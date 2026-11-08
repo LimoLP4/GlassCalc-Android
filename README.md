@@ -23,8 +23,9 @@ Please note that the current version of GlassCalc is available **exclusively in 
 
 **Future Update:** English support is currently **planned for a future update**. If you are interested in helping with the translation, feel free to reach out!
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & App Information
 
+*   **Package Name / Application ID:** `com.limonatalp4.glasscalcproject`
 *   **Language:** Kotlin
 *   **UI Framework:** Jetpack Compose (Material 3)
 *   **Architecture:** MVVM (Model-View-ViewModel)
