@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Subtle Outer Glass Glow Circle -->
+    <path
+        android:fillColor="#1500E5FF"
+        android:pathData="M54,22A32,32 0 1,1 53.9,22Z" />
+
+    <!-- Sleek Rounded Liquid Glass Main Panel Frame -->
+    <path
+        android:fillColor="#20FFFFFF"
+        android:strokeColor="#60FFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M34,26h40c5.52,0 10,4.48 10,10v36c0,5.52 -4.48,10 -10,10H34c-5.52,0 -10,-4.48 -10,-10V36c0,-5.52 4.48,-10 10,-10z" />
+
+    <!-- Minimalist Display Glass Window at Top -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M30,32h48c2.2,0 4,1.8 4,4v10c0,2.2 -1.8,4 -4,4H30c-2.2,0 -4,-1.8 -4,-4V36c0,-2.2 1.8,-4 4,-4z" />
+
+    <!-- Display Digit Accent Line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,37h12v2H60zM48,37h8v2H48zM64,43h8v2H64z" />
+
+    <!-- Minimalist Key Matrix Dots (Row 1: Functions) -->
+    <path android:fillColor="#00E5FF" android:pathData="M35,56a3.5,3.5 0 1,1 0.01,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M48,56a3.5,3.5 0 1,1 0.01,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M61,56a3.5,3.5 0 1,1 0.01,0" />
+    <path android:fillColor="#00E5FF" android:pathData="M73,56a3.5,3.5 0 1,1 0.01,0" />
+
+    <!-- Minimalist Key Matrix Dots (Row 2: Digits & Accent) -->
+    <path android:fillColor="#FFFFFF" android:pathData="M35,67a3.5,3.5 0 1,1 0.01,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M48,67a3.5,3.5 0 1,1 0.01,0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M61,67a3.5,3.5 0 1,1 0.01,0" />
+    <path android:fillColor="#00E5FF" android:pathData="M73,67a3.5,3.5 0 1,1 0.01,0" />
+
+    <!-- Specular Glass Highlight Arc -->
+    <path
+        android:fillColor="#40FFFFFF"
+        android:pathData="M34,26h40c5.52,0 10,4.48 10,10v4c-12,-6 -38,-6 -50,0v-4c0,-5.52 4.48,-10 10,-10z" />
+</vector>

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="title_calculator">Rechner</string>
+    <string name="title_history">Verlauf</string>
+    <string name="title_settings">Einstellungen</string>
+    <string name="title_converter">Einheitenumrechnung</string>
+    <string name="title_appearance">Erscheinungsbild</string>
+    <string name="title_dev_options">Entwickleroptionen</string>
+</resources>

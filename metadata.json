@@ -1,0 +1,6 @@
+{
+  "name": "GlassCalc",
+  "description": "Elegante wissenschaftliche Liquid-Glass-Rechner-App mit Einheitenumrechnung, dynamischen Themes und Entwickler-Dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
