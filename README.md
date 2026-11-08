@@ -16,6 +16,13 @@
 *   **Haptic Feedback:** Tactile response on button presses and graph interactions (with OEM-specific fallbacks).
 *   **Developer Options:** Built-in debug menu for testing API levels, layout sizes, and cache management.
 
+## 🌍 Localization / Sprache
+
+**Current Language: German (Deutsch)**
+Please note that the current version of GlassCalc is available **exclusively in German**. All buttons, menus, and descriptions are in German.
+
+**Future Update:** English support is currently **planned for a future update**. If you are interested in helping with the translation, feel free to reach out!
+
 ## 🛠️ Tech Stack
 
 *   **Language:** Kotlin
