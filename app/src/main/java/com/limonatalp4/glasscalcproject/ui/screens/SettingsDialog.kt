@@ -951,7 +951,7 @@ fun SettingsDialog(
                                         .fillMaxWidth()
                                         .clickable {
                                             triggerHaptic()
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/tree/main"))
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/releases/"))
                                             context.startActivity(intent)
                                         }
                                         .padding(18.dp),
