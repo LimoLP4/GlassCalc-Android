@@ -6,7 +6,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -172,6 +171,11 @@ fun FunctionGraphView(
     }
 
     var selectedPreset by remember { mutableStateOf(GraphPreset.SIN) }
+    var isGraphLocked by remember { mutableStateOf(isGestureLocked) }
+
+    LaunchedEffect(isGestureLocked) {
+        isGraphLocked = isGestureLocked
+    }
 
     // Range bounds state
     var xMin by remember { mutableDoubleStateOf(-6.28) }
@@ -355,7 +359,8 @@ fun FunctionGraphView(
                 // LOCK BUTTON (Locks graph 2D panning/zooming gesture on canvas)
                 IconButton(
                     onClick = {
-                        onGestureLockChange(!isGestureLocked)
+                        isGraphLocked = !isGraphLocked
+                        onGestureLockChange(isGraphLocked)
                         triggerClickHaptic()
                     },
                     modifier = Modifier
@@ -363,9 +368,9 @@ fun FunctionGraphView(
                         .testTag("btn_lock_graph")
                 ) {
                     Icon(
-                        imageVector = if (isGestureLocked) Icons.Default.Lock else Icons.Default.LockOpen,
-                        contentDescription = if (isGestureLocked) "Graph-Gesten entsperren" else "Graph-Gesten sperren",
-                        tint = if (isGestureLocked) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.4f),
+                        imageVector = if (isGraphLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                        contentDescription = if (isGraphLocked) "Graph-Gesten entsperren" else "Graph-Gesten sperren",
+                        tint = if (isGraphLocked) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.4f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -381,19 +386,8 @@ fun FunctionGraphView(
                     .clip(RoundedCornerShape(16.dp))
                     .background(colorScheme.surfaceContainerLow)
                     .border(1.dp, gridColor, RoundedCornerShape(16.dp))
-                    .pointerInput(selectedPreset, xMin, xMax, yMin, yMax, angleMode, isGestureLocked) {
-                        if (isGestureLocked) {
-                            detectTapGestures(
-                                onTap = { offset ->
-                                    val width = size.width.toFloat()
-                                    val height = size.height.toFloat()
-                                    updateTraceFromCache(offset, width, height)
-                                    if (hapticEnabled) {
-                                        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
-                                    }
-                                }
-                            )
-                        } else {
+                    .pointerInput(isGraphLocked) {
+                        if (!isGraphLocked) {
                             detectDragGestures(
                                 onDragStart = { isTracing = true },
                                 onDragEnd = { isTracing = false },
