@@ -128,6 +128,7 @@ fun CalculatorScreen(
     var showHistorySheet by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showConverterDialog by remember { mutableStateOf(false) }
+    var showConstantsDialog by remember { mutableStateOf(false) }
 
     val glassState = rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
 
@@ -204,14 +205,16 @@ fun CalculatorScreen(
                         LandscapeCalculatorLayout(
                             viewModel = viewModel,
                             angleMode = angleMode,
-                            glassState = glassState
+                            glassState = glassState,
+                            onOpenConstants = { showConstantsDialog = true }
                         )
                     } else {
                         PortraitCalculatorLayout(
                             viewModel = viewModel,
                             angleMode = angleMode,
                             isScientificExpanded = isScientificExpanded,
-                            glassState = glassState
+                            glassState = glassState,
+                            onOpenConstants = { showConstantsDialog = true }
                         )
                     }
                 }
@@ -405,6 +408,15 @@ fun CalculatorScreen(
                 onDismiss = { showConverterDialog = false }
             )
         }
+
+        if (showConstantsDialog) {
+            ConstantsDialog(
+                onSelectConstant = { constantValue ->
+                    viewModel.onConstant(constantValue)
+                },
+                onDismiss = { showConstantsDialog = false }
+            )
+        }
     }
 }
 
@@ -413,7 +425,8 @@ private fun PortraitCalculatorLayout(
     viewModel: CalculatorViewModel,
     angleMode: com.limonatalp4.glasscalcproject.data.model.AngleMode,
     isScientificExpanded: Boolean,
-    glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null
+    glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null,
+    onOpenConstants: () -> Unit = {}
 ) {
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
@@ -644,6 +657,7 @@ private fun PortraitCalculatorLayout(
                                 glassState = glassState,
                                 buttonSize = sciButtonSize,
                                 spacing = 5.dp,
+                                onOpenConstants = onOpenConstants,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         } else {
@@ -681,7 +695,8 @@ private fun PortraitCalculatorLayout(
 private fun LandscapeCalculatorLayout(
     viewModel: CalculatorViewModel,
     angleMode: com.limonatalp4.glasscalcproject.data.model.AngleMode,
-    glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null
+    glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null,
+    onOpenConstants: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val localContext = LocalContext.current
@@ -843,7 +858,8 @@ private fun LandscapeCalculatorLayout(
                         viewModel = viewModel,
                         glassState = glassState,
                         buttonSize = uniformButtonSize,
-                        spacing = 4.dp
+                        spacing = 4.dp,
+                        onOpenConstants = onOpenConstants
                     )
                 } else {
                     FunctionGraphView(
@@ -890,6 +906,7 @@ private fun ScientificKeyboardGrid(
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null,
     buttonSize: Dp? = null,
     spacing: Dp = 6.dp,
+    onOpenConstants: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     fun RowScope.buttonModifier(): Modifier =
@@ -900,7 +917,7 @@ private fun ScientificKeyboardGrid(
         verticalArrangement = Arrangement.spacedBy(spacing),
         horizontalAlignment = if (buttonSize != null) Alignment.CenterHorizontally else Alignment.Start
     ) {
-        // Row 1: sin, cos, tan, π, e
+        // Row 1: sin, cos, tan, π, Konst.
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -917,8 +934,15 @@ private fun ScientificKeyboardGrid(
             GlassCalculatorButton(text = "π", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onConstant("π")
             }
-            GlassCalculatorButton(text = "e", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onConstant("e")
+            GlassCalculatorButton(
+                text = "Konst",
+                type = ButtonType.OPERATOR,
+                glassState = glassState,
+                testTag = "btn_constants",
+                contentDesc = "Physikalische und mathematische Konstanten",
+                modifier = buttonModifier()
+            ) {
+                onOpenConstants()
             }
         }
 
