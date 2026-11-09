@@ -33,7 +33,7 @@ Please note that the current version of GlassCalc is available **exclusively in 
 *   **UI Framework:** Jetpack Compose (Material 3)
 *   **Architecture:** MVVM (Model-View-ViewModel)
 *   **Local Storage:** DataStore (Preferences)
-*   **Minimum SDK:** Android 9 (API 28)
+*   **Minimum SDK:** Android 8 (API 26)
 *   **Target SDK:** Android 17 (API 37)
 *   **ABI Support:** `arm64-v8a` and `armeabi-v7a`
 
