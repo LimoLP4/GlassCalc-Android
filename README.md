@@ -10,7 +10,8 @@
 *   **Refined App Icon:** A minimalist, custom-designed "GC" monogram with a liquid glass aesthetic, fully compatible with Material You (Monet) adaptive icons.
 *   **Advanced Scientific Mode:** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, derivatives (d/dx), and integrals (∫).
 *   **Physical & Mathematical Constants:** A dedicated menu for constants like π, e, c (speed of light), g (gravity), h (Planck), G (gravitational), Na (Avogadro), and k (Boltzmann).
-*   **Interactive Graphing:** Plot mathematical functions dynamically. Includes a lock feature to freeze the graph view without blocking the rest of the UI.
+*   **Standalone Interactive Graph:** The function plotter is now a dedicated popup accessible from the menu. It includes a lock feature to freeze the view without blocking the rest of the UI.
+*   **API Simulation & Feature Legend:** A developer tool to simulate older Android versions. A dynamic legend shows exactly which features (Blur, Material You, Swipe Gestures) are available on the simulated API level.
 *   **Material You (Dynamic Colors):** Fully supports Android 12+ dynamic theming, adapting the app's colors to your device's wallpaper and system theme.
 *   **Multiple Themes:** Includes Automatic (System), White Mode, Dark Mode, and a true **AMOLED Dark Mode** (pure black for battery saving).
 *   **Unit Conversion:** Seamlessly convert between Metric and US/Imperial units (m↔ft, cm↔in, kg↔lb, etc.) with a sleek, rounded interface.
@@ -18,7 +19,7 @@
 *   **Adaptive Layout:** Optimized for both smartphones and tablets, in portrait and landscape orientations.
 *   **Haptic Feedback:** Tactile response on button presses, graph interactions, sliders, and switches (with OEM-specific fallbacks).
 *   **Information & Licensing Hub:** A dedicated "Information" tab to view the GitHub repository, the app's license, and third-party licenses.
-*   **Developer Options:** Built-in debug menu for testing API levels, layout sizes, and simulating API-specific feature availability.
+*   **Developer Options:** Built-in debug menu for testing API levels, layout sizes, and cache management.
 
 ## 🌍 Localization / Sprache
 
