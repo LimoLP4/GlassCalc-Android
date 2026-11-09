@@ -116,8 +116,8 @@ fun CalculatorScreen(
             drawable.toBitmap(128, 128).asImageBitmap()
         }.getOrNull()
     }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var isMenuOpen by remember { mutableStateOf(false) }
 
     val isScientificExpanded by viewModel.isScientificExpanded.collectAsState()
     val angleMode by viewModel.angleMode.collectAsState()
@@ -137,10 +137,8 @@ fun CalculatorScreen(
 
     val glassState = rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
 
-    BackHandler(enabled = drawerState.isOpen && glassProps.supportsPredictiveBack) {
-        scope.launch { drawerState.close() }
-    }
-
+    // BackHandler replaced by Popup dismissal
+    
     CompositionLocalProvider(LocalHapticFeedbackEnabled provides hapticFeedbackEnabled) {
         Box(
             modifier = modifier
@@ -154,202 +152,191 @@ fun CalculatorScreen(
                     }
                 )
         ) {
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                gesturesEnabled = glassProps.supportsPredictiveBack,
-                drawerContent = {
-                    ModalDrawerSheet(
-                        modifier = Modifier.width(280.dp),
-                        drawerContainerColor = Color.Transparent,
-                        drawerContentColor = colorScheme.onSurface
-                    ) {
-                        val drawerBgColor = colorScheme.surfaceContainerHigh
-                        val primaryTint = colorScheme.primary
-                        val onSurfaceColor = colorScheme.onSurface
-                        val selectedContainerCol = colorScheme.primary
-                        val selectedTextCol = colorScheme.onPrimary
-                        val view = LocalView.current
-
-                        GlassSurface(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .width(280.dp)
-                                .testTag("floating_nav_menu"),
-                            shape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp),
-                            borderWidth = 1.2.dp,
-                            customBgColor = drawerBgColor.copy(alpha = 0.85f),
-                            glassState = glassState
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp)
-                                    .verticalScroll(rememberScrollState())
+            // Main Content
+            Scaffold(
+                containerColor = Color.Transparent,
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = "GlassCalc",
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.onSurface
+                            )
+                        },
+                        navigationIcon = {
+                            val view = LocalView.current
+                            IconButton(
+                                onClick = {
+                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                    isMenuOpen = !isMenuOpen
+                                },
+                                modifier = Modifier.testTag("btn_hamburger_menu")
                             ) {
-                                // Header
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                ) {
-                                    if (appIconBitmap != null) {
-                                        Image(
-                                            bitmap = appIconBitmap,
-                                            contentDescription = "App-Icon",
-                                            modifier = Modifier
-                                                .size(48.dp)
-                                                .clip(CircleShape)
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "GlassCalc",
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = onSurfaceColor
-                                    )
-                                    Text(
-                                        text = "v1.2 • Android 8-17 Ready",
-                                        fontSize = 11.sp,
-                                        fontFamily = FontFamily.Monospace,
-                                        color = primaryTint,
-                                        maxLines = 1
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(16.dp))
-                                HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                // Navigation Items (Vertical Pills)
-                                val menuItems = listOf(
-                                    Triple(Icons.Default.Calculate, "Rechner", "nav_item_calculator"),
-                                    Triple(Icons.Default.History, "Verlauf", "nav_item_history"),
-                                    Triple(Icons.Default.Straighten, "Einheitenumrechnung", "nav_item_converter"),
-                                    Triple(Icons.Default.ShowChart, "Graph", "nav_item_graph"),
-                                    Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menü öffnen",
+                                    tint = colorScheme.onSurface
                                 )
-
-                                menuItems.forEach { (icon, label, tag) ->
-                                    val isSelected = label == "Rechner"
-                                    
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp)
-                                            .clip(CircleShape)
-                                            .background(if (isSelected) selectedContainerCol else Color.Transparent)
-                                            .clickable {
-                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                                scope.launch { drawerState.close() }
-                                                when (label) {
-                                                    "Verlauf" -> showHistorySheet = true
-                                                    "Einheitenumrechnung" -> showConverterDialog = true
-                                                    "Graph" -> showGraphDialog = true
-                                                    "Einstellungen" -> showSettingsDialog = true
-                                                }
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                                            .testTag(tag),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = icon,
-                                                contentDescription = null,
-                                                tint = if (isSelected) selectedTextCol else onSurfaceColor.copy(alpha = 0.7f),
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Text(
-                                                text = label,
-                                                fontSize = 15.sp,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isSelected) selectedTextCol else onSurfaceColor
-                                            )
-                                        }
-                                    }
-                                }
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
-                        }
-                    }
-                }
-            ) {
-                Scaffold(
-                    containerColor = Color.Transparent,
-                    topBar = {
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    text = "GlassCalc",
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorScheme.onSurface
+                        },
+                        actions = {
+                            val view = LocalView.current
+                            IconButton(
+                                onClick = {
+                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                    showHistorySheet = true
+                                },
+                                modifier = Modifier.testTag("btn_top_history")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.History,
+                                    contentDescription = "Verlauf anzeigen",
+                                    tint = colorScheme.onSurface
                                 )
-                            },
-                            navigationIcon = {
-                                val view = LocalView.current
-                                IconButton(
-                                    onClick = {
-                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                        scope.launch { 
-                                            if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                        }
-                                    },
-                                    modifier = Modifier.testTag("btn_hamburger_menu")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Menu,
-                                        contentDescription = "Menü öffnen",
-                                        tint = colorScheme.onSurface
-                                    )
-                                }
-                            },
-                            actions = {
-                                val view = LocalView.current
-                                IconButton(
-                                    onClick = {
-                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                        showHistorySheet = true
-                                    },
-                                    modifier = Modifier.testTag("btn_top_history")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.History,
-                                        contentDescription = "Verlauf anzeigen",
-                                        tint = colorScheme.onSurface
-                                    )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    )
+                }
+            ) { innerPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .navigationBarsPadding(),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    if (isDualPane) {
+                        LandscapeCalculatorLayout(
+                            viewModel = viewModel,
+                            angleMode = angleMode,
+                            glassState = glassState,
+                            onOpenConstants = { showConstantsDialog = true }
+                        )
+                    } else {
+                        PortraitCalculatorLayout(
+                            viewModel = viewModel,
+                            angleMode = angleMode,
+                            isScientificExpanded = isScientificExpanded,
+                            glassState = glassState,
+                            onOpenConstants = { showConstantsDialog = true }
                         )
                     }
-                ) { innerPadding ->
-                    Box(
+                }
+            }
+            
+            // Popup Menu
+            if (isMenuOpen) {
+                androidx.compose.ui.window.Popup(
+                    alignment = Alignment.TopStart,
+                    offset = androidx.compose.ui.unit.IntOffset(16, 160),
+                    onDismissRequest = { isMenuOpen = false },
+                    properties = androidx.compose.ui.window.PopupProperties(focusable = true)
+                ) {
+                    val drawerBgColor = colorScheme.surfaceContainerHigh
+                    val primaryTint = colorScheme.primary
+                    val onSurfaceColor = colorScheme.onSurface
+                    val selectedContainerCol = colorScheme.primary
+                    val selectedTextCol = colorScheme.onPrimary
+                    val view = LocalView.current
+                    
+                    GlassSurface(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .navigationBarsPadding(),
-                        contentAlignment = Alignment.TopCenter
+                            .width(300.dp)
+                            .testTag("floating_nav_menu"),
+                        shape = RoundedCornerShape(24.dp),
+                        borderWidth = 1.2.dp,
+                        customBgColor = drawerBgColor.copy(alpha = 0.9f),
+                        glassState = glassState
                     ) {
-                        if (isDualPane) {
-                            LandscapeCalculatorLayout(
-                                viewModel = viewModel,
-                                angleMode = angleMode,
-                                glassState = glassState,
-                                onOpenConstants = { showConstantsDialog = true }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            // Header
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                if (appIconBitmap != null) {
+                                    Image(
+                                        bitmap = appIconBitmap,
+                                        contentDescription = "App-Icon",
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(CircleShape)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "GlassCalc",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = onSurfaceColor
+                                )
+                                Text(
+                                    text = "v1.2 • Android 8-17 Ready",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = primaryTint,
+                                    maxLines = 1
+                                )
+                            }
+                            HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            val menuItems = listOf(
+                                Triple(Icons.Default.Calculate, "Rechner", "nav_item_calculator"),
+                                Triple(Icons.Default.History, "Verlauf", "nav_item_history"),
+                                Triple(Icons.Default.Straighten, "Einheitenumrechnung", "nav_item_converter"),
+                                Triple(Icons.Default.ShowChart, "Graph", "nav_item_graph"),
+                                Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
                             )
-                        } else {
-                            PortraitCalculatorLayout(
-                                viewModel = viewModel,
-                                angleMode = angleMode,
-                                isScientificExpanded = isScientificExpanded,
-                                glassState = glassState,
-                                onOpenConstants = { showConstantsDialog = true }
-                            )
+                            
+                            menuItems.forEach { (icon, label, tag) ->
+                                val isSelected = label == "Rechner"
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .clip(CircleShape)
+                                        .background(if (isSelected) selectedContainerCol else Color.Transparent)
+                                        .clickable {
+                                            HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                            isMenuOpen = false
+                                            when (label) {
+                                                "Verlauf" -> showHistorySheet = true
+                                                "Einheitenumrechnung" -> showConverterDialog = true
+                                                "Graph" -> showGraphDialog = true
+                                                "Einstellungen" -> showSettingsDialog = true
+                                            }
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                                        .testTag(tag)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = if (isSelected) selectedTextCol else onSurfaceColor.copy(alpha = 0.7f),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = label,
+                                            fontSize = 15.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) selectedTextCol else onSurfaceColor
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
