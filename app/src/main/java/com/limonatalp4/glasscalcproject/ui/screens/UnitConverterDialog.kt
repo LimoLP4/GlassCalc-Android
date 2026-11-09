@@ -3,6 +3,7 @@ package com.limonatalp4.glasscalcproject.ui.screens
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -169,6 +170,11 @@ fun UnitConverterDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
                         .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = colorScheme.outline.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(50.dp)
+                        )
                         .padding(4.dp)
                 ) {
                     Row(

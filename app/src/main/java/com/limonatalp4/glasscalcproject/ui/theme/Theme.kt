@@ -41,35 +41,53 @@ val LocalGlassProperties = staticCompositionLocalOf {
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimaryBlue,
+    onPrimary = Color(0xFF003258),
+    primaryContainer = Color(0xFF00497D),
+    onPrimaryContainer = Color(0xFFD1E4FF),
     secondary = DarkSecondaryBlue,
     tertiary = DarkTertiaryBlue,
     error = DarkErrorRed,
     background = DarkBackground,
     surface = Color(0xFF14171E),
     onBackground = Color(0xFFF0F4F8),
-    onSurface = Color(0xFFF0F4F8)
+    onSurface = Color(0xFFF0F4F8),
+    surfaceVariant = Color(0xFF202838),
+    onSurfaceVariant = Color(0xFFC2C7D0),
+    outline = Color(0xFF8C9199)
 )
 
 private val AmoledColorScheme = darkColorScheme(
     primary = AmoledPrimaryBlue,
+    onPrimary = Color(0xFF003554),
+    primaryContainer = Color(0xFF004D73),
+    onPrimaryContainer = Color(0xFFE0F3FF),
     secondary = AmoledSecondaryBlue,
     tertiary = DarkTertiaryBlue,
     error = DarkErrorRed,
     background = AmoledBackground,
     surface = Color(0xFF0D0D0D),
     onBackground = Color.White,
-    onSurface = Color.White
+    onSurface = Color.White,
+    surfaceVariant = Color(0xFF181F2B),
+    onSurfaceVariant = Color(0xFFBCC2CD),
+    outline = Color(0xFF8A909A)
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryBlue,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD1E4FF),
+    onPrimaryContainer = Color(0xFF001D36),
     secondary = SecondaryBlue,
     tertiary = TertiaryBlue,
     error = ErrorRed,
     background = Color(0xFFF3F5FA),
     surface = Color(0xFFFFFFFF),
     onBackground = Color(0xFF0F172A),
-    onSurface = Color(0xFF0F172A)
+    onSurface = Color(0xFF0F172A),
+    surfaceVariant = Color(0xFFE1E7F0),
+    onSurfaceVariant = Color(0xFF42474E),
+    outline = Color(0xFF73777F)
 )
 
 @Composable

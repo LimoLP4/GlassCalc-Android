@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -188,6 +189,11 @@ fun SettingsDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
                         .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(
+                            width = 1.dp,
+                            color = colorScheme.outline.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(50.dp)
+                        )
                         .padding(4.dp)
                 ) {
                     Row(
@@ -557,7 +563,9 @@ fun SettingsDialog(
                                             },
                                             colors = SwitchDefaults.colors(
                                                 checkedThumbColor = colorScheme.onPrimary,
-                                                checkedTrackColor = colorScheme.primary
+                                                checkedTrackColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.outline,
+                                                uncheckedTrackColor = colorScheme.surfaceVariant
                                             ),
                                             modifier = Modifier.testTag("switch_simulate_api")
                                         )
@@ -693,7 +701,9 @@ fun SettingsDialog(
                                         },
                                         colors = SwitchDefaults.colors(
                                             checkedThumbColor = colorScheme.onPrimary,
-                                            checkedTrackColor = colorScheme.primary
+                                            checkedTrackColor = colorScheme.primary,
+                                            uncheckedThumbColor = colorScheme.outline,
+                                            uncheckedTrackColor = colorScheme.surfaceVariant
                                         ),
                                         modifier = Modifier.testTag("switch_haptic_feedback")
                                     )
@@ -847,24 +857,27 @@ fun SettingsDialog(
                             // App Version Card
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(18.dp),
-                                customBgColor = colorScheme.surfaceVariant
+                                shape = RoundedCornerShape(20.dp),
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                customBorderColor = glassProps.buttonBorderColor
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(14.dp),
+                                    modifier = Modifier.padding(18.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
                                         text = "GlassCalc v1.1",
-                                        fontSize = 18.sp,
+                                        fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "Android 8.0 - 17 Ready (API 26-37)",
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
+                                    Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Copyright © 2026 limonatalp4",
                                         fontSize = 11.sp,
@@ -876,8 +889,9 @@ fun SettingsDialog(
                             // GitHub Repository Card
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(18.dp),
-                                customBgColor = colorScheme.surfaceVariant
+                                shape = RoundedCornerShape(20.dp),
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                customBorderColor = glassProps.buttonBorderColor
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -887,7 +901,7 @@ fun SettingsDialog(
                                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/tree/main"))
                                             context.startActivity(intent)
                                         }
-                                        .padding(14.dp),
+                                        .padding(18.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -898,6 +912,7 @@ fun SettingsDialog(
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
                                         )
+                                        Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "LimoLP4/GlassCalc-Android",
                                             fontSize = 12.sp,
@@ -915,10 +930,11 @@ fun SettingsDialog(
                             // Third-Party OSS Licenses Button (play-services-oss-licenses)
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(18.dp),
-                                customBgColor = colorScheme.surfaceVariant
+                                shape = RoundedCornerShape(20.dp),
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                customBorderColor = glassProps.buttonBorderColor
                             ) {
-                                Column(modifier = Modifier.padding(14.dp)) {
+                                Column(modifier = Modifier.padding(18.dp)) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -935,13 +951,13 @@ fun SettingsDialog(
                                             color = colorScheme.primary
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(6.dp))
                                     Text(
                                         text = "Vollständige Übersicht aller verwendeten Open-Source-Bibliotheken und deren Lizenzen.",
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     Button(
                                         onClick = {
                                             triggerHaptic()
@@ -956,12 +972,13 @@ fun SettingsDialog(
                                             containerColor = colorScheme.primary,
                                             contentColor = colorScheme.onPrimary
                                         ),
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .height(48.dp)
                                             .testTag("btn_oss_licenses")
                                     ) {
-                                        Text("Open-Source-Lizenzen anzeigen")
+                                        Text("Open-Source-Lizenzen anzeigen", fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
