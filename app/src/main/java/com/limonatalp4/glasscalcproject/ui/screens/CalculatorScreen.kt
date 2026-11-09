@@ -10,8 +10,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import com.limonatalp4.glasscalcproject.R
-import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -33,7 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
@@ -47,10 +44,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,17 +62,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.limonatalp4.glasscalcproject.ui.components.ButtonType
 import com.limonatalp4.glasscalcproject.ui.components.FunctionGraphView
@@ -119,9 +117,7 @@ fun CalculatorScreen(
     val scope = rememberCoroutineScope()
 
     val isScientificExpanded by viewModel.isScientificExpanded.collectAsState()
-    val expression by viewModel.expression.collectAsState()
     val angleMode by viewModel.angleMode.collectAsState()
-    var scientificSubTab by remember { mutableIntStateOf(0) }
     val history by viewModel.history.collectAsState()
     val currentTheme by viewModel.currentTheme.collectAsState()
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
@@ -160,7 +156,7 @@ fun CalculatorScreen(
                             )
                         },
                         navigationIcon = {
-                            val view = androidx.compose.ui.platform.LocalView.current
+                            val view = LocalView.current
                             IconButton(
                                 onClick = {
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
@@ -178,7 +174,7 @@ fun CalculatorScreen(
                             }
                         },
                         actions = {
-                            val view = androidx.compose.ui.platform.LocalView.current
+                            val view = LocalView.current
                             IconButton(
                                 onClick = {
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
@@ -205,14 +201,12 @@ fun CalculatorScreen(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (isDualPane) {
-                        // Landscape / Tablet layout (dual pane side-by-side)
                         LandscapeCalculatorLayout(
                             viewModel = viewModel,
                             angleMode = angleMode,
                             glassState = glassState
                         )
                     } else {
-                        // Portrait Smartphone Layout (clean, evenly spaced 4-column rigid grid)
                         PortraitCalculatorLayout(
                             viewModel = viewModel,
                             angleMode = angleMode,
@@ -253,7 +247,7 @@ fun CalculatorScreen(
                 val onSurfaceColor = colorScheme.onSurface
                 val selectedContainerCol = colorScheme.primary
                 val selectedTextCol = colorScheme.onPrimary
-                val view = androidx.compose.ui.platform.LocalView.current
+                val view = LocalView.current
 
                 Box(
                     modifier = Modifier
@@ -267,7 +261,7 @@ fun CalculatorScreen(
                             .testTag("floating_nav_menu"),
                         shape = RoundedCornerShape(28.dp),
                         borderWidth = 1.2.dp,
-                        customBgColor = drawerBgColor.copy(alpha = 0.85f), // Liquid Glass translucency
+                        customBgColor = drawerBgColor.copy(alpha = 0.85f),
                         glassState = glassState
                     ) {
                         Column(
@@ -298,8 +292,8 @@ fun CalculatorScreen(
                                     color = onSurfaceColor
                                 )
                                 Text(
-                                    text = "com.limonatalp4.glasscalcproject",
-                                    fontSize = 10.sp,
+                                    text = "v1.1 • Android 8-17 Ready",
+                                    fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = primaryTint,
                                     maxLines = 1
@@ -310,16 +304,16 @@ fun CalculatorScreen(
                             HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Navigation Items (Vertical Pills)
+                            // Navigation Items (Vertical Pills) - Renamed "Einheiten" to "Einheitenumrechnung"
                             val menuItems = listOf(
                                 Triple(Icons.Default.Calculate, "Rechner", "nav_item_calculator"),
                                 Triple(Icons.Default.History, "Verlauf", "nav_item_history"),
-                                Triple(Icons.Default.Straighten, "Einheiten", "nav_item_converter"),
+                                Triple(Icons.Default.Straighten, "Einheitenumrechnung", "nav_item_converter"),
                                 Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
                             )
 
                             menuItems.forEach { (icon, label, tag) ->
-                                val isSelected = label == "Rechner" // Standard focus for now
+                                val isSelected = label == "Rechner"
                                 
                                 Box(
                                     modifier = Modifier
@@ -332,7 +326,7 @@ fun CalculatorScreen(
                                             scope.launch { drawerState.close() }
                                             when (label) {
                                                 "Verlauf" -> showHistorySheet = true
-                                                "Einheiten" -> showConverterDialog = true
+                                                "Einheitenumrechnung" -> showConverterDialog = true
                                                 "Einstellungen" -> showSettingsDialog = true
                                             }
                                         }
@@ -411,8 +405,6 @@ fun CalculatorScreen(
                 onDismiss = { showConverterDialog = false }
             )
         }
-
-
     }
 }
 
@@ -425,12 +417,13 @@ private fun PortraitCalculatorLayout(
 ) {
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
-    val localContext = androidx.compose.ui.platform.LocalContext.current
-    val localView = androidx.compose.ui.platform.LocalView.current
+    val localContext = LocalContext.current
+    val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val expression by viewModel.expression.collectAsState()
     var scientificSubTab by remember { mutableIntStateOf(0) }
     var isGestureLocked by remember { mutableStateOf(true) }
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -439,12 +432,11 @@ private fun PortraitCalculatorLayout(
             .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Section: Fixed Display & Mode bar (NO weight modifier, stays fixed at top)
+        // Top Section: Fixed Display & Mode bar
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // GlassDisplay receives StateFlow directly so typing NEVER recomposes this column or the buttons!
             GlassDisplay(
                 expressionFlow = viewModel.expression,
                 resultFlow = viewModel.result,
@@ -524,26 +516,41 @@ private fun PortraitCalculatorLayout(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Middle/Bottom Section: Scrollable Button Container with weight(1f)
+        // Middle/Bottom Section: Scrollable Button Container with Scrollbar Indicator
         BoxWithConstraints(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
         ) {
             val availableWidth = maxWidth
-            // Explicit button sizes calculated from width to guarantee zero overlap!
             val mainButtonSize = ((availableWidth - 30.dp) / 4f).coerceIn(48.dp, 72.dp)
-            val sciButtonSize = ((availableWidth - 24.dp) / 5f).coerceIn(38.dp, 64.dp)
+            val sciButtonSize = ((availableWidth - 24.dp) / 5f).coerceIn(36.dp, 60.dp)
+            val scrollbarColor = colorScheme.primary.copy(alpha = 0.45f)
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState(), enabled = !isGestureLocked)
-                    .padding(bottom = 6.dp),
+                    .drawWithContent {
+                        drawContent()
+                        if (isScientificExpanded && scrollState.maxValue > 0) {
+                            val totalHeight = size.height
+                            val scrollFraction = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
+                            val indicatorHeight = (totalHeight * 0.22f).coerceAtLeast(32.dp.toPx())
+                            val indicatorY = scrollFraction * (totalHeight - indicatorHeight)
+                            drawRoundRect(
+                                color = scrollbarColor,
+                                topLeft = Offset(size.width - 4.dp.toPx(), indicatorY),
+                                size = Size(3.dp.toPx(), indicatorHeight),
+                                cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
+                            )
+                        }
+                    }
+                    .verticalScroll(scrollState, enabled = !isGestureLocked)
+                    .padding(bottom = 24.dp), // Generous padding so row 5 is never cut off
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Scientific functions grid or Graph view (animated when toggled)
+                // Scientific functions grid or Graph view
                 AnimatedVisibility(
                     visible = isScientificExpanded,
                     enter = expandVertically() + fadeIn(),
@@ -553,7 +560,7 @@ private fun PortraitCalculatorLayout(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Sub-Tab Switcher (Tastatur vs Graph)
+                        // Sub-Tab Switcher (Tastatur vs Graph) with Haptic Feedback
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
@@ -569,7 +576,10 @@ private fun PortraitCalculatorLayout(
                                         modifier = Modifier
                                             .clip(CircleShape)
                                             .background(if (scientificSubTab == 0) colorScheme.primary else Color.Transparent)
-                                            .clickable { scientificSubTab = 0 }
+                                            .clickable {
+                                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                                scientificSubTab = 0
+                                            }
                                             .padding(horizontal = 16.dp, vertical = 6.dp)
                                             .testTag("tab_sci_keyboard"),
                                         contentAlignment = Alignment.Center
@@ -598,7 +608,10 @@ private fun PortraitCalculatorLayout(
                                         modifier = Modifier
                                             .clip(CircleShape)
                                             .background(if (scientificSubTab == 1) colorScheme.primary else Color.Transparent)
-                                            .clickable { scientificSubTab = 1 }
+                                            .clickable {
+                                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                                scientificSubTab = 1
+                                            }
                                             .padding(horizontal = 16.dp, vertical = 6.dp)
                                             .testTag("tab_sci_graph"),
                                         contentAlignment = Alignment.Center
@@ -630,7 +643,7 @@ private fun PortraitCalculatorLayout(
                                 viewModel = viewModel,
                                 glassState = glassState,
                                 buttonSize = sciButtonSize,
-                                spacing = 6.dp,
+                                spacing = 5.dp,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         } else {
@@ -646,7 +659,7 @@ private fun PortraitCalculatorLayout(
                     }
                 }
 
-                // Main 4-column rigid Keypad with explicit buttonSize
+                // Main 4-column rigid Keypad
                 MainKeyboardGrid(
                     viewModel = viewModel,
                     glassState = glassState,
@@ -654,26 +667,25 @@ private fun PortraitCalculatorLayout(
                     spacing = 8.dp,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Extra safety spacer so scrolling leaves comfortable margin at bottom
+                if (isScientificExpanded) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }
 }
 
-/**
- * Landscape layout ensuring that buttons are NEVER clipped.
- * Button size is dynamically computed from available height so all 5 rows fit perfectly,
- * while the left side has a scrollable area for scientific keys and compact display.
- */
 @Composable
 private fun LandscapeCalculatorLayout(
     viewModel: CalculatorViewModel,
     angleMode: com.limonatalp4.glasscalcproject.data.model.AngleMode,
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null
 ) {
-    val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
-    val localContext = androidx.compose.ui.platform.LocalContext.current
-    val localView = androidx.compose.ui.platform.LocalView.current
+    val localContext = LocalContext.current
+    val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val expression by viewModel.expression.collectAsState()
     var scientificSubTab by remember { mutableIntStateOf(0) }
@@ -687,15 +699,11 @@ private fun LandscapeCalculatorLayout(
         val availableHeight = maxHeight
         val availableWidth = maxWidth
 
-        // Keypad button size calculation from available height (5 rows + 4 gaps)
         val maxButtonSizeFromHeight = ((availableHeight - 24.dp) / 5.2f).coerceIn(36.dp, 60.dp)
-
-        // Ensure 5 scientific buttons in a row fit in the left column
         val mainKeypadWidth = maxButtonSizeFromHeight * 4 + 20.dp
         val leftColumnAvailableWidth = availableWidth - mainKeypadWidth - 24.dp
         val maxSciButtonSizeFromWidth = ((leftColumnAvailableWidth - 16.dp) / 5f).coerceAtLeast(30.dp)
 
-        // Exact same button size for both scientific section and main keypad:
         val uniformButtonSize = minOf(maxButtonSizeFromHeight, maxSciButtonSizeFromWidth)
         val finalKeypadWidth = uniformButtonSize * 4 + 20.dp
 
@@ -704,7 +712,7 @@ private fun LandscapeCalculatorLayout(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left Column: Compact Display + scrollable Scientific keys
+            // Left Column: Compact Display + scrollable Scientific keys / Graph
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -731,7 +739,7 @@ private fun LandscapeCalculatorLayout(
                         .padding(horizontal = 2.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    val localViewInternal = androidx.compose.ui.platform.LocalView.current
+                    val localViewInternal = LocalView.current
                     GlassSurface(
                         modifier = Modifier.testTag("btn_toggle_angle_mode_tablet"),
                         shape = CircleShape,
@@ -754,7 +762,7 @@ private fun LandscapeCalculatorLayout(
                     }
                 }
 
-                // Sub-Tab Switcher for Landscape Mode (Tastatur vs Graph)
+                // Sub-Tab Switcher for Landscape Mode (Tastatur vs Graph) with Haptic Feedback
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -770,7 +778,10 @@ private fun LandscapeCalculatorLayout(
                                 modifier = Modifier
                                     .clip(CircleShape)
                                     .background(if (scientificSubTab == 0) colorScheme.primary else Color.Transparent)
-                                    .clickable { scientificSubTab = 0 }
+                                    .clickable {
+                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                        scientificSubTab = 0
+                                    }
                                     .padding(horizontal = 14.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -798,7 +809,10 @@ private fun LandscapeCalculatorLayout(
                                 modifier = Modifier
                                     .clip(CircleShape)
                                     .background(if (scientificSubTab == 1) colorScheme.primary else Color.Transparent)
-                                    .clickable { scientificSubTab = 1 }
+                                    .clickable {
+                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                        scientificSubTab = 1
+                                    }
                                     .padding(horizontal = 14.dp, vertical = 4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -843,7 +857,7 @@ private fun LandscapeCalculatorLayout(
                 }
             }
 
-            // Right Column: Fixed Main 4x5 Keypad (with exact same uniformButtonSize!)
+            // Right Column: Fixed Main 4x5 Keypad
             Box(
                 modifier = Modifier
                     .width(finalKeypadWidth)
@@ -862,12 +876,20 @@ private fun LandscapeCalculatorLayout(
     }
 }
 
+/**
+ * 5-row Scientific Grid including:
+ * Row 1: sin, cos, tan, π, e
+ * Row 2: ln, log, x², x³, x^y
+ * Row 3: √, ³√, n!, (, )
+ * Row 4: asin, acos, atan, |x|, mod
+ * Row 5: sinh, cosh, tanh, d/dx, ∫
+ */
 @Composable
 private fun ScientificKeyboardGrid(
     viewModel: CalculatorViewModel,
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null,
     buttonSize: Dp? = null,
-    spacing: Dp = 8.dp,
+    spacing: Dp = 6.dp,
     modifier: Modifier = Modifier
 ) {
     fun RowScope.buttonModifier(): Modifier =
@@ -943,15 +965,55 @@ private fun ScientificKeyboardGrid(
                 viewModel.onCharacterInput(")")
             }
         }
+
+        // Row 4: asin, acos, atan, |x|, mod
+        Row(
+            modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing)
+        ) {
+            GlassCalculatorButton(text = "asin", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("arcsin")
+            }
+            GlassCalculatorButton(text = "acos", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("arccos")
+            }
+            GlassCalculatorButton(text = "atan", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("arctan")
+            }
+            GlassCalculatorButton(text = "|x|", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("abs")
+            }
+            GlassCalculatorButton(text = "mod", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onCharacterInput(" mod ")
+            }
+        }
+
+        // Row 5: sinh, cosh, tanh, d/dx, ∫
+        Row(
+            modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing)
+        ) {
+            GlassCalculatorButton(text = "sinh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("sinh")
+            }
+            GlassCalculatorButton(text = "cosh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("cosh")
+            }
+            GlassCalculatorButton(text = "tanh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("tanh")
+            }
+            GlassCalculatorButton(text = "d/dx", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("der")
+            }
+            GlassCalculatorButton(text = "∫", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("int")
+            }
+        }
     }
 }
 
 /**
  * Rigid 4-column x 5-row Keypad.
- * - In Portrait: every button uses `Modifier.weight(1f)` for exact equal circles.
- * - In Landscape: every button uses `buttonSize` calculated dynamically from available height,
- *   guaranteeing all 5 rows (including row 5 with 0 and =) are 100% visible!
- * - DEL button features Long-Press (detectTapGestures) to clear all with visual feedback.
  */
 @Composable
 private fun MainKeyboardGrid(

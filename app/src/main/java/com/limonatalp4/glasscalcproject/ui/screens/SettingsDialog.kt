@@ -1,8 +1,16 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +28,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeveloperMode
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -53,7 +66,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -66,6 +80,7 @@ import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,9 +106,8 @@ fun SettingsDialog(
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
     val config = LocalConfiguration.current
-    val density = LocalDensity.current
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val view = androidx.compose.ui.platform.LocalView.current
+    val context = LocalContext.current
+    val view = LocalView.current
 
     fun triggerHaptic() {
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
@@ -101,9 +115,13 @@ fun SettingsDialog(
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
     var currentSliderApi by remember(simulatedApiLevel) { mutableFloatStateOf(simulatedApiLevel.toFloat()) }
+    var lastHapticStep by remember(simulatedApiLevel) { mutableIntStateOf(simulatedApiLevel) }
+
+    // Accordion expansion states for Info tab
+    var apacheAccordionOpen by remember { mutableStateOf(false) }
+    var mxparserAccordionOpen by remember { mutableStateOf(false) }
 
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
-    val isBlurActive = effectiveApi in 31..35 && com.limonatalp4.glasscalcproject.ui.components.isBlurHardwareSupported()
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -152,126 +170,63 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // 3-Tab Segmented Control (Pill-Design)
+                // 4-Tab Segmented Control (Pill-Design)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
                         .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    // Tab 0: Erscheinungsbild
-                    val tab0Selected = selectedTab == 0
-                    val tab0Bg by animateColorAsState(
-                        targetValue = if (tab0Selected) colorScheme.primary else Color.Transparent,
-                        animationSpec = tween(durationMillis = 200),
-                        label = "tab0_bg"
+                    val tabs = listOf(
+                        Triple(0, Icons.Default.Palette, "Design"),
+                        Triple(1, Icons.Default.Straighten, "Einheiten"),
+                        Triple(2, Icons.Default.DeveloperMode, "Entwickler"),
+                        Triple(3, Icons.Default.Info, "Infos")
                     )
-                    val tab0Tint = if (tab0Selected) colorScheme.onPrimary else colorScheme.onSurface.copy(alpha = 0.75f)
 
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(50.dp))
-                            .background(tab0Bg)
-                            .clickable {
-                                triggerHaptic()
-                                selectedTab = 0
-                            }
-                            .padding(vertical = 10.dp, horizontal = 4.dp)
-                            .testTag("tab_appearance"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    tabs.forEach { (index, icon, label) ->
+                        val isSelected = selectedTab == index
+                        val tabBg by animateColorAsState(
+                            targetValue = if (isSelected) colorScheme.primary else Color.Transparent,
+                            animationSpec = tween(durationMillis = 200),
+                            label = "tab_${index}_bg"
+                        )
+                        val tabTint = if (isSelected) colorScheme.onPrimary else colorScheme.onSurface.copy(alpha = 0.75f)
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(50.dp))
+                                .background(tabBg)
+                                .clickable {
+                                    triggerHaptic()
+                                    selectedTab = index
+                                }
+                                .padding(vertical = 8.dp, horizontal = 2.dp)
+                                .testTag("tab_settings_$index"),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(imageVector = Icons.Default.Palette, contentDescription = null, tint = tab0Tint, modifier = Modifier.size(16.dp))
-                            Text(
-                                text = "Design",
-                                fontSize = 12.sp,
-                                fontWeight = if (tab0Selected) FontWeight.Bold else FontWeight.Medium,
-                                color = tab0Tint,
-                                maxLines = 1,
-                                softWrap = false
-                            )
-                        }
-                    }
-
-                    // Tab 1: Einheiten
-                    val tab1Selected = selectedTab == 1
-                    val tab1Bg by animateColorAsState(
-                        targetValue = if (tab1Selected) colorScheme.primary else Color.Transparent,
-                        animationSpec = tween(durationMillis = 200),
-                        label = "tab1_bg"
-                    )
-                    val tab1Tint = if (tab1Selected) colorScheme.onPrimary else colorScheme.onSurface.copy(alpha = 0.75f)
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(50.dp))
-                            .background(tab1Bg)
-                            .clickable {
-                                triggerHaptic()
-                                selectedTab = 1
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = tabTint,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = label,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = tabTint,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
                             }
-                            .padding(vertical = 10.dp, horizontal = 4.dp)
-                            .testTag("tab_units"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(imageVector = Icons.Default.Straighten, contentDescription = null, tint = tab1Tint, modifier = Modifier.size(16.dp))
-                            Text(
-                                text = "Einheiten",
-                                fontSize = 12.sp,
-                                fontWeight = if (tab1Selected) FontWeight.Bold else FontWeight.Medium,
-                                color = tab1Tint,
-                                maxLines = 1,
-                                softWrap = false
-                            )
-                        }
-                    }
-
-                    // Tab 2: Entwickleroptionen
-                    val tab2Selected = selectedTab == 2
-                    val tab2Bg by animateColorAsState(
-                        targetValue = if (tab2Selected) colorScheme.primary else Color.Transparent,
-                        animationSpec = tween(durationMillis = 200),
-                        label = "tab2_bg"
-                    )
-                    val tab2Tint = if (tab2Selected) colorScheme.onPrimary else colorScheme.onSurface.copy(alpha = 0.75f)
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(50.dp))
-                            .background(tab2Bg)
-                            .clickable {
-                                triggerHaptic()
-                                selectedTab = 2
-                            }
-                            .padding(vertical = 10.dp, horizontal = 4.dp)
-                            .testTag("tab_dev_options"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(imageVector = Icons.Default.DeveloperMode, contentDescription = null, tint = tab2Tint, modifier = Modifier.size(16.dp))
-                            Text(
-                                text = "Entwickler",
-                                fontSize = 12.sp,
-                                fontWeight = if (tab2Selected) FontWeight.Bold else FontWeight.Medium,
-                                color = tab2Tint,
-                                maxLines = 1,
-                                softWrap = false
-                            )
                         }
                     }
                 }
@@ -309,7 +264,12 @@ fun SettingsDialog(
                             ) {
                                 RadioButton(
                                     selected = isSelected,
-                                    onClick = if (isSupported) { { onSelectTheme(themeOption) } } else null,
+                                    onClick = if (isSupported) {
+                                        {
+                                            triggerHaptic()
+                                            onSelectTheme(themeOption)
+                                        }
+                                    } else null,
                                     colors = RadioButtonDefaults.colors(selectedColor = colorScheme.primary),
                                     enabled = isSupported
                                 )
@@ -324,7 +284,7 @@ fun SettingsDialog(
 
                                     if (!isSupported) {
                                         Text(
-                                            text = "Nicht mit dieser Android-Version kompatibel (erfordert API 33+, aktiv: API $effectiveApiLevel)",
+                                            text = "Nicht mit dieser Android-Version kompatibel (erfordert API 31+, aktiv: API $effectiveApiLevel)",
                                             fontSize = 12.sp,
                                             color = colorScheme.error,
                                             modifier = Modifier.testTag("text_material_you_unsupported")
@@ -468,7 +428,7 @@ fun SettingsDialog(
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (effectiveApi < 33) colorScheme.error else colorScheme.primary
+                                        color = if (effectiveApi < 31) colorScheme.error else colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Row(
@@ -489,8 +449,8 @@ fun SettingsDialog(
                                                 onSetSimulatedApi(checked, currentSliderApi.toInt())
                                             },
                                             colors = SwitchDefaults.colors(
-                                                checkedThumbColor = colorScheme.primary,
-                                                checkedTrackColor = colorScheme.primaryContainer
+                                                checkedThumbColor = colorScheme.onPrimary,
+                                                checkedTrackColor = colorScheme.primary
                                             ),
                                             modifier = Modifier.testTag("switch_simulate_api")
                                         )
@@ -505,20 +465,30 @@ fun SettingsDialog(
                                         )
                                         Slider(
                                             value = currentSliderApi,
-                                            onValueChange = { currentSliderApi = it },
+                                            onValueChange = { newVal ->
+                                                currentSliderApi = newVal
+                                                val rounded = newVal.roundToInt()
+                                                if (rounded != lastHapticStep) {
+                                                    lastHapticStep = rounded
+                                                    triggerHaptic()
+                                                }
+                                            },
                                             onValueChangeFinished = {
                                                 onSetSimulatedApi(true, currentSliderApi.toInt())
                                             },
-                                            valueRange = 28f..35f,
-                                            steps = 6,
-                                            colors = SliderDefaults.colors(thumbColor = colorScheme.primary, activeTrackColor = colorScheme.primaryContainer),
+                                            valueRange = 26f..37f,
+                                            steps = 10,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = colorScheme.primary,
+                                                activeTrackColor = colorScheme.primary
+                                            ),
                                             modifier = Modifier.testTag("slider_simulated_api")
                                         )
                                     }
                                 }
                             }
 
-                            // Card 3: Haptic Feedback
+                            // Card 3: Haptic Feedback with standard M3 switch colors
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
@@ -539,7 +509,7 @@ fun SettingsDialog(
                                             color = colorScheme.primary
                                         )
                                         Text(
-                                            text = "Vibration bei Tastendruck",
+                                            text = "Vibration bei Tastendruck und Schaltern",
                                             fontSize = 12.sp,
                                             color = colorScheme.onSurfaceVariant
                                         )
@@ -547,12 +517,12 @@ fun SettingsDialog(
                                     Switch(
                                         checked = hapticFeedbackEnabled,
                                         onCheckedChange = {
-                                            triggerHaptic()
+                                            HapticUtil.performAppHaptic(context, view, true) // Always feedback when toggling haptics
                                             onToggleHapticFeedback(it)
                                         },
                                         colors = SwitchDefaults.colors(
-                                            checkedThumbColor = colorScheme.primary,
-                                            checkedTrackColor = colorScheme.primaryContainer
+                                            checkedThumbColor = colorScheme.onPrimary,
+                                            checkedTrackColor = colorScheme.primary
                                         ),
                                         modifier = Modifier.testTag("switch_haptic_feedback")
                                     )
@@ -613,7 +583,7 @@ fun SettingsDialog(
                                 }
                             }
 
-                            // Card 5: Cache Clear
+                            // Card 5: Separate Card 1 - App-Speicher zurücksetzen (DataStore / History)
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
@@ -621,14 +591,14 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "App-Speicher & Cache",
+                                        text = "App-Speicher zurücksetzen",
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.error
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Setzt DataStore und Verlauf auf Standardwerte zurück.",
+                                        text = "Löscht den gesamten Verlauf, gespeicherte Ausdrücke und setzt alle Einstellungen auf Standard zurück.",
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
@@ -638,7 +608,54 @@ fun SettingsDialog(
                                             triggerHaptic()
                                             showResetConfirmDialog = true
                                         },
-                                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error, contentColor = colorScheme.onError),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colorScheme.error,
+                                            contentColor = colorScheme.onError
+                                        ),
+                                        shape = RoundedCornerShape(14.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .testTag("btn_reset_storage")
+                                    ) {
+                                        Text("Einstellungen zurücksetzen", fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+
+                            // Card 6: Separate Card 2 - Cache leeren (Temporary files)
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
+                                    Text(
+                                        text = "Cache leeren",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Gibt temporären Speicherplatz frei, ohne deine Einstellungen oder den Verlauf zu verändern.",
+                                        fontSize = 12.sp,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(
+                                        onClick = {
+                                            triggerHaptic()
+                                            try {
+                                                context.cacheDir.deleteRecursively()
+                                                Toast.makeText(context, "Cache erfolgreich geleert", Toast.LENGTH_SHORT).show()
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "Cache konnte nicht vollständig gelöscht werden", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colorScheme.primary,
+                                            contentColor = colorScheme.onPrimary
+                                        ),
                                         shape = RoundedCornerShape(14.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -646,6 +663,275 @@ fun SettingsDialog(
                                     ) {
                                         Text("Cache leeren", fontWeight = FontWeight.Bold)
                                     }
+                                }
+                            }
+                        }
+                    }
+                    3 -> {
+                        // Information Tab (Task 5: Complete Legal, GitHub & OSS Licenses)
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // App Version Card
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(14.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "GlassCalc v1.1",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Android 8.0 - 17 Ready (API 26-37)",
+                                        fontSize = 12.sp,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = "Copyright © 2026 limonatalp4",
+                                        fontSize = 11.sp,
+                                        color = colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
+
+                            // GitHub Repository Card
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            triggerHaptic()
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/tree/main"))
+                                            context.startActivity(intent)
+                                        }
+                                        .padding(14.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "GitHub Repository",
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "LimoLP4/GlassCalc-Android",
+                                            fontSize = 12.sp,
+                                            color = colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.OpenInBrowser,
+                                        contentDescription = "Auf GitHub öffnen",
+                                        tint = colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            // Third-Party OSS Licenses Button (play-services-oss-licenses)
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Policy,
+                                            contentDescription = null,
+                                            tint = colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "Drittanbieter-Lizenzen",
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Vollständige Übersicht aller verwendeten Open-Source-Bibliotheken und deren Lizenzen.",
+                                        fontSize = 12.sp,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(
+                                        onClick = {
+                                            triggerHaptic()
+                                            try {
+                                                val intent = Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
+                                                context.startActivity(intent)
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "Lizenzen können nicht geöffnet werden: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colorScheme.primary,
+                                            contentColor = colorScheme.onPrimary
+                                        ),
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .testTag("btn_oss_licenses")
+                                    ) {
+                                        Text("Open-Source-Lizenzen anzeigen")
+                                    }
+                                }
+                            }
+
+                            // Accordion 1: Apache License 2.0 (App License)
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            triggerHaptic()
+                                            apacheAccordionOpen = !apacheAccordionOpen
+                                        }
+                                        .padding(14.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Apache License 2.0",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.onSurface
+                                        )
+                                        Icon(
+                                            imageVector = if (apacheAccordionOpen) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                            contentDescription = null,
+                                            tint = colorScheme.onSurface
+                                        )
+                                    }
+
+                                    AnimatedVisibility(
+                                        visible = apacheAccordionOpen,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Column(modifier = Modifier.padding(top = 10.dp)) {
+                                            Text(
+                                                text = "Copyright 2026 limonatalp4\n\n" +
+                                                        "Licensed under the Apache License, Version 2.0 (the \"License\");\n" +
+                                                        "you may not use this file except in compliance with the License.\n" +
+                                                        "You may obtain a copy of the License at\n\n" +
+                                                        "    http://www.apache.org/licenses/LICENSE-2.0\n\n" +
+                                                        "Unless required by applicable law or agreed to in writing, software\n" +
+                                                        "distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
+                                                        "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
+                                                        "See the License for the specific language governing permissions and\n" +
+                                                        "limitations under the License.",
+                                                fontSize = 11.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Accordion 2: mXparser License Notice
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            triggerHaptic()
+                                            mxparserAccordionOpen = !mxparserAccordionOpen
+                                        }
+                                        .padding(14.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "mXparser Lizenz (Non-Commercial)",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.onSurface
+                                        )
+                                        Icon(
+                                            imageVector = if (mxparserAccordionOpen) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                            contentDescription = null,
+                                            tint = colorScheme.onSurface
+                                        )
+                                    }
+
+                                    AnimatedVisibility(
+                                        visible = mxparserAccordionOpen,
+                                        enter = expandVertically() + fadeIn(),
+                                        exit = shrinkVertically() + fadeOut()
+                                    ) {
+                                        Column(modifier = Modifier.padding(top = 10.dp)) {
+                                            Text(
+                                                text = "mXparser - Math Parser for JAVA, Android and C# .NET\n" +
+                                                        "Copyright (c) 2010 - 2026 Mariusz Gromada - MathParser.org\n\n" +
+                                                        "GlassCalc nutzt mXparser unter der \"mXparser Non-Commercial License Agreement\".\n" +
+                                                        "Bestätigung erfolgte via:\n" +
+                                                        "License.iConfirmNonCommercialUse(\"limonatalp4\")\n\n" +
+                                                        "Diese Software ist ein nicht-kommerzielles Open-Source-Projekt und respektiert sämtliche Bedingungen des Urhebers.",
+                                                fontSize = 11.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Library Usages & Architecture Card
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
+                                    Text(
+                                        text = "Verwendete Bibliotheken",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "• Jetpack Compose & Material 3: Modernes UI-Framework\n" +
+                                                "• LiquidGlass (nadeemiqbal): Fluider Blur- & Glas-Shader\n" +
+                                                "• mXparser: Mathematische Formelauswertung, Analysis & Graphen\n" +
+                                                "• DataStore Preferences: Asynchrone, robuste Datenspeicherung\n" +
+                                                "• Play Services OSS Licenses: Automatische Drittanbieter-Lizenzverwaltung",
+                                        fontSize = 12.sp,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }
@@ -660,7 +946,7 @@ fun SettingsDialog(
             onDismissRequest = { showResetConfirmDialog = false },
             icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = colorScheme.error) },
             title = { Text("App wirklich zurücksetzen?") },
-            text = { Text("Alle DataStore-Einstellungen, Berechnungen und der aktuelle Zustand werden gelöscht.") },
+            text = { Text("Alle DataStore-Einstellungen, gespeicherten Berechnungen und der gesamte Verlauf werden unwiderruflich gelöscht.") },
             confirmButton = {
                 TextButton(
                     onClick = {

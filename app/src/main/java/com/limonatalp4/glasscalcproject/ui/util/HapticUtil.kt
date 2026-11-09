@@ -44,10 +44,14 @@ object HapticUtil {
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
                             v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                         }
+                        // Android 8+ (API 26+) Oreo
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                            v.vibrate(VibrationEffect.createOneShot(20L, VibrationEffect.DEFAULT_AMPLITUDE))
+                        }
                         // Legacy Fallback
                         else -> {
                             @Suppress("DEPRECATION")
-                            v.vibrate(30L)
+                            v.vibrate(20L)
                         }
                     }
                 } catch (e: Exception) {

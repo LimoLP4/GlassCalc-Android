@@ -1,21 +1,11 @@
 package com.limonatalp4.glasscalcproject.ui.components
 
-import android.content.ContentValues
-import android.graphics.Bitmap
-import android.os.Environment
-import android.provider.MediaStore
-import android.widget.Toast
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +26,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Remove
@@ -54,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,13 +51,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.layer.rememberGraphicsLayer
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -79,38 +65,45 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
-import com.limonatalp4.glasscalcproject.domain.evaluator.EvaluationResult
-import com.limonatalp4.glasscalcproject.domain.evaluator.ExpressionEvaluator
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
-import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
-import java.util.Locale
-import kotlin.math.*
+import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
-import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.Argument
+import org.mariuszgromada.math.mxparser.Expression
+import org.mariuszgromada.math.mxparser.License
 import org.mariuszgromada.math.mxparser.mXparser
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
+import kotlin.math.roundToLong
 
 enum class GraphPreset(val label: String, val formula: String) {
-    SIN("sin(x)", "sin"),
-    COS("cos(x)", "cos"),
-    TAN("tan(x)", "tan"),
-    LN("ln(x)", "ln"),
-    LOG("log(x)", "log"),
+    SIN("sin(x)", "sin(x)"),
+    COS("cos(x)", "cos(x)"),
+    TAN("tan(x)", "tan(x)"),
+    ARCSIN("arcsin", "asin(x)"),
+    ARCCOS("arccos", "acos(x)"),
+    ARCTAN("arctan", "atan(x)"),
+    SINH("sinh(x)", "sinh(x)"),
+    COSH("cosh(x)", "cosh(x)"),
+    TANH("tanh(x)", "tanh(x)"),
+    ABS("|x|", "abs(x)"),
+    LN("ln(x)", "ln(x)"),
+    LOG("log(x)", "log10(x)"),
     SQUARE("x²", "x^2"),
-    SQRT("√x", "sqrt"),
+    SQRT("√x", "sqrt(x)"),
+    DERIV("d/dx", "der(sin(t), t, x)"),
+    INTEGRAL("∫", "int(sin(t), t, 0, x)"),
     CUSTOM("f(x)", "custom")
 }
 
 data class GraphPoint(val x: Double, val y: Double)
 
-/**
- * Calculates human-readable "nice" grid step intervals (e.g. 1, 2, 5, 10, 0.5, 0.2, etc.)
- * based on the domain/range interval and requested target step count.
- */
 private fun calculateNiceStep(range: Double, targetSteps: Int): Double {
     if (range <= 0.0) return 1.0
     val rawStep = range / targetSteps.coerceAtLeast(1)
@@ -126,9 +119,6 @@ private fun calculateNiceStep(range: Double, targetSteps: Int): Double {
     return niceFactor * magnitude
 }
 
-/**
- * Formats axis numerical labels cleanly without trailing unneeded zeros.
- */
 private fun formatAxisLabel(value: Double): String {
     val rounded = (value * 1000.0).roundToLong() / 1000.0
     if (abs(rounded - rounded.toLong()) < 1e-4) {
@@ -141,6 +131,26 @@ private fun formatAxisLabel(value: Double): String {
     }
 }
 
+private fun sanitizeForGraphParser(expr: String): String {
+    return expr
+        .replace("π", "pi")
+        .replace("e", "e")
+        .replace("−", "-")
+        .replace("×", "*")
+        .replace("÷", "/")
+        .replace("²", "^2")
+        .replace("³", "^3")
+        .replace("√", "sqrt")
+        .replace("³√", "cbrt")
+        .replace("arcsin", "asin")
+        .replace("arccos", "acos")
+        .replace("arctan", "atan")
+        .replace("ln", "ln")
+        .replace("log", "log10")
+        .replace("|", "abs")
+        .replace("mod", "#")
+}
+
 @Composable
 fun FunctionGraphView(
     expression: String,
@@ -150,32 +160,14 @@ fun FunctionGraphView(
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
 ) {
-    val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
-    val localContext = androidx.compose.ui.platform.LocalContext.current
-    val view = androidx.compose.ui.platform.LocalView.current
-    val hapticFeedback = LocalHapticFeedback.current
+    val localContext = LocalContext.current
+    val view = LocalView.current
     val textMeasurer = rememberTextMeasurer()
-    val scope = rememberCoroutineScope()
     val hapticEnabled = LocalHapticFeedbackEnabled.current
 
     fun triggerClickHaptic() {
         HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
-    }
-
-    fun sanitizeForParser(expr: String): String {
-        return expr
-            .replace("π", "pi")
-            .replace("e", "e")
-            .replace("−", "-")
-            .replace("×", "*")
-            .replace("÷", "/")
-            .replace("²", "^2")
-            .replace("³", "^3")
-            .replace("√", "sqrt")
-            .replace("³√", "cbrt")
-            .replace("ln", "ln")
-            .replace("log", "log10")
     }
 
     var selectedPreset by remember { mutableStateOf(GraphPreset.SIN) }
@@ -186,103 +178,17 @@ fun FunctionGraphView(
     var yMin by remember { mutableDoubleStateOf(-3.0) }
     var yMax by remember { mutableDoubleStateOf(3.0) }
 
-    var cachedPoints by remember { mutableStateOf<List<Offset>>(emptyList()) }
-
-    // Asynchronous calculation of curve points in background thread (Dispatchers.Default)
-    LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
-        withContext(Dispatchers.Default) {
-            if (angleMode == AngleMode.DEG) {
-                mXparser.setDegreesMode()
-            } else {
-                mXparser.setRadiansMode()
-            }
-
-            val exprString = when (selectedPreset) {
-                GraphPreset.SIN -> "sin(x)"
-                GraphPreset.COS -> "cos(x)"
-                GraphPreset.TAN -> "tan(x)"
-                GraphPreset.LN -> "ln(x)"
-                GraphPreset.LOG -> "log10(x)"
-                GraphPreset.SQRT -> "sqrt(x)"
-                GraphPreset.SQUARE -> "x^2"
-                GraphPreset.CUSTOM -> {
-                    if (expression.isNotBlank() && (expression.contains("x", ignoreCase = true))) {
-                        expression
-                    } else if (expression.isNotBlank()) {
-                        "($expression) * sin(x)"
-                    } else {
-                        "sin(x)"
-                    }
-                }
-            }
-            val sanitizedExpr = sanitizeForParser(exprString)
-
-            val steps = 600
-            val points = ArrayList<Offset>(steps + 1)
-            for (i in 0..steps) {
-                val t = i.toDouble() / steps
-                val x = xMin + t * (xMax - xMin)
-                try {
-                    val argX = Argument("x = $x")
-                    val e = Expression(sanitizedExpr, argX)
-                    val y = e.calculate()
-                    if (!y.isNaN() && !y.isInfinite() && abs(y) <= 1e10) {
-                        points.add(Offset(t.toFloat(), y.toFloat()))
-                    } else {
-                        points.add(Offset(t.toFloat(), Float.NaN))
-                    }
-                } catch (_: Exception) {
-                    points.add(Offset(t.toFloat(), Float.NaN))
-                }
-            }
-            cachedPoints = points
-        }
-    }
-
-    fun saveGraphToGallery() {
-        scope.launch {
-            try {
-                val bitmap = Bitmap.createBitmap(view.width.coerceAtLeast(100), view.height.coerceAtLeast(100), Bitmap.Config.ARGB_8888)
-                val canvas = android.graphics.Canvas(bitmap)
-                view.draw(canvas)
-
-                val resolver = localContext.contentResolver
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, "GlassCalc_Graph_${System.currentTimeMillis()}.png")
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/GlassCalc")
-                }
-                val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                if (uri != null) {
-                    resolver.openOutputStream(uri)?.use { stream ->
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                    }
-                    Toast.makeText(localContext, "Graph als Bild in der Galerie gespeichert!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(localContext, "Fehler beim Speichern des Bildes", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                Toast.makeText(localContext, "Fehler: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
-            }
-            triggerClickHaptic()
-        }
-    }
+    // Cached curve evaluation points (normalized t from 0..1, y value)
+    var cachedPoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
 
     // Active touch-to-trace state
     var isTracing by remember { mutableStateOf(false) }
     var inspectedPoint by remember { mutableStateOf<GraphPoint?>(null) }
     var inspectedCanvasPos by remember { mutableStateOf<Offset?>(null) }
-
-    var lastHapticTriggerX by remember { mutableDoubleStateOf(Double.NaN) }
     var lastHapticTime by remember { mutableStateOf(0L) }
-    val hapticEnabled = LocalHapticFeedbackEnabled.current
-
-    fun triggerClickHaptic() {
-        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
-    }
 
     // Auto-Zoom & Auto-Lock: Adjust range and re-lock when switching DEG/RAD
-    androidx.compose.runtime.LaunchedEffect(angleMode) {
+    LaunchedEffect(angleMode) {
         if (angleMode == AngleMode.DEG) {
             xMin = -360.0
             xMax = 360.0
@@ -294,12 +200,63 @@ fun FunctionGraphView(
         yMax = 2.0
         inspectedPoint = null
         inspectedCanvasPos = null
-        onGestureLockChange(true) // AUTO-LOCK
+        onGestureLockChange(true)
     }
 
     // Auto-Lock on Preset change
-    androidx.compose.runtime.LaunchedEffect(selectedPreset) {
-        onGestureLockChange(true) // AUTO-LOCK
+    LaunchedEffect(selectedPreset) {
+        inspectedPoint = null
+        inspectedCanvasPos = null
+        onGestureLockChange(true)
+    }
+
+    // Asynchronous background computation of curve points (Dispatchers.Default)
+    // Only re-runs when the function or viewport boundaries change, NEVER when tracing!
+    LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
+        withContext(Dispatchers.Default) {
+            try {
+                License.iConfirmNonCommercialUse("limonatalp4")
+            } catch (_: Exception) {}
+
+            if (angleMode == AngleMode.DEG) {
+                mXparser.setDegreesMode()
+            } else {
+                mXparser.setRadiansMode()
+            }
+
+            val formulaString = when (selectedPreset) {
+                GraphPreset.CUSTOM -> {
+                    if (expression.isNotBlank() && expression.contains("x", ignoreCase = true)) {
+                        expression
+                    } else if (expression.isNotBlank()) {
+                        "($expression) * sin(x)"
+                    } else {
+                        "sin(x)"
+                    }
+                }
+                else -> selectedPreset.formula
+            }
+
+            val sanitizedExpr = sanitizeForGraphParser(formulaString)
+            val steps = 360 // High quality, low CPU footprint
+            val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
+
+            val argX = Argument("x = 0")
+            val expr = Expression(sanitizedExpr, argX)
+
+            for (i in 0..steps) {
+                val t = i.toDouble() / steps
+                val x = xMin + t * (xMax - xMin)
+                argX.argumentValue = x
+                val y = expr.calculate()
+                if (!y.isNaN() && !y.isInfinite() && abs(y) <= 1e8) {
+                    calculatedList.add(Pair(x, y))
+                } else {
+                    calculatedList.add(Pair(x, Double.NaN))
+                }
+            }
+            cachedPoints = calculatedList
+        }
     }
 
     fun resetView() {
@@ -315,74 +272,19 @@ fun FunctionGraphView(
         inspectedPoint = null
         inspectedCanvasPos = null
         isTracing = false
-        onGestureLockChange(true) // AUTO-LOCK
-    triggerClickHaptic()
+        onGestureLockChange(true)
+        triggerClickHaptic()
     }
 
-    fun sanitizeForParser(expr: String): String {
-        return expr
-            .replace("π", "pi")
-            .replace("e", "e")
-            .replace("−", "-")
-            .replace("×", "*")
-            .replace("÷", "/")
-            .replace("²", "^2")
-            .replace("³", "^3")
-            .replace("√", "sqrt")
-            .replace("³√", "cbrt")
-            .replace("ln", "ln")
-            .replace("log", "log10")
-    }
-
-    // Function evaluator using mXparser
-    fun evalY(xVal: Double): Double? {
-        return try {
-            // Set global angle mode for mXparser
-            if (angleMode == AngleMode.DEG) {
-                mXparser.setDegreesMode()
-            } else {
-                mXparser.setRadiansMode()
-            }
-
-            val exprString = when (selectedPreset) {
-                GraphPreset.SIN -> "sin(x)"
-                GraphPreset.COS -> "cos(x)"
-                GraphPreset.TAN -> "tan(x)"
-                GraphPreset.LN -> "ln(x)"
-                GraphPreset.LOG -> "log10(x)" // mXparser uses log10 for base 10
-                GraphPreset.SQRT -> "sqrt(x)"
-                GraphPreset.SQUARE -> "x^2"
-                GraphPreset.CUSTOM -> {
-                    if (expression.isNotBlank() && (expression.contains("x", ignoreCase = true))) {
-                        expression
-                    } else if (expression.isNotBlank()) {
-                        "($expression) * sin(x)"
-                    } else {
-                        "sin(x)"
-                    }
-                }
-            }
-
-            val sanitizedExpr = sanitizeForParser(exprString)
-            val argX = Argument("x = $xVal")
-            val e = Expression(sanitizedExpr, argX)
-            val res = e.calculate()
-
-            if (res.isNaN() || res.isInfinite() || abs(res) > 1e10) null
-            else res
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    fun updateTrace(offset: Offset, width: Float, height: Float) {
-        if (width <= 0 || height <= 0) return
-        val touchXFraction = (offset.x / width).coerceIn(0f, 1f)
-        val xVal = xMin + touchXFraction * (xMax - xMin)
-        val yVal = evalY(xVal)
-        if (yVal != null) {
-            inspectedPoint = GraphPoint(xVal, yVal)
-            val py = (height - ((yVal - yMin) / (yMax - yMin) * height)).toFloat()
+    // High performance trace lookup: interpolates from already calculated cached points (instant O(1))
+    fun updateTraceFromCache(offset: Offset, width: Float, height: Float) {
+        if (width <= 0 || height <= 0 || cachedPoints.isEmpty()) return
+        val touchFraction = (offset.x / width).coerceIn(0f, 1f)
+        val index = (touchFraction * (cachedPoints.size - 1)).toInt().coerceIn(0, cachedPoints.size - 1)
+        val pt = cachedPoints[index]
+        if (!pt.second.isNaN()) {
+            inspectedPoint = GraphPoint(pt.first, pt.second)
+            val py = (height - ((pt.second - yMin) / (yMax - yMin) * height)).toFloat()
             inspectedCanvasPos = Offset(offset.x.coerceIn(0f, width), py.coerceIn(0f, height))
         }
     }
@@ -424,8 +326,6 @@ fun FunctionGraphView(
                             selected = isSelected,
                             onClick = {
                                 selectedPreset = preset
-                                inspectedPoint = null
-                                inspectedCanvasPos = null
                                 triggerClickHaptic()
                             },
                             label = {
@@ -454,7 +354,7 @@ fun FunctionGraphView(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // LOCK BUTTON
+                // LOCK BUTTON (Blocks background scroll & system gesture interference)
                 IconButton(
                     onClick = {
                         onGestureLockChange(!isGestureLocked)
@@ -475,13 +375,12 @@ fun FunctionGraphView(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Main Canvas Plot Area with 2D Panning, Throttled Haptics & GraphicsLayer
+            // Main Canvas Plot Area with 2D Panning & Throttled Haptics
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(230.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .graphicsLayer(graphicsLayer)
                     .background(colorScheme.surfaceContainerLow)
                     .border(1.dp, gridColor, RoundedCornerShape(16.dp))
                     .pointerInput(selectedPreset, xMin, xMax, yMin, yMax, angleMode, isGestureLocked) {
@@ -494,7 +393,7 @@ fun FunctionGraphView(
                                 val height = size.height.toFloat()
 
                                 if (!isGestureLocked) {
-                                    // 2D Panning: Update coordinate bounds only when UNLOCKED
+                                    // 2D Panning when unlocked
                                     val dx = -(dragAmount.x / width) * (xMax - xMin)
                                     val dy = (dragAmount.y / height) * (yMax - yMin)
 
@@ -504,8 +403,8 @@ fun FunctionGraphView(
                                     yMax += dy
                                 }
 
-                                // Update trace info relative to finger position (Always enabled)
-                                updateTrace(change.position, width, height)
+                                // Instant O(1) trace info from cached points
+                                updateTraceFromCache(change.position, width, height)
 
                                 // Throttled Haptic Feedback (80ms)
                                 val now = System.currentTimeMillis()
@@ -514,7 +413,6 @@ fun FunctionGraphView(
                                     HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
                                 }
 
-                                // Consume the gesture to prevent background scrolling or system 'Back'
                                 change.consume()
                             }
                         )
@@ -530,7 +428,6 @@ fun FunctionGraphView(
                     val gridStrokeWidth = 1.dp.toPx()
                     val axisStrokeWidth = 1.8.dp.toPx()
 
-                    // Compute origin pixel positions
                     val zeroXpx = ((0.0 - xMin) / (xMax - xMin) * width).toFloat()
                     val zeroYpx = (height - ((0.0 - yMin) / (yMax - yMin) * height)).toFloat()
 
@@ -548,14 +445,12 @@ fun FunctionGraphView(
                     )
 
                     // 1. DYNAMIC GRID LINES & AXIS LABELS
-                    // Vertical grid lines (X axis ticks)
                     val xStep = calculateNiceStep(xMax - xMin, targetSteps = 6)
                     val firstX = floor(xMin / xStep) * xStep
                     var currentX = firstX
                     while (currentX <= xMax + xStep * 0.1) {
                         val gx = ((currentX - xMin) / (xMax - xMin) * width).toFloat()
                         if (gx in 0f..width) {
-                            // Grid line
                             drawLine(
                                 color = gridColor,
                                 start = Offset(gx, 0f),
@@ -564,7 +459,6 @@ fun FunctionGraphView(
                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f), 0f)
                             )
 
-                            // Tick mark on X axis
                             val tickY = zeroYpx.coerceIn(12f, height - 16f)
                             drawLine(
                                 color = axisColor,
@@ -573,7 +467,6 @@ fun FunctionGraphView(
                                 strokeWidth = axisStrokeWidth
                             )
 
-                            // Numerical label for X
                             if (abs(currentX) > 1e-4) {
                                 val labelText = formatAxisLabel(currentX)
                                 val measured = textMeasurer.measure(labelText, style = axisTextStyle)
@@ -594,14 +487,12 @@ fun FunctionGraphView(
                         currentX += xStep
                     }
 
-                    // Horizontal grid lines (Y axis ticks)
                     val yStep = calculateNiceStep(yMax - yMin, targetSteps = 4)
                     val firstY = floor(yMin / yStep) * yStep
                     var currentY = firstY
                     while (currentY <= yMax + yStep * 0.1) {
                         val gy = (height - ((currentY - yMin) / (yMax - yMin) * height)).toFloat()
                         if (gy in 0f..height) {
-                            // Grid line
                             drawLine(
                                 color = gridColor,
                                 start = Offset(0f, gy),
@@ -610,7 +501,6 @@ fun FunctionGraphView(
                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f), 0f)
                             )
 
-                            // Tick mark on Y axis
                             val tickX = zeroXpx.coerceIn(16f, width - 16f)
                             drawLine(
                                 color = axisColor,
@@ -619,7 +509,6 @@ fun FunctionGraphView(
                                 strokeWidth = axisStrokeWidth
                             )
 
-                            // Numerical label for Y
                             if (abs(currentY) > 1e-4) {
                                 val labelText = formatAxisLabel(currentY)
                                 val measured = textMeasurer.measure(labelText, style = axisTextStyle)
@@ -641,7 +530,6 @@ fun FunctionGraphView(
                     }
 
                     // 2. MAIN COORDINATE AXES (X = 0 & Y = 0)
-                    // X-Axis
                     if (zeroYpx in 0f..height) {
                         drawLine(
                             color = axisColor,
@@ -649,7 +537,6 @@ fun FunctionGraphView(
                             end = Offset(width, zeroYpx),
                             strokeWidth = axisStrokeWidth
                         )
-                        // "X" axis symbol at right
                         drawText(
                             textMeasurer = textMeasurer,
                             text = "x",
@@ -658,7 +545,6 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // Y-Axis
                     if (zeroXpx in 0f..width) {
                         drawLine(
                             color = axisColor,
@@ -666,7 +552,6 @@ fun FunctionGraphView(
                             end = Offset(zeroXpx, height),
                             strokeWidth = axisStrokeWidth
                         )
-                        // "Y" axis symbol at top
                         drawText(
                             textMeasurer = textMeasurer,
                             text = "y",
@@ -675,7 +560,6 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // Origin "0" label
                     if (zeroXpx in 10f..(width - 10f) && zeroYpx in 10f..(height - 10f)) {
                         drawText(
                             textMeasurer = textMeasurer,
@@ -685,45 +569,42 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // 3. CURVE EVALUATION & PLOTTING (from cached points)
-                    val path = remember(cachedPoints, xMin, xMax, yMin, yMax, width, height) {
-                        val p = Path()
-                        var isFirstPoint = true
+                    // 3. CURVE DRAWING (Instantly rendered from cached list with zero allocation in draw pass)
+                    if (cachedPoints.isNotEmpty()) {
+                        val path = Path()
+                        var isFirst = true
                         var lastPy = 0f
+                        val count = cachedPoints.size
 
-                        for (pt in cachedPoints) {
-                            if (pt.y.isNaN()) {
-                                isFirstPoint = true
+                        for (i in 0 until count) {
+                            val (x, y) = cachedPoints[i]
+                            if (y.isNaN()) {
+                                isFirst = true
                                 continue
                             }
-                            val px = pt.x * width
-                            val py = (height - ((pt.y.toDouble() - yMin) / (yMax - yMin) * height)).toFloat()
+                            val px = ((x - xMin) / (xMax - xMin) * width).toFloat()
+                            val py = (height - ((y - yMin) / (yMax - yMin) * height)).toFloat()
 
-                            // Asymptote / Discontinuity jump filter
-                            if (isFirstPoint || abs(py - lastPy) > height * 0.75f) {
-                                p.moveTo(px, py)
-                                isFirstPoint = false
+                            if (isFirst || abs(py - lastPy) > height * 0.75f) {
+                                path.moveTo(px, py)
+                                isFirst = false
                             } else {
-                                p.lineTo(px, py)
+                                path.lineTo(px, py)
                             }
                             lastPy = py
                         }
-                        p
-                    }
 
-                    // Draw smooth curve line
-                    drawPath(
-                        path = path,
-                        color = graphColor,
-                        style = Stroke(width = strokeWidth)
-                    )
+                        drawPath(
+                            path = path,
+                            color = graphColor,
+                            style = Stroke(width = strokeWidth)
+                        )
+                    }
 
                     // 4. TOUCH-TO-TRACE INTERACTION OVERLAYS
                     inspectedCanvasPos?.let { pos ->
-                        // Crosshair guide lines
                         val crosshairPathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
 
-                        // Vertical trace guide line (spanning full height)
                         drawLine(
                             color = traceLineColor.copy(alpha = 0.70f),
                             start = Offset(pos.x, 0f),
@@ -732,7 +613,6 @@ fun FunctionGraphView(
                             pathEffect = crosshairPathEffect
                         )
 
-                        // Horizontal trace guide line (spanning full width)
                         drawLine(
                             color = traceLineColor.copy(alpha = 0.70f),
                             start = Offset(0f, pos.y),
@@ -741,7 +621,6 @@ fun FunctionGraphView(
                             pathEffect = crosshairPathEffect
                         )
 
-                        // Glowing pulsing reticle bead on curve
                         drawCircle(
                             color = traceLineColor.copy(alpha = 0.28f),
                             radius = 11.dp.toPx(),
@@ -777,16 +656,7 @@ fun FunctionGraphView(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Column {
-                                val formulaText = when (selectedPreset) {
-                                    GraphPreset.SIN -> "sin(x)"
-                                    GraphPreset.COS -> "cos(x)"
-                                    GraphPreset.TAN -> "tan(x)"
-                                    GraphPreset.LN -> "ln(x)"
-                                    GraphPreset.LOG -> "log(x)"
-                                    GraphPreset.SQUARE -> "x²"
-                                    GraphPreset.SQRT -> "√x"
-                                    GraphPreset.CUSTOM -> "f(x)"
-                                }
+                                val formulaText = selectedPreset.label
                                 Text(
                                     text = "$formulaText @ [${angleMode.name}]",
                                     fontSize = 10.sp,
@@ -802,7 +672,6 @@ fun FunctionGraphView(
                                 )
                             }
 
-                            // Dismiss trace button
                             IconButton(
                                 onClick = {
                                     inspectedPoint = null
@@ -822,7 +691,6 @@ fun FunctionGraphView(
                     }
                 }
 
-                // Interactive Trace Hint (when not actively traced)
                 if (inspectedPoint == null) {
                     Box(
                         modifier = Modifier
@@ -843,7 +711,7 @@ fun FunctionGraphView(
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
-                                text = "Gedrückt halten & wischen zum Abtasten",
+                                text = "Wischen zum Abtasten",
                                 fontSize = 9.sp,
                                 color = labelColor
                             )
@@ -854,13 +722,12 @@ fun FunctionGraphView(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Graph Controls Footer Bar
+            // Graph Controls Footer Bar (Pan, Zoom, Reset)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Bounds Legend Text
                 Text(
                     text = String.format(Locale.US, "X: [%.1f .. %.1f]  Y: [%.1f .. %.1f]", xMin, xMax, yMin, yMax),
                     fontSize = 10.sp,
@@ -868,7 +735,6 @@ fun FunctionGraphView(
                     color = labelColor
                 )
 
-                // Pan, Zoom & Reset Action Buttons
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -879,7 +745,7 @@ fun FunctionGraphView(
                             val shift = (xMax - xMin) * 0.25
                             xMin -= shift
                             xMax -= shift
-                            onGestureLockChange(true) // AUTO-LOCK
+                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -898,7 +764,7 @@ fun FunctionGraphView(
                             val shift = (xMax - xMin) * 0.25
                             xMin += shift
                             xMax += shift
-                            onGestureLockChange(true) // AUTO-LOCK
+                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -922,7 +788,7 @@ fun FunctionGraphView(
                             val yCenter = (yMin + yMax) / 2
                             yMin = yCenter - yRange / 2
                             yMax = yCenter + yRange / 2
-                            onGestureLockChange(true) // AUTO-LOCK
+                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -946,7 +812,7 @@ fun FunctionGraphView(
                             val yCenter = (yMin + yMax) / 2
                             yMin = yCenter - yRange / 2
                             yMax = yCenter + yRange / 2
-                            onGestureLockChange(true) // AUTO-LOCK
+                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -954,21 +820,6 @@ fun FunctionGraphView(
                         Icon(
                             imageVector = Icons.Default.Remove,
                             contentDescription = "Zoom Out",
-                            tint = graphColor,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-
-                    // Export Image Button (⤓)
-                    IconButton(
-                        onClick = { saveGraphToGallery() },
-                        modifier = Modifier
-                            .size(28.dp)
-                            .testTag("btn_export_graph")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = "Graph als Bild speichern",
                             tint = graphColor,
                             modifier = Modifier.size(16.dp)
                         )

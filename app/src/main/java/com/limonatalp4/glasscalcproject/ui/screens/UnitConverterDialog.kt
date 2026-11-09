@@ -276,10 +276,13 @@ fun UnitConverterDialog(
                             onValueChange = { inputValue = it },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("input_converter_value"),
                             colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.35f),
                                 focusedBorderColor = primaryColor,
                                 unfocusedBorderColor = glassProps.buttonBorderColor,
                                 focusedTextColor = onSurfaceColor,

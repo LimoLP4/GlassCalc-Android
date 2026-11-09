@@ -206,7 +206,12 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         val curr = _expression.value
         if (curr.isNotEmpty()) {
             // If ends with function like "sin(", "cos(", "log(", remove the entire token
-            val funcs = listOf("sin(", "cos(", "tan(", "log(", "ln(", "³√(", "√(")
+            val funcs = listOf(
+                "arcsin(", "arccos(", "arctan(",
+                "sinh(", "cosh(", "tanh(",
+                "d/dx(", "der(", "int(", "abs(", "mod(", "log(", "ln(",
+                "sin(", "cos(", "tan(", "³√(", "√("
+            )
             var handled = false
             for (f in funcs) {
                 if (curr.endsWith(f)) {
