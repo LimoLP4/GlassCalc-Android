@@ -35,7 +35,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val _isScientificExpanded = MutableStateFlow(false)
     val isScientificExpanded: StateFlow<Boolean> = _isScientificExpanded.asStateFlow()
 
-    private val _isGraphLocked = MutableStateFlow(true)
+    private val _isGraphLocked = MutableStateFlow(false)
     val isGraphLocked: StateFlow<Boolean> = _isGraphLocked.asStateFlow()
 
     fun setGraphLocked(locked: Boolean) {

@@ -444,26 +444,10 @@ private fun PortraitCalculatorLayout(
         modifier = Modifier
             .fillMaxSize()
             .widthIn(max = 440.dp)
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-            .drawWithContent {
-                drawContent()
-                if (isScientificExpanded && scrollState.maxValue > 0) {
-                    val totalHeight = size.height
-                    val scrollFraction = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
-                    val indicatorHeight = (totalHeight * 0.22f).coerceAtLeast(32.dp.toPx())
-                    val indicatorY = scrollFraction * (totalHeight - indicatorHeight)
-                    drawRoundRect(
-                        color = scrollbarColor,
-                        topLeft = Offset(size.width - 2.dp.toPx(), indicatorY),
-                        size = Size(3.dp.toPx(), indicatorHeight),
-                        cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
-                    )
-                }
-            }
-            .verticalScroll(scrollState, enabled = isScientificExpanded),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Section: Display & Mode bar
+        // Fixed Top Section: Display, Mode bar & Sub-Tab Switcher
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -543,13 +527,101 @@ private fun PortraitCalculatorLayout(
                     }
                 }
             }
+
+            // Sub-Tab Switcher (Tastatur vs Graph) fixed at top when expanded
+            AnimatedVisibility(
+                visible = isScientificExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    GlassSurface(
+                        shape = CircleShape,
+                        borderWidth = 1.dp
+                    ) {
+                        Row(modifier = Modifier.padding(2.dp)) {
+                            // Keyboard Tab
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(if (scientificSubTab == 0) colorScheme.primary else Color.Transparent)
+                                    .clickable {
+                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                        scientificSubTab = 0
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                                    .testTag("tab_sci_keyboard"),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.GridOn,
+                                        contentDescription = null,
+                                        tint = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = "Tastatur",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface
+                                    )
+                                }
+                            }
+
+                            // Graph Tab
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(if (scientificSubTab == 1) colorScheme.primary else Color.Transparent)
+                                    .clickable {
+                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                        scientificSubTab = 1
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 6.dp)
+                                    .testTag("tab_sci_graph"),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ShowChart,
+                                        contentDescription = null,
+                                        tint = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = "Graph",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Middle/Bottom Section: Button Container
+        // Scrollable Lower Container: Keys & Graph Content ONLY
         BoxWithConstraints(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         ) {
             val availableWidth = maxWidth
             val mainButtonSize = ((availableWidth - 30.dp) / 4f).coerceIn(48.dp, 72.dp)
@@ -557,118 +629,45 @@ private fun PortraitCalculatorLayout(
 
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+                    .fillMaxSize()
+                    .drawWithContent {
+                        drawContent()
+                        if (isScientificExpanded && scientificSubTab == 0 && scrollState.maxValue > 0) {
+                            val totalHeight = size.height
+                            val scrollFraction = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
+                            val indicatorHeight = (totalHeight * 0.22f).coerceAtLeast(32.dp.toPx())
+                            val indicatorY = scrollFraction * (totalHeight - indicatorHeight)
+                            drawRoundRect(
+                                color = scrollbarColor,
+                                topLeft = Offset(size.width - 2.dp.toPx(), indicatorY),
+                                size = Size(3.dp.toPx(), indicatorHeight),
+                                cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
+                            )
+                        }
+                    }
+                    .verticalScroll(scrollState, enabled = isScientificExpanded),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Scientific functions grid or Graph view
-                AnimatedVisibility(
-                    visible = isScientificExpanded,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Sub-Tab Switcher (Tastatur vs Graph) with Haptic Feedback
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            GlassSurface(
-                                shape = CircleShape,
-                                borderWidth = 1.dp
-                            ) {
-                                Row(modifier = Modifier.padding(2.dp)) {
-                                    // Keyboard Tab
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(CircleShape)
-                                            .background(if (scientificSubTab == 0) colorScheme.primary else Color.Transparent)
-                                            .clickable {
-                                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
-                                                scientificSubTab = 0
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                                            .testTag("tab_sci_keyboard"),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.GridOn,
-                                                contentDescription = null,
-                                                tint = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface,
-                                                modifier = Modifier.size(14.dp)
-                                            )
-                                            Text(
-                                                text = "Tastatur",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface
-                                            )
-                                        }
-                                    }
-
-                                    // Graph Tab
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(CircleShape)
-                                            .background(if (scientificSubTab == 1) colorScheme.primary else Color.Transparent)
-                                            .clickable {
-                                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
-                                                scientificSubTab = 1
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                                            .testTag("tab_sci_graph"),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.ShowChart,
-                                                contentDescription = null,
-                                                tint = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface,
-                                                modifier = Modifier.size(14.dp)
-                                            )
-                                            Text(
-                                                text = "Graph",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (scientificSubTab == 0) {
-                            ScientificKeyboardGrid(
-                                viewModel = viewModel,
-                                glassState = glassState,
-                                buttonSize = sciButtonSize,
-                                spacing = 5.dp,
-                                onOpenConstants = onOpenConstants,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
-                            FunctionGraphView(
-                                expression = expression,
-                                angleMode = angleMode,
-                                isGestureLocked = isGestureLocked,
-                                onGestureLockChange = { viewModel.setGraphLocked(it) },
-                                glassState = glassState,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                if (isScientificExpanded) {
+                    if (scientificSubTab == 0) {
+                        ScientificKeyboardGrid(
+                            viewModel = viewModel,
+                            glassState = glassState,
+                            buttonSize = sciButtonSize,
+                            spacing = 5.dp,
+                            onOpenConstants = onOpenConstants,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        FunctionGraphView(
+                            expression = expression,
+                            angleMode = angleMode,
+                            isGestureLocked = isGestureLocked,
+                            onGestureLockChange = { viewModel.setGraphLocked(it) },
+                            glassState = glassState,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
@@ -681,7 +680,6 @@ private fun PortraitCalculatorLayout(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Extra safety spacer so scrolling leaves comfortable margin at bottom
                 if (isScientificExpanded) {
                     Spacer(modifier = Modifier.height(24.dp))
                 }

@@ -201,14 +201,12 @@ fun FunctionGraphView(
         yMax = 2.0
         inspectedPoint = null
         inspectedCanvasPos = null
-        onGestureLockChange(true)
     }
 
-    // Auto-Lock on Preset change
+    // Auto-reset inspected points on Preset change
     LaunchedEffect(selectedPreset) {
         inspectedPoint = null
         inspectedCanvasPos = null
-        onGestureLockChange(true)
     }
 
     // Asynchronous background computation of curve points (Dispatchers.Default)
@@ -273,7 +271,6 @@ fun FunctionGraphView(
         inspectedPoint = null
         inspectedCanvasPos = null
         isTracing = false
-        onGestureLockChange(true)
         triggerClickHaptic()
     }
 
@@ -387,17 +384,6 @@ fun FunctionGraphView(
                     .pointerInput(selectedPreset, xMin, xMax, yMin, yMax, angleMode, isGestureLocked) {
                         if (isGestureLocked) {
                             detectTapGestures(
-                                onPress = { offset ->
-                                    val width = size.width.toFloat()
-                                    val height = size.height.toFloat()
-                                    isTracing = true
-                                    updateTraceFromCache(offset, width, height)
-                                    if (hapticEnabled) {
-                                        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
-                                    }
-                                    tryAwaitRelease()
-                                    isTracing = false
-                                },
                                 onTap = { offset ->
                                     val width = size.width.toFloat()
                                     val height = size.height.toFloat()
@@ -768,7 +754,6 @@ fun FunctionGraphView(
                             val shift = (xMax - xMin) * 0.25
                             xMin -= shift
                             xMax -= shift
-                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -787,7 +772,6 @@ fun FunctionGraphView(
                             val shift = (xMax - xMin) * 0.25
                             xMin += shift
                             xMax += shift
-                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -811,7 +795,6 @@ fun FunctionGraphView(
                             val yCenter = (yMin + yMax) / 2
                             yMin = yCenter - yRange / 2
                             yMax = yCenter + yRange / 2
-                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -835,7 +818,6 @@ fun FunctionGraphView(
                             val yCenter = (yMin + yMax) / 2
                             yMin = yCenter - yRange / 2
                             yMax = yCenter + yRange / 2
-                            onGestureLockChange(true)
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
