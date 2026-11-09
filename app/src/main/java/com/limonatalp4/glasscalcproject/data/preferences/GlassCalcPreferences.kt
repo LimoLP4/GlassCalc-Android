@@ -107,7 +107,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] = enabled
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to save haptic feedback setting", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -117,7 +118,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = enabled
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to save auto result setting", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -127,7 +129,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.APP_THEME] = theme.name
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to save theme", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -137,7 +140,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.ANGLE_MODE] = mode.name
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to save angle mode", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -148,7 +152,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.SAVED_RESULT] = result
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to save calculation state", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -162,7 +167,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.CALCULATION_HISTORY] = serializeHistoryJson(trimmed)
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to add history item", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -172,7 +178,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.CALCULATION_HISTORY] = "[]"
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to clear history", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -183,7 +190,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.SIMULATED_API_LEVEL] = level
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to set simulated API", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -194,7 +202,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.DEFAULT_MASS_UNIT] = massUnit
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to set default units", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -212,7 +221,8 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = true
             }
         } catch (e: Exception) {
-            Log.e("GlassCalcPreferences", "Failed to reset preferences", e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
