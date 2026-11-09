@@ -98,11 +98,13 @@ fun SettingsDialog(
     simulatedApiEnabled: Boolean,
     simulatedApiLevel: Int,
     hapticFeedbackEnabled: Boolean,
+    autoResultEnabled: Boolean,
     lifecycleStatus: String,
     onSelectTheme: (AppTheme) -> Unit,
     onSelectAngleMode: (AngleMode) -> Unit,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
     onToggleHapticFeedback: (Boolean) -> Unit,
+    onToggleAutoResult: (Boolean) -> Unit,
     onSimulateBackground: () -> Unit,
     onTestCrashProtection: () -> Unit,
     onResetApp: () -> Unit,
@@ -714,6 +716,49 @@ fun SettingsDialog(
                                             uncheckedTrackColor = colorScheme.surfaceVariant
                                         ),
                                         modifier = Modifier.testTag("switch_haptic_feedback")
+                                    )
+                                }
+                            }
+
+                            // Auto Result Switch
+                            GlassSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(18.dp),
+                                customBgColor = colorScheme.surfaceVariant
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "Automatisches Ergebnis",
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "Ergebnis live bei Eingabe berechnen",
+                                            fontSize = 12.sp,
+                                            color = colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Switch(
+                                        checked = autoResultEnabled,
+                                        onCheckedChange = {
+                                            triggerHaptic()
+                                            onToggleAutoResult(it)
+                                        },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = colorScheme.onPrimary,
+                                            checkedTrackColor = colorScheme.primary,
+                                            uncheckedThumbColor = colorScheme.outline,
+                                            uncheckedTrackColor = colorScheme.surfaceVariant
+                                        ),
+                                        modifier = Modifier.testTag("switch_auto_result")
                                     )
                                 }
                             }

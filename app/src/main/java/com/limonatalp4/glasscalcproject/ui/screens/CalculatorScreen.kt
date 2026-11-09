@@ -126,6 +126,7 @@ fun CalculatorScreen(
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
     val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
     val hapticFeedbackEnabled by viewModel.hapticFeedbackEnabled.collectAsState()
+    val autoResultEnabled by viewModel.isAutoResultEnabled.collectAsState()
     val lifecycleStatus by viewModel.lifecycleStatus.collectAsState()
 
     var showHistorySheet by remember { mutableStateOf(false) }
@@ -382,10 +383,12 @@ fun CalculatorScreen(
                 },
                 onSetSimulatedApi = { enabled, level -> viewModel.setSimulatedApi(enabled, level) },
                 onToggleHapticFeedback = { enabled -> viewModel.setHapticFeedbackEnabled(enabled) },
+                onToggleAutoResult = { enabled -> viewModel.setAutoResultEnabled(enabled) },
                 onSimulateBackground = { viewModel.simulateBackgroundSave() },
                 onTestCrashProtection = { viewModel.testCrashProtection() },
                 onResetApp = { viewModel.resetApp() },
-                onDismiss = { showSettingsDialog = false }
+                onDismiss = { showSettingsDialog = false },
+                autoResultEnabled = autoResultEnabled
             )
         }
 

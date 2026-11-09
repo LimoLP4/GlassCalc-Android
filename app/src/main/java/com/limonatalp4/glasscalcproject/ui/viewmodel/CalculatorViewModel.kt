@@ -62,6 +62,16 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     val lifecycleStatus: StateFlow<String> = AppLifecycleObserver.lastLifecycleEvent
 
+    private val _isAutoResultEnabled = preferences.autoResultEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+    val isAutoResultEnabled: StateFlow<Boolean> = _isAutoResultEnabled
+
+    fun setAutoResultEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferences.setAutoResultEnabled(enabled)
+        }
+    }
+
     fun setHapticFeedbackEnabled(enabled: Boolean) {
         viewModelScope.launch {
             preferences.setHapticFeedbackEnabled(enabled)
@@ -278,7 +288,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
         // Live preview only if expression has operators/functions
         val hasOp = expr.any { it in "+-*÷×/^%!scl" }
-        if (hasOp) {
+        if (hasOp && _isAutoResultEnabled.value) {
             viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
                 when (val eval = evaluator.evaluate(expr, angleMode.value)) {
                     is EvaluationResult.Success -> {

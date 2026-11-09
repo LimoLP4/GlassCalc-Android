@@ -35,6 +35,7 @@ class GlassCalcPreferences(private val context: Context) {
         val DEFAULT_LENGTH_UNIT = stringPreferencesKey("default_length_unit")
         val DEFAULT_MASS_UNIT = stringPreferencesKey("default_mass_unit")
         val HAPTIC_FEEDBACK_ENABLED = booleanPreferencesKey("haptic_feedback_enabled")
+        val AUTO_RESULT_ENABLED = booleanPreferencesKey("auto_result_enabled")
     }
 
     private val safeDataFlow: Flow<Preferences> = context.dataStore.data
@@ -96,6 +97,10 @@ class GlassCalcPreferences(private val context: Context) {
         prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] ?: true
     }
 
+    val autoResultEnabledFlow: Flow<Boolean> = safeDataFlow.map { prefs ->
+        prefs[PreferencesKeys.AUTO_RESULT_ENABLED] ?: true
+    }
+
     suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
         try {
             context.dataStore.edit { prefs ->
@@ -103,6 +108,16 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             Log.e("GlassCalcPreferences", "Failed to save haptic feedback setting", e)
+        }
+    }
+
+    suspend fun setAutoResultEnabled(enabled: Boolean) {
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = enabled
+            }
+        } catch (e: Exception) {
+            Log.e("GlassCalcPreferences", "Failed to save auto result setting", e)
         }
     }
 
@@ -194,6 +209,7 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.DEFAULT_LENGTH_UNIT] = "m"
                 prefs[PreferencesKeys.DEFAULT_MASS_UNIT] = "kg"
                 prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] = true
+                prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = true
             }
         } catch (e: Exception) {
             Log.e("GlassCalcPreferences", "Failed to reset preferences", e)
