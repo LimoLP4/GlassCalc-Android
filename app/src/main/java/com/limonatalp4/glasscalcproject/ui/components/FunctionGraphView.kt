@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -384,15 +385,37 @@ fun FunctionGraphView(
                     .background(colorScheme.surfaceContainerLow)
                     .border(1.dp, gridColor, RoundedCornerShape(16.dp))
                     .pointerInput(selectedPreset, xMin, xMax, yMin, yMax, angleMode, isGestureLocked) {
-                        detectDragGestures(
-                            onDragStart = { isTracing = true },
-                            onDragEnd = { isTracing = false },
-                            onDragCancel = { isTracing = false },
-                            onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                                val width = size.width.toFloat()
-                                val height = size.height.toFloat()
+                        if (isGestureLocked) {
+                            detectTapGestures(
+                                onPress = { offset ->
+                                    val width = size.width.toFloat()
+                                    val height = size.height.toFloat()
+                                    isTracing = true
+                                    updateTraceFromCache(offset, width, height)
+                                    if (hapticEnabled) {
+                                        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
+                                    }
+                                    tryAwaitRelease()
+                                    isTracing = false
+                                },
+                                onTap = { offset ->
+                                    val width = size.width.toFloat()
+                                    val height = size.height.toFloat()
+                                    updateTraceFromCache(offset, width, height)
+                                    if (hapticEnabled) {
+                                        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
+                                    }
+                                }
+                            )
+                        } else {
+                            detectDragGestures(
+                                onDragStart = { isTracing = true },
+                                onDragEnd = { isTracing = false },
+                                onDragCancel = { isTracing = false },
+                                onDrag = { change: PointerInputChange, dragAmount: Offset ->
+                                    val width = size.width.toFloat()
+                                    val height = size.height.toFloat()
 
-                                if (!isGestureLocked) {
                                     // 2D Panning when unlocked
                                     val dx = -(dragAmount.x / width) * (xMax - xMin)
                                     val dy = (dragAmount.y / height) * (yMax - yMin)
@@ -401,21 +424,21 @@ fun FunctionGraphView(
                                     xMax += dx
                                     yMin += dy
                                     yMax += dy
+
+                                    // Instant O(1) trace info from cached points
+                                    updateTraceFromCache(change.position, width, height)
+
+                                    // Throttled Haptic Feedback (80ms)
+                                    val now = System.currentTimeMillis()
+                                    if (hapticEnabled && now - lastHapticTime > 80L) {
+                                        lastHapticTime = now
+                                        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
+                                    }
+
+                                    change.consume()
                                 }
-
-                                // Instant O(1) trace info from cached points
-                                updateTraceFromCache(change.position, width, height)
-
-                                // Throttled Haptic Feedback (80ms)
-                                val now = System.currentTimeMillis()
-                                if (hapticEnabled && now - lastHapticTime > 80L) {
-                                    lastHapticTime = now
-                                    HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
-                                }
-
-                                change.consume()
-                            }
-                        )
+                            )
+                        }
                     }
                     .testTag("graph_canvas_container")
             ) {

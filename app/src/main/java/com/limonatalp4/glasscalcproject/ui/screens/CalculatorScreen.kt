@@ -438,14 +438,32 @@ private fun PortraitCalculatorLayout(
     var isGestureLocked by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
+    val scrollbarColor = colorScheme.primary.copy(alpha = 0.45f)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .widthIn(max = 440.dp)
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .drawWithContent {
+                drawContent()
+                if (isScientificExpanded && scrollState.maxValue > 0) {
+                    val totalHeight = size.height
+                    val scrollFraction = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
+                    val indicatorHeight = (totalHeight * 0.22f).coerceAtLeast(32.dp.toPx())
+                    val indicatorY = scrollFraction * (totalHeight - indicatorHeight)
+                    drawRoundRect(
+                        color = scrollbarColor,
+                        topLeft = Offset(size.width - 2.dp.toPx(), indicatorY),
+                        size = Size(3.dp.toPx(), indicatorHeight),
+                        cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
+                    )
+                }
+            }
+            .verticalScroll(scrollState, enabled = isScientificExpanded),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Section: Fixed Display & Mode bar
+        // Top Section: Display & Mode bar
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -529,37 +547,18 @@ private fun PortraitCalculatorLayout(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Middle/Bottom Section: Scrollable Button Container with Scrollbar Indicator
+        // Middle/Bottom Section: Button Container
         BoxWithConstraints(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             val availableWidth = maxWidth
             val mainButtonSize = ((availableWidth - 30.dp) / 4f).coerceIn(48.dp, 72.dp)
             val sciButtonSize = ((availableWidth - 24.dp) / 5f).coerceIn(36.dp, 60.dp)
-            val scrollbarColor = colorScheme.primary.copy(alpha = 0.45f)
 
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .drawWithContent {
-                        drawContent()
-                        if (isScientificExpanded && scrollState.maxValue > 0) {
-                            val totalHeight = size.height
-                            val scrollFraction = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
-                            val indicatorHeight = (totalHeight * 0.22f).coerceAtLeast(32.dp.toPx())
-                            val indicatorY = scrollFraction * (totalHeight - indicatorHeight)
-                            drawRoundRect(
-                                color = scrollbarColor,
-                                topLeft = Offset(size.width - 4.dp.toPx(), indicatorY),
-                                size = Size(3.dp.toPx(), indicatorHeight),
-                                cornerRadius = CornerRadius(1.5.dp.toPx(), 1.5.dp.toPx())
-                            )
-                        }
-                    }
-                    .verticalScroll(scrollState, enabled = !isGestureLocked)
-                    .padding(bottom = 24.dp), // Generous padding so row 5 is never cut off
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -733,7 +732,7 @@ private fun LandscapeCalculatorLayout(
                     .weight(1f)
                     .fillMaxHeight()
                     .padding(end = 12.dp)
-                    .verticalScroll(rememberScrollState(), enabled = !isGestureLocked),
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
