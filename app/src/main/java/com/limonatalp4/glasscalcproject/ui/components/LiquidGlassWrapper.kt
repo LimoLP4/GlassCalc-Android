@@ -3,7 +3,6 @@ package com.limonatalp4.glasscalcproject.ui.components
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -46,13 +45,11 @@ fun isBlurHardwareSupported(): Boolean {
             Build.PRODUCT.contains("sdk_gphone")
 
     if (isEmulator) {
-        Log.i("LiquidGlassWrapper", "Emulator detected: using safe smooth glass fallback to prevent RenderThread SIGSEGV.")
         return false
     }
 
     // 3. Android 17 / API 36+ specific guard (as requested for Samsung S25 / Android 17)
     if (Build.VERSION.SDK_INT >= 36) {
-        Log.i("LiquidGlassWrapper", "Android 17+ detected: using safe glass fallback.")
         return false
     }
 
@@ -60,7 +57,6 @@ fun isBlurHardwareSupported(): Boolean {
         val testEffect = RenderEffect.createBlurEffect(10f, 10f, Shader.TileMode.CLAMP)
         testEffect != null
     } catch (t: Throwable) {
-        Log.w("LiquidGlassWrapper", "RenderEffect hardware blur is not supported: ${t.message}")
         false
     }
 }
@@ -93,7 +89,6 @@ fun Modifier.safeLiquidGlass(
     return try {
         this.liquidGlass(state = state, shape = shape)
     } catch (t: Throwable) {
-        Log.w("LiquidGlassWrapper", "liquidGlass modifier exception caught: ${t.message}")
         this
     }
 }

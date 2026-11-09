@@ -2,7 +2,6 @@ package com.limonatalp4.glasscalcproject
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,16 +20,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        Log.i(
-            "MainActivity",
-            "Starting GlassCalc on ${Build.MANUFACTURER} ${Build.MODEL} (SDK: ${Build.VERSION.SDK_INT}, ABI: ${Build.SUPPORTED_ABIS.joinToString()})"
-        )
-
-        try {
-            enableEdgeToEdge()
-        } catch (t: Throwable) {
-            Log.w("MainActivity", "enableEdgeToEdge fallback: ${t.message}")
-        }
+        enableEdgeToEdge()
 
         setContent {
             GlassCalcAppRoot()

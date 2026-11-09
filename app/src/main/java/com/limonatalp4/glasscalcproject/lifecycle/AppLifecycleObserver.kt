@@ -1,6 +1,5 @@
 package com.limonatalp4.glasscalcproject.lifecycle
 
-import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -27,9 +26,8 @@ object AppLifecycleObserver : DefaultLifecycleObserver {
             try {
                 ProcessLifecycleOwner.get().lifecycle.addObserver(this)
                 isRegistered = true
-                Log.d("AppLifecycleObserver", "ProcessLifecycleOwner registered successfully.")
             } catch (t: Throwable) {
-                Log.w("AppLifecycleObserver", "Could not register ProcessLifecycleOwner, fallback active: ${t.message}")
+                // Ignore registration errors in release
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.limonatalp4.glasscalcproject.data.preferences
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -41,7 +40,6 @@ class GlassCalcPreferences(private val context: Context) {
     private val safeDataFlow: Flow<Preferences> = context.dataStore.data
         .catch { exception ->
             if (exception is IOException) {
-                Log.e("GlassCalcPreferences", "Error reading DataStore preferences", exception)
                 emit(emptyPreferences())
             } else {
                 throw exception
@@ -108,7 +106,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -119,7 +116,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -130,7 +126,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -141,7 +136,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -153,7 +147,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -168,7 +161,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -179,7 +171,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -191,7 +182,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -203,7 +193,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 
@@ -222,7 +211,6 @@ class GlassCalcPreferences(private val context: Context) {
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            Log.e("GlassCalcPreferences", "Failed to save operation", e)
         }
     }
 

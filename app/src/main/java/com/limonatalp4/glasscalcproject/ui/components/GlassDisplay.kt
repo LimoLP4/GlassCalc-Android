@@ -3,7 +3,6 @@ package com.limonatalp4.glasscalcproject.ui.components
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -136,7 +135,7 @@ private fun GlassDisplayContent(
                     isCopyFlashed = true
                 }
             } catch (e: Exception) {
-                Log.e("GlassDisplay", "Failed to copy to clipboard", e)
+                // Ignore silent failures for clipboard in release
             }
         }
     }
