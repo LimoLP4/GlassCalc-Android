@@ -935,8 +935,8 @@ private fun ScientificKeyboardGrid(
                 viewModel.onConstant("π")
             }
             GlassCalculatorButton(
-                text = "Konst",
-                type = ButtonType.OPERATOR,
+                text = "Konst.",
+                type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_constants",
                 contentDesc = "Physikalische und mathematische Konstanten",

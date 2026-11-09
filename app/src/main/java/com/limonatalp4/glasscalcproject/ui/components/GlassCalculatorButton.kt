@@ -233,7 +233,13 @@ fun GlassCalculatorButton(
                 )
         )
 
-        val calculatedFontSize = (maxHeight.value * 0.36f).coerceIn(14f, 32f).sp
+        val baseFontSize = (maxHeight.value * 0.36f).coerceIn(14f, 32f)
+        val calculatedFontSize = when {
+            text.length > 4 -> (baseFontSize * 0.65f).coerceAtLeast(10f).sp
+            text.length > 3 -> (baseFontSize * 0.78f).coerceAtLeast(11f).sp
+            text.length > 2 -> (baseFontSize * 0.88f).coerceAtLeast(12f).sp
+            else -> baseFontSize.sp
+        }
 
         Text(
             text = text,
@@ -241,7 +247,9 @@ fun GlassCalculatorButton(
             fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR) FontWeight.Bold else FontWeight.Medium,
             color = if (isLongPressTriggered) Color.White else textColor,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 4.dp)
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.padding(horizontal = 2.dp)
         )
     }
 }
