@@ -355,7 +355,7 @@ fun FunctionGraphView(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // LOCK BUTTON (Blocks background scroll & system gesture interference)
+                // LOCK BUTTON (Locks graph 2D panning/zooming gesture on canvas)
                 IconButton(
                     onClick = {
                         onGestureLockChange(!isGestureLocked)
@@ -367,7 +367,7 @@ fun FunctionGraphView(
                 ) {
                     Icon(
                         imageVector = if (isGestureLocked) Icons.Default.Lock else Icons.Default.LockOpen,
-                        contentDescription = if (isGestureLocked) "Gesten freigeben" else "Hintergrund sperren",
+                        contentDescription = if (isGestureLocked) "Graph-Gesten entsperren" else "Graph-Gesten sperren",
                         tint = if (isGestureLocked) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.4f),
                         modifier = Modifier.size(20.dp)
                     )

@@ -435,7 +435,7 @@ private fun PortraitCalculatorLayout(
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val expression by viewModel.expression.collectAsState()
     var scientificSubTab by remember { mutableIntStateOf(0) }
-    var isGestureLocked by remember { mutableStateOf(true) }
+    val isGestureLocked by viewModel.isGraphLocked.collectAsState()
     val scrollState = rememberScrollState()
 
     val scrollbarColor = colorScheme.primary.copy(alpha = 0.45f)
@@ -664,7 +664,7 @@ private fun PortraitCalculatorLayout(
                                 expression = expression,
                                 angleMode = angleMode,
                                 isGestureLocked = isGestureLocked,
-                                onGestureLockChange = { isGestureLocked = it },
+                                onGestureLockChange = { viewModel.setGraphLocked(it) },
                                 glassState = glassState,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -703,7 +703,7 @@ private fun LandscapeCalculatorLayout(
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val expression by viewModel.expression.collectAsState()
     var scientificSubTab by remember { mutableIntStateOf(0) }
-    var isGestureLocked by remember { mutableStateOf(true) }
+    val isGestureLocked by viewModel.isGraphLocked.collectAsState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -865,7 +865,7 @@ private fun LandscapeCalculatorLayout(
                         expression = expression,
                         angleMode = angleMode,
                         isGestureLocked = isGestureLocked,
-                        onGestureLockChange = { isGestureLocked = it },
+                        onGestureLockChange = { viewModel.setGraphLocked(it) },
                         glassState = glassState,
                         modifier = Modifier.fillMaxWidth()
                     )
