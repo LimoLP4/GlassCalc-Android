@@ -595,7 +595,6 @@ private fun LandscapeCalculatorLayout(
     val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val expression by viewModel.expression.collectAsState()
-    var scientificSubTab by remember { mutableIntStateOf(0) }
     val isGestureLocked by viewModel.isGraphLocked.collectAsState()
 
     BoxWithConstraints(
@@ -604,63 +603,64 @@ private fun LandscapeCalculatorLayout(
             .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
         val availableHeight = maxHeight
-        val availableWidth = maxWidth
-
-        val maxButtonSizeFromHeight = ((availableHeight - 24.dp) / 5.2f).coerceIn(36.dp, 60.dp)
-        val mainKeypadWidth = maxButtonSizeFromHeight * 4 + 20.dp
-        val leftColumnAvailableWidth = availableWidth - mainKeypadWidth - 24.dp
-        val maxSciButtonSizeFromWidth = ((leftColumnAvailableWidth - 16.dp) / 5f).coerceAtLeast(30.dp)
-
-        val uniformButtonSize = minOf(maxButtonSizeFromHeight, maxSciButtonSizeFromWidth)
-        val finalKeypadWidth = uniformButtonSize * 4 + 20.dp
+        val buttonSize = (availableHeight / 7f).coerceIn(30.dp, 50.dp)
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Left Column: Compact Display + scrollable Scientific keys / Graph
+            // LEFT: Display + Main Keypad
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .padding(end = 12.dp)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 GlassDisplay(
                     expressionFlow = viewModel.expression,
                     resultFlow = viewModel.result,
                     errorMessageFlow = viewModel.errorMessage,
                     angleMode = angleMode,
-                    isScientificExpanded = true,
+                    isScientificExpanded = false,
                     isCompact = true,
                     glassState = glassState
                 )
+                MainKeyboardGrid(
+                    viewModel = viewModel,
+                    glassState = glassState,
+                    buttonSize = buttonSize,
+                    spacing = 4.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
+            // RIGHT: Scientific Keypad
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 // DEG/RAD Bar
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 2.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    val localViewInternal = LocalView.current
                     GlassSurface(
-                        modifier = Modifier.testTag("btn_toggle_angle_mode_tablet"),
                         shape = CircleShape,
                         borderWidth = 1.dp
                     ) {
                         IconButton(
                             onClick = {
-                                HapticUtil.performAppHaptic(localContext, localViewInternal, hapticFeedbackEnabled)
+                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
                                 viewModel.toggleAngleMode()
                             },
-                            modifier = Modifier.size(width = 88.dp, height = 30.dp)
+                            modifier = Modifier.size(width = 80.dp, height = 30.dp)
                         ) {
                             Text(
-                                text = if (angleMode == com.limonatalp4.glasscalcproject.data.model.AngleMode.DEG) "DEG (Grad)" else "RAD (Bogen)",
+                                text = if (angleMode == com.limonatalp4.glasscalcproject.data.model.AngleMode.DEG) "DEG" else "RAD",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.primary
@@ -668,23 +668,12 @@ private fun LandscapeCalculatorLayout(
                         }
                     }
                 }
-
-                // No sub-tab switcher
-            }
-
-            // Right Column: Fixed Main 4x5 Keypad
-            Box(
-                modifier = Modifier
-                    .width(finalKeypadWidth)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                MainKeyboardGrid(
+                ScientificKeyboardGrid(
                     viewModel = viewModel,
                     glassState = glassState,
-                    buttonSize = uniformButtonSize,
-                    spacing = 5.dp,
-                    modifier = Modifier.fillMaxWidth()
+                    buttonSize = buttonSize,
+                    spacing = 4.dp,
+                    onOpenConstants = onOpenConstants
                 )
             }
         }
