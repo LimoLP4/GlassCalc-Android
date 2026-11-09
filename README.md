@@ -4,12 +4,13 @@
 
 > ⚠️ **Note:** This project is currently in an experimental phase. The core code was generated with the assistance of AI (Google AI Studio) and has been iteratively curated, tested, and refined by the developer.
 
-## 🚀 Features (Version 1.1)
+## 🚀 Features (Version 1.2)
 
 *   **Liquid Glass UI:** Beautifully blurred, semi-transparent buttons and panels with dynamic Material You colors.
-*   **Advanced Scientific Mode:** Toggleable scientific keypad including trigonometry (sin, cos, tan), inverse functions (arcsin, arccos, arctan), logarithms, roots, powers, derivatives (d/dx), and integrals (∫).
+*   **Refined App Icon:** A minimalist, custom-designed "GC" monogram with a liquid glass aesthetic, fully compatible with Material You (Monet) adaptive icons.
+*   **Advanced Scientific Mode:** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, derivatives (d/dx), and integrals (∫).
 *   **Physical & Mathematical Constants:** A dedicated menu for constants like π, e, c (speed of light), g (gravity), h (Planck), G (gravitational), Na (Avogadro), and k (Boltzmann).
-*   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system. Includes a lock feature to freeze the graph view.
+*   **Interactive Graphing:** Plot mathematical functions dynamically. Includes a lock feature to freeze the graph view without blocking the rest of the UI.
 *   **Material You (Dynamic Colors):** Fully supports Android 12+ dynamic theming, adapting the app's colors to your device's wallpaper and system theme.
 *   **Multiple Themes:** Includes Automatic (System), White Mode, Dark Mode, and a true **AMOLED Dark Mode** (pure black for battery saving).
 *   **Unit Conversion:** Seamlessly convert between Metric and US/Imperial units (m↔ft, cm↔in, kg↔lb, etc.) with a sleek, rounded interface.
@@ -17,7 +18,7 @@
 *   **Adaptive Layout:** Optimized for both smartphones and tablets, in portrait and landscape orientations.
 *   **Haptic Feedback:** Tactile response on button presses, graph interactions, sliders, and switches (with OEM-specific fallbacks).
 *   **Information & Licensing Hub:** A dedicated "Information" tab to view the GitHub repository, the app's license, and third-party licenses.
-*   **Developer Options:** Built-in debug menu for testing API levels, layout sizes, and cache management.
+*   **Developer Options:** Built-in debug menu for testing API levels, layout sizes, and simulating API-specific feature availability.
 
 ## 🌍 Localization / Sprache
 
@@ -29,7 +30,7 @@ Please note that the current version of GlassCalc is available **exclusively in 
 ## 🛠️ Tech Stack & App Information
 
 *   **Package Name / Application ID:** `com.limonatalp4.glasscalcproject`
-*   **Version:** 1.1
+*   **Version:** 1.2 (VersionCode: 3)
 *   **Language:** Kotlin
 *   **UI Framework:** Jetpack Compose (Material 3)
 *   **Architecture:** MVVM (Model-View-ViewModel)
