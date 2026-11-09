@@ -208,9 +208,9 @@ fun UnitConverterDialog(
 
                 conversionsInCategory.forEachIndexed { idx, pair ->
                     val isSelected = selectedPairIndex == idx
-                    val pairBg = if (isSelected) primaryColor.copy(alpha = 0.15f) else null
+                    val pairBg = if (isSelected) primaryContainerColor else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     val pairBorder = if (isSelected) primaryColor else glassProps.buttonBorderColor
-                    val pairTextCol = if (isSelected) primaryColor else onSurfaceColor
+                    val pairTextCol = if (isSelected) onPrimaryContainerColor else onSurfaceColor
 
                     GlassSurface(
                         modifier = Modifier
@@ -221,16 +221,17 @@ fun UnitConverterDialog(
                                 selectedPairIndex = idx
                             }
                             .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(50.dp),
+                        borderWidth = if (isSelected) 1.5.dp else 1.dp,
                         customBorderColor = pairBorder,
                         customBgColor = pairBg
                     ) {
                         Text(
                             text = pair.label,
                             fontSize = 14.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = pairTextCol,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
                         )
                     }
                 }
