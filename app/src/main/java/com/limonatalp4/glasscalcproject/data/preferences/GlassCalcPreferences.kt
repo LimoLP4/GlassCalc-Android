@@ -143,7 +143,7 @@ class GlassCalcPreferences(private val context: Context) {
                 val raw = prefs[PreferencesKeys.CALCULATION_HISTORY] ?: "[]"
                 val currentList = parseHistoryJson(raw).toMutableList()
                 currentList.add(0, item)
-                val trimmed = currentList.take(10)
+                val trimmed = currentList.take(20)
                 prefs[PreferencesKeys.CALCULATION_HISTORY] = serializeHistoryJson(trimmed)
             }
         } catch (e: Exception) {
