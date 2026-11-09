@@ -295,7 +295,7 @@ fun CalculatorScreen(
                                     color = onSurfaceColor
                                 )
                                 Text(
-                                    text = "v1.1 • Android 8-17 Ready",
+                                    text = "v1.2 • Android 8-17 Ready",
                                     fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = primaryTint,

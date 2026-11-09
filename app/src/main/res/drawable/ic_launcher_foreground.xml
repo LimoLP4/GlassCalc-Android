@@ -5,42 +5,40 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Subtle Outer Glass Glow Circle -->
+    <!-- Subtle Glass Specular Reflection Arc -->
     <path
-        android:fillColor="#1500E5FF"
-        android:pathData="M54,22A32,32 0 1,1 53.9,22Z" />
+        android:fillColor="#26FFFFFF"
+        android:pathData="M 42,27 L 66,27 C 75,27 81,33 81,42 L 81,48 C 65,40 43,40 27,48 L 27,42 C 27,33 33,27 42,27 Z" />
 
-    <!-- Sleek Rounded Liquid Glass Main Panel Frame -->
+    <!-- Outer Liquid Glass Lens Frame (Rounded Squircle) -->
     <path
-        android:fillColor="#20FFFFFF"
-        android:strokeColor="#60FFFFFF"
-        android:strokeWidth="1.5"
-        android:pathData="M34,26h40c5.52,0 10,4.48 10,10v36c0,5.52 -4.48,10 -10,10H34c-5.52,0 -10,-4.48 -10,-10V36c0,-5.52 4.48,-10 10,-10z" />
+        android:fillColor="#1AFFFFFF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 42,27 L 66,27 C 75,27 81,33 81,42 L 81,66 C 81,75 75,81 66,81 L 42,81 C 33,81 27,75 27,66 L 27,42 C 27,33 33,27 42,27 Z" />
 
-    <!-- Minimalist Display Glass Window at Top -->
+    <!-- Smooth Flowing "G" Monogram -->
     <path
-        android:fillColor="#00E5FF"
-        android:pathData="M30,32h48c2.2,0 4,1.8 4,4v10c0,2.2 -1.8,4 -4,4H30c-2.2,0 -4,-1.8 -4,-4V36c0,-2.2 1.8,-4 4,-4z" />
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 50,44 C 41,43 36,48 36,54 C 36,60 41,64 47,64 C 51,64 51,64 51,54 L 46,54" />
 
-    <!-- Display Digit Accent Line -->
+    <!-- Smooth Flowing "C" Monogram -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 71,44 C 62,43 57,48 57,54 C 57,60 62,64 71,64" />
+
+    <!-- Harmonious Glass Accent Dot -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M60,37h12v2H60zM48,37h8v2H48zM64,43h8v2H64z" />
-
-    <!-- Minimalist Key Matrix Dots (Row 1: Functions) -->
-    <path android:fillColor="#00E5FF" android:pathData="M35,56a3.5,3.5 0 1,1 0.01,0" />
-    <path android:fillColor="#FFFFFF" android:pathData="M48,56a3.5,3.5 0 1,1 0.01,0" />
-    <path android:fillColor="#FFFFFF" android:pathData="M61,56a3.5,3.5 0 1,1 0.01,0" />
-    <path android:fillColor="#00E5FF" android:pathData="M73,56a3.5,3.5 0 1,1 0.01,0" />
-
-    <!-- Minimalist Key Matrix Dots (Row 2: Digits & Accent) -->
-    <path android:fillColor="#FFFFFF" android:pathData="M35,67a3.5,3.5 0 1,1 0.01,0" />
-    <path android:fillColor="#FFFFFF" android:pathData="M48,67a3.5,3.5 0 1,1 0.01,0" />
-    <path android:fillColor="#FFFFFF" android:pathData="M61,67a3.5,3.5 0 1,1 0.01,0" />
-    <path android:fillColor="#00E5FF" android:pathData="M73,67a3.5,3.5 0 1,1 0.01,0" />
-
-    <!-- Specular Glass Highlight Arc -->
-    <path
-        android:fillColor="#40FFFFFF"
-        android:pathData="M34,26h40c5.52,0 10,4.48 10,10v4c-12,-6 -38,-6 -50,0v-4c0,-5.52 4.48,-10 10,-10z" />
+        android:pathData="M 54,35 A 2.5,2.5 0 1,1 53.9,35 Z" />
 </vector>
