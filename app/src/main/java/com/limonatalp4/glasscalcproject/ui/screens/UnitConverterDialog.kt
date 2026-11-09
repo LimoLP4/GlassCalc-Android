@@ -18,7 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.BasicAlertDialog
@@ -149,47 +156,74 @@ fun UnitConverterDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Pill-Design Segmented Control for Categories
-                Row(
+                // Pill-Design Segmented Control for Categories (matching SettingsDialog design)
+                val categoryTabs = listOf(
+                    Triple(UnitCategory.LENGTH, Icons.Default.Straighten, "Länge"),
+                    Triple(UnitCategory.MASS, Icons.Default.FitnessCenter, "Masse"),
+                    Triple(UnitCategory.TEMPERATURE, Icons.Default.Thermostat, "Temp."),
+                    Triple(UnitCategory.VOLUME, Icons.Default.Opacity, "Volumen")
+                )
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
                         .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        .padding(4.dp)
                 ) {
-                    categories.forEachIndexed { index, cat ->
-                        val isSelected = selectedCategoryIndex == index
-                        val tabBg by animateColorAsState(
-                            targetValue = if (isSelected) primaryContainerColor else Color.Transparent,
-                            animationSpec = tween(durationMillis = 200),
-                            label = "cat_tab_bg_$index"
-                        )
-                        val tabTint = if (isSelected) onPrimaryContainerColor else onSurfaceColor.copy(alpha = 0.75f)
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(tabBg)
-                                .clickable {
-                                    triggerHaptic()
-                                    selectedCategoryIndex = index
-                                    selectedPairIndex = 0
-                                }
-                                .padding(vertical = 10.dp, horizontal = 4.dp)
-                                .testTag("tab_cat_${cat.name}"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = cat.displayName,
-                                fontSize = 11.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = tabTint,
-                                maxLines = 1,
-                                softWrap = false,
-                                textAlign = TextAlign.Center
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        categoryTabs.forEachIndexed { index, (cat, icon, shortLabel) ->
+                            val isSelected = selectedCategoryIndex == index
+                            val tabBg by animateColorAsState(
+                                targetValue = if (isSelected) primaryContainerColor else Color.Transparent,
+                                animationSpec = tween(durationMillis = 220),
+                                label = "cat_tab_bg_$index"
                             )
+                            val tabTint by animateColorAsState(
+                                targetValue = if (isSelected) onPrimaryContainerColor else colorScheme.onSurfaceVariant,
+                                animationSpec = tween(durationMillis = 220),
+                                label = "cat_tab_tint_$index"
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(50.dp))
+                                    .background(tabBg)
+                                    .clickable {
+                                        triggerHaptic()
+                                        selectedCategoryIndex = index
+                                        selectedPairIndex = 0
+                                    }
+                                    .padding(vertical = 9.dp, horizontal = 2.dp)
+                                    .testTag("tab_cat_${cat.name}"),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        tint = tabTint,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = shortLabel,
+                                        fontSize = 11.5.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = tabTint,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -171,61 +172,71 @@ fun SettingsDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // 4-Tab Segmented Control (Pill-Design)
-                Row(
+                val tabs = listOf(
+                    Triple(0, Icons.Default.Palette, "Design"),
+                    Triple(1, Icons.Default.Straighten, "Einheiten"),
+                    Triple(2, Icons.Default.DeveloperMode, "Entwickler"),
+                    Triple(3, Icons.Default.Info, "Infos")
+                )
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
                         .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        .padding(4.dp)
                 ) {
-                    val tabs = listOf(
-                        Triple(0, Icons.Default.Palette, "Design"),
-                        Triple(1, Icons.Default.Straighten, "Einheiten"),
-                        Triple(2, Icons.Default.DeveloperMode, "Entwickler"),
-                        Triple(3, Icons.Default.Info, "Infos")
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        tabs.forEach { (index, icon, label) ->
+                            val isSelected = selectedTab == index
+                            val tabBg by animateColorAsState(
+                                targetValue = if (isSelected) colorScheme.primaryContainer else Color.Transparent,
+                                animationSpec = tween(durationMillis = 220),
+                                label = "tab_${index}_bg"
+                            )
+                            val tabTint by animateColorAsState(
+                                targetValue = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
+                                animationSpec = tween(durationMillis = 220),
+                                label = "tab_${index}_tint"
+                            )
 
-                    tabs.forEach { (index, icon, label) ->
-                        val isSelected = selectedTab == index
-                        val tabBg by animateColorAsState(
-                            targetValue = if (isSelected) colorScheme.primary else Color.Transparent,
-                            animationSpec = tween(durationMillis = 200),
-                            label = "tab_${index}_bg"
-                        )
-                        val tabTint = if (isSelected) colorScheme.onPrimary else colorScheme.onSurface.copy(alpha = 0.75f)
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(tabBg)
-                                .clickable {
-                                    triggerHaptic()
-                                    selectedTab = index
-                                }
-                                .padding(vertical = 8.dp, horizontal = 2.dp)
-                                .testTag("tab_settings_$index"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(50.dp))
+                                    .background(tabBg)
+                                    .clickable {
+                                        triggerHaptic()
+                                        selectedTab = index
+                                    }
+                                    .padding(vertical = 9.dp, horizontal = 2.dp)
+                                    .testTag("tab_settings_$index"),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null,
-                                    tint = tabTint,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = label,
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = tabTint,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        tint = tabTint,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = label,
+                                        fontSize = 11.5.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = tabTint,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
                     }
