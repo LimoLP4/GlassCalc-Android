@@ -246,7 +246,7 @@ fun SettingsDialog(
 
                 when (selectedTab) {
                     0 -> {
-                        // Appearance Section
+                        // Appearance Section (Individual Pill Cards with Haptic Feedback)
                         Text(
                             text = "Wähle das Design:",
                             fontSize = 14.sp,
@@ -254,65 +254,86 @@ fun SettingsDialog(
                             color = colorScheme.onSurface.copy(alpha = 0.7f)
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        AppTheme.entries.forEach { themeOption ->
-                            val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
-                            val isSupported = !isMaterialYou || effectiveApiLevel >= 31
-                            val isSelected = currentTheme == themeOption && isSupported
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            AppTheme.entries.forEach { themeOption ->
+                                val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
+                                val isSupported = !isMaterialYou || effectiveApiLevel >= 31
+                                val isSelected = currentTheme == themeOption && isSupported
+                                val cardBg = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                val cardBorder = if (isSelected) colorScheme.primary else glassProps.buttonBorderColor
+                                val textColor = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
 
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .alpha(if (isSupported) 1.0f else 0.45f)
-                                    .clickable(enabled = isSupported) {
-                                        triggerHaptic()
-                                        onSelectTheme(themeOption)
-                                    }
-                                    .padding(vertical = 10.dp, horizontal = 4.dp)
-                                    .testTag("radio_theme_${themeOption.name}"),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = isSelected,
-                                    onClick = if (isSupported) {
-                                        {
+                                GlassSurface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .alpha(if (isSupported) 1.0f else 0.45f)
+                                        .clickable(enabled = isSupported) {
                                             triggerHaptic()
                                             onSelectTheme(themeOption)
                                         }
-                                    } else null,
-                                    colors = RadioButtonDefaults.colors(selectedColor = colorScheme.primary),
-                                    enabled = isSupported
-                                )
-
-                                Column(modifier = Modifier.padding(start = 12.dp)) {
-                                    Text(
-                                        text = themeOption.label,
-                                        fontSize = 16.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = colorScheme.onSurface
-                                    )
-
-                                    if (!isSupported) {
-                                        Text(
-                                            text = "Nicht mit dieser Android-Version kompatibel (erfordert API 31+, aktiv: API $effectiveApiLevel)",
-                                            fontSize = 12.sp,
-                                            color = colorScheme.error,
-                                            modifier = Modifier.testTag("text_material_you_unsupported")
+                                        .testTag("radio_theme_${themeOption.name}"),
+                                    shape = RoundedCornerShape(24.dp),
+                                    borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                                    customBorderColor = cardBorder,
+                                    customBgColor = cardBg
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
+                                            selected = isSelected,
+                                            onClick = if (isSupported) {
+                                                {
+                                                    triggerHaptic()
+                                                    onSelectTheme(themeOption)
+                                                }
+                                            } else null,
+                                            colors = RadioButtonDefaults.colors(
+                                                selectedColor = colorScheme.primary,
+                                                unselectedColor = colorScheme.onSurfaceVariant
+                                            ),
+                                            enabled = isSupported
                                         )
-                                    } else if (themeOption == AppTheme.AMOLED_DARK) {
-                                        Text(
-                                            text = "Reines Schwarz #000000 mit 10-15% Weiß-Glas für maximale OLED-Energieersparnis",
-                                            fontSize = 12.sp,
-                                            color = colorScheme.onSurface.copy(alpha = 0.5f)
-                                        )
+
+                                        Column(modifier = Modifier.padding(start = 12.dp)) {
+                                            Text(
+                                                text = themeOption.label,
+                                                fontSize = 15.sp,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                color = textColor
+                                            )
+
+                                            if (!isSupported) {
+                                                Text(
+                                                    text = "Nicht mit dieser Android-Version kompatibel (erfordert API 31+, aktiv: API $effectiveApiLevel)",
+                                                    fontSize = 12.sp,
+                                                    color = colorScheme.error,
+                                                    modifier = Modifier.testTag("text_material_you_unsupported")
+                                                )
+                                            } else if (themeOption == AppTheme.AMOLED_DARK) {
+                                                Text(
+                                                    text = "Reines Schwarz #000000 mit 10-15% Weiß-Glas für maximale OLED-Energieersparnis",
+                                                    fontSize = 12.sp,
+                                                    color = if (isSelected) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f),
+                                                    softWrap = true
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                     1 -> {
-                        // Units Section
+                        // Units Section (Individual Pill Cards with Haptic Feedback)
                         Text(
                             text = "Standard-Winkelmodus für Trigonometrie:",
                             fontSize = 14.sp,
@@ -320,70 +341,141 @@ fun SettingsDialog(
                             color = colorScheme.onSurface
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    triggerHaptic()
-                                    onSelectAngleMode(AngleMode.DEG)
-                                }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            RadioButton(
-                                selected = currentAngleMode == AngleMode.DEG,
-                                onClick = {
-                                    triggerHaptic()
-                                    onSelectAngleMode(AngleMode.DEG)
-                                },
-                                colors = RadioButtonDefaults.colors(selectedColor = colorScheme.primary)
-                            )
-                            Column(modifier = Modifier.padding(start = 12.dp)) {
-                                Text("Grad (DEG)", fontSize = 16.sp, color = colorScheme.onSurface)
-                                Text("Standardkreis = 360°", fontSize = 12.sp, color = colorScheme.onSurface.copy(alpha = 0.5f))
+                            // Option 1: DEG
+                            val isDeg = currentAngleMode == AngleMode.DEG
+                            val degBg = if (isDeg) colorScheme.primaryContainer else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            val degBorder = if (isDeg) colorScheme.primary else glassProps.buttonBorderColor
+                            val degTextColor = if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface
+
+                            GlassSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        triggerHaptic()
+                                        onSelectAngleMode(AngleMode.DEG)
+                                    }
+                                    .testTag("radio_angle_deg"),
+                                shape = RoundedCornerShape(24.dp),
+                                borderWidth = if (isDeg) 1.5.dp else 1.dp,
+                                customBorderColor = degBorder,
+                                customBgColor = degBg
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = isDeg,
+                                        onClick = {
+                                            triggerHaptic()
+                                            onSelectAngleMode(AngleMode.DEG)
+                                        },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = colorScheme.primary,
+                                            unselectedColor = colorScheme.onSurfaceVariant
+                                        )
+                                    )
+                                    Column(modifier = Modifier.padding(start = 12.dp)) {
+                                        Text(
+                                            text = "Grad (DEG)",
+                                            fontSize = 15.sp,
+                                            fontWeight = if (isDeg) FontWeight.Bold else FontWeight.Medium,
+                                            color = degTextColor
+                                        )
+                                        Text(
+                                            text = "Standardkreis = 360°",
+                                            fontSize = 12.sp,
+                                            color = if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f)
+                                        )
+                                    }
+                                }
                             }
-                        }
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    triggerHaptic()
-                                    onSelectAngleMode(AngleMode.RAD)
+                            // Option 2: RAD
+                            val isRad = currentAngleMode == AngleMode.RAD
+                            val radBg = if (isRad) colorScheme.primaryContainer else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            val radBorder = if (isRad) colorScheme.primary else glassProps.buttonBorderColor
+                            val radTextColor = if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface
+
+                            GlassSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        triggerHaptic()
+                                        onSelectAngleMode(AngleMode.RAD)
+                                    }
+                                    .testTag("radio_angle_rad"),
+                                shape = RoundedCornerShape(24.dp),
+                                borderWidth = if (isRad) 1.5.dp else 1.dp,
+                                customBorderColor = radBorder,
+                                customBgColor = radBg
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = isRad,
+                                        onClick = {
+                                            triggerHaptic()
+                                            onSelectAngleMode(AngleMode.RAD)
+                                        },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = colorScheme.primary,
+                                            unselectedColor = colorScheme.onSurfaceVariant
+                                        )
+                                    )
+                                    Column(modifier = Modifier.padding(start = 12.dp)) {
+                                        Text(
+                                            text = "Bogenmaß (RAD)",
+                                            fontSize = 15.sp,
+                                            fontWeight = if (isRad) FontWeight.Bold else FontWeight.Medium,
+                                            color = radTextColor
+                                        )
+                                        Text(
+                                            text = "Vollkreis = 2π",
+                                            fontSize = 12.sp,
+                                            color = if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f)
+                                        )
+                                    }
                                 }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = currentAngleMode == AngleMode.RAD,
-                                onClick = {
-                                    triggerHaptic()
-                                    onSelectAngleMode(AngleMode.RAD)
-                                },
-                                colors = RadioButtonDefaults.colors(selectedColor = colorScheme.primary)
-                            )
-                            Column(modifier = Modifier.padding(start = 12.dp)) {
-                                Text("Bogenmaß (RAD)", fontSize = 16.sp, color = colorScheme.onSurface)
-                                Text("Vollkreis = 2π", fontSize = 12.sp, color = colorScheme.onSurface.copy(alpha = 0.5f))
                             }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = "Unterstützte Umrechnungssysteme:",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "• Metrisch ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperatur (°C ↔ °F)\n• Volumen (l ↔ gal)",
-                            fontSize = 13.sp,
-                            color = colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
+                        // Supported Systems Card (Pill Shape)
+                        GlassSurface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            borderWidth = 1.dp,
+                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                        ) {
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                Text(
+                                    text = "Unterstützte Umrechnungssysteme:",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "• Metrisch ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperatur (°C ↔ °F)\n• Volumen (l ↔ gal)",
+                                    fontSize = 13.sp,
+                                    color = colorScheme.onSurface.copy(alpha = 0.75f)
+                                )
+                            }
+                        }
                     }
                     2 -> {
                         // Developer Options Section
