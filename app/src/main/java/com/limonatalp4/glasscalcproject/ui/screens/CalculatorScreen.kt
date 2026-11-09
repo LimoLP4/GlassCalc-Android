@@ -272,7 +272,7 @@ fun CalculatorScreen(
                                     color = onSurfaceColor
                                 )
                                 Text(
-                                    text = "v1.2 • Android 8-17 Ready",
+                                    text = "v1.2.1 • Android 8-17 Ready",
                                     fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = primaryTint,
@@ -593,22 +593,24 @@ private fun LandscapeCalculatorLayout(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .padding(horizontal = 12.dp, vertical = 2.dp)
     ) {
         val availableHeight = maxHeight
-        val buttonSize = (availableHeight / 7f).coerceIn(30.dp, 50.dp)
+        // Calculation: 1 row for Display (~25%), 1 row for DEG/RAD (~10%), 5 rows for buttons.
+        // To be safe and avoid scrolling, we target ~12-14% of height per button row.
+        val buttonSize = (availableHeight * 0.12f).coerceIn(32.dp, 46.dp)
+        val spacing = 4.dp
 
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // LEFT: Display + Main Keypad
+            // LEFT: Display + DEG/RAD + Main Keypad
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                    .weight(1.1f) // Slightly wider for main keypad
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(spacing)
             ) {
                 GlassDisplay(
                     expressionFlow = viewModel.expression,
@@ -617,26 +619,11 @@ private fun LandscapeCalculatorLayout(
                     angleMode = angleMode,
                     isScientificExpanded = false,
                     isCompact = true,
-                    glassState = glassState
-                )
-                MainKeyboardGrid(
-                    viewModel = viewModel,
                     glassState = glassState,
-                    buttonSize = buttonSize,
-                    spacing = 4.dp,
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
-
-            // RIGHT: Scientific Keypad
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                // DEG/RAD Bar
+                
+                // DEG/RAD Button aligned to the right (like in portrait)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -650,7 +637,7 @@ private fun LandscapeCalculatorLayout(
                                 HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
                                 viewModel.toggleAngleMode()
                             },
-                            modifier = Modifier.size(width = 80.dp, height = 30.dp)
+                            modifier = Modifier.size(width = 72.dp, height = 30.dp)
                         ) {
                             Text(
                                 text = if (angleMode == com.limonatalp4.glasscalcproject.data.model.AngleMode.DEG) "DEG" else "RAD",
@@ -661,12 +648,30 @@ private fun LandscapeCalculatorLayout(
                         }
                     }
                 }
+
+                MainKeyboardGrid(
+                    viewModel = viewModel,
+                    glassState = glassState,
+                    buttonSize = buttonSize,
+                    spacing = spacing,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // RIGHT: Scientific Keypad
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Bottom // Push scientific buttons to bottom to align with keypad
+            ) {
                 ScientificKeyboardGrid(
                     viewModel = viewModel,
                     glassState = glassState,
                     buttonSize = buttonSize,
-                    spacing = 4.dp,
-                    onOpenConstants = onOpenConstants
+                    spacing = spacing,
+                    onOpenConstants = onOpenConstants,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

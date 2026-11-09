@@ -919,7 +919,7 @@ fun SettingsDialog(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "GlassCalc v1.2",
+                                        text = "GlassCalc v1.2.1",
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
