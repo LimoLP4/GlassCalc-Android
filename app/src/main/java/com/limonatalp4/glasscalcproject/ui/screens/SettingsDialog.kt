@@ -623,11 +623,11 @@ fun SettingsDialog(
                                     Spacer(modifier = Modifier.height(6.dp))
 
                                     val apiFeatures = listOf(
-                                        Triple("VibrationEffect", 26, "API 26+"),
-                                        Triple("Edge-to-Edge", 29, "API 29+"),
-                                        Triple("Material You", 31, "API 31+"),
-                                        Triple("Voller Blur-Effekt", 31, "API 31+"),
-                                        Triple("Swipe-Gesten (Predictive Back)", 33, "API 33+")
+                                        Triple("VibrationEffect", 26, "API 26+ / Android 8.0+"),
+                                        Triple("Edge-to-Edge", 29, "API 29+ / Android 10+"),
+                                        Triple("Material You", 31, "API 31+ / Android 12+"),
+                                        Triple("Voller Blur-Effekt", 31, "API 31+ / Android 12+"),
+                                        Triple("Swipe-Gesten (Predictive Back)", 33, "API 33+ / Android 13+")
                                     )
 
                                     FlowRow(
