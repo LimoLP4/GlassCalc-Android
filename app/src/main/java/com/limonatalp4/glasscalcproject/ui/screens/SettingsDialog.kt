@@ -22,11 +22,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.ExpandLess
@@ -83,7 +87,7 @@ import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsDialog(
     currentTheme: AppTheme,
@@ -587,6 +591,70 @@ fun SettingsDialog(
                                             ),
                                             modifier = Modifier.testTag("slider_simulated_api")
                                         )
+                                    }
+
+                                    // Dynamic API Feature Legend (Pill Design)
+                                    val activeApiForLegend = if (simulatedApiEnabled) currentSliderApi.toInt() else effectiveApi
+
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = "API-Feature-Kompatibilität:",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+
+                                    val apiFeatures = listOf(
+                                        Triple("VibrationEffect", 26, "API 26+"),
+                                        Triple("Edge-to-Edge", 29, "API 29+"),
+                                        Triple("Material You", 31, "API 31+"),
+                                        Triple("Voller Blur-Effekt", 31, "API 31+")
+                                    )
+
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        apiFeatures.forEach { (name, minApi, suffix) ->
+                                            val isAvailable = activeApiForLegend >= minApi
+                                            val pillBg = if (isAvailable) {
+                                                colorScheme.primaryContainer.copy(alpha = 0.85f)
+                                            } else {
+                                                colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                            }
+                                            val textColor = if (isAvailable) {
+                                                colorScheme.onPrimaryContainer
+                                            } else {
+                                                colorScheme.onSurface.copy(alpha = 0.35f)
+                                            }
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(CircleShape)
+                                                    .background(pillBg)
+                                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = if (isAvailable) Icons.Default.Check else Icons.Default.Close,
+                                                        contentDescription = if (isAvailable) "Unterstützt" else "Nicht unterstützt",
+                                                        tint = if (isAvailable) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.35f),
+                                                        modifier = Modifier.size(13.dp)
+                                                    )
+                                                    Text(
+                                                        text = "$name ($suffix)",
+                                                        fontSize = 11.sp,
+                                                        fontWeight = if (isAvailable) FontWeight.Bold else FontWeight.Medium,
+                                                        color = textColor
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
