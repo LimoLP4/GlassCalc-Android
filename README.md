@@ -7,14 +7,14 @@
 ## 🚀 Features (Version 1.1)
 
 *   **Liquid Glass UI:** Beautifully blurred, semi-transparent buttons and panels for a modern aesthetic.
-*   **Advanced Scientific Mode:** Toggleable scientific keypad including trigonometry (sin, cos, tan), logarithms, roots, powers, and physical constants.
-*   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system. Now includes derivatives (d/dx) and integrals (∫).
+*   **Advanced Scientific Mode:** Toggleable scientific keypad including trigonometry (sin, cos, tan), logarithms, roots, powers, physical constants, derivatives (d/dx), and integrals (∫).
+*   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 *   **Extended Math Capabilities:** Supports inverse trigonometric functions (arcsin, arccos, arctan), hyperbolic functions (sinh, cosh, tanh), absolute values (|x|), modulo, and custom log bases.
-*   **Material You (Dynamic Colors):** Fully supports Android 13+ dynamic theming, adapting the app's colors to your device's wallpaper.
+*   **Material You (Dynamic Colors):** Fully supports Android 12+ dynamic theming, adapting the app's colors to your device's wallpaper.
 *   **Multiple Themes:** Includes Automatic (System), White Mode, Dark Mode, and a true **AMOLED Dark Mode** (pure black for battery saving).
-*   **Unit Conversion:** Seamlessly convert between Metric and US/Imperial units (m↔ft, cm↔in, kg↔lb, etc.).
+*   **Unit Conversion:** Seamlessly convert between Metric and US/Imperial units (m↔ft, cm↔in, kg↔lb, etc.) with a sleek, rounded input field.
 *   **Adaptive Layout:** Optimized for both smartphones and tablets, in portrait and landscape orientations.
-*   **Haptic Feedback:** Tactile response on button presses and graph interactions (with OEM-specific fallbacks).
+*   **Haptic Feedback:** Tactile response on button presses, graph interactions, sliders, and switches (with OEM-specific fallbacks for Samsung, Xiaomi, etc.).
 *   **Information & Licensing Hub:** A dedicated "Information" tab in the settings to view the GitHub repository, the app's license, and third-party licenses.
 *   **Developer Options:** Built-in debug menu for testing API levels, layout sizes, and cache management.
 
@@ -33,7 +33,7 @@ Please note that the current version of GlassCalc is available **exclusively in 
 *   **UI Framework:** Jetpack Compose (Material 3)
 *   **Architecture:** MVVM (Model-View-ViewModel)
 *   **Local Storage:** DataStore (Preferences)
-*   **Minimum SDK:** Android 8 (API 26)
+*   **Minimum SDK:** Android 8.0 (API 26)
 *   **Target SDK:** Android 17 (API 37)
 *   **ABI Support:** `arm64-v8a` and `armeabi-v7a`
 
