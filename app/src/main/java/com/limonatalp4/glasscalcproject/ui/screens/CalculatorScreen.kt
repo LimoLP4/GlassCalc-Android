@@ -38,12 +38,15 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Straighten
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -129,8 +132,13 @@ fun CalculatorScreen(
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showConverterDialog by remember { mutableStateOf(false) }
     var showConstantsDialog by remember { mutableStateOf(false) }
+    var showGraphDialog by remember { mutableStateOf(false) }
 
     val glassState = rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
+
+    BackHandler(enabled = drawerState.isOpen && glassProps.supportsPredictiveBack) {
+        scope.launch { drawerState.close() }
+    }
 
     CompositionLocalProvider(LocalHapticFeedbackEnabled provides hapticFeedbackEnabled) {
         Box(
@@ -145,224 +153,208 @@ fun CalculatorScreen(
                     }
                 )
         ) {
-            Scaffold(
-                containerColor = Color.Transparent,
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = "GlassCalc",
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.onSurface
-                            )
-                        },
-                        navigationIcon = {
-                            val view = LocalView.current
-                            IconButton(
-                                onClick = {
-                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                    scope.launch { 
-                                        if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                    }
-                                },
-                                modifier = Modifier.testTag("btn_hamburger_menu")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menü öffnen",
-                                    tint = colorScheme.onSurface
-                                )
-                            }
-                        },
-                        actions = {
-                            val view = LocalView.current
-                            IconButton(
-                                onClick = {
-                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                    showHistorySheet = true
-                                },
-                                modifier = Modifier.testTag("btn_top_history")
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.History,
-                                    contentDescription = "Verlauf anzeigen",
-                                    tint = colorScheme.onSurface
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                    )
-                }
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .navigationBarsPadding(),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    if (isDualPane) {
-                        LandscapeCalculatorLayout(
-                            viewModel = viewModel,
-                            angleMode = angleMode,
-                            glassState = glassState,
-                            onOpenConstants = { showConstantsDialog = true }
-                        )
-                    } else {
-                        PortraitCalculatorLayout(
-                            viewModel = viewModel,
-                            angleMode = angleMode,
-                            isScientificExpanded = isScientificExpanded,
-                            glassState = glassState,
-                            onOpenConstants = { showConstantsDialog = true }
-                        )
-                    }
-                }
-            }
-
-            // --- Floating Vertical Pill Menu (Custom Floating Drawer) ---
-            val isMenuOpen = drawerState.isOpen
-            
-            // Scrim (Background overlay to close menu)
-            AnimatedVisibility(
-                visible = isMenuOpen,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.32f))
-                        .clickable(interactionSource = null, indication = null) {
-                            scope.launch { drawerState.close() }
-                        }
-                )
-            }
-
-            // The Floating Menu Panel
-            AnimatedVisibility(
-                visible = isMenuOpen,
-                enter = fadeIn() + androidx.compose.animation.slideInHorizontally(initialOffsetX = { -it / 2 }),
-                exit = fadeOut() + androidx.compose.animation.slideOutHorizontally(targetOffsetX = { -it / 2 })
-            ) {
-                val drawerBgColor = colorScheme.surfaceContainerHigh
-                val primaryTint = colorScheme.primary
-                val onSurfaceColor = colorScheme.onSurface
-                val selectedContainerCol = colorScheme.primary
-                val selectedTextCol = colorScheme.onPrimary
-                val view = LocalView.current
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(start = 16.dp, top = 64.dp, bottom = 16.dp),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    GlassSurface(
-                        modifier = Modifier
-                            .width(280.dp)
-                            .testTag("floating_nav_menu"),
-                        shape = RoundedCornerShape(28.dp),
-                        borderWidth = 1.2.dp,
-                        customBgColor = drawerBgColor.copy(alpha = 0.85f),
-                        glassState = glassState
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                gesturesEnabled = glassProps.supportsPredictiveBack,
+                drawerContent = {
+                    ModalDrawerSheet(
+                        modifier = Modifier.width(280.dp),
+                        drawerContainerColor = Color.Transparent,
+                        drawerContentColor = colorScheme.onSurface
                     ) {
-                        Column(
+                        val drawerBgColor = colorScheme.surfaceContainerHigh
+                        val primaryTint = colorScheme.primary
+                        val onSurfaceColor = colorScheme.onSurface
+                        val selectedContainerCol = colorScheme.primary
+                        val selectedTextCol = colorScheme.onPrimary
+                        val view = LocalView.current
+
+                        GlassSurface(
                             modifier = Modifier
-                                .padding(16.dp)
-                                .verticalScroll(rememberScrollState())
+                                .fillMaxHeight()
+                                .width(280.dp)
+                                .testTag("floating_nav_menu"),
+                            shape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp),
+                            borderWidth = 1.2.dp,
+                            customBgColor = drawerBgColor.copy(alpha = 0.85f),
+                            glassState = glassState
                         ) {
-                            // Header
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
+                                    .fillMaxSize()
+                                    .padding(16.dp)
+                                    .verticalScroll(rememberScrollState())
                             ) {
-                                if (appIconBitmap != null) {
-                                    Image(
-                                        bitmap = appIconBitmap,
-                                        contentDescription = "App-Icon",
-                                        modifier = Modifier
-                                            .size(48.dp)
-                                            .clip(CircleShape)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "GlassCalc",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = onSurfaceColor
-                                )
-                                Text(
-                                    text = "v1.2 • Android 8-17 Ready",
-                                    fontSize = 11.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = primaryTint,
-                                    maxLines = 1
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Navigation Items (Vertical Pills) - Renamed "Einheiten" to "Einheitenumrechnung"
-                            val menuItems = listOf(
-                                Triple(Icons.Default.Calculate, "Rechner", "nav_item_calculator"),
-                                Triple(Icons.Default.History, "Verlauf", "nav_item_history"),
-                                Triple(Icons.Default.Straighten, "Einheitenumrechnung", "nav_item_converter"),
-                                Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
-                            )
-
-                            menuItems.forEach { (icon, label, tag) ->
-                                val isSelected = label == "Rechner"
-                                
-                                Box(
+                                // Header
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                        .clip(CircleShape)
-                                        .background(if (isSelected) selectedContainerCol else Color.Transparent)
-                                        .clickable {
-                                            HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                            scope.launch { drawerState.close() }
-                                            when (label) {
-                                                "Verlauf" -> showHistorySheet = true
-                                                "Einheitenumrechnung" -> showConverterDialog = true
-                                                "Einstellungen" -> showSettingsDialog = true
-                                            }
-                                        }
-                                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                                        .testTag(tag),
-                                    contentAlignment = Alignment.CenterStart
+                                        .padding(8.dp)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            tint = if (isSelected) selectedTextCol else onSurfaceColor.copy(alpha = 0.7f),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = label,
-                                            fontSize = 15.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) selectedTextCol else onSurfaceColor
+                                    if (appIconBitmap != null) {
+                                        Image(
+                                            bitmap = appIconBitmap,
+                                            contentDescription = "App-Icon",
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .clip(CircleShape)
                                         )
                                     }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "GlassCalc",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = onSurfaceColor
+                                    )
+                                    Text(
+                                        text = "v1.2 • Android 8-17 Ready",
+                                        fontSize = 11.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = primaryTint,
+                                        maxLines = 1
+                                    )
                                 }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                                HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Navigation Items (Vertical Pills)
+                                val menuItems = listOf(
+                                    Triple(Icons.Default.Calculate, "Rechner", "nav_item_calculator"),
+                                    Triple(Icons.Default.History, "Verlauf", "nav_item_history"),
+                                    Triple(Icons.Default.Straighten, "Einheitenumrechnung", "nav_item_converter"),
+                                    Triple(Icons.Default.ShowChart, "Graph", "nav_item_graph"),
+                                    Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
+                                )
+
+                                menuItems.forEach { (icon, label, tag) ->
+                                    val isSelected = label == "Rechner"
+                                    
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .clip(CircleShape)
+                                            .background(if (isSelected) selectedContainerCol else Color.Transparent)
+                                            .clickable {
+                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                                scope.launch { drawerState.close() }
+                                                when (label) {
+                                                    "Verlauf" -> showHistorySheet = true
+                                                    "Einheitenumrechnung" -> showConverterDialog = true
+                                                    "Graph" -> showGraphDialog = true
+                                                    "Einstellungen" -> showSettingsDialog = true
+                                                }
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                                            .testTag(tag),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = icon,
+                                                contentDescription = null,
+                                                tint = if (isSelected) selectedTextCol else onSurfaceColor.copy(alpha = 0.7f),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Text(
+                                                text = label,
+                                                fontSize = 15.sp,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isSelected) selectedTextCol else onSurfaceColor
+                                            )
+                                        }
+                                    }
+                                }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+            ) {
+                Scaffold(
+                    containerColor = Color.Transparent,
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    text = "GlassCalc",
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.onSurface
+                                )
+                            },
+                            navigationIcon = {
+                                val view = LocalView.current
+                                IconButton(
+                                    onClick = {
+                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                        scope.launch { 
+                                            if (drawerState.isClosed) drawerState.open() else drawerState.close()
+                                        }
+                                    },
+                                    modifier = Modifier.testTag("btn_hamburger_menu")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Menü öffnen",
+                                        tint = colorScheme.onSurface
+                                    )
+                                }
+                            },
+                            actions = {
+                                val view = LocalView.current
+                                IconButton(
+                                    onClick = {
+                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                        showHistorySheet = true
+                                    },
+                                    modifier = Modifier.testTag("btn_top_history")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = "Verlauf anzeigen",
+                                        tint = colorScheme.onSurface
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                        )
+                    }
+                ) { innerPadding ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .navigationBarsPadding(),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        if (isDualPane) {
+                            LandscapeCalculatorLayout(
+                                viewModel = viewModel,
+                                angleMode = angleMode,
+                                glassState = glassState,
+                                onOpenConstants = { showConstantsDialog = true }
+                            )
+                        } else {
+                            PortraitCalculatorLayout(
+                                viewModel = viewModel,
+                                angleMode = angleMode,
+                                isScientificExpanded = isScientificExpanded,
+                                glassState = glassState,
+                                onOpenConstants = { showConstantsDialog = true }
+                            )
                         }
                     }
                 }
             }
         }
+
 
         // Dialogs & Sheets
         if (showHistorySheet) {
@@ -415,6 +407,14 @@ fun CalculatorScreen(
                     viewModel.onConstant(constantValue)
                 },
                 onDismiss = { showConstantsDialog = false }
+            )
+        }
+
+        if (showGraphDialog) {
+            GraphDialog(
+                viewModel = viewModel,
+                angleMode = angleMode,
+                onDismiss = { showGraphDialog = false }
             )
         }
     }
@@ -528,91 +528,7 @@ private fun PortraitCalculatorLayout(
                 }
             }
 
-            // Sub-Tab Switcher (Tastatur vs Graph) fixed at top when expanded
-            AnimatedVisibility(
-                visible = isScientificExpanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 2.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    GlassSurface(
-                        shape = CircleShape,
-                        borderWidth = 1.dp
-                    ) {
-                        Row(modifier = Modifier.padding(2.dp)) {
-                            // Keyboard Tab
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(if (scientificSubTab == 0) colorScheme.primary else Color.Transparent)
-                                    .clickable {
-                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
-                                        scientificSubTab = 0
-                                    }
-                                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                                    .testTag("tab_sci_keyboard"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.GridOn,
-                                        contentDescription = null,
-                                        tint = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = "Tastatur",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface
-                                    )
-                                }
-                            }
-
-                            // Graph Tab
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(if (scientificSubTab == 1) colorScheme.primary else Color.Transparent)
-                                    .clickable {
-                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
-                                        scientificSubTab = 1
-                                    }
-                                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                                    .testTag("tab_sci_graph"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ShowChart,
-                                        contentDescription = null,
-                                        tint = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = "Graph",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // No sub-tab switcher
         }
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -650,25 +566,14 @@ private fun PortraitCalculatorLayout(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (isScientificExpanded) {
-                    if (scientificSubTab == 0) {
-                        ScientificKeyboardGrid(
-                            viewModel = viewModel,
-                            glassState = glassState,
-                            buttonSize = sciButtonSize,
-                            spacing = 5.dp,
-                            onOpenConstants = onOpenConstants,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    } else {
-                        FunctionGraphView(
-                            expression = expression,
-                            angleMode = angleMode,
-                            isGestureLocked = isGestureLocked,
-                            onGestureLockChange = { viewModel.setGraphLocked(it) },
-                            glassState = glassState,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                    ScientificKeyboardGrid(
+                        viewModel = viewModel,
+                        glassState = glassState,
+                        buttonSize = sciButtonSize,
+                        spacing = 5.dp,
+                        onOpenConstants = onOpenConstants,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
 
                 // Main 4-column rigid Keypad
@@ -774,100 +679,7 @@ private fun LandscapeCalculatorLayout(
                     }
                 }
 
-                // Sub-Tab Switcher for Landscape Mode (Tastatur vs Graph) with Haptic Feedback
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    GlassSurface(
-                        shape = CircleShape,
-                        borderWidth = 1.dp
-                    ) {
-                        Row(modifier = Modifier.padding(2.dp)) {
-                            // Keyboard Tab
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(if (scientificSubTab == 0) colorScheme.primary else Color.Transparent)
-                                    .clickable {
-                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
-                                        scientificSubTab = 0
-                                    }
-                                    .padding(horizontal = 14.dp, vertical = 4.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.GridOn,
-                                        contentDescription = null,
-                                        tint = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = "Tastatur",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = if (scientificSubTab == 0) colorScheme.onPrimary else colorScheme.onSurface
-                                    )
-                                }
-                            }
-
-                            // Graph Tab
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(if (scientificSubTab == 1) colorScheme.primary else Color.Transparent)
-                                    .clickable {
-                                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
-                                        scientificSubTab = 1
-                                    }
-                                    .padding(horizontal = 14.dp, vertical = 4.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.ShowChart,
-                                        contentDescription = null,
-                                        tint = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Text(
-                                        text = "Graph",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = if (scientificSubTab == 1) colorScheme.onPrimary else colorScheme.onSurface
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (scientificSubTab == 0) {
-                    ScientificKeyboardGrid(
-                        viewModel = viewModel,
-                        glassState = glassState,
-                        buttonSize = uniformButtonSize,
-                        spacing = 4.dp,
-                        onOpenConstants = onOpenConstants
-                    )
-                } else {
-                    FunctionGraphView(
-                        expression = expression,
-                        angleMode = angleMode,
-                        isGestureLocked = isGestureLocked,
-                        onGestureLockChange = { viewModel.setGraphLocked(it) },
-                        glassState = glassState,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                // No sub-tab switcher
             }
 
             // Right Column: Fixed Main 4x5 Keypad

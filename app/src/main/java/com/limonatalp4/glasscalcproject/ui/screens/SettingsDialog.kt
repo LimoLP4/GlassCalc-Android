@@ -120,7 +120,14 @@ fun SettingsDialog(
     }
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
-    var currentSliderApi by remember(simulatedApiLevel) { mutableFloatStateOf(simulatedApiLevel.toFloat()) }
+    val realDeviceApi = Build.VERSION.SDK_INT
+    val sliderMax = realDeviceApi.toFloat().coerceIn(26f, 37f)
+    val sliderMin = 26f
+    val sliderSteps = if (sliderMax > sliderMin) (sliderMax - sliderMin).toInt() - 1 else 0
+
+    var currentSliderApi by remember(simulatedApiLevel, sliderMax) { 
+        mutableFloatStateOf(simulatedApiLevel.toFloat().coerceIn(sliderMin, sliderMax)) 
+    }
     var lastHapticStep by remember(simulatedApiLevel) { mutableIntStateOf(simulatedApiLevel) }
 
     // Accordion expansion states for Info tab
@@ -591,8 +598,8 @@ fun SettingsDialog(
                                             onValueChangeFinished = {
                                                 onSetSimulatedApi(true, currentSliderApi.toInt())
                                             },
-                                            valueRange = 26f..37f,
-                                            steps = 10,
+                                            valueRange = sliderMin..sliderMax,
+                                            steps = sliderSteps,
                                             colors = SliderDefaults.colors(
                                                 thumbColor = colorScheme.primary,
                                                 activeTrackColor = colorScheme.primary
@@ -606,7 +613,7 @@ fun SettingsDialog(
 
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Text(
-                                        text = "API-Feature-Kompatibilität:",
+                                        text = "API-Feature-Kompatibilität (Gerät-Limit: API $realDeviceApi):",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = colorScheme.onSurfaceVariant
@@ -617,7 +624,8 @@ fun SettingsDialog(
                                         Triple("VibrationEffect", 26, "API 26+"),
                                         Triple("Edge-to-Edge", 29, "API 29+"),
                                         Triple("Material You", 31, "API 31+"),
-                                        Triple("Voller Blur-Effekt", 31, "API 31+")
+                                        Triple("Voller Blur-Effekt", 31, "API 31+"),
+                                        Triple("Swipe-Gesten (Predictive Back)", 33, "API 33+")
                                     )
 
                                     FlowRow(

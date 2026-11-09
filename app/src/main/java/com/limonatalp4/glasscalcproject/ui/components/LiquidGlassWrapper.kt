@@ -90,7 +90,12 @@ fun Modifier.safeLiquidGlass(
     if (!supportsBlur || state == null || state.quality == LiquidGlassQuality.Fallback) {
         return this
     }
-    return this.liquidGlass(state = state, shape = shape)
+    return try {
+        this.liquidGlass(state = state, shape = shape)
+    } catch (t: Throwable) {
+        Log.w("LiquidGlassWrapper", "liquidGlass modifier exception caught: ${t.message}")
+        this
+    }
 }
 
 /**

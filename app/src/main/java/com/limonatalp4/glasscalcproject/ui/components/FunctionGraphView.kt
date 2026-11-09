@@ -5,7 +5,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -388,36 +388,39 @@ fun FunctionGraphView(
                     .border(1.dp, gridColor, RoundedCornerShape(16.dp))
                     .pointerInput(isGraphLocked) {
                         if (!isGraphLocked) {
-                            detectDragGestures(
-                                onDragStart = { isTracing = true },
-                                onDragEnd = { isTracing = false },
-                                onDragCancel = { isTracing = false },
-                                onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                                    val width = size.width.toFloat()
-                                    val height = size.height.toFloat()
+                            detectTransformGestures { centroid, pan, zoom, rotation ->
+                                val width = size.width.toFloat()
+                                val height = size.height.toFloat()
+                                if (width > 0f && height > 0f) {
+                                    val xSpan = xMax - xMin
+                                    val ySpan = yMax - yMin
 
-                                    // 2D Panning when unlocked
-                                    val dx = -(dragAmount.x / width) * (xMax - xMin)
-                                    val dy = (dragAmount.y / height) * (yMax - yMin)
+                                    val dx = -(pan.x / width) * xSpan
+                                    val dy = (pan.y / height) * ySpan
 
                                     xMin += dx
                                     xMax += dx
                                     yMin += dy
                                     yMax += dy
 
-                                    // Instant O(1) trace info from cached points
-                                    updateTraceFromCache(change.position, width, height)
+                                    if (zoom != 1f && zoom > 0f) {
+                                        val xCenter = (xMin + xMax) / 2.0
+                                        val yCenter = (yMin + yMax) / 2.0
+                                        val newXSpan = xSpan / zoom
+                                        val newYSpan = ySpan / zoom
+                                        xMin = xCenter - newXSpan / 2.0
+                                        xMax = xCenter + newXSpan / 2.0
+                                        yMin = yCenter - newYSpan / 2.0
+                                        yMax = yCenter + newYSpan / 2.0
+                                    }
 
-                                    // Throttled Haptic Feedback (80ms)
                                     val now = System.currentTimeMillis()
                                     if (hapticEnabled && now - lastHapticTime > 80L) {
                                         lastHapticTime = now
                                         HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
                                     }
-
-                                    change.consume()
                                 }
-                            )
+                            }
                         }
                     }
                     .testTag("graph_canvas_container")

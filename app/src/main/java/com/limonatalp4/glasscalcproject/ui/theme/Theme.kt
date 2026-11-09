@@ -23,7 +23,9 @@ data class GlassThemeProperties(
     val isDark: Boolean,
     val isAmoled: Boolean,
     val isMaterialYou: Boolean,
-    val supportsBlur: Boolean
+    val supportsBlur: Boolean,
+    val supportsPredictiveBack: Boolean,
+    val effectiveApiLevel: Int
 )
 
 val LocalGlassProperties = staticCompositionLocalOf {
@@ -35,7 +37,9 @@ val LocalGlassProperties = staticCompositionLocalOf {
         isDark = true,
         isAmoled = false,
         isMaterialYou = false,
-        supportsBlur = true
+        supportsBlur = true,
+        supportsPredictiveBack = true,
+        effectiveApiLevel = Build.VERSION.SDK_INT
     )
 }
 
@@ -122,9 +126,20 @@ fun GlassCalcTheme(
     // Native blur supported only on Android 12+ (API 31+)
     val supportsBlur = effectiveApi >= 31
 
+    // Predictive back animations supported on Android 13+ (API 33+)
+    val supportsPredictiveBack = effectiveApi >= 33
+
     val colorScheme = when {
         isMaterialYou -> {
-            if (systemDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            try {
+                if (effectiveApi >= 31 && Build.VERSION.SDK_INT >= 31) {
+                    if (systemDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                } else {
+                    if (isDark) DarkColorScheme else LightColorScheme
+                }
+            } catch (t: Throwable) {
+                if (isDark) DarkColorScheme else LightColorScheme
+            }
         }
         resolvedTheme == AppTheme.AMOLED_DARK -> AmoledColorScheme
         isDark -> DarkColorScheme
@@ -218,7 +233,9 @@ fun GlassCalcTheme(
         isDark = isDark,
         isAmoled = isAmoled,
         isMaterialYou = isMaterialYou,
-        supportsBlur = supportsBlur
+        supportsBlur = supportsBlur,
+        supportsPredictiveBack = supportsPredictiveBack,
+        effectiveApiLevel = effectiveApi
     )
 
     CompositionLocalProvider(LocalGlassProperties provides glassProps) {
