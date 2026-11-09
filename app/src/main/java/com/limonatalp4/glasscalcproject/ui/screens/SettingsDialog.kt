@@ -796,7 +796,7 @@ fun SettingsDialog(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .testTag("btn_simulate_background"),
-                                            shape = RoundedCornerShape(12.dp)
+                                            shape = RoundedCornerShape(24.dp)
                                         ) {
                                             Text("Hintergrund", fontSize = 11.sp, maxLines = 1)
                                         }
@@ -809,7 +809,7 @@ fun SettingsDialog(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .testTag("btn_test_crash_protection"),
-                                            shape = RoundedCornerShape(12.dp)
+                                            shape = RoundedCornerShape(24.dp)
                                         ) {
                                             Text("Crash-Test", fontSize = 11.sp, maxLines = 1)
                                         }
@@ -846,7 +846,7 @@ fun SettingsDialog(
                                             containerColor = colorScheme.error,
                                             contentColor = colorScheme.onError
                                         ),
-                                        shape = RoundedCornerShape(14.dp),
+                                        shape = RoundedCornerShape(50),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("btn_reset_storage")
@@ -890,7 +890,7 @@ fun SettingsDialog(
                                             containerColor = colorScheme.primary,
                                             contentColor = colorScheme.onPrimary
                                         ),
-                                        shape = RoundedCornerShape(14.dp),
+                                        shape = RoundedCornerShape(50),
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .testTag("btn_clear_cache")
