@@ -24,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.ui.components.FunctionGraphView
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
@@ -76,7 +78,7 @@ fun GraphDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Funktionsgraph",
+                        text = stringResource(R.string.title_graph),
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
@@ -90,7 +92,7 @@ fun GraphDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Schließen",
+                            contentDescription = stringResource(R.string.nav_close),
                             tint = colorScheme.onSurface
                         )
                     }

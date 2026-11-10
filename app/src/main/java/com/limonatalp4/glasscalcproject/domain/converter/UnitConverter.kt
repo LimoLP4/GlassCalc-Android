@@ -1,21 +1,22 @@
 package com.limonatalp4.glasscalcproject.domain.converter
 
+import com.limonatalp4.glasscalcproject.R
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-enum class UnitCategory(val displayName: String) {
-    LENGTH("Länge"),
-    MASS("Gewicht / Masse"),
-    TEMPERATURE("Temperatur"),
-    VOLUME("Volumen")
+enum class UnitCategory(val stringResId: Int) {
+    LENGTH(R.string.cat_length),
+    MASS(R.string.cat_mass),
+    TEMPERATURE(R.string.cat_temp),
+    VOLUME(R.string.cat_volume)
 }
 
 data class ConversionPair(
     val category: UnitCategory,
     val unitFrom: String,
     val unitTo: String,
-    val label: String,
+    val labelResId: Int,
     val formulaFromTo: (Double) -> Double,
     val formulaToFrom: (Double) -> Double
 )
@@ -29,7 +30,7 @@ object UnitConverter {
             category = UnitCategory.LENGTH,
             unitFrom = "m",
             unitTo = "ft",
-            label = "Meter ↔ Fuß (m ↔ ft)",
+            labelResId = R.string.unit_m_ft,
             formulaFromTo = { it * 3.280839895 },
             formulaToFrom = { it / 3.280839895 }
         ),
@@ -37,7 +38,7 @@ object UnitConverter {
             category = UnitCategory.LENGTH,
             unitFrom = "cm",
             unitTo = "in",
-            label = "Zentimeter ↔ Zoll (cm ↔ in)",
+            labelResId = R.string.unit_cm_in,
             formulaFromTo = { it * 0.3937007874 },
             formulaToFrom = { it / 0.3937007874 }
         ),
@@ -45,7 +46,7 @@ object UnitConverter {
             category = UnitCategory.LENGTH,
             unitFrom = "km",
             unitTo = "mi",
-            label = "Kilometer ↔ Meilen (km ↔ mi)",
+            labelResId = R.string.unit_km_mi,
             formulaFromTo = { it * 0.6213711922 },
             formulaToFrom = { it / 0.6213711922 }
         ),
@@ -54,7 +55,7 @@ object UnitConverter {
             category = UnitCategory.MASS,
             unitFrom = "kg",
             unitTo = "lb",
-            label = "Kilogramm ↔ Pfund (kg ↔ lb)",
+            labelResId = R.string.unit_kg_lb,
             formulaFromTo = { it * 2.2046226218 },
             formulaToFrom = { it / 2.2046226218 }
         ),
@@ -63,7 +64,7 @@ object UnitConverter {
             category = UnitCategory.TEMPERATURE,
             unitFrom = "°C",
             unitTo = "°F",
-            label = "Celsius ↔ Fahrenheit (°C ↔ °F)",
+            labelResId = R.string.unit_c_f,
             formulaFromTo = { (it * 9.0 / 5.0) + 32.0 },
             formulaToFrom = { (it - 32.0) * 5.0 / 9.0 }
         ),
@@ -72,7 +73,7 @@ object UnitConverter {
             category = UnitCategory.VOLUME,
             unitFrom = "l",
             unitTo = "gal",
-            label = "Liter ↔ Gallonen (l ↔ gal)",
+            labelResId = R.string.unit_l_gal,
             formulaFromTo = { it * 0.2641720524 },
             formulaToFrom = { it / 0.2641720524 }
         )

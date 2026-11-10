@@ -35,6 +35,7 @@ class GlassCalcPreferences(private val context: Context) {
         val DEFAULT_MASS_UNIT = stringPreferencesKey("default_mass_unit")
         val HAPTIC_FEEDBACK_ENABLED = booleanPreferencesKey("haptic_feedback_enabled")
         val AUTO_RESULT_ENABLED = booleanPreferencesKey("auto_result_enabled")
+        val LANGUAGE = stringPreferencesKey("language")
     }
 
     private val safeDataFlow: Flow<Preferences> = context.dataStore.data
@@ -99,6 +100,10 @@ class GlassCalcPreferences(private val context: Context) {
         prefs[PreferencesKeys.AUTO_RESULT_ENABLED] ?: true
     }
 
+    val languageFlow: Flow<String> = safeDataFlow.map { prefs ->
+        prefs[PreferencesKeys.LANGUAGE] ?: ""
+    }
+
     suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
         try {
             context.dataStore.edit { prefs ->
@@ -113,6 +118,16 @@ class GlassCalcPreferences(private val context: Context) {
         try {
             context.dataStore.edit { prefs ->
                 prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = enabled
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+        }
+    }
+
+    suspend fun setLanguage(languageTag: String) {
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[PreferencesKeys.LANGUAGE] = languageTag
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e

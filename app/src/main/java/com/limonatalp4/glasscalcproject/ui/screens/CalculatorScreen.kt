@@ -77,6 +77,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.limonatalp4.glasscalcproject.R
 import androidx.core.graphics.drawable.toBitmap
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.limonatalp4.glasscalcproject.ui.components.ButtonType
@@ -183,7 +185,7 @@ fun CalculatorScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Menu,
-                                        contentDescription = "Menü öffnen",
+                                        contentDescription = stringResource(R.string.nav_open_menu),
                                         tint = colorScheme.onSurface,
                                         modifier = Modifier.size(20.dp)
                                     )
@@ -220,7 +222,7 @@ fun CalculatorScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.History,
-                                    contentDescription = "Verlauf anzeigen",
+                                    contentDescription = stringResource(R.string.nav_history_show),
                                     tint = colorScheme.onSurface,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -319,11 +321,11 @@ fun CalculatorScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             
                             val menuItems = listOf(
-                                Triple(Icons.Default.Calculate, "Rechner", "nav_item_calculator"),
-                                Triple(Icons.Default.History, "Verlauf", "nav_item_history"),
-                                Triple(Icons.Default.Straighten, "Einheitenumrechnung", "nav_item_converter"),
-                                Triple(Icons.Default.ShowChart, "Graph", "nav_item_graph"),
-                                Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
+                                Triple(Icons.Default.Calculate, R.string.nav_calculator, "nav_item_calculator"),
+                                Triple(Icons.Default.History, R.string.nav_history, "nav_item_history"),
+                                Triple(Icons.Default.Straighten, R.string.nav_converter, "nav_item_converter"),
+                                Triple(Icons.Default.ShowChart, R.string.nav_graph, "nav_item_graph"),
+                                Triple(Icons.Default.Settings, R.string.nav_settings, "nav_item_settings")
                             )
 
                             // Outer Segmented Control Container
@@ -340,8 +342,8 @@ fun CalculatorScreen(
                                     .padding(horizontal = 2.dp, vertical = 4.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                menuItems.forEach { (icon, label, tag) ->
-                                    val isSelected = label == "Rechner"
+                                menuItems.forEach { (icon, labelRes, tag) ->
+                                    val isSelected = tag == "nav_item_calculator"
                                     
                                     Box(
                                         modifier = Modifier
@@ -353,11 +355,11 @@ fun CalculatorScreen(
                                             .clickable {
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
                                                 isMenuOpen = false
-                                                when (label) {
-                                                    "Verlauf" -> showHistorySheet = true
-                                                    "Einheitenumrechnung" -> showConverterDialog = true
-                                                    "Graph" -> showGraphDialog = true
-                                                    "Einstellungen" -> showSettingsDialog = true
+                                                when (tag) {
+                                                    "nav_item_history" -> showHistorySheet = true
+                                                    "nav_item_converter" -> showConverterDialog = true
+                                                    "nav_item_graph" -> showGraphDialog = true
+                                                    "nav_item_settings" -> showSettingsDialog = true
                                                 }
                                             }
                                             .testTag(tag),
@@ -381,7 +383,7 @@ fun CalculatorScreen(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                             Text(
-                                                text = label,
+                                                text = stringResource(labelRes),
                                                 fontSize = 15.sp,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                                 color = if (isAmoled) Color.White else (if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor)
@@ -411,8 +413,10 @@ fun CalculatorScreen(
         if (showSettingsDialog) {
             SettingsDialog(
                 currentTheme = currentTheme,
+                currentLanguage = viewModel.language.collectAsState().value,
                 effectiveApiLevel = viewModel.getEffectiveApiLevel(),
                 currentAngleMode = angleMode,
+                onSelectLanguage = { tag -> viewModel.setLanguage(tag) },
                 windowSizeClass = adaptiveInfo.windowSizeClass,
                 simulatedApiEnabled = simulatedApiEnabled,
                 simulatedApiLevel = simulatedApiLevel,
@@ -563,7 +567,7 @@ private fun PortraitCalculatorLayout(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = if (isScientificExpanded) "Standard" else "Wissensch.",
+                                text = if (isScientificExpanded) stringResource(R.string.mode_standard) else stringResource(R.string.mode_scientific),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = if (isScientificExpanded) colorScheme.tertiary else colorScheme.onSurface
@@ -820,11 +824,11 @@ private fun ScientificKeyboardGrid(
                 viewModel.onConstant("π")
             }
             GlassCalculatorButton(
-                text = "Konst.",
+                text = stringResource(R.string.btn_constants),
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_constants",
-                contentDesc = "Physikalische und mathematische Konstanten",
+                contentDesc = stringResource(R.string.btn_constants_desc),
                 modifier = buttonModifier()
             ) {
                 onOpenConstants()
@@ -958,7 +962,7 @@ private fun MainKeyboardGrid(
                 type = ButtonType.ACTION_CLEAR,
                 glassState = glassState,
                 testTag = "btn_delete",
-                contentDesc = "Löschen (Gedrückt halten zum kontinuierlichen Löschen)",
+                contentDesc = stringResource(R.string.btn_del_desc),
                 isRepeatable = true,
                 modifier = buttonModifier()
             ) {

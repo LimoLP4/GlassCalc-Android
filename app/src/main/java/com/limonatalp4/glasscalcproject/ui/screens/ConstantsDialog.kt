@@ -27,30 +27,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 
 data class MathConstant(
     val symbol: String,
-    val name: String,
+    val nameResId: Int,
     val value: String,
     val unit: String
 )
 
 val MATH_CONSTANTS = listOf(
-    MathConstant("π", "Kreiszahl Pi", "3.141592653589793", ""),
-    MathConstant("e", "Eulersche Zahl", "2.718281828459045", ""),
-    MathConstant("c", "Lichtgeschwindigkeit", "299792458", "m/s"),
-    MathConstant("g", "Erdbeschleunigung", "9.80665", "m/s²"),
-    MathConstant("h", "Plancksches Wirkungsquantum", "6.62607015E-34", "J·s"),
-    MathConstant("G", "Gravitationskonstante", "6.67430E-11", "m³/(kg·s²)"),
-    MathConstant("Na", "Avogadro-Konstante", "6.02214076E23", "mol⁻¹"),
-    MathConstant("k", "Boltzmann-Konstante", "1.380649E-23", "J/K")
+    MathConstant("π", R.string.const_pi, "3.141592653589793", ""),
+    MathConstant("e", R.string.const_e, "2.718281828459045", ""),
+    MathConstant("c", R.string.const_c, "299792458", "m/s"),
+    MathConstant("g", R.string.const_g, "9.80665", "m/s²"),
+    MathConstant("h", R.string.const_h, "6.62607015E-34", "J·s"),
+    MathConstant("G", R.string.const_G, "6.67430E-11", "m³/(kg·s²)"),
+    MathConstant("Na", R.string.const_na, "6.02214076E23", "mol⁻¹"),
+    MathConstant("k", R.string.const_k, "1.380649E-23", "J/K")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +105,7 @@ fun ConstantsDialog(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "Konstanten",
+                            text = stringResource(R.string.title_constants),
                             fontSize = 21.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onSurface
@@ -119,7 +121,7 @@ fun ConstantsDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Schließen",
+                            contentDescription = stringResource(R.string.nav_close),
                             tint = colorScheme.onSurface
                         )
                     }
@@ -128,7 +130,7 @@ fun ConstantsDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = "Wähle eine physikalische oder mathematische Konstante:",
+                    text = stringResource(R.string.constants_select_heading),
                     fontSize = 13.sp,
                     color = colorScheme.onSurfaceVariant
                 )
@@ -183,7 +185,7 @@ fun ConstantsDialog(
 
                                     Column {
                                         Text(
-                                            text = constant.name,
+                                            text = stringResource(constant.nameResId),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = colorScheme.onSurface

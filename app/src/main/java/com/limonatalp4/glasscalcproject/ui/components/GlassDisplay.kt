@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import com.limonatalp4.glasscalcproject.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -131,7 +133,7 @@ private fun GlassDisplayContent(
                 if (clipboard != null) {
                     val clip = ClipData.newPlainText("GlassCalc", textToCopy)
                     clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, "In Zwischenablage kopiert: $textToCopy", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.toast_copied, textToCopy), Toast.LENGTH_SHORT).show()
                     isCopyFlashed = true
                 }
             } catch (e: Exception) {
@@ -244,7 +246,7 @@ private fun GlassDisplayContent(
                     // Copy indicator icon
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Ergebnis in Zwischenablage kopieren",
+                        contentDescription = stringResource(R.string.btn_copy_clipboard),
                         tint = copyIconColor,
                         modifier = Modifier
                             .size(16.dp)

@@ -35,7 +35,7 @@ class ExampleUnitTest {
     fun testDivisionByZeroHandledGracefully() {
         val res = evaluator.evaluate("10/0")
         assertTrue(res is EvaluationResult.Error)
-        assertEquals("Division durch 0 nicht möglich", (res as EvaluationResult.Error).message)
+        assertEquals(R.string.error_division_by_zero, (res as EvaluationResult.Error).messageResId)
     }
 
     @Test

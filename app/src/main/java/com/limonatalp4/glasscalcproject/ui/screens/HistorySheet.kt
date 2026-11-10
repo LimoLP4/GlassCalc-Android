@@ -1,6 +1,8 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,22 +34,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
-import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.ui.graphics.Color
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -56,14 +59,14 @@ import java.util.Locale
 @Composable
 fun HistorySheet(
     history: List<CalculationHistoryItem>,
-    currentTheme: com.limonatalp4.glasscalcproject.data.model.AppTheme,
+    currentTheme: AppTheme,
     onSelect: (CalculationHistoryItem) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val colorScheme = MaterialTheme.colorScheme
-    val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.GERMANY)
+    val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val context = LocalContext.current
     val view = LocalView.current
@@ -86,7 +89,6 @@ fun HistorySheet(
         },
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         dragHandle = {
-            // Highly rounded pill-style drag handle matching Liquid Glass theme
             Box(
                 modifier = Modifier
                     .padding(vertical = 14.dp)
@@ -144,7 +146,7 @@ fun HistorySheet(
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = "Verlauf (Letzte 20)",
+                            text = stringResource(R.string.title_history),
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
@@ -162,7 +164,7 @@ fun HistorySheet(
                             contentColor = colorScheme.error
                         ),
                         shape = RoundedCornerShape(50.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.5f)),
+                        border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.5f)),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
                         modifier = Modifier.testTag("btn_clear_history")
                     ) {
@@ -172,11 +174,15 @@ fun HistorySheet(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Verlauf leeren",
+                                contentDescription = stringResource(R.string.btn_history_clear_desc),
                                 tint = colorScheme.error,
                                 modifier = Modifier.size(16.dp)
                             )
-                            Text("Leeren", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = stringResource(R.string.btn_history_clear),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }
@@ -192,7 +198,7 @@ fun HistorySheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Noch keine Berechnungen gespeichert.",
+                        text = stringResource(R.string.history_empty),
                         fontSize = 15.sp,
                         color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center

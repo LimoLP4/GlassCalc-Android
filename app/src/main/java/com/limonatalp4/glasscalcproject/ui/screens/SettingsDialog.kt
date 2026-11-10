@@ -14,6 +14,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Policy
@@ -59,6 +61,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -83,6 +86,8 @@ import androidx.compose.ui.unit.sp
 import androidx.window.core.layout.WindowSizeClass
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
+import com.limonatalp4.glasscalcproject.data.model.Language
+import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
@@ -92,8 +97,10 @@ import kotlin.math.roundToInt
 @Composable
 fun SettingsDialog(
     currentTheme: AppTheme,
+    currentLanguage: String,
     effectiveApiLevel: Int,
     currentAngleMode: AngleMode,
+    onSelectLanguage: (String) -> Unit,
     windowSizeClass: WindowSizeClass?,
     simulatedApiEnabled: Boolean,
     simulatedApiLevel: Int,
@@ -174,7 +181,7 @@ fun SettingsDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Einstellungen",
+                        text = stringResource(R.string.title_settings),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
@@ -188,7 +195,7 @@ fun SettingsDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Schließen",
+                            contentDescription = stringResource(R.string.nav_close),
                             tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
                         )
                     }
@@ -196,14 +203,16 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // 4-Tab Segmented Control (Pill-Design)
+                // 5-Tab Segmented Control (Pill-Design)
                 val tabs = listOf(
-                    Triple(0, Icons.Default.Palette, "Design"),
-                    Triple(1, Icons.Default.Straighten, "Einheiten"),
-                    Triple(2, Icons.Default.DeveloperMode, "Entwickler"),
-                    Triple(3, Icons.Default.Info, "Infos")
+                    Triple(0, Icons.Default.Palette, androidx.compose.ui.res.stringResource(id = R.string.title_appearance)),
+                    Triple(1, Icons.Default.Straighten, androidx.compose.ui.res.stringResource(id = R.string.title_converter)),
+                    Triple(2, Icons.Default.DeveloperMode, androidx.compose.ui.res.stringResource(id = R.string.title_dev_options)),
+                    Triple(3, Icons.Default.Info, androidx.compose.ui.res.stringResource(id = R.string.title_info)),
+                    Triple(4, Icons.Default.Language, androidx.compose.ui.res.stringResource(id = R.string.tab_language))
                 )
 
+                val tabScrollState = androidx.compose.foundation.rememberScrollState()
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -227,7 +236,9 @@ fun SettingsDialog(
                         .padding(4.dp)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(tabScrollState),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -250,14 +261,13 @@ fun SettingsDialog(
 
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
                                     .clip(RoundedCornerShape(50.dp))
                                     .background(tabBg)
                                     .clickable {
                                         triggerHaptic()
                                         selectedTab = index
                                     }
-                                    .padding(vertical = 9.dp, horizontal = 2.dp)
+                                    .padding(vertical = 8.dp, horizontal = 10.dp)
                                     .testTag("tab_settings_$index"),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -271,10 +281,10 @@ fun SettingsDialog(
                                         tint = tabTint,
                                         modifier = Modifier.size(15.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = label,
-                                        fontSize = 11.5.sp,
+                                        fontSize = 12.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = tabTint,
                                         maxLines = 1,
@@ -292,7 +302,7 @@ fun SettingsDialog(
                     0 -> {
                         // Appearance Section (Individual Pill Cards with Haptic Feedback)
                         Text(
-                            text = "Wähle das Design:",
+                            text = androidx.compose.ui.res.stringResource(id = R.string.theme_select_heading),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
@@ -363,8 +373,16 @@ fun SettingsDialog(
                                         )
 
                                         Column(modifier = Modifier.padding(start = 12.dp)) {
+                                            val themeLabel = when (themeOption) {
+                                                AppTheme.MATERIAL_YOU -> androidx.compose.ui.res.stringResource(id = R.string.theme_material_you)
+                                                AppTheme.AUTOMATIC -> androidx.compose.ui.res.stringResource(id = R.string.theme_automatic)
+                                                AppTheme.WHITE_MODE -> androidx.compose.ui.res.stringResource(id = R.string.theme_white_mode)
+                                                AppTheme.STANDARD_DARK -> androidx.compose.ui.res.stringResource(id = R.string.theme_standard_dark)
+                                                AppTheme.DARK_MODE -> androidx.compose.ui.res.stringResource(id = R.string.theme_dark_mode)
+                                                AppTheme.AMOLED_DARK -> androidx.compose.ui.res.stringResource(id = R.string.theme_amoled_dark)
+                                            }
                                             Text(
-                                                text = themeOption.label,
+                                                text = themeLabel,
                                                 fontSize = 15.sp,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                                 color = textColor
@@ -372,14 +390,14 @@ fun SettingsDialog(
 
                                             if (!isSupported) {
                                                 Text(
-                                                    text = "Nicht mit dieser Android-Version kompatibel (erfordert API 31+, aktiv: API $effectiveApiLevel)",
+                                                    text = androidx.compose.ui.res.stringResource(id = R.string.theme_material_you_unsupported, effectiveApiLevel),
                                                     fontSize = 12.sp,
                                                     color = colorScheme.error,
                                                     modifier = Modifier.testTag("text_material_you_unsupported")
                                                 )
                                             } else if (themeOption == AppTheme.AMOLED_DARK) {
                                                 Text(
-                                                    text = "Reines Schwarz #000000 mit 10-15% Weiß-Glas für maximale OLED-Energieersparnis",
+                                                    text = androidx.compose.ui.res.stringResource(id = R.string.theme_amoled_desc),
                                                     fontSize = 12.sp,
                                                     color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isSelected) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f)),
                                                     softWrap = true
@@ -394,7 +412,7 @@ fun SettingsDialog(
                     1 -> {
                         // Units Section (Individual Pill Cards with Haptic Feedback)
                         Text(
-                            text = "Standard-Winkelmodus für Trigonometrie:",
+                            text = androidx.compose.ui.res.stringResource(id = R.string.units_angle_heading),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onSurface
@@ -450,13 +468,13 @@ fun SettingsDialog(
                                     )
                                     Column(modifier = Modifier.padding(start = 12.dp)) {
                                         Text(
-                                            text = "Grad (DEG)",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_label),
                                             fontSize = 15.sp,
                                             fontWeight = if (isDeg) FontWeight.Bold else FontWeight.Medium,
                                             color = degTextColor
                                         )
                                         Text(
-                                            text = "Standardkreis = 360°",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_desc),
                                             fontSize = 12.sp,
                                             color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
                                         )
@@ -506,13 +524,13 @@ fun SettingsDialog(
                                     )
                                     Column(modifier = Modifier.padding(start = 12.dp)) {
                                         Text(
-                                            text = "Bogenmaß (RAD)",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_label),
                                             fontSize = 15.sp,
                                             fontWeight = if (isRad) FontWeight.Bold else FontWeight.Medium,
                                             color = radTextColor
                                         )
                                         Text(
-                                            text = "Vollkreis = 2π",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_desc),
                                             fontSize = 12.sp,
                                         color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
                                         )
@@ -533,14 +551,14 @@ fun SettingsDialog(
                         ) {
                             Column(modifier = Modifier.padding(14.dp)) {
                                 Text(
-                                    text = "Unterstützte Umrechnungssysteme:",
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.units_supported_systems),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "• Metrisch ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperatur (°C ↔ °F)\n• Volumen (l ↔ gal)",
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.units_systems_detail),
                                     fontSize = 13.sp,
                                     color = colorScheme.onSurface.copy(alpha = 0.75f)
                                 )
@@ -562,7 +580,7 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "Bildschirmgröße & Skalierung",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_screen_scaling),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
@@ -592,7 +610,7 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "Simulierte Android-Version",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_simulated_api_title),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
@@ -612,7 +630,7 @@ fun SettingsDialog(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "API-Stufe simulieren",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.dev_simulate_api_switch),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
@@ -758,13 +776,13 @@ fun SettingsDialog(
                                                 .alpha(if (isHapticUsable) 1.0f else 0.5f)
                                         ) {
                                             Text(
-                                                text = "Haptisches Feedback",
+                                                text = androidx.compose.ui.res.stringResource(id = R.string.dev_haptic_title),
                                                 fontSize = 15.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = colorScheme.primary
                                             )
                                             Text(
-                                                text = "Vibration bei Tastendruck und Schaltern",
+                                                text = androidx.compose.ui.res.stringResource(id = R.string.dev_haptic_desc),
                                                 fontSize = 12.sp,
                                                 color = colorScheme.onSurfaceVariant
                                             )
@@ -796,7 +814,7 @@ fun SettingsDialog(
                                         !hasVibratorMotor -> {
                                             Spacer(modifier = Modifier.height(6.dp))
                                             Text(
-                                                text = "Dieses Gerät unterstützt kein haptisches Feedback.",
+                                                text = androidx.compose.ui.res.stringResource(id = R.string.dev_haptic_unsupported_device),
                                                 fontSize = 12.sp,
                                                 color = colorScheme.error,
                                                 fontWeight = FontWeight.Medium,
@@ -806,7 +824,7 @@ fun SettingsDialog(
                                         simulatedApiEnabled && !isSupportedBySimulatedApi -> {
                                             Spacer(modifier = Modifier.height(6.dp))
                                             Text(
-                                                text = "Wird von der simulierten API-Stufe nicht unterstützt.",
+                                                text = androidx.compose.ui.res.stringResource(id = R.string.dev_haptic_unsupported_api),
                                                 fontSize = 12.sp,
                                                 color = colorScheme.error,
                                                 fontWeight = FontWeight.Medium,
@@ -817,9 +835,9 @@ fun SettingsDialog(
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text(
                                                 text = if (hapticMotorType == com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.LRA) {
-                                                    "Hardware: LRA-Linearmotor erkannt (feine Haptik-Impulse aktiv)"
+                                                    androidx.compose.ui.res.stringResource(id = R.string.dev_haptic_lra_detected)
                                                 } else {
-                                                    "Hardware: ERM-Rotationsmotor erkannt (robuste Impulssteuerung aktiv)"
+                                                    androidx.compose.ui.res.stringResource(id = R.string.dev_haptic_erm_detected)
                                                 },
                                                 fontSize = 11.sp,
                                                 color = colorScheme.primary.copy(alpha = 0.8f),
@@ -847,13 +865,13 @@ fun SettingsDialog(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "Automatisches Ergebnis",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.dev_auto_result_title),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
                                         )
                                         Text(
-                                            text = "Ergebnis live bei Eingabe berechnen",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.dev_auto_result_desc),
                                             fontSize = 12.sp,
                                             color = colorScheme.onSurfaceVariant
                                         )
@@ -884,7 +902,7 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "Zustandserhalt & Lifecycle",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_lifecycle_title),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
@@ -911,7 +929,7 @@ fun SettingsDialog(
                                                 .testTag("btn_simulate_background"),
                                             shape = RoundedCornerShape(24.dp)
                                         ) {
-                                            Text("Hintergrund", fontSize = 11.sp, maxLines = 1)
+                                            Text(androidx.compose.ui.res.stringResource(id = R.string.dev_btn_background), fontSize = 11.sp, maxLines = 1)
                                         }
                                         Button(
                                             onClick = {
@@ -924,7 +942,7 @@ fun SettingsDialog(
                                                 .testTag("btn_test_crash_protection"),
                                             shape = RoundedCornerShape(24.dp)
                                         ) {
-                                            Text("Crash-Test", fontSize = 11.sp, maxLines = 1)
+                                            Text(androidx.compose.ui.res.stringResource(id = R.string.dev_btn_crash_test), fontSize = 11.sp, maxLines = 1)
                                         }
                                     }
                                 }
@@ -939,14 +957,14 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "App-Speicher zurücksetzen",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_reset_storage_title),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.error
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Löscht den gesamten Verlauf, gespeicherte Ausdrücke und setzt alle Einstellungen auf Standard zurück.",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_reset_storage_desc),
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
@@ -965,7 +983,7 @@ fun SettingsDialog(
                                             .fillMaxWidth()
                                             .testTag("btn_reset_storage")
                                     ) {
-                                        Text("Einstellungen zurücksetzen", fontWeight = FontWeight.Bold)
+                                        Text(androidx.compose.ui.res.stringResource(id = R.string.dev_btn_reset_storage), fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -979,26 +997,28 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "Cache leeren",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_clear_cache_title),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Gibt temporären Speicherplatz frei, ohne deine Einstellungen oder den Verlauf zu verändern.",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_clear_cache_desc),
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
+                                    val cacheSuccessMsg = androidx.compose.ui.res.stringResource(id = R.string.toast_cache_cleared)
+                                    val cacheErrorMsg = androidx.compose.ui.res.stringResource(id = R.string.toast_cache_error)
                                     Button(
                                         onClick = {
                                             triggerHaptic()
                                             try {
                                                 context.cacheDir.deleteRecursively()
-                                                Toast.makeText(context, "Cache erfolgreich geleert", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, cacheSuccessMsg, Toast.LENGTH_SHORT).show()
                                             } catch (e: Exception) {
-                                                Toast.makeText(context, "Cache konnte nicht vollständig gelöscht werden", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, cacheErrorMsg, Toast.LENGTH_SHORT).show()
                                             }
                                         },
                                         colors = ButtonDefaults.buttonColors(
@@ -1010,7 +1030,7 @@ fun SettingsDialog(
                                             .fillMaxWidth()
                                             .testTag("btn_clear_cache")
                                     ) {
-                                        Text("Cache leeren", fontWeight = FontWeight.Bold)
+                                        Text(androidx.compose.ui.res.stringResource(id = R.string.dev_btn_clear_cache), fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -1044,14 +1064,14 @@ fun SettingsDialog(
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Android 8.0 - 17 Ready (API 26-37)",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.app_version_subtitle),
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant,
                                         textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = "Copyright © 2026 limonatalp4",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.copyright_notice),
                                         fontSize = 11.sp,
                                         color = colorScheme.onSurface.copy(alpha = 0.6f),
                                         textAlign = TextAlign.Center
@@ -1080,7 +1100,7 @@ fun SettingsDialog(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "GitHub Repository",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.info_github_repo),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
@@ -1094,7 +1114,7 @@ fun SettingsDialog(
                                     }
                                     Icon(
                                         imageVector = Icons.Default.OpenInBrowser,
-                                        contentDescription = "Auf GitHub öffnen",
+                                        contentDescription = androidx.compose.ui.res.stringResource(id = R.string.info_github_open),
                                         tint = colorScheme.primary
                                     )
                                 }
@@ -1118,7 +1138,7 @@ fun SettingsDialog(
                                             tint = colorScheme.primary
                                         )
                                         Text(
-                                            text = "Drittanbieter-Lizenzen",
+                                            text = androidx.compose.ui.res.stringResource(id = R.string.info_oss_licenses),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = colorScheme.primary
@@ -1126,7 +1146,7 @@ fun SettingsDialog(
                                     }
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "Vollständige Übersicht aller verwendeten Open-Source-Bibliotheken und deren Lizenzen.",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.info_oss_licenses_desc),
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
@@ -1151,7 +1171,7 @@ fun SettingsDialog(
                                             .height(48.dp)
                                             .testTag("btn_oss_licenses")
                                     ) {
-                                        Text("Open-Source-Lizenzen anzeigen", fontWeight = FontWeight.Bold)
+                                        Text(androidx.compose.ui.res.stringResource(id = R.string.info_btn_oss_licenses), fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -1281,21 +1301,84 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = "Verwendete Bibliotheken",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.info_used_libraries),
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
                                     Text(
-                                        text = "• Jetpack Compose & Material 3: Modernes UI-Framework\n" +
-                                                "• LiquidGlass (nadeemiqbal): Fluider Blur- & Glas-Shader\n" +
-                                                "• mXparser: Mathematische Formelauswertung, Analysis & Graphen\n" +
-                                                "• DataStore Preferences: Asynchrone, robuste Datenspeicherung\n" +
-                                                "• Play Services OSS Licenses: Automatische Drittanbieter-Lizenzverwaltung",
+                                        text = androidx.compose.ui.res.stringResource(id = R.string.info_libraries_detail),
                                         fontSize = 12.sp,
                                         color = colorScheme.onSurfaceVariant
                                     )
+                                }
+                            }
+                        }
+                    }
+                    4 -> {
+                        // Language Selection Section
+                        Text(
+                            text = androidx.compose.ui.res.stringResource(id = R.string.language_select_heading),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Language.entries.forEach { langOption ->
+                                val isSelected = currentLanguage == langOption.localeTag
+                                val cardBg = if (isSelected) {
+                                    if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                                } else {
+                                    if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                }
+                                val cardBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) colorScheme.primary else glassProps.buttonBorderColor)
+                                val textColor = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+
+                                GlassSurface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            triggerHaptic()
+                                            onSelectLanguage(langOption.localeTag)
+                                        }
+                                        .testTag("radio_lang_${langOption.name}"),
+                                    shape = RoundedCornerShape(24.dp),
+                                    borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                                    customBorderColor = cardBorder,
+                                    customBgColor = cardBg
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
+                                            selected = isSelected,
+                                            onClick = {
+                                                triggerHaptic()
+                                                onSelectLanguage(langOption.localeTag)
+                                            },
+                                            colors = RadioButtonDefaults.colors(
+                                                selectedColor = textColor,
+                                                unselectedColor = if (isAmoled) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
+                                            )
+                                        )
+                                        Text(
+                                            text = androidx.compose.ui.res.stringResource(id = langOption.stringResId),
+                                            fontSize = 15.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = textColor,
+                                            modifier = Modifier.padding(start = 12.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

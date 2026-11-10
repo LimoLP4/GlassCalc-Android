@@ -1,0 +1,161 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">Android 8.0 - 17 Ready (API 26-37)</string>
+    <string name="app_version_tag">v1.2.2 • Android 8-17 Ready</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <!-- Navigation Drawer -->
+    <string name="nav_open_menu">Open menu</string>
+    <string name="nav_calculator">Calculator</string>
+    <string name="nav_history">History</string>
+    <string name="nav_converter">Unit Converter</string>
+    <string name="nav_graph">Graph</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_close">Close</string>
+    <string name="nav_history_show">Show history</string>
+
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">Standard</string>
+    <string name="mode_scientific">Scientific</string>
+    <string name="btn_constants">Const.</string>
+    <string name="btn_constants_desc">Physical and mathematical constants</string>
+    <string name="btn_del_desc">Delete (Hold to delete continuously)</string>
+    <string name="btn_copy_clipboard">Copy result to clipboard</string>
+    <string name="toast_copied">Copied to clipboard: %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">Division by 0 not possible</string>
+    <string name="error_syntax">Syntax error</string>
+    <string name="error_not_defined">Not defined</string>
+    <string name="error_calculation">Calculation error</string>
+    <string name="error_invalid_expression">Invalid expression</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">History (Last 20)</string>
+    <string name="history_empty">No calculations saved yet.</string>
+    <string name="btn_history_clear">Clear</string>
+    <string name="btn_history_clear_desc">Clear history</string>
+
+    <!-- Unit Converter Dialog -->
+    <string name="title_converter">Unit Converter</string>
+    <string name="cat_length">Length</string>
+    <string name="cat_mass">Mass</string>
+    <string name="cat_temp">Temp.</string>
+    <string name="cat_volume">Volume</string>
+    <string name="converter_select_pair">Select conversion:</string>
+    <string name="converter_input_label">Input (%s):</string>
+    <string name="converter_swap_direction">Reverse direction</string>
+    <string name="converter_result_label">Result (%s):</string>
+    <string name="converter_import">Import into calculator</string>
+
+    <!-- Unit Pairs -->
+    <string name="unit_m_ft">Meters ↔ Feet (m ↔ ft)</string>
+    <string name="unit_cm_in">Centimeters ↔ Inches (cm ↔ in)</string>
+    <string name="unit_km_mi">Kilometers ↔ Miles (km ↔ mi)</string>
+    <string name="unit_kg_lb">Kilograms ↔ Pounds (kg ↔ lb)</string>
+    <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
+    <string name="unit_l_gal">Liters ↔ Gallons (l ↔ gal)</string>
+
+    <!-- Constants Dialog -->
+    <string name="title_constants">Scientific Constants</string>
+    <string name="cat_constants_math">Mathematics</string>
+    <string name="cat_constants_physics">Physics</string>
+    <string name="cat_constants_astro">Astronomy</string>
+    <string name="constants_apply_hint">Tap to insert value directly into current calculation.</string>
+    <string name="constants_select_heading">Choose a physical or mathematical constant:</string>
+    <string name="const_pi">Pi (Circle constant)</string>
+    <string name="const_e">Euler\'s number</string>
+    <string name="const_c">Speed of light</string>
+    <string name="const_g">Standard gravity</string>
+    <string name="const_h">Planck constant</string>
+    <string name="const_G">Gravitational constant</string>
+    <string name="const_na">Avogadro constant</string>
+    <string name="const_k">Boltzmann constant</string>
+
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">Function Graph</string>
+    <string name="graph_hint_expression">Enter formula (e.g. sin(x), x^2, cos(x)*2):</string>
+    <string name="graph_gesture_locked">Gestures locked</string>
+    <string name="graph_gesture_unlocked">Gestures enabled</string>
+    <string name="graph_gesture_unlock">Unlock graph gestures</string>
+    <string name="graph_gesture_lock">Lock graph gestures</string>
+    <string name="graph_hint_scan">Swipe to inspect</string>
+    <string name="graph_pan_left">Pan left</string>
+    <string name="graph_pan_right">Pan right</string>
+    <string name="graph_zoom_in">Zoom in</string>
+    <string name="graph_zoom_out">Zoom out</string>
+    <string name="graph_reset">Reset</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">Settings</string>
+    <string name="title_appearance">Design</string>
+    <string name="title_units">Units</string>
+    <string name="title_dev_options">Developer</string>
+    <string name="title_info">Info</string>
+    <string name="tab_language">Language</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">Select theme:</string>
+    <string name="theme_material_you">Material You (Dynamic Colors)</string>
+    <string name="theme_automatic">Automatic (System)</string>
+    <string name="theme_white_mode">White Mode (Light)</string>
+    <string name="theme_standard_dark">Dark Mode (Standard)</string>
+    <string name="theme_dark_mode">Dark Mode (Deep Black)</string>
+    <string name="theme_amoled_dark">AMOLED Dark (Pure Black)</string>
+    <string name="theme_material_you_unsupported">Not compatible with this Android version (requires API 31+, active: API %d)</string>
+    <string name="theme_amoled_desc">Pure black #000000 with 10-15% white-glass for maximal OLED battery savings</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">Default angle mode for trigonometry:</string>
+    <string name="angle_deg_label">Degree (DEG)</string>
+    <string name="angle_deg_desc">Standard circle = 360°</string>
+    <string name="angle_rad_label">Radian (RAD)</string>
+    <string name="angle_rad_desc">Full circle = 2π</string>
+    <string name="units_supported_systems">Supported conversion systems:</string>
+    <string name="units_systems_detail">• Metric ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperature (°C ↔ °F)\n• Volume (l ↔ gal)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">Screen Size &amp; Scaling</string>
+    <string name="dev_simulated_api_title">Simulated Android Version</string>
+    <string name="dev_simulate_api_switch">Simulate API level</string>
+    <string name="dev_haptic_title">Haptic Feedback</string>
+    <string name="dev_haptic_desc">Vibration on key presses and switches</string>
+    <string name="dev_haptic_unsupported_device">This device does not support haptic feedback.</string>
+    <string name="dev_haptic_unsupported_api">Not supported by the simulated API level.</string>
+    <string name="dev_haptic_lra_detected">Hardware: LRA linear motor detected (fine haptic pulses active)</string>
+    <string name="dev_haptic_erm_detected">Hardware: ERM rotary motor detected (robust pulse control active)</string>
+    <string name="dev_auto_result_title">Automatic Result</string>
+    <string name="dev_auto_result_desc">Compute result live during input</string>
+    <string name="dev_lifecycle_title">State Preservation &amp; Lifecycle</string>
+    <string name="dev_btn_background">Background</string>
+    <string name="dev_btn_crash_test">Crash-Test</string>
+    <string name="dev_reset_storage_title">Reset App Storage</string>
+    <string name="dev_reset_storage_desc">Deletes all history, saved expressions, and resets all settings to default.</string>
+    <string name="dev_btn_reset_storage">Reset Settings</string>
+    <string name="dev_clear_cache_title">Clear Cache</string>
+    <string name="dev_clear_cache_desc">Frees temporary storage space without altering your settings or history.</string>
+    <string name="dev_btn_clear_cache">Clear Cache</string>
+    <string name="toast_cache_cleared">Cache cleared successfully</string>
+    <string name="toast_cache_error">Could not completely clear cache</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">GitHub Repository</string>
+    <string name="info_github_open">Open on GitHub</string>
+    <string name="info_oss_licenses">Third-Party Licenses</string>
+    <string name="info_oss_licenses_desc">Full overview of all open-source libraries used and their licenses.</string>
+    <string name="info_btn_oss_licenses">Show Open Source Licenses</string>
+    <string name="info_used_libraries">Used Libraries</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3: Modern UI framework\n• LiquidGlass (nadeemiqbal): Fluid blur &amp; glass shader\n• mXparser: Math formula evaluation, calculus &amp; graphs\n• DataStore Preferences: Asynchronous, robust data storage\n• Play Services OSS Licenses: Automated third-party license management</string>
+
+    <!-- Settings: Language Tab -->
+    <string name="language_select_heading">Select language:</string>
+    <string name="language_system">System Language (Default)</string>
+    <string name="language_german">German (Deutsch)</string>
+    <string name="language_english">English (Englisch)</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">Really reset the app?</string>
+    <string name="dialog_reset_text">All DataStore settings, saved calculations, and the entire history will be permanently deleted.</string>
+    <string name="dialog_reset_confirm">Reset</string>
+    <string name="dialog_reset_cancel">Cancel</string>
+</resources>

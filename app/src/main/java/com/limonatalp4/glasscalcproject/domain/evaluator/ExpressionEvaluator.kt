@@ -1,5 +1,6 @@
 package com.limonatalp4.glasscalcproject.domain.evaluator
 
+import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import org.mariuszgromada.math.mxparser.Expression
 import org.mariuszgromada.math.mxparser.License
@@ -11,7 +12,7 @@ import kotlin.math.*
 
 sealed class EvaluationResult {
     data class Success(val value: Double, val formatted: String) : EvaluationResult()
-    data class Error(val message: String) : EvaluationResult()
+    data class Error(val messageResId: Int) : EvaluationResult()
 }
 
 class ExpressionEvaluator {
@@ -46,34 +47,34 @@ class ExpressionEvaluator {
             
             // Check if dividing by literal 0 (e.g. /0 or /0.0)
             if (Regex("""/\s*0+(\.0+)?(?!\d)""").containsMatchIn(sanitized)) {
-                return EvaluationResult.Error("Division durch 0 nicht möglich")
+                return EvaluationResult.Error(R.string.error_division_by_zero)
             }
 
             val e = Expression(sanitized)
             val result = e.calculate()
 
             if (result.isInfinite()) {
-                return EvaluationResult.Error("Division durch 0 nicht möglich")
+                return EvaluationResult.Error(R.string.error_division_by_zero)
             }
 
             if (result.isNaN()) {
                 val err = e.errorMessage
-                val userMsg = if (!err.isNullOrBlank() && !err.contains("no errors", ignoreCase = true)) {
-                    "Syntaxfehler"
+                val userResId = if (!err.isNullOrBlank() && !err.contains("no errors", ignoreCase = true)) {
+                    R.string.error_syntax
                 } else {
-                    "Nicht definiert"
+                    R.string.error_not_defined
                 }
-                return EvaluationResult.Error(userMsg)
+                return EvaluationResult.Error(userResId)
             }
 
             val formatted = formatResult(result)
             return EvaluationResult.Success(result, formatted)
-        } catch (e: ArithmeticException) {
-            return EvaluationResult.Error(e.message ?: "Berechnungsfehler")
-        } catch (e: IllegalArgumentException) {
-            return EvaluationResult.Error(e.message ?: "Syntaxfehler")
+        } catch (_: ArithmeticException) {
+            return EvaluationResult.Error(R.string.error_calculation)
+        } catch (_: IllegalArgumentException) {
+            return EvaluationResult.Error(R.string.error_syntax)
         } catch (_: Exception) {
-            return EvaluationResult.Error("Ungültiger Ausdruck")
+            return EvaluationResult.Error(R.string.error_invalid_expression)
         }
     }
 
@@ -96,13 +97,11 @@ class ExpressionEvaluator {
             .replace("∫", "int")
             .replace("mod", "#")
             .replace("|", "abs")
-            // mXparser: log(x) is natural log in some parser conventions, log10(x) is base-10
-            // When user types log(x), map to log10(x) so log(100) = 2
             .replace(Regex("""(?<![a-zA-Z0-9_])log\("""), "log10(")
     }
 
     fun formatResult(value: Double): String {
-        if (value.isNaN() || value.isInfinite()) return "Fehler"
+        if (value.isNaN() || value.isInfinite()) return "Error"
         // Whole number check
         if (abs(value - round(value)) < 1e-9 && abs(value) < 1e12) {
             return round(value).toLong().toString()

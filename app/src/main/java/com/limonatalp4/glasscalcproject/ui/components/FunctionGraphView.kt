@@ -37,6 +37,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import com.limonatalp4.glasscalcproject.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -369,7 +371,7 @@ fun FunctionGraphView(
                 ) {
                     Icon(
                         imageVector = if (isGraphLocked) Icons.Default.Lock else Icons.Default.LockOpen,
-                        contentDescription = if (isGraphLocked) "Graph-Gesten entsperren" else "Graph-Gesten sperren",
+                        contentDescription = if (isGraphLocked) stringResource(R.string.graph_gesture_unlock) else stringResource(R.string.graph_gesture_lock),
                         tint = if (isGraphLocked) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.4f),
                         modifier = Modifier.size(20.dp)
                     )
@@ -688,7 +690,7 @@ fun FunctionGraphView(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = "Schließen",
+                                    contentDescription = stringResource(R.string.nav_close),
                                     tint = traceLineColor,
                                     modifier = Modifier.size(14.dp)
                                 )
@@ -717,7 +719,7 @@ fun FunctionGraphView(
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
-                                text = "Wischen zum Abtasten",
+                                text = stringResource(R.string.graph_hint_scan),
                                 fontSize = 9.sp,
                                 color = labelColor
                             )
@@ -757,7 +759,7 @@ fun FunctionGraphView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Links schwenken",
+                            contentDescription = stringResource(R.string.graph_pan_left),
                             tint = graphColor,
                             modifier = Modifier.size(16.dp)
                         )
@@ -775,7 +777,7 @@ fun FunctionGraphView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "Rechts schwenken",
+                            contentDescription = stringResource(R.string.graph_pan_right),
                             tint = graphColor,
                             modifier = Modifier.size(16.dp)
                         )
@@ -798,7 +800,7 @@ fun FunctionGraphView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Zoom In",
+                            contentDescription = stringResource(R.string.graph_zoom_in),
                             tint = graphColor,
                             modifier = Modifier.size(16.dp)
                         )
@@ -821,7 +823,7 @@ fun FunctionGraphView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Remove,
-                            contentDescription = "Zoom Out",
+                            contentDescription = stringResource(R.string.graph_zoom_out),
                             tint = graphColor,
                             modifier = Modifier.size(16.dp)
                         )
@@ -834,7 +836,7 @@ fun FunctionGraphView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.RestartAlt,
-                            contentDescription = "Zurücksetzen",
+                            contentDescription = stringResource(R.string.graph_reset),
                             tint = colorScheme.onSurface.copy(alpha = 0.70f),
                             modifier = Modifier.size(16.dp)
                         )

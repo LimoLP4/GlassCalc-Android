@@ -113,6 +113,7 @@ dependencies {
   implementation("com.google.android.gms:play-services-oss-licenses:17.5.2")
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.androidx.appcompat)
 
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)

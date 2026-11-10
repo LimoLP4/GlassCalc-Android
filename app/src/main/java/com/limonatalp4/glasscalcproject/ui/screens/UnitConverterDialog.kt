@@ -19,9 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Opacity
@@ -49,12 +47,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
@@ -62,7 +64,6 @@ import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
-import androidx.compose.foundation.BorderStroke
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,8 +75,8 @@ fun UnitConverterDialog(
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val view = androidx.compose.ui.platform.LocalView.current
+    val context = LocalContext.current
+    val view = LocalView.current
 
     fun triggerHaptic() {
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
@@ -149,7 +150,7 @@ fun UnitConverterDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Einheitenumrechnung",
+                        text = stringResource(R.string.title_converter),
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
@@ -163,7 +164,7 @@ fun UnitConverterDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Schließen",
+                            contentDescription = stringResource(R.string.nav_close),
                             tint = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
                         )
                     }
@@ -173,10 +174,10 @@ fun UnitConverterDialog(
 
                 // Pill-Design Segmented Control for Categories (matching SettingsDialog design)
                 val categoryTabs = listOf(
-                    Triple(UnitCategory.LENGTH, Icons.Default.Straighten, "Länge"),
-                    Triple(UnitCategory.MASS, Icons.Default.FitnessCenter, "Masse"),
-                    Triple(UnitCategory.TEMPERATURE, Icons.Default.Thermostat, "Temp."),
-                    Triple(UnitCategory.VOLUME, Icons.Default.Opacity, "Volumen")
+                    Triple(UnitCategory.LENGTH, Icons.Default.Straighten, R.string.cat_length),
+                    Triple(UnitCategory.MASS, Icons.Default.FitnessCenter, R.string.cat_mass),
+                    Triple(UnitCategory.TEMPERATURE, Icons.Default.Thermostat, R.string.cat_temp),
+                    Triple(UnitCategory.VOLUME, Icons.Default.Opacity, R.string.cat_volume)
                 )
 
                 Box(
@@ -206,7 +207,7 @@ fun UnitConverterDialog(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        categoryTabs.forEachIndexed { index, (cat, icon, shortLabel) ->
+                        categoryTabs.forEachIndexed { index, (cat, icon, shortLabelRes) ->
                             val isSelected = selectedCategoryIndex == index
                             val tabBg by animateColorAsState(
                                 targetValue = if (isSelected) primaryContainerColor else Color.Transparent,
@@ -249,7 +250,7 @@ fun UnitConverterDialog(
                                     )
                                     Spacer(modifier = Modifier.width(3.dp))
                                     Text(
-                                        text = shortLabel,
+                                        text = stringResource(shortLabelRes),
                                         fontSize = 11.5.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = tabTint,
@@ -266,7 +267,7 @@ fun UnitConverterDialog(
 
                 // Conversion Pairs in this category
                 Text(
-                    text = "Umrechnung auswählen:",
+                    text = stringResource(R.string.converter_select_pair),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
@@ -300,7 +301,7 @@ fun UnitConverterDialog(
                         customBgColor = pairBg
                     ) {
                         Text(
-                            text = pair.label,
+                            text = stringResource(pair.labelResId),
                             fontSize = 14.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = pairTextCol,
@@ -334,7 +335,7 @@ fun UnitConverterDialog(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Eingabe ($fromUnit):",
+                                text = stringResource(R.string.converter_input_label, fromUnit),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
@@ -349,7 +350,7 @@ fun UnitConverterDialog(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SwapHoriz,
-                                    contentDescription = "Richtung umkehren",
+                                    contentDescription = stringResource(R.string.converter_swap_direction),
                                     tint = primaryColor
                                 )
                             }
@@ -385,7 +386,7 @@ fun UnitConverterDialog(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Ergebnis ($toUnit):",
+                            text = stringResource(R.string.converter_result_label, toUnit),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
                             color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
@@ -424,7 +425,7 @@ fun UnitConverterDialog(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                    Text("In Rechner übernehmen", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.converter_import), fontWeight = FontWeight.Bold)
                 }
             }
         }

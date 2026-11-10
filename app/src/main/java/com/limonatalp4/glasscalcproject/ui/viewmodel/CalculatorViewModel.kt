@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
@@ -51,6 +52,20 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     val simulatedApiLevel: StateFlow<Int> = preferences.simulatedApiLevelFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, 30)
+
+    val language: StateFlow<String> = preferences.languageFlow
+        .catch { emit("") }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    fun setLanguage(languageTag: String) {
+        viewModelScope.launch {
+            try {
+                preferences.setLanguage(languageTag)
+            } catch (e: Exception) {
+                // Fallback / ignore exception to prevent crash
+            }
+        }
+    }
 
     val currentTheme: StateFlow<AppTheme> = combine(
         preferences.themeFlow,
@@ -144,7 +159,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     private fun getValidChainingResult(): String? {
         val res = _result.value
-        if (res.isNotEmpty() && _errorMessage.value == null && res != "Error" && !res.contains("nicht möglich")) {
+        if (res.isNotEmpty() && _errorMessage.value == null && res != "Error") {
             return res
         }
         return null
@@ -291,7 +306,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                 }
             }
             is EvaluationResult.Error -> {
-                _errorMessage.value = eval.message
+                _result.value = "Error"
+                _errorMessage.value = getApplication<Application>().getString(eval.messageResId)
             }
         }
     }
