@@ -120,7 +120,8 @@ fun UnitConverterDialog(
                 .padding(8.dp),
             shape = RoundedCornerShape(28.dp),
             borderWidth = 1.2.dp,
-            customBgColor = dialogBgColor
+            customBgColor = if (glassProps.isAmoled) Color.Black else dialogBgColor,
+            customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
         ) {
             Column(
                 modifier = Modifier
@@ -169,10 +170,10 @@ fun UnitConverterDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
-                        .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .background(if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         .border(
                             width = 1.dp,
-                            color = colorScheme.outline.copy(alpha = 0.3f),
+                            color = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
                             shape = RoundedCornerShape(50.dp)
                         )
                         .padding(4.dp)
@@ -190,7 +191,11 @@ fun UnitConverterDialog(
                                 label = "cat_tab_bg_$index"
                             )
                             val tabTint by animateColorAsState(
-                                targetValue = if (isSelected) onPrimaryContainerColor else colorScheme.onSurfaceVariant,
+                                targetValue = if (isSelected) {
+                                    if (glassProps.isAmoled) Color.White else onPrimaryContainerColor
+                                } else {
+                                    if (glassProps.isAmoled) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                                },
                                 animationSpec = tween(durationMillis = 220),
                                 label = "cat_tab_tint_$index"
                             )
@@ -247,10 +252,15 @@ fun UnitConverterDialog(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 conversionsInCategory.forEachIndexed { idx, pair ->
+                    val isAmoled = glassProps.isAmoled
                     val isSelected = selectedPairIndex == idx
-                    val pairBg = if (isSelected) primaryContainerColor else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    val pairBorder = if (isSelected) primaryColor else glassProps.buttonBorderColor
-                    val pairTextCol = if (isSelected) onPrimaryContainerColor else onSurfaceColor
+                    val pairBg = if (isSelected) {
+                        if (isAmoled) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                    } else {
+                        if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    }
+                    val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                    val pairTextCol = if (isAmoled) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
 
                     GlassSurface(
                         modifier = Modifier
@@ -282,7 +292,9 @@ fun UnitConverterDialog(
                 GlassSurface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    borderWidth = 1.2.dp
+                    borderWidth = 1.2.dp,
+                    customBgColor = if (glassProps.isAmoled) Color.Black else null,
+                    customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -322,12 +334,12 @@ fun UnitConverterDialog(
                                 .fillMaxWidth()
                                 .testTag("input_converter_value"),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                unfocusedContainerColor = colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                                focusedBorderColor = primaryColor,
-                                unfocusedBorderColor = glassProps.buttonBorderColor,
-                                focusedTextColor = onSurfaceColor,
-                                unfocusedTextColor = onSurfaceColor
+                                focusedContainerColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                                focusedBorderColor = if (glassProps.isAmoled) Color.White else primaryColor,
+                                unfocusedBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor,
+                                focusedTextColor = if (glassProps.isAmoled) Color.White else onSurfaceColor,
+                                unfocusedTextColor = if (glassProps.isAmoled) Color.White else onSurfaceColor
                             )
                         )
 

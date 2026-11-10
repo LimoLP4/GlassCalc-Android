@@ -263,11 +263,10 @@ fun CalculatorScreen(
                     onDismissRequest = { isMenuOpen = false },
                     properties = androidx.compose.ui.window.PopupProperties(focusable = true)
                 ) {
+                    val isAmoled = currentTheme == com.limonatalp4.glasscalcproject.data.model.AppTheme.AMOLED_DARK
                     val drawerBgColor = colorScheme.surfaceContainerHigh
                     val primaryTint = colorScheme.primary
                     val onSurfaceColor = colorScheme.onSurface
-                    val selectedContainerCol = colorScheme.primary
-                    val selectedTextCol = colorScheme.onPrimary
                     val view = LocalView.current
                     
                     GlassSurface(
@@ -276,7 +275,8 @@ fun CalculatorScreen(
                             .testTag("floating_nav_menu"),
                         shape = RoundedCornerShape(32.dp),
                         borderWidth = 1.2.dp,
-                        customBgColor = drawerBgColor.copy(alpha = 0.9f),
+                        customBgColor = if (isAmoled) Color.Black else drawerBgColor.copy(alpha = 0.9f),
+                        customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else null,
                         glassState = glassState
                     ) {
                         Column(
@@ -305,7 +305,7 @@ fun CalculatorScreen(
                                     text = "GlassCalc",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = onSurfaceColor
+                                    color = if (isAmoled) Color.White else onSurfaceColor
                                 )
                                 Text(
                                     text = "v1.2.1 • Android 8-17 Ready",
@@ -315,7 +315,7 @@ fun CalculatorScreen(
                                     maxLines = 1
                                 )
                             }
-                            HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
+                            HorizontalDivider(color = (if (isAmoled) Color.White else onSurfaceColor).copy(alpha = 0.08f))
                             Spacer(modifier = Modifier.height(16.dp))
                             
                             val menuItems = listOf(
@@ -331,10 +331,10 @@ fun CalculatorScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(32.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                    .background(if (isAmoled) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                     .border(
                                         width = 1.dp,
-                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        color = if (isAmoled) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(32.dp)
                                     )
                                     .padding(horizontal = 2.dp, vertical = 4.dp),
@@ -368,17 +368,23 @@ fun CalculatorScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
+                                            val iconTextTint = if (isAmoled) {
+                                                Color.White
+                                            } else {
+                                                if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor.copy(alpha = 0.7f)
+                                            }
+                                            
                                             Icon(
                                                 imageVector = icon,
                                                 contentDescription = null,
-                                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor.copy(alpha = 0.7f),
+                                                tint = iconTextTint,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                             Text(
                                                 text = label,
                                                 fontSize = 15.sp,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor
+                                                color = if (isAmoled) Color.White else (if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor)
                                             )
                                         }
                                     }
