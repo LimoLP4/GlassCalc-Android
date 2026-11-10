@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -289,44 +290,60 @@ fun CalculatorScreen(
                                 Triple(Icons.Default.ShowChart, "Graph", "nav_item_graph"),
                                 Triple(Icons.Default.Settings, "Einstellungen", "nav_item_settings")
                             )
-                            
-                            menuItems.forEach { (icon, label, tag) ->
-                                val isSelected = label == "Rechner"
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .clip(CircleShape)
-                                        .background(if (isSelected) selectedContainerCol else Color.Transparent)
-                                        .clickable {
-                                            HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                            isMenuOpen = false
-                                            when (label) {
-                                                "Verlauf" -> showHistorySheet = true
-                                                "Einheitenumrechnung" -> showConverterDialog = true
-                                                "Graph" -> showGraphDialog = true
-                                                "Einstellungen" -> showSettingsDialog = true
+
+                            // Outer Segmented Control Container
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(32.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(32.dp)
+                                    )
+                                    .padding(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                menuItems.forEach { (icon, label, tag) ->
+                                    val isSelected = label == "Rechner"
+                                    
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(24.dp))
+                                            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                                            .clickable {
+                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                                isMenuOpen = false
+                                                when (label) {
+                                                    "Verlauf" -> showHistorySheet = true
+                                                    "Einheitenumrechnung" -> showConverterDialog = true
+                                                    "Graph" -> showGraphDialog = true
+                                                    "Einstellungen" -> showSettingsDialog = true
+                                                }
                                             }
-                                        }
-                                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                                        .testTag(tag)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                                            .testTag(tag),
+                                        contentAlignment = Alignment.CenterStart
                                     ) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            tint = if (isSelected) selectedTextCol else onSurfaceColor.copy(alpha = 0.7f),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = label,
-                                            fontSize = 15.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) selectedTextCol else onSurfaceColor
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = icon,
+                                                contentDescription = null,
+                                                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor.copy(alpha = 0.7f),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Text(
+                                                text = label,
+                                                fontSize = 15.sp,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor
+                                            )
+                                        }
                                     }
                                 }
                             }
