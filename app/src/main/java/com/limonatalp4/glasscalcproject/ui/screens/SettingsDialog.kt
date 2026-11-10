@@ -1393,7 +1393,7 @@ fun SettingsDialog(
             onDismissRequest = { showResetConfirmDialog = false },
             icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = colorScheme.error) },
             title = { Text(stringResource(R.string.dialog_reset_title) },
-            text = { Text(stringResource(R.string.dialog_reset_text)) },
+            title = { Text(stringResource(R.string.dialog_reset_title) },
             confirmButton = {
                 TextButton(
                     onClick = {
