@@ -246,7 +246,11 @@ fun CalculatorScreen(
             }
             
             // Popup Menu
-            if (isMenuOpen) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isMenuOpen,
+                enter = androidx.compose.animation.slideInHorizontally(initialOffsetX = { -it }) + androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.slideOutHorizontally(targetOffsetX = { -it }) + androidx.compose.animation.fadeOut()
+            ) {
                 androidx.compose.ui.window.Popup(
                     alignment = Alignment.TopStart,
                     offset = androidx.compose.ui.unit.IntOffset(16, 160),

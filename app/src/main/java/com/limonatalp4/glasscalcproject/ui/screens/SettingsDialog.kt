@@ -68,7 +68,10 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -146,6 +149,13 @@ fun SettingsDialog(
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
     val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
+    val coroutineScope = rememberCoroutineScope()
+    var isDismissing by remember { mutableStateOf(false) }
+    val alphaAnim by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isDismissing) 0f else 1f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+        label = "dialog_fade_anim"
+    )
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -154,7 +164,8 @@ fun SettingsDialog(
         GlassSurface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(8.dp)
+                .alpha(alphaAnim),
             shape = RoundedCornerShape(28.dp),
             borderWidth = 1.2.dp,
             customBgColor = when {
@@ -1056,7 +1067,7 @@ fun SettingsDialog(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "GlassCalc v1.2.3",
+                                        text = "GlassCalc v1.2.4",
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary,
@@ -1346,7 +1357,12 @@ fun SettingsDialog(
                                         .fillMaxWidth()
                                         .clickable {
                                             triggerHaptic()
-                                            onSelectLanguage(langOption.localeTag)
+                                            coroutineScope.launch {
+                                                isDismissing = true
+                                                delay(200)
+                                                onSelectLanguage(langOption.localeTag)
+                                                onDismiss()
+                                            }
                                         }
                                         .testTag("radio_lang_${langOption.name}"),
                                     shape = RoundedCornerShape(24.dp),
@@ -1364,7 +1380,12 @@ fun SettingsDialog(
                                             selected = isSelected,
                                             onClick = {
                                                 triggerHaptic()
-                                                onSelectLanguage(langOption.localeTag)
+                                                coroutineScope.launch {
+                                                    isDismissing = true
+                                                    delay(200)
+                                                    onSelectLanguage(langOption.localeTag)
+                                                    onDismiss()
+                                                }
                                             },
                                             colors = RadioButtonDefaults.colors(
                                                 selectedColor = textColor,
