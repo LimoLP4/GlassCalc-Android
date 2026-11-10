@@ -41,9 +41,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
+import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Color
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -67,10 +71,13 @@ fun HistorySheet(
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
     }
 
+    val glassProps = LocalGlassProperties.current
+    val isAmoled = glassProps.isAmoled
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colorScheme.surfaceContainerHigh,
+        containerColor = if (isAmoled) Color.Black else colorScheme.surfaceContainerHigh,
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         dragHandle = {
             // Highly rounded pill-style drag handle matching Liquid Glass theme
@@ -80,13 +87,19 @@ fun HistorySheet(
                     .width(42.dp)
                     .height(5.dp)
                     .clip(CircleShape)
-                    .background(colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                    .background(if (isAmoled) Color.White else colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
             )
         }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(
+                    if (isAmoled) Modifier.border(
+                        BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+                        RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    ) else Modifier
+                )
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 32.dp)
                 .testTag("history_sheet")
@@ -118,7 +131,7 @@ fun HistorySheet(
                             text = "Verlauf (Letzte 20)",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
+                            color = if (isAmoled) Color.White else colorScheme.onSurface
                         )
                     }
                 }
@@ -165,7 +178,7 @@ fun HistorySheet(
                     Text(
                         text = "Noch keine Berechnungen gespeichert.",
                         fontSize = 15.sp,
-                        color = colorScheme.onSurfaceVariant,
+                        color = if (isAmoled) Color.White else colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
