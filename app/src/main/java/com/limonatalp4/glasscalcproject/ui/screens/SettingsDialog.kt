@@ -123,8 +123,8 @@ fun SettingsDialog(
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
     val realDeviceApi = Build.VERSION.SDK_INT
-    val sliderMax = realDeviceApi.toFloat().coerceIn(26f, 37f)
-    val sliderMin = 26f
+    val sliderMax = realDeviceApi.toFloat().coerceIn(21f, 37f)
+    val sliderMin = 21f
     val sliderSteps = if (sliderMax > sliderMin) (sliderMax - sliderMin).toInt() - 1 else 0
 
     var currentSliderApi by remember(simulatedApiLevel, sliderMax) { 
@@ -730,9 +730,11 @@ fun SettingsDialog(
                                 }
                             }
 
-                            // Card 3: Haptic Feedback with hardware motor detection (LRA, ERM, None)
+                            // Card 3: Haptic Feedback with hardware motor detection (LRA, ERM, None) and simulated API check
                             val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
                             val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
+                            val isSupportedBySimulatedApi = effectiveApi >= 26
+                            val isHapticUsable = hasVibratorMotor && isSupportedBySimulatedApi
 
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
@@ -753,7 +755,7 @@ fun SettingsDialog(
                                         Column(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .alpha(if (hasVibratorMotor) 1.0f else 0.5f)
+                                                .alpha(if (isHapticUsable) 1.0f else 0.5f)
                                         ) {
                                             Text(
                                                 text = "Haptisches Feedback",
@@ -768,14 +770,14 @@ fun SettingsDialog(
                                             )
                                         }
                                         Switch(
-                                            checked = if (hasVibratorMotor) hapticFeedbackEnabled else false,
-                                            onCheckedChange = if (hasVibratorMotor) {
+                                            checked = if (isHapticUsable) hapticFeedbackEnabled else false,
+                                            onCheckedChange = if (isHapticUsable) {
                                                 {
                                                     HapticUtil.performAppHaptic(context, view, true)
                                                     onToggleHapticFeedback(it)
                                                 }
                                             } else null,
-                                            enabled = hasVibratorMotor,
+                                            enabled = isHapticUsable,
                                             colors = SwitchDefaults.colors(
                                                 checkedThumbColor = colorScheme.onPrimary,
                                                 checkedTrackColor = colorScheme.primary,
@@ -790,28 +792,41 @@ fun SettingsDialog(
                                         )
                                     }
 
-                                    if (!hasVibratorMotor) {
-                                        Spacer(modifier = Modifier.height(6.dp))
-                                        Text(
-                                            text = "Dieses Gerät unterstützt kein haptisches Feedback.",
-                                            fontSize = 12.sp,
-                                            color = colorScheme.error,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.testTag("text_haptic_unsupported")
-                                        )
-                                    } else {
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = if (hapticMotorType == com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.LRA) {
-                                                "Hardware: LRA-Linearmotor erkannt (feine Haptik-Impulse aktiv)"
-                                            } else {
-                                                "Hardware: ERM-Rotationsmotor erkannt (robuste Impulssteuerung aktiv)"
-                                            },
-                                            fontSize = 11.sp,
-                                            color = colorScheme.primary.copy(alpha = 0.8f),
-                                            fontFamily = FontFamily.Monospace,
-                                            modifier = Modifier.testTag("text_haptic_motor_type")
-                                        )
+                                    when {
+                                        !hasVibratorMotor -> {
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Text(
+                                                text = "Dieses Gerät unterstützt kein haptisches Feedback.",
+                                                fontSize = 12.sp,
+                                                color = colorScheme.error,
+                                                fontWeight = FontWeight.Medium,
+                                                modifier = Modifier.testTag("text_haptic_unsupported")
+                                            )
+                                        }
+                                        simulatedApiEnabled && !isSupportedBySimulatedApi -> {
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Text(
+                                                text = "Wird von der simulierten API-Stufe nicht unterstützt.",
+                                                fontSize = 12.sp,
+                                                color = colorScheme.error,
+                                                fontWeight = FontWeight.Medium,
+                                                modifier = Modifier.testTag("text_haptic_simulated_api_unsupported")
+                                            )
+                                        }
+                                        else -> {
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = if (hapticMotorType == com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.LRA) {
+                                                    "Hardware: LRA-Linearmotor erkannt (feine Haptik-Impulse aktiv)"
+                                                } else {
+                                                    "Hardware: ERM-Rotationsmotor erkannt (robuste Impulssteuerung aktiv)"
+                                                },
+                                                fontSize = 11.sp,
+                                                color = colorScheme.primary.copy(alpha = 0.8f),
+                                                fontFamily = FontFamily.Monospace,
+                                                modifier = Modifier.testTag("text_haptic_motor_type")
+                                            )
+                                        }
                                     }
                                 }
                             }
