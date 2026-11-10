@@ -1392,7 +1392,7 @@ fun SettingsDialog(
         AlertDialog(
             onDismissRequest = { showResetConfirmDialog = false },
             icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = colorScheme.error) },
-            title = { Text("App wirklich zurücksetzen?") },
+            title = { Text(stringResource(R.string.dialog_reset_title) },
             text = { Text("Alle DataStore-Einstellungen, gespeicherten Berechnungen und der gesamte Verlauf werden unwiderruflich gelöscht.") },
             confirmButton = {
                 TextButton(
