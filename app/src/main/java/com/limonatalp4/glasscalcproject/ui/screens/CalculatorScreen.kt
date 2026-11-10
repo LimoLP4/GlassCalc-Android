@@ -49,7 +49,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,7 +112,8 @@ fun CalculatorScreen(
             drawable.toBitmap(128, 128).asImageBitmap()
         }.getOrNull()
     }
-    var isMenuOpen by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val menuVisibleState = remember { androidx.compose.animation.core.MutableTransitionState(false) }
 
     val isScientificExpanded by viewModel.isScientificExpanded.collectAsState()
     val angleMode by viewModel.angleMode.collectAsState()
@@ -165,7 +174,7 @@ fun CalculatorScreen(
                                 IconButton(
                                     onClick = {
                                         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                        isMenuOpen = !isMenuOpen
+                                        menuVisibleState.targetState = !menuVisibleState.targetState
                                     },
                                     modifier = Modifier
                                         .size(36.dp)
@@ -246,27 +255,38 @@ fun CalculatorScreen(
             }
             
             // Popup Menu
-            androidx.compose.animation.AnimatedVisibility(
-                visible = isMenuOpen,
-                enter = androidx.compose.animation.slideInHorizontally(initialOffsetX = { -it }) + androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.slideOutHorizontally(targetOffsetX = { -it }) + androidx.compose.animation.fadeOut()
-            ) {
+            if (menuVisibleState.targetState || menuVisibleState.currentState) {
                 androidx.compose.ui.window.Popup(
                     alignment = Alignment.TopStart,
                     offset = androidx.compose.ui.unit.IntOffset(16, 160),
-                    onDismissRequest = { isMenuOpen = false },
+                    onDismissRequest = { menuVisibleState.targetState = false },
                     properties = androidx.compose.ui.window.PopupProperties(focusable = true)
                 ) {
-                    val isAmoled = currentTheme == com.limonatalp4.glasscalcproject.data.model.AppTheme.AMOLED_DARK
-                    val drawerBgColor = colorScheme.surfaceContainerHigh
-                    val primaryTint = colorScheme.primary
-                    val onSurfaceColor = colorScheme.onSurface
-                    val view = LocalView.current
-                    
-                    GlassSurface(
-                        modifier = Modifier
-                            .width(300.dp)
-                            .testTag("floating_nav_menu"),
+                    androidx.compose.animation.AnimatedVisibility(
+                        visibleState = menuVisibleState,
+                        enter = androidx.compose.animation.slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                        ) + androidx.compose.animation.fadeIn(
+                            animationSpec = tween(durationMillis = 200)
+                        ),
+                        exit = androidx.compose.animation.slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = tween(durationMillis = 220, easing = FastOutLinearInEasing)
+                        ) + androidx.compose.animation.fadeOut(
+                            animationSpec = tween(durationMillis = 200)
+                        )
+                    ) {
+                        val isAmoled = currentTheme == com.limonatalp4.glasscalcproject.data.model.AppTheme.AMOLED_DARK
+                        val drawerBgColor = colorScheme.surfaceContainerHigh
+                        val primaryTint = colorScheme.primary
+                        val onSurfaceColor = colorScheme.onSurface
+                        val view = LocalView.current
+                        
+                        GlassSurface(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .testTag("floating_nav_menu"),
                         shape = RoundedCornerShape(32.dp),
                         borderWidth = 1.2.dp,
                         customBgColor = if (isAmoled) Color.Black else drawerBgColor.copy(alpha = 0.9f),
@@ -346,12 +366,16 @@ fun CalculatorScreen(
                                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                             .clickable {
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                                isMenuOpen = false
-                                                when (tag) {
-                                                    "nav_item_history" -> showHistorySheet = true
-                                                    "nav_item_converter" -> showConverterDialog = true
-                                                    "nav_item_graph" -> showGraphDialog = true
-                                                    "nav_item_settings" -> showSettingsDialog = true
+                                                coroutineScope.launch {
+                                                    menuVisibleState.targetState = false
+                                                    snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
+                                                        .first { it }
+                                                    when (tag) {
+                                                        "nav_item_history" -> showHistorySheet = true
+                                                        "nav_item_converter" -> showConverterDialog = true
+                                                        "nav_item_graph" -> showGraphDialog = true
+                                                        "nav_item_settings" -> showSettingsDialog = true
+                                                    }
                                                 }
                                             }
                                             .testTag(tag),
@@ -387,6 +411,7 @@ fun CalculatorScreen(
                         }
                     }
                 }
+            }
             }
         }
 
