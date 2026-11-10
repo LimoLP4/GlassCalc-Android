@@ -74,14 +74,14 @@ fun HistorySheet(
 
     val glassProps = LocalGlassProperties.current
     val isAmoled = glassProps.isAmoled
-    val isNormalDark = currentTheme == com.limonatalp4.glasscalcproject.data.model.AppTheme.DARK_MODE
+    val isTiefschwarz = glassProps.isTiefschwarz
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = when {
             isAmoled -> Color.Black
-            isNormalDark -> Color(0xFF121212)
+            isTiefschwarz -> Color(0xFF121212)
             else -> colorScheme.surfaceContainerHigh
         },
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
@@ -94,7 +94,7 @@ fun HistorySheet(
                     .height(5.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isAmoled || isNormalDark) Color.White 
+                        if (isAmoled || isTiefschwarz) Color.White 
                         else colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
             )
@@ -109,7 +109,7 @@ fun HistorySheet(
                             BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
                             RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
                         )
-                        isNormalDark -> Modifier.border(
+                        isTiefschwarz -> Modifier.border(
                             BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
                             RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
                         )
@@ -147,7 +147,7 @@ fun HistorySheet(
                             text = "Verlauf (Letzte 20)",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurface
+                            color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
                         )
                     }
                 }
@@ -194,7 +194,7 @@ fun HistorySheet(
                     Text(
                         text = "Noch keine Berechnungen gespeichert.",
                         fontSize = 15.sp,
-                        color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurfaceVariant,
+                        color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }

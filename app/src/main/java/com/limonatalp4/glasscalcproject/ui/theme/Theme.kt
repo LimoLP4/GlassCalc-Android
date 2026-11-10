@@ -21,6 +21,7 @@ data class GlassThemeProperties(
     val buttonBorderColor: Color,
     val cardBackground: Color,
     val isDark: Boolean,
+    val isTiefschwarz: Boolean,
     val isAmoled: Boolean,
     val isMaterialYou: Boolean,
     val supportsBlur: Boolean,
@@ -35,6 +36,7 @@ val LocalGlassProperties = staticCompositionLocalOf {
         buttonBorderColor = Color.White.copy(alpha = 0.20f),
         cardBackground = Color.White.copy(alpha = 0.07f),
         isDark = true,
+        isTiefschwarz = true,
         isAmoled = false,
         isMaterialYou = false,
         supportsBlur = true,
@@ -104,24 +106,27 @@ fun GlassCalcTheme(
     val systemDark = isSystemInDarkTheme()
     val effectiveApi = simulatedApiLevel
 
-    // Determine actual active theme mode
-    val resolvedTheme = when (selectedTheme) {
-        AppTheme.MATERIAL_YOU -> {
-            if (effectiveApi >= 31) AppTheme.MATERIAL_YOU else AppTheme.AUTOMATIC
-        }
-        AppTheme.AUTOMATIC -> if (systemDark) AppTheme.DARK_MODE else AppTheme.WHITE_MODE
+    // 1. Handle Fallback for Material You if not supported
+    val themeAfterFallback = when (selectedTheme) {
+        AppTheme.MATERIAL_YOU -> if (effectiveApi >= 31) AppTheme.MATERIAL_YOU else AppTheme.AUTOMATIC
         else -> selectedTheme
     }
 
-    val isDark = when (resolvedTheme) {
-        AppTheme.WHITE_MODE -> false
-        AppTheme.DARK_MODE, AppTheme.AMOLED_DARK -> true
-        AppTheme.MATERIAL_YOU -> systemDark
-        AppTheme.AUTOMATIC -> systemDark
+    // 2. Fully resolve AUTOMATIC to a concrete theme
+    val resolvedTheme = if (themeAfterFallback == AppTheme.AUTOMATIC) {
+        if (systemDark) AppTheme.DARK_MODE else AppTheme.WHITE_MODE
+    } else {
+        themeAfterFallback
     }
 
     val isAmoled = resolvedTheme == AppTheme.AMOLED_DARK
-    val isMaterialYou = resolvedTheme == AppTheme.MATERIAL_YOU && effectiveApi >= 31
+    val isTiefschwarz = resolvedTheme == AppTheme.DARK_MODE
+    val isMaterialYou = resolvedTheme == AppTheme.MATERIAL_YOU
+    val isDark = when (resolvedTheme) {
+        AppTheme.DARK_MODE, AppTheme.AMOLED_DARK, AppTheme.STANDARD_DARK -> true
+        AppTheme.MATERIAL_YOU -> systemDark
+        else -> false
+    }
 
     // Native blur supported only on Android 12+ (API 31+)
     val supportsBlur = effectiveApi >= 31
@@ -134,10 +139,16 @@ fun GlassCalcTheme(
             if (Build.VERSION.SDK_INT >= 31) {
                 if (systemDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } else {
-                if (isDark) DarkColorScheme else LightColorScheme
+                // This branch shouldn't be reached due to fallback but kept for safety
+                if (systemDark) DarkColorScheme else LightColorScheme
             }
         }
-        resolvedTheme == AppTheme.AMOLED_DARK -> AmoledColorScheme
+        isAmoled -> AmoledColorScheme
+        resolvedTheme == AppTheme.STANDARD_DARK -> DarkColorScheme.copy(
+            background = Color(0xFF1A1C1E),
+            surface = Color(0xFF1C1B1F),
+            surfaceVariant = Color(0xFF44474E)
+        )
         isDark -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -175,6 +186,16 @@ fun GlassCalcTheme(
                 )
             )
         }
+        resolvedTheme == AppTheme.STANDARD_DARK -> {
+            // Standard Dark: Material 3 typical charcoal gray gradient
+            Brush.verticalGradient(
+                listOf(
+                    Color(0xFF1A1C1E),
+                    Color(0xFF1E2124),
+                    Color(0xFF1A1C1E)
+                )
+            )
+        }
         isDark -> {
             // Dark Mode: Deep #0A0A0A with atmospheric midnight indigo & cyan glows
             Brush.verticalGradient(
@@ -203,6 +224,7 @@ fun GlassCalcTheme(
     val buttonAlpha = when {
         isMaterialYou -> if (isDark) 0.35f else 0.65f
         isAmoled -> 0.14f
+        resolvedTheme == AppTheme.STANDARD_DARK -> 0.12f
         isDark -> 0.08f
         else -> 0.65f
     }
@@ -227,6 +249,7 @@ fun GlassCalcTheme(
         buttonBorderColor = buttonBorderColor,
         cardBackground = cardBackground,
         isDark = isDark,
+        isTiefschwarz = isTiefschwarz,
         isAmoled = isAmoled,
         isMaterialYou = isMaterialYou,
         supportsBlur = supportsBlur,
