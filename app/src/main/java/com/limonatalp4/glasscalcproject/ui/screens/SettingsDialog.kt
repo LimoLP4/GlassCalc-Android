@@ -580,7 +580,7 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_screen_scaling),
+                                        text = stringResource(R.string.dev_screen_scaling),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
@@ -593,7 +593,7 @@ fun SettingsDialog(
                                         color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Auflösung: ${config.screenWidthDp}dp x ${config.screenHeightDp}dp",
+                                        text = stringResource(R.string.dev_resolution, config.screenWidthDp, config.screenHeightDp),
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
                                         color = colorScheme.onSurfaceVariant
@@ -610,14 +610,14 @@ fun SettingsDialog(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
-                                        text = androidx.compose.ui.res.stringResource(id = R.string.dev_simulated_api_title),
+                                        text = stringResource(R.string.dev_simulated_api_title),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Effektive UI-API: $effectiveApi",
+                                        text = stringResource(R.string.dev_effective_ui_api, effectiveApi),
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold,
@@ -630,7 +630,7 @@ fun SettingsDialog(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = androidx.compose.ui.res.stringResource(id = R.string.dev_simulate_api_switch),
+                                            text = stringResource(R.string.dev_simulate_api_switch),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
                                             color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
@@ -654,7 +654,7 @@ fun SettingsDialog(
                                     if (simulatedApiEnabled) {
                                         Spacer(modifier = Modifier.height(6.dp))
                                         Text(
-                                            text = "Stufe: API ${currentSliderApi.toInt()}",
+                                            text = stringResource(R.string.dev_api_level_slider, currentSliderApi.toInt()),
                                             fontSize = 12.sp,
                                             color = colorScheme.primary
                                         )
@@ -686,7 +686,7 @@ fun SettingsDialog(
 
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Text(
-                                        text = "API-Feature-Kompatibilität (Gerät-Limit: API $realDeviceApi):",
+                                        text = stringResource(R.string.dev_api_feature_compatibility, realDeviceApi),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = colorScheme.onSurfaceVariant
@@ -731,7 +731,7 @@ fun SettingsDialog(
                                                 ) {
                                                     Icon(
                                                         imageVector = if (isAvailable) Icons.Default.Check else Icons.Default.Close,
-                                                        contentDescription = if (isAvailable) "Unterstützt" else "Nicht unterstützt",
+                                                        contentDescription = if (isAvailable) stringResource(R.string.dev_feature_supported) else stringResource(R.string.dev_feature_not_supported),
                                                         tint = if (isAvailable) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.35f),
                                                         modifier = Modifier.size(13.dp)
                                                     )
