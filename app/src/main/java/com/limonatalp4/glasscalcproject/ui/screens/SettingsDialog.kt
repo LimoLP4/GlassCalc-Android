@@ -915,26 +915,31 @@ fun SettingsDialog(
                                 customBorderColor = glassProps.buttonBorderColor
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(18.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(18.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
                                         text = "GlassCalc v1.2.1",
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorScheme.primary
+                                        color = colorScheme.primary,
+                                        textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "Android 8.0 - 17 Ready (API 26-37)",
                                         fontSize = 12.sp,
-                                        color = colorScheme.onSurfaceVariant
+                                        color = colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Copyright © 2026 limonatalp4",
                                         fontSize = 11.sp,
-                                        color = colorScheme.onSurface.copy(alpha = 0.6f)
+                                        color = colorScheme.onSurface.copy(alpha = 0.6f),
+                                        textAlign = TextAlign.Center
                                     )
                                 }
                             }
