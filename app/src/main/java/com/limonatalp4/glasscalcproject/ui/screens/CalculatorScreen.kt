@@ -239,7 +239,7 @@ fun CalculatorScreen(
                         modifier = Modifier
                             .width(300.dp)
                             .testTag("floating_nav_menu"),
-                        shape = RoundedCornerShape(24.dp),
+                        shape = RoundedCornerShape(32.dp),
                         borderWidth = 1.2.dp,
                         customBgColor = drawerBgColor.copy(alpha = 0.9f),
                         glassState = glassState
@@ -311,7 +311,7 @@ fun CalculatorScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(24.dp))
+                                            .clip(RoundedCornerShape(50))
                                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                             .clickable {
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
