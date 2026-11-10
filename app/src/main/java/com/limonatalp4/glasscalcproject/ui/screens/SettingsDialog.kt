@@ -205,11 +205,11 @@ fun SettingsDialog(
 
                 // 5-Tab Segmented Control (Pill-Design)
                 val tabs = listOf(
-                    Triple(0, Icons.Default.Palette, androidx.compose.ui.res.stringResource(id = R.string.title_appearance)),
-                    Triple(1, Icons.Default.Straighten, androidx.compose.ui.res.stringResource(id = R.string.title_converter)),
-                    Triple(2, Icons.Default.DeveloperMode, androidx.compose.ui.res.stringResource(id = R.string.title_dev_options)),
-                    Triple(3, Icons.Default.Info, androidx.compose.ui.res.stringResource(id = R.string.title_info)),
-                    Triple(4, Icons.Default.Language, androidx.compose.ui.res.stringResource(id = R.string.tab_language))
+                    Triple(0, Icons.Default.Palette, stringResource(R.string.title_appearance)),
+                    Triple(1, Icons.Default.Straighten, stringResource(R.string.title_units)),
+                    Triple(2, Icons.Default.DeveloperMode, stringResource(R.string.title_dev_options)),
+                    Triple(3, Icons.Default.Info, stringResource(R.string.title_info)),
+                    Triple(4, Icons.Default.Language, stringResource(R.string.tab_language))
                 )
 
                 val tabScrollState = androidx.compose.foundation.rememberScrollState()
