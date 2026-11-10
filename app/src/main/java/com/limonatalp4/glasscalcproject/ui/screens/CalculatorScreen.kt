@@ -649,49 +649,66 @@ private fun LandscapeCalculatorLayout(
     val localContext = LocalContext.current
     val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
-    val expression by viewModel.expression.collectAsState()
-    val isGestureLocked by viewModel.isGraphLocked.collectAsState()
+    val leftScrollState = rememberScrollState()
+    val rightScrollState = rememberScrollState()
 
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
+        val availableWidth = maxWidth
         val availableHeight = maxHeight
-        // Calculation: Aim for ~8.5 vertical units (Display ~2.5, Space 0.5, DEG/RAD 0.7, Space 0.3, Grid 4.5)
-        // This ensures buttons are large enough on tablets but fit on phones.
-        val buttonSize = (availableHeight / 8.2f).coerceIn(36.dp, 84.dp)
-        val spacing = (availableHeight * 0.02f).coerceIn(4.dp, 10.dp)
+
+        // In the right half (~50% width), we have:
+        // Scientific Keyboard (5 columns) + Main Keyboard (4 columns) side-by-side = 9 columns total.
+        // There is spacing between columns in each grid, plus spacing between the two grids (~10.dp).
+        val rightHalfWidth = (availableWidth - 14.dp) / 2f
+        val interKeypadSpacing = 8.dp
+
+        // Total columns = 9. Total column gaps = 4 (in sci) + 3 (in main) = 7 gaps.
+        // We calculate maxButtonWidth so all 9 buttons fit horizontally within the right half:
+        val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.dp * 7)) / 9.2f)
+
+        // For vertical height: 5 rows of buttons in both grids.
+        // 5 * buttonSize + 4 * spacing <= availableHeight
+        val maxButtonHeight = ((availableHeight - 12.dp) / 5.2f)
+
+        // Button size fits both dimensions perfectly
+        val buttonSize = minOf(maxButtonWidth, maxButtonHeight).coerceIn(28.dp, 62.dp)
+        val spacing = (buttonSize * 0.08f).coerceIn(2.5.dp, 6.dp)
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(32.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // LEFT COLUMN: Display + DEG/RAD + Main Keypad
+            // LINKS (ca. 50% der Breite): Display + DEG/RAD-Button rechtsbündig darunter
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .verticalScroll(leftScrollState),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = Modifier.width(buttonSize * 4 + spacing * 3),
-                    verticalArrangement = Arrangement.spacedBy(spacing)
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     GlassDisplay(
                         expressionFlow = viewModel.expression,
                         resultFlow = viewModel.result,
                         errorMessageFlow = viewModel.errorMessage,
                         angleMode = angleMode,
-                        isScientificExpanded = false,
-                        isCompact = true,
+                        isScientificExpanded = true,
+                        isCompact = false,
                         glassState = glassState,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
-                    // DEG/RAD Button right-aligned under display
+
+                    // DEG/RAD Button rechtsbündig unter dem Display
                     Box(modifier = Modifier.fillMaxWidth()) {
                         GlassSurface(
                             shape = CircleShape,
@@ -704,46 +721,57 @@ private fun LandscapeCalculatorLayout(
                                     viewModel.toggleAngleMode()
                                 },
                                 modifier = Modifier.size(
-                                    width = (buttonSize * 1.6f).coerceAtLeast(76.dp), 
-                                    height = (buttonSize * 0.75f).coerceAtLeast(32.dp)
+                                    width = (buttonSize * 1.8f).coerceIn(68.dp, 96.dp),
+                                    height = (buttonSize * 0.75f).coerceIn(28.dp, 38.dp)
                                 )
                             ) {
                                 Text(
                                     text = if (angleMode == com.limonatalp4.glasscalcproject.data.model.AngleMode.DEG) "DEG" else "RAD",
-                                    fontSize = (buttonSize.value * 0.28f).coerceIn(11f, 16f).sp,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.primary
                                 )
                             }
                         }
                     }
+                }
+            }
 
+            // RECHTS (ca. 50% der Breite): Wissenschaftliche Tasten & Ziffernblock NEBENEINANDER (in einer inneren Row)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .verticalScroll(rightScrollState),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Wissenschaftliche Tasten (sin, cos, etc.) in einer Column links
+                    ScientificKeyboardGrid(
+                        viewModel = viewModel,
+                        glassState = glassState,
+                        buttonSize = buttonSize,
+                        spacing = spacing,
+                        onOpenConstants = onOpenConstants,
+                        modifier = Modifier.width(buttonSize * 5 + spacing * 4)
+                    )
+
+                    Spacer(modifier = Modifier.width(interKeypadSpacing))
+
+                    // Der Ziffernblock (Zahlen, AC, DEL, =) in einer Column rechts daneben
                     MainKeyboardGrid(
                         viewModel = viewModel,
                         glassState = glassState,
                         buttonSize = buttonSize,
                         spacing = spacing,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.width(buttonSize * 4 + spacing * 3)
                     )
                 }
-            }
-
-            // RIGHT COLUMN: Scientific Keypad
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ScientificKeyboardGrid(
-                    viewModel = viewModel,
-                    glassState = glassState,
-                    buttonSize = buttonSize,
-                    spacing = spacing,
-                    onOpenConstants = onOpenConstants,
-                    modifier = Modifier.width(buttonSize * 5 + spacing * 4)
-                )
             }
         }
     }
