@@ -131,13 +131,9 @@ fun GlassCalcTheme(
 
     val colorScheme = when {
         isMaterialYou -> {
-            try {
-                if (effectiveApi >= 31 && Build.VERSION.SDK_INT >= 31) {
-                    if (systemDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-                } else {
-                    if (isDark) DarkColorScheme else LightColorScheme
-                }
-            } catch (t: Throwable) {
+            if (Build.VERSION.SDK_INT >= 31) {
+                if (systemDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            } else {
                 if (isDark) DarkColorScheme else LightColorScheme
             }
         }

@@ -46,12 +46,12 @@ class GlassCalcPreferences(private val context: Context) {
             }
         }
 
-    val themeFlow: Flow<AppTheme> = safeDataFlow.map { prefs ->
-        val name = prefs[PreferencesKeys.APP_THEME] ?: AppTheme.AUTOMATIC.name
+    val themeFlow: Flow<AppTheme?> = safeDataFlow.map { prefs ->
+        val name = prefs[PreferencesKeys.APP_THEME] ?: return@map null
         try {
             AppTheme.valueOf(name)
         } catch (_: Exception) {
-            AppTheme.AUTOMATIC
+            null
         }
     }
 
@@ -200,7 +200,6 @@ class GlassCalcPreferences(private val context: Context) {
         try {
             context.dataStore.edit { prefs ->
                 prefs.clear()
-                prefs[PreferencesKeys.APP_THEME] = AppTheme.AUTOMATIC.name
                 prefs[PreferencesKeys.SAVED_EXPRESSION] = ""
                 prefs[PreferencesKeys.SAVED_RESULT] = "0"
                 prefs[PreferencesKeys.CALCULATION_HISTORY] = "[]"

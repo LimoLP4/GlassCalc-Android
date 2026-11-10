@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
@@ -45,17 +46,32 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     val angleMode: StateFlow<AngleMode> = preferences.angleModeFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, AngleMode.DEG)
 
-    val currentTheme: StateFlow<AppTheme> = preferences.themeFlow
-        .stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.AUTOMATIC)
-
-    val history: StateFlow<List<CalculationHistoryItem>> = preferences.historyFlow
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-
     val simulatedApiEnabled: StateFlow<Boolean> = preferences.simulatedApiEnabledFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val simulatedApiLevel: StateFlow<Int> = preferences.simulatedApiLevelFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, 30)
+
+    val currentTheme: StateFlow<AppTheme> = combine(
+        preferences.themeFlow,
+        simulatedApiEnabled,
+        simulatedApiLevel
+    ) { savedTheme, simEnabled, simLevel ->
+        val effective = if (simEnabled) simLevel else Build.VERSION.SDK_INT
+        
+        // 1. Initial Preference (Saved or Intelligent Default)
+        val pref = savedTheme ?: if (effective >= 31) AppTheme.MATERIAL_YOU else AppTheme.AUTOMATIC
+        
+        // 2. Real-time Fallback for UI sync
+        if (pref == AppTheme.MATERIAL_YOU && effective < 31) {
+            AppTheme.AUTOMATIC
+        } else {
+            pref
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.AUTOMATIC)
+
+    val history: StateFlow<List<CalculationHistoryItem>> = preferences.historyFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val hapticFeedbackEnabled: StateFlow<Boolean> = preferences.hapticFeedbackEnabledFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
