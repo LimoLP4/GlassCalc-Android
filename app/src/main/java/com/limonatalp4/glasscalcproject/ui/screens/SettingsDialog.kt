@@ -1393,7 +1393,7 @@ fun SettingsDialog(
             onDismissRequest = { showResetConfirmDialog = false },
             icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = colorScheme.error) },
             title = { Text(stringResource(R.string.dialog_reset_title) },
-            text = { Text("Alle DataStore-Einstellungen, gespeicherten Berechnungen und der gesamte Verlauf werden unwiderruflich gelöscht.") },
+            text = { Text(stringResource(R.string.dialog_reset_text)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -1404,7 +1404,7 @@ fun SettingsDialog(
                     },
                     modifier = Modifier.testTag("btn_confirm_reset")
                 ) {
-                    Text("Zurücksetzen", color = colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.dialog_reset_confirm), color = colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -1412,7 +1412,7 @@ fun SettingsDialog(
                     triggerHaptic()
                     showResetConfirmDialog = false
                 }) {
-                    Text("Abbrechen")
+                    Text(stringResource(R.string.dialog_reset_cancel))
                 }
             }
         )
