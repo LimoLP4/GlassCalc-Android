@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -150,48 +151,82 @@ fun CalculatorScreen(
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = "GlassCalc",
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.onSurface
-                            )
-                        },
-                        navigationIcon = {
-                            val view = LocalView.current
-                            IconButton(
-                                onClick = {
-                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
-                                    isMenuOpen = !isMenuOpen
-                                },
-                                modifier = Modifier.testTag("btn_hamburger_menu")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Floating Pill (Menu + App Name)
+                        GlassSurface(
+                            modifier = Modifier.testTag("header_pill"),
+                            shape = RoundedCornerShape(50),
+                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            borderWidth = 1.2.dp,
+                            glassState = glassState
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menü öffnen",
-                                    tint = colorScheme.onSurface
+                                val view = LocalView.current
+                                IconButton(
+                                    onClick = {
+                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                        isMenuOpen = !isMenuOpen
+                                    },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .testTag("btn_hamburger_menu")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Menü öffnen",
+                                        tint = colorScheme.onSurface,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                
+                                Text(
+                                    text = "GlassCalc",
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.onSurface,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(start = 6.dp, end = 14.dp)
                                 )
                             }
-                        },
-                        actions = {
+                        }
+
+                        // History Pill (Right)
+                        GlassSurface(
+                            modifier = Modifier.testTag("history_pill"),
+                            shape = RoundedCornerShape(50),
+                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            borderWidth = 1.2.dp,
+                            glassState = glassState
+                        ) {
                             val view = LocalView.current
                             IconButton(
                                 onClick = {
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
                                     showHistorySheet = true
                                 },
-                                modifier = Modifier.testTag("btn_top_history")
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .padding(4.dp)
+                                    .testTag("btn_top_history")
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.History,
                                     contentDescription = "Verlauf anzeigen",
-                                    tint = colorScheme.onSurface
+                                    tint = colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                    )
+                        }
+                    }
                 }
             ) { innerPadding ->
                 Box(
