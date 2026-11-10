@@ -730,47 +730,89 @@ fun SettingsDialog(
                                 }
                             }
 
-                            // Card 3: Haptic Feedback with standard M3 switch colors
+                            // Card 3: Haptic Feedback with hardware motor detection (LRA, ERM, None)
+                            val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
+                            val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
+
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
                                 customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant,
                                 customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
                             ) {
-                                Row(
+                                Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(14.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .padding(14.dp)
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = "Haptisches Feedback",
-                                            fontSize = 15.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = colorScheme.primary
-                                        )
-                                        Text(
-                                            text = "Vibration bei Tastendruck und Schaltern",
-                                            fontSize = 12.sp,
-                                            color = colorScheme.onSurfaceVariant
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .alpha(if (hasVibratorMotor) 1.0f else 0.5f)
+                                        ) {
+                                            Text(
+                                                text = "Haptisches Feedback",
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colorScheme.primary
+                                            )
+                                            Text(
+                                                text = "Vibration bei Tastendruck und Schaltern",
+                                                fontSize = 12.sp,
+                                                color = colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = if (hasVibratorMotor) hapticFeedbackEnabled else false,
+                                            onCheckedChange = if (hasVibratorMotor) {
+                                                {
+                                                    HapticUtil.performAppHaptic(context, view, true)
+                                                    onToggleHapticFeedback(it)
+                                                }
+                                            } else null,
+                                            enabled = hasVibratorMotor,
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = colorScheme.onPrimary,
+                                                checkedTrackColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.outline,
+                                                uncheckedTrackColor = colorScheme.surfaceVariant,
+                                                disabledCheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
+                                                disabledCheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.38f),
+                                                disabledUncheckedThumbColor = colorScheme.outline.copy(alpha = 0.38f),
+                                                disabledUncheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.24f)
+                                            ),
+                                            modifier = Modifier.testTag("switch_haptic_feedback")
                                         )
                                     }
-                                    Switch(
-                                        checked = hapticFeedbackEnabled,
-                                        onCheckedChange = {
-                                            HapticUtil.performAppHaptic(context, view, true) // Always feedback when toggling haptics
-                                            onToggleHapticFeedback(it)
-                                        },
-                                        colors = SwitchDefaults.colors(
-                                            checkedThumbColor = colorScheme.onPrimary,
-                                            checkedTrackColor = colorScheme.primary,
-                                            uncheckedThumbColor = colorScheme.outline,
-                                            uncheckedTrackColor = colorScheme.surfaceVariant
-                                        ),
-                                        modifier = Modifier.testTag("switch_haptic_feedback")
-                                    )
+
+                                    if (!hasVibratorMotor) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = "Dieses Gerät unterstützt kein haptisches Feedback.",
+                                            fontSize = 12.sp,
+                                            color = colorScheme.error,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.testTag("text_haptic_unsupported")
+                                        )
+                                    } else {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = if (hapticMotorType == com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.LRA) {
+                                                "Hardware: LRA-Linearmotor erkannt (feine Haptik-Impulse aktiv)"
+                                            } else {
+                                                "Hardware: ERM-Rotationsmotor erkannt (robuste Impulssteuerung aktiv)"
+                                            },
+                                            fontSize = 11.sp,
+                                            color = colorScheme.primary.copy(alpha = 0.8f),
+                                            fontFamily = FontFamily.Monospace,
+                                            modifier = Modifier.testTag("text_haptic_motor_type")
+                                        )
+                                    }
                                 }
                             }
 
