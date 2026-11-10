@@ -130,8 +130,8 @@ fun SettingsDialog(
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
     val realDeviceApi = Build.VERSION.SDK_INT
-    val sliderMax = realDeviceApi.toFloat().coerceIn(21f, 37f)
-    val sliderMin = 21f
+    val sliderMin = 26f
+    val sliderMax = realDeviceApi.toFloat().coerceAtLeast(sliderMin)
     val sliderSteps = if (sliderMax > sliderMin) (sliderMax - sliderMin).toInt() - 1 else 0
 
     var currentSliderApi by remember(simulatedApiLevel, sliderMax) { 

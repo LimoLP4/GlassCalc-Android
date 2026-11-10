@@ -298,7 +298,7 @@ fun CalculatorScreen(
                                     color = if (isAmoled) Color.White else onSurfaceColor
                                 )
                                 Text(
-                                    text = "v1.2.2 • Android 8-17 Ready",
+                                    text = stringResource(R.string.app_version_tag),
                                     fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = primaryTint,
