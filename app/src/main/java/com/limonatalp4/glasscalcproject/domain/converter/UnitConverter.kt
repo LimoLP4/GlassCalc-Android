@@ -1,5 +1,6 @@
 package com.limonatalp4.glasscalcproject.domain.converter
 
+import androidx.compose.runtime.Immutable
 import com.limonatalp4.glasscalcproject.R
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -12,6 +13,7 @@ enum class UnitCategory(val stringResId: Int) {
     VOLUME(R.string.cat_volume)
 }
 
+@Immutable
 data class ConversionPair(
     val category: UnitCategory,
     val unitFrom: String,

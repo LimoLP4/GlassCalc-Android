@@ -1,11 +1,6 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Science
@@ -47,8 +41,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -57,7 +49,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,7 +73,6 @@ import com.limonatalp4.glasscalcproject.R
 import androidx.core.graphics.drawable.toBitmap
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.limonatalp4.glasscalcproject.ui.components.ButtonType
-import com.limonatalp4.glasscalcproject.ui.components.FunctionGraphView
 import com.limonatalp4.glasscalcproject.ui.components.GlassCalculatorButton
 import com.limonatalp4.glasscalcproject.ui.components.GlassDisplay
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
@@ -92,7 +82,6 @@ import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
 import io.github.nadeemiqbal.liquidglass.liquidGlassSource
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +104,6 @@ fun CalculatorScreen(
             drawable.toBitmap(128, 128).asImageBitmap()
         }.getOrNull()
     }
-    val scope = rememberCoroutineScope()
     var isMenuOpen by remember { mutableStateOf(false) }
 
     val isScientificExpanded by viewModel.isScientificExpanded.collectAsState()

@@ -1,5 +1,6 @@
 package com.limonatalp4.glasscalcproject.data.model
 
+import androidx.compose.runtime.Immutable
 import com.limonatalp4.glasscalcproject.R
 
 enum class AppTheme(val stringResId: Int, val requiresMinApi: Int = 0) {
@@ -21,6 +22,7 @@ enum class Language(val stringResId: Int, val localeTag: String) {
     ENGLISH(R.string.language_english, "en")
 }
 
+@Immutable
 data class CalculationHistoryItem(
     val id: Long = System.currentTimeMillis(),
     val expression: String,

@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import com.limonatalp4.glasscalcproject.R
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -104,6 +105,7 @@ enum class GraphPreset(val label: String, val formula: String) {
     CUSTOM("f(x)", "custom")
 }
 
+@Immutable
 data class GraphPoint(val x: Double, val y: Double)
 
 private fun calculateNiceStep(range: Double, targetSteps: Int): Double {
@@ -408,8 +410,8 @@ fun FunctionGraphView(
                                     if (zoom != 1f && zoom > 0f) {
                                         val xCenter = (xMin + xMax) / 2.0
                                         val yCenter = (yMin + yMax) / 2.0
-                                        val newXSpan = xSpan / zoom
-                                        val newYSpan = ySpan / zoom
+                                        val newXSpan = (xSpan / zoom).coerceIn(1e-4, 1e6)
+                                        val newYSpan = (ySpan / zoom).coerceIn(1e-4, 1e6)
                                         xMin = xCenter - newXSpan / 2.0
                                         xMax = xCenter + newXSpan / 2.0
                                         yMin = yCenter - newYSpan / 2.0
@@ -786,11 +788,11 @@ fun FunctionGraphView(
                     // Zoom In (+)
                     IconButton(
                         onClick = {
-                            val xRange = (xMax - xMin) * 0.75
+                            val xRange = ((xMax - xMin) * 0.75).coerceIn(1e-4, 1e6)
                             val xCenter = (xMin + xMax) / 2
                             xMin = xCenter - xRange / 2
                             xMax = xCenter + xRange / 2
-                            val yRange = (yMax - yMin) * 0.75
+                            val yRange = ((yMax - yMin) * 0.75).coerceIn(1e-4, 1e6)
                             val yCenter = (yMin + yMax) / 2
                             yMin = yCenter - yRange / 2
                             yMax = yCenter + yRange / 2
@@ -809,11 +811,11 @@ fun FunctionGraphView(
                     // Zoom Out (-)
                     IconButton(
                         onClick = {
-                            val xRange = (xMax - xMin) * 1.35
+                            val xRange = ((xMax - xMin) * 1.35).coerceIn(1e-4, 1e6)
                             val xCenter = (xMin + xMax) / 2
                             xMin = xCenter - xRange / 2
                             xMax = xCenter + xRange / 2
-                            val yRange = (yMax - yMin) * 1.35
+                            val yRange = ((yMax - yMin) * 1.35).coerceIn(1e-4, 1e6)
                             val yCenter = (yMin + yMax) / 2
                             yMin = yCenter - yRange / 2
                             yMax = yCenter + yRange / 2
