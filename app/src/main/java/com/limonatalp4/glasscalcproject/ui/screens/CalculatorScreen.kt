@@ -302,7 +302,7 @@ fun CalculatorScreen(
                                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(32.dp)
                                     )
-                                    .padding(4.dp),
+                                    .padding(horizontal = 2.dp, vertical = 4.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 menuItems.forEach { (icon, label, tag) ->
@@ -310,8 +310,10 @@ fun CalculatorScreen(
                                     
                                     Box(
                                         modifier = Modifier
+                                            .padding(horizontal = 4.dp, vertical = 2.dp)
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(50))
+                                            .height(48.dp)
+                                            .clip(RoundedCornerShape(percent = 50))
                                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                             .clickable {
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
@@ -323,11 +325,11 @@ fun CalculatorScreen(
                                                     "Einstellungen" -> showSettingsDialog = true
                                                 }
                                             }
-                                            .padding(horizontal = 16.dp, vertical = 12.dp)
                                             .testTag(tag),
                                         contentAlignment = Alignment.CenterStart
                                     ) {
                                         Row(
+                                            modifier = Modifier.padding(horizontal = 16.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
