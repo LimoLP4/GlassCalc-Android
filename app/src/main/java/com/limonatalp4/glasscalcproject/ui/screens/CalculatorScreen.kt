@@ -928,8 +928,8 @@ private fun MainKeyboardGrid(
                 type = ButtonType.ACTION_CLEAR,
                 glassState = glassState,
                 testTag = "btn_delete",
-                contentDesc = "Löschen (Gedrückt halten zum Zurücksetzen)",
-                onLongClick = { viewModel.onClearAll() },
+                contentDesc = "Löschen (Gedrückt halten zum kontinuierlichen Löschen)",
+                isRepeatable = true,
                 modifier = buttonModifier()
             ) {
                 viewModel.onDelete()

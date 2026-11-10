@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.*
+import androidx.compose.foundation.indication
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +65,7 @@ fun GlassCalculatorButton(
     testTag: String = "btn_$text",
     contentDesc: String = text,
     hapticFeedbackEnabled: Boolean = LocalHapticFeedbackEnabled.current,
+    isRepeatable: Boolean = false,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
@@ -166,33 +169,71 @@ fun GlassCalculatorButton(
         }
     }
 
-    val clickModifier = if (onLongClick != null) {
-        Modifier.pointerInput(onLongClick, onClick, hapticFeedbackEnabled) {
-            detectTapGestures(
-                onTap = {
+    val clickModifier = when {
+        isRepeatable -> {
+            Modifier
+                .indication(interactionSource, ripple(bounded = true, radius = 48.dp, color = textColor))
+                .pointerInput(onClick, hapticFeedbackEnabled) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            val press = PressInteraction.Press(offset)
+                            interactionSource.emit(press)
+                            
+                            // Execute first action immediately on press
+                            onClick()
+                            triggerHapticTap()
+                            
+                            val repeatJob = coroutineScope.launch {
+                                delay(450) // Wait for long press threshold
+                                while (true) {
+                                    onClick()
+                                    triggerHapticTap()
+                                    delay(90) // Repeat interval (50-100ms)
+                                }
+                            }
+                            
+                            val released = try {
+                                awaitRelease()
+                                true
+                            } catch (c: Exception) {
+                                false
+                            }
+                            
+                            repeatJob.cancel()
+                            interactionSource.emit(if (released) PressInteraction.Release(press) else PressInteraction.Cancel(press))
+                        }
+                    )
+                }
+        }
+        onLongClick != null -> {
+            Modifier.pointerInput(onLongClick, onClick, hapticFeedbackEnabled) {
+                detectTapGestures(
+                    onTap = {
+                        triggerHapticTap()
+                        onClick()
+                    },
+                    onLongPress = {
+                        isLongPressTriggered = true
+                        triggerHapticLongPress()
+                        coroutineScope.launch {
+                            delay(250)
+                            isLongPressTriggered = false
+                        }
+                        onLongClick()
+                    }
+                )
+            }
+        }
+        else -> {
+            Modifier.clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true, radius = 48.dp, color = textColor),
+                onClick = {
                     triggerHapticTap()
                     onClick()
-                },
-                onLongPress = {
-                    isLongPressTriggered = true
-                    triggerHapticLongPress()
-                    coroutineScope.launch {
-                        delay(250)
-                        isLongPressTriggered = false
-                    }
-                    onLongClick()
                 }
             )
         }
-    } else {
-        Modifier.clickable(
-            interactionSource = interactionSource,
-            indication = ripple(bounded = true, radius = 48.dp, color = textColor),
-            onClick = {
-                triggerHapticTap()
-                onClick()
-            }
-        )
     }
 
     BoxWithConstraints(
