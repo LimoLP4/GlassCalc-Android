@@ -1,7 +1,10 @@
 package com.limonatalp4.glasscalcproject.ui.util
 
 import android.content.Context
-import android.os.*
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.runtime.compositionLocalOf
@@ -67,25 +70,16 @@ object HapticUtil {
 
             if (isLra) {
                 // Für LRA-Motoren (hasAmplitudeControl() == true):
-                // Feine, moderne Haptik-Effekte (z.B. EFFECT_CLICK oder Composition)
+                // Feine, moderne Haptik-Effekte (z.B. EFFECT_CLICK)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(20L, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(20L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(20L, VibrationEffect.DEFAULT_AMPLITUDE))
                 }
             } else {
                 // Für ERM-Motoren (hasAmplitudeControl() == false):
-                // Robuster, einfacher Impuls (z.B. 30ms DEFAULT_AMPLITUDE), damit es auf günstigen Geräten
-                // und AOSP-ROMs nicht zu Aussetzern kommt.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(30L, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(30L)
-                }
+                // Robuster Impuls
+                vibrator.vibrate(VibrationEffect.createOneShot(30L, VibrationEffect.DEFAULT_AMPLITUDE))
             }
         } catch (e: Exception) {
             // Ignoriere Hardware- oder Berechtigungsfehler sicher
@@ -110,19 +104,11 @@ object HapticUtil {
             if (isLra) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(50L, VibrationEffect.DEFAULT_AMPLITUDE))
                 } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(50L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(50L, VibrationEffect.DEFAULT_AMPLITUDE))
                 }
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(60L, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(60L)
-                }
+                vibrator.vibrate(VibrationEffect.createOneShot(60L, VibrationEffect.DEFAULT_AMPLITUDE))
             }
         } catch (e: Exception) {
             // Ignoriere Fehler
