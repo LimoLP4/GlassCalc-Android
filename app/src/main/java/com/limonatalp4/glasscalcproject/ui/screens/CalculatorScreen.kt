@@ -401,6 +401,7 @@ fun CalculatorScreen(
         if (showHistorySheet) {
             HistorySheet(
                 history = history,
+                currentTheme = currentTheme,
                 onSelect = { item -> viewModel.restoreHistoryItem(item) },
                 onClear = { viewModel.clearHistory() },
                 onDismiss = { showHistorySheet = false }
@@ -434,6 +435,7 @@ fun CalculatorScreen(
 
         if (showConverterDialog) {
             UnitConverterDialog(
+                currentTheme = currentTheme,
                 onImportToCalculator = { value ->
                     viewModel.onClearAll()
                     for (ch in value) {

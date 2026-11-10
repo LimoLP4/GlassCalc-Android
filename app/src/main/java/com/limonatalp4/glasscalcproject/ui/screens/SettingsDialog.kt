@@ -137,6 +137,8 @@ fun SettingsDialog(
     var mxparserAccordionOpen by remember { mutableStateOf(false) }
 
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
+    val isAmoled = glassProps.isAmoled
+    val isNormalDark = currentTheme == AppTheme.DARK_MODE
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -148,8 +150,16 @@ fun SettingsDialog(
                 .padding(8.dp),
             shape = RoundedCornerShape(28.dp),
             borderWidth = 1.2.dp,
-            customBgColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceContainerHigh,
-            customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+            customBgColor = when {
+                isAmoled -> Color.Black
+                isNormalDark -> Color(0xFF121212)
+                else -> colorScheme.surfaceContainerHigh
+            },
+            customBorderColor = when {
+                isAmoled -> Color.White.copy(alpha = 0.15f)
+                isNormalDark -> Color.White.copy(alpha = 0.1f)
+                else -> null
+            }
         ) {
             Column(
                 modifier = Modifier
@@ -167,7 +177,7 @@ fun SettingsDialog(
                         text = "Einstellungen",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
+                        color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurface
                     )
                     IconButton(
                         onClick = {
@@ -179,7 +189,7 @@ fun SettingsDialog(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Schließen",
-                            tint = colorScheme.onSurface
+                            tint = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurface
                         )
                     }
                 }
@@ -198,10 +208,20 @@ fun SettingsDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
-                        .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .background(
+                            when {
+                                isAmoled -> Color.Black
+                                isNormalDark -> colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            }
+                        )
                         .border(
                             width = 1.dp,
-                            color = colorScheme.outline.copy(alpha = 0.3f),
+                            color = when {
+                                isAmoled -> Color.White.copy(alpha = 0.15f)
+                                isNormalDark -> Color.White.copy(alpha = 0.1f)
+                                else -> colorScheme.outline.copy(alpha = 0.3f)
+                            },
                             shape = RoundedCornerShape(50.dp)
                         )
                         .padding(4.dp)
@@ -219,7 +239,11 @@ fun SettingsDialog(
                                 label = "tab_${index}_bg"
                             )
                             val tabTint by animateColorAsState(
-                                targetValue = if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
+                                targetValue = if (isSelected) {
+                                    if (isAmoled || isNormalDark) Color.White else colorScheme.onPrimaryContainer
+                                } else {
+                                    if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                                },
                                 animationSpec = tween(durationMillis = 220),
                                 label = "tab_${index}_tint"
                             )
@@ -271,7 +295,7 @@ fun SettingsDialog(
                             text = "Wähle das Design:",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -287,19 +311,21 @@ fun SettingsDialog(
                                 val isSelected = currentTheme == themeOption && isSupported
                                 
                                 val cardBg = if (isSelected) {
-                                    if (isAmoled) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                                    if (isAmoled || isNormalDark) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
                                 } else {
-                                    if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                 }
                                 
                                 val cardBorder = if (isAmoled) {
                                     Color.White.copy(alpha = 0.15f)
+                                } else if (isNormalDark) {
+                                    Color.White.copy(alpha = 0.1f)
                                 } else {
                                     if (isSelected) colorScheme.primary else glassProps.buttonBorderColor
                                 }
                                 
-                                val textColor = if (isAmoled) Color.White else (if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface)
-                                val radioIconColor = if (isAmoled) Color.White else colorScheme.primary
+                                val textColor = if (isAmoled || isNormalDark) Color.White else (if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+                                val radioIconColor = if (isAmoled || isNormalDark) Color.White else colorScheme.primary
 
                                 GlassSurface(
                                     modifier = Modifier
@@ -355,7 +381,7 @@ fun SettingsDialog(
                                                 Text(
                                                     text = "Reines Schwarz #000000 mit 10-15% Weiß-Glas für maximale OLED-Energieersparnis",
                                                     fontSize = 12.sp,
-                                                    color = if (isAmoled) Color.White.copy(alpha = 0.7f) else (if (isSelected) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f)),
+                                                    color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else (if (isSelected) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f)),
                                                     softWrap = true
                                                 )
                                             }
@@ -384,13 +410,13 @@ fun SettingsDialog(
                             // Option 1: DEG
                             val isDeg = currentAngleMode == AngleMode.DEG
                             val degBg = if (isDeg) {
-                                if (isAmoled) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                                if (isAmoled || isNormalDark) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
                             } else {
-                                if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             }
                             
-                            val degBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
-                            val degTextColor = if (isAmoled) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+                            val degBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
+                            val degTextColor = if (isAmoled || isNormalDark) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
 
                             GlassSurface(
                                 modifier = Modifier
@@ -432,7 +458,7 @@ fun SettingsDialog(
                                         Text(
                                             text = "Standardkreis = 360°",
                                             fontSize = 12.sp,
-                                            color = if (isAmoled) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
+                                            color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
                                         )
                                     }
                                 }
@@ -441,12 +467,12 @@ fun SettingsDialog(
                             // Option 2: RAD
                             val isRad = currentAngleMode == AngleMode.RAD
                             val radBg = if (isRad) {
-                                if (isAmoled) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                                if (isAmoled || isNormalDark) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
                             } else {
-                                if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             }
-                            val radBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
-                            val radTextColor = if (isAmoled) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+                            val radBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
+                            val radTextColor = if (isAmoled || isNormalDark) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
 
                             GlassSurface(
                                 modifier = Modifier
@@ -488,7 +514,7 @@ fun SettingsDialog(
                                         Text(
                                             text = "Vollkreis = 2π",
                                             fontSize = 12.sp,
-                                        color = if (isAmoled) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
+                                        color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
                                         )
                                     }
                                 }
@@ -502,8 +528,8 @@ fun SettingsDialog(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(20.dp),
                             borderWidth = 1.dp,
-                            customBgColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                            customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+                            customBgColor = if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                            customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else null
                         ) {
                             Column(modifier = Modifier.padding(14.dp)) {
                                 Text(
@@ -531,8 +557,8 @@ fun SettingsDialog(
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
-                                customBgColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant,
-                                customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+                                customBgColor = if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant,
+                                customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else null
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
@@ -546,7 +572,7 @@ fun SettingsDialog(
                                         text = "WindowSizeClass: ${windowSizeClass?.windowWidthSizeClass ?: "Compact"}",
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
-                                        color = colorScheme.onSurface
+                                        color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurface
                                     )
                                     Text(
                                         text = "Auflösung: ${config.screenWidthDp}dp x ${config.screenHeightDp}dp",
@@ -561,8 +587,8 @@ fun SettingsDialog(
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
-                                customBgColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant,
-                                customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+                                customBgColor = if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant,
+                                customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else null
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Text(
@@ -589,7 +615,7 @@ fun SettingsDialog(
                                             text = "API-Stufe simulieren",
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
-                                            color = colorScheme.onSurface
+                                            color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurface
                                         )
                                         Switch(
                                             checked = simulatedApiEnabled,
@@ -708,8 +734,8 @@ fun SettingsDialog(
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
-                                customBgColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant,
-                                customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+                                customBgColor = if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant,
+                                customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else null
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -752,8 +778,8 @@ fun SettingsDialog(
                             GlassSurface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(18.dp),
-                                customBgColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant,
-                                customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+                                customBgColor = if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant,
+                                customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else null
                             ) {
                                 Row(
                                     modifier = Modifier

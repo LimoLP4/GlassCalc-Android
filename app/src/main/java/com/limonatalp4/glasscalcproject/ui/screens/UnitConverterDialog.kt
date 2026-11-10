@@ -55,16 +55,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import androidx.compose.foundation.BorderStroke
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnitConverterDialog(
+    currentTheme: AppTheme,
     onImportToCalculator: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -109,6 +112,8 @@ fun UnitConverterDialog(
     val primaryColor = colorScheme.primary
     val primaryContainerColor = colorScheme.primaryContainer
     val onPrimaryContainerColor = colorScheme.onPrimaryContainer
+    val isAmoled = glassProps.isAmoled
+    val isNormalDark = currentTheme == AppTheme.DARK_MODE
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -120,8 +125,16 @@ fun UnitConverterDialog(
                 .padding(8.dp),
             shape = RoundedCornerShape(28.dp),
             borderWidth = 1.2.dp,
-            customBgColor = if (glassProps.isAmoled) Color.Black else dialogBgColor,
-            customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+            customBgColor = when {
+                isAmoled -> Color.Black
+                isNormalDark -> Color(0xFF121212)
+                else -> dialogBgColor
+            },
+            customBorderColor = when {
+                isAmoled -> Color.White.copy(alpha = 0.15f)
+                isNormalDark -> Color.White.copy(alpha = 0.1f)
+                else -> null
+            }
         ) {
             Column(
                 modifier = Modifier
@@ -139,7 +152,7 @@ fun UnitConverterDialog(
                         text = "Einheitenumrechnung",
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Bold,
-                        color = onSurfaceColor
+                        color = if (isAmoled || isNormalDark) Color.White else onSurfaceColor
                     )
                     IconButton(
                         onClick = {
@@ -151,7 +164,7 @@ fun UnitConverterDialog(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Schließen",
-                            tint = onSurfaceColor
+                            tint = if (isAmoled || isNormalDark) Color.White else onSurfaceColor
                         )
                     }
                 }
@@ -170,10 +183,20 @@ fun UnitConverterDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
-                        .background(if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .background(
+                            when {
+                                isAmoled -> Color.Black
+                                isNormalDark -> colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                                else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            }
+                        )
                         .border(
                             width = 1.dp,
-                            color = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
+                            color = when {
+                                isAmoled -> Color.White.copy(alpha = 0.15f)
+                                isNormalDark -> Color.White.copy(alpha = 0.1f)
+                                else -> colorScheme.outline.copy(alpha = 0.3f)
+                            },
                             shape = RoundedCornerShape(50.dp)
                         )
                         .padding(4.dp)
@@ -192,9 +215,9 @@ fun UnitConverterDialog(
                             )
                             val tabTint by animateColorAsState(
                                 targetValue = if (isSelected) {
-                                    if (glassProps.isAmoled) Color.White else onPrimaryContainerColor
+                                    if (isAmoled || isNormalDark) Color.White else onPrimaryContainerColor
                                 } else {
-                                    if (glassProps.isAmoled) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                                    if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
                                 },
                                 animationSpec = tween(durationMillis = 220),
                                 label = "cat_tab_tint_$index"
@@ -246,7 +269,7 @@ fun UnitConverterDialog(
                     text = "Umrechnung auswählen:",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = onSurfaceColor.copy(alpha = 0.7f)
+                    color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -255,12 +278,12 @@ fun UnitConverterDialog(
                     val isAmoled = glassProps.isAmoled
                     val isSelected = selectedPairIndex == idx
                     val pairBg = if (isSelected) {
-                        if (isAmoled) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                        if (isAmoled || isNormalDark) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
                     } else {
-                        if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        if (isAmoled) Color.Black else if (isNormalDark) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     }
-                    val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
-                    val pairTextCol = if (isAmoled) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+                    val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                    val pairTextCol = if (isAmoled || isNormalDark) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
 
                     GlassSurface(
                         modifier = Modifier
@@ -293,8 +316,16 @@ fun UnitConverterDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     borderWidth = 1.2.dp,
-                    customBgColor = if (glassProps.isAmoled) Color.Black else null,
-                    customBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else null
+                    customBgColor = when {
+                        isAmoled -> Color.Black
+                        isNormalDark -> colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        else -> null
+                    },
+                    customBorderColor = when {
+                        isAmoled -> Color.White.copy(alpha = 0.15f)
+                        isNormalDark -> Color.White.copy(alpha = 0.1f)
+                        else -> null
+                    }
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -306,7 +337,7 @@ fun UnitConverterDialog(
                                 text = "Eingabe ($fromUnit):",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = onSurfaceColor.copy(alpha = 0.7f)
+                                color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                             )
 
                             IconButton(
@@ -334,12 +365,20 @@ fun UnitConverterDialog(
                                 .fillMaxWidth()
                                 .testTag("input_converter_value"),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                unfocusedContainerColor = if (glassProps.isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                                focusedBorderColor = if (glassProps.isAmoled) Color.White else primaryColor,
-                                unfocusedBorderColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor,
-                                focusedTextColor = if (glassProps.isAmoled) Color.White else onSurfaceColor,
-                                unfocusedTextColor = if (glassProps.isAmoled) Color.White else onSurfaceColor
+                                focusedContainerColor = when {
+                                    isAmoled -> Color.Black
+                                    isNormalDark -> Color(0xFF1E1E1E)
+                                    else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                },
+                                unfocusedContainerColor = when {
+                                    isAmoled -> Color.Black
+                                    isNormalDark -> Color(0xFF1A1A1A)
+                                    else -> colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                },
+                                focusedBorderColor = if (isAmoled || isNormalDark) Color.White else primaryColor,
+                                unfocusedBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isNormalDark) Color.White.copy(alpha = 0.1f) else glassProps.buttonBorderColor,
+                                focusedTextColor = if (isAmoled || isNormalDark) Color.White else onSurfaceColor,
+                                unfocusedTextColor = if (isAmoled || isNormalDark) Color.White else onSurfaceColor
                             )
                         )
 
@@ -349,7 +388,7 @@ fun UnitConverterDialog(
                             text = "Ergebnis ($toUnit):",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            color = onSurfaceColor.copy(alpha = 0.7f)
+                            color = if (isAmoled || isNormalDark) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                         )
 
                         Text(

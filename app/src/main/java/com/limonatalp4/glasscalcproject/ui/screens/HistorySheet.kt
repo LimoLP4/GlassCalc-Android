@@ -56,6 +56,7 @@ import java.util.Locale
 @Composable
 fun HistorySheet(
     history: List<CalculationHistoryItem>,
+    currentTheme: com.limonatalp4.glasscalcproject.data.model.AppTheme,
     onSelect: (CalculationHistoryItem) -> Unit,
     onClear: () -> Unit,
     onDismiss: () -> Unit
@@ -73,11 +74,16 @@ fun HistorySheet(
 
     val glassProps = LocalGlassProperties.current
     val isAmoled = glassProps.isAmoled
+    val isNormalDark = currentTheme == com.limonatalp4.glasscalcproject.data.model.AppTheme.DARK_MODE
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = if (isAmoled) Color.Black else colorScheme.surfaceContainerHigh,
+        containerColor = when {
+            isAmoled -> Color.Black
+            isNormalDark -> Color(0xFF121212)
+            else -> colorScheme.surfaceContainerHigh
+        },
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         dragHandle = {
             // Highly rounded pill-style drag handle matching Liquid Glass theme
@@ -87,7 +93,10 @@ fun HistorySheet(
                     .width(42.dp)
                     .height(5.dp)
                     .clip(CircleShape)
-                    .background(if (isAmoled) Color.White else colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                    .background(
+                        if (isAmoled || isNormalDark) Color.White 
+                        else colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    )
             )
         }
     ) {
@@ -95,10 +104,17 @@ fun HistorySheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .then(
-                    if (isAmoled) Modifier.border(
-                        BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
-                        RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-                    ) else Modifier
+                    when {
+                        isAmoled -> Modifier.border(
+                            BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+                            RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        )
+                        isNormalDark -> Modifier.border(
+                            BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                            RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        )
+                        else -> Modifier
+                    }
                 )
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 32.dp)
@@ -131,7 +147,7 @@ fun HistorySheet(
                             text = "Verlauf (Letzte 20)",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isAmoled) Color.White else colorScheme.onSurface
+                            color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurface
                         )
                     }
                 }
@@ -178,7 +194,7 @@ fun HistorySheet(
                     Text(
                         text = "Noch keine Berechnungen gespeichert.",
                         fontSize = 15.sp,
-                        color = if (isAmoled) Color.White else colorScheme.onSurfaceVariant,
+                        color = if (isAmoled || isNormalDark) Color.White else colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
