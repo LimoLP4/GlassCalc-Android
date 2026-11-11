@@ -54,8 +54,8 @@ fun isBlurHardwareSupported(): Boolean {
     }
 
     return try {
-        val testEffect = RenderEffect.createBlurEffect(10f, 10f, Shader.TileMode.CLAMP)
-        testEffect != null
+        RenderEffect.createBlurEffect(10f, 10f, Shader.TileMode.CLAMP)
+        true
     } catch (t: Throwable) {
         false
     }

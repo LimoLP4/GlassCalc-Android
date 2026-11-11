@@ -55,7 +55,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -110,7 +109,6 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -156,7 +154,6 @@ fun SettingsDialog(
     var currentSliderApi by remember(simulatedApiLevel, sliderMax) { 
         mutableFloatStateOf(simulatedApiLevel.toFloat().coerceIn(sliderMin, sliderMax)) 
     }
-    var lastHapticStep by remember(simulatedApiLevel) { mutableIntStateOf(simulatedApiLevel) }
 
     // Accordion expansion states for Info tab
     var apacheAccordionOpen by remember { mutableStateOf(false) }
@@ -173,6 +170,7 @@ fun SettingsDialog(
         label = "dialog_fade_anim"
     )
 
+    @Suppress("DEPRECATION")
     BasicAlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.testTag("dialog_settings")
@@ -445,7 +443,6 @@ fun SettingsDialog(
                                 onResetAppRequest = { showResetConfirmDialog = true },
                                 triggerHaptic = ::triggerHaptic,
                                 context = context,
-                                view = view,
                                 onSliderValueChange = { currentSliderApi = it }
                             )
                             3 -> InformationSection(
@@ -819,7 +816,6 @@ private fun DeveloperOptionsSection(
     onResetAppRequest: () -> Unit,
     triggerHaptic: () -> Unit,
     context: android.content.Context,
-    view: android.view.View,
     onSliderValueChange: (Float) -> Unit
 ) {
     Column(
@@ -841,8 +837,10 @@ private fun DeveloperOptionsSection(
                     color = colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                @Suppress("DEPRECATION")
+                val widthClassName = windowSizeClass?.windowWidthSizeClass ?: "Compact"
                 Text(
-                    text = "WindowSizeClass: ${windowSizeClass?.windowWidthSizeClass ?: "Compact"}",
+                    text = "WindowSizeClass: $widthClassName",
                     fontSize = 13.sp,
                     fontFamily = FontFamily.Monospace,
                     color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
@@ -1237,6 +1235,7 @@ private fun InformationSection(
                     onClick = {
                         triggerHaptic()
                         try {
+                            @Suppress("DEPRECATION")
                             val intent = Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
                             context.startActivity(intent)
                         } catch (e: Exception) {

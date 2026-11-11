@@ -57,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.R
-import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
@@ -81,7 +80,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnitConverterDialog(
-    currentTheme: AppTheme,
     onImportToCalculator: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -129,6 +127,7 @@ fun UnitConverterDialog(
     val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
 
+    @Suppress("DEPRECATION")
     BasicAlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.testTag("dialog_unit_converter")

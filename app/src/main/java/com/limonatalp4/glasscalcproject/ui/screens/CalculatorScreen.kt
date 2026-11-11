@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.limonatalp4.glasscalcproject.ui.screens
 
 import android.content.res.Configuration
@@ -32,7 +34,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -103,6 +105,7 @@ fun CalculatorScreen(
     val adaptiveInfo = currentWindowAdaptiveInfo()
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    @Suppress("DEPRECATION")
     val isTablet = adaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     val isDualPane = isTablet || isLandscape
 
@@ -140,7 +143,7 @@ fun CalculatorScreen(
                 .fillMaxSize()
                 .background(glassProps.backgroundBrush)
                 .then(
-                    if (glassState != null && glassState.quality != io.github.nadeemiqbal.liquidglass.LiquidGlassQuality.Fallback) {
+                    if (glassState.quality != io.github.nadeemiqbal.liquidglass.LiquidGlassQuality.Fallback) {
                         Modifier.liquidGlassSource(glassState)
                     } else {
                         Modifier
@@ -337,7 +340,7 @@ fun CalculatorScreen(
                                 Triple(Icons.Default.Calculate, R.string.nav_calculator, "nav_item_calculator"),
                                 Triple(Icons.Default.History, R.string.nav_history, "nav_item_history"),
                                 Triple(Icons.Default.Straighten, R.string.nav_converter, "nav_item_converter"),
-                                Triple(Icons.Default.ShowChart, R.string.nav_graph, "nav_item_graph"),
+                                Triple(Icons.AutoMirrored.Filled.ShowChart, R.string.nav_graph, "nav_item_graph"),
                                 Triple(Icons.Default.Settings, R.string.nav_settings, "nav_item_settings")
                             )
 
@@ -457,7 +460,6 @@ fun CalculatorScreen(
 
         if (showConverterDialog) {
             UnitConverterDialog(
-                currentTheme = currentTheme,
                 onImportToCalculator = { value ->
                     viewModel.onClearAll()
                     for (ch in value) {
