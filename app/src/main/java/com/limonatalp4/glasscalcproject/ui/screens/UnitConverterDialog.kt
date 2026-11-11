@@ -64,6 +64,19 @@ import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,7 +193,7 @@ fun UnitConverterDialog(
                     Triple(UnitCategory.VOLUME, Icons.Default.Opacity, R.string.cat_volume)
                 )
 
-                Box(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
@@ -202,17 +215,35 @@ fun UnitConverterDialog(
                         )
                         .padding(4.dp)
                 ) {
+                    val tabWidth = maxWidth / categoryTabs.size
+                    val indicatorOffset by animateDpAsState(
+                        targetValue = tabWidth * selectedCategoryIndex,
+                        animationSpec = tween(durationMillis = 250),
+                        label = "cat_indicator_offset"
+                    )
+
+                    // Sliding Highlight Pill
+                    Box(
+                        modifier = Modifier
+                            .offset(x = indicatorOffset)
+                            .width(tabWidth)
+                            .height(40.dp) // Approximate height matching padding
+                            .clip(RoundedCornerShape(50.dp))
+                            .background(primaryContainerColor)
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(0.dp), // Spacing handled by weights
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         categoryTabs.forEachIndexed { index, (cat, icon, shortLabelRes) ->
                             val isSelected = selectedCategoryIndex == index
-                            val tabBg by animateColorAsState(
-                                targetValue = if (isSelected) primaryContainerColor else Color.Transparent,
-                                animationSpec = tween(durationMillis = 220),
-                                label = "cat_tab_bg_$index"
+                            var isPressed by remember { mutableStateOf(false) }
+                            val scale by animateFloatAsState(
+                                targetValue = if (isPressed) 0.94f else 1.0f,
+                                animationSpec = tween(durationMillis = 100),
+                                label = "cat_tab_scale_$index"
                             )
                             val tabTint by animateColorAsState(
                                 targetValue = if (isSelected) {
@@ -227,14 +258,25 @@ fun UnitConverterDialog(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(50.dp))
-                                    .background(tabBg)
-                                    .clickable {
-                                        triggerHaptic()
-                                        selectedCategoryIndex = index
-                                        selectedPairIndex = 0
+                                    .graphicsLayer {
+                                        scaleX = scale
+                                        scaleY = scale
                                     }
-                                    .padding(vertical = 9.dp, horizontal = 2.dp)
+                                    .clip(RoundedCornerShape(50.dp))
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onPress = {
+                                                isPressed = true
+                                                try { awaitRelease() } finally { isPressed = false }
+                                            },
+                                            onTap = {
+                                                triggerHaptic()
+                                                selectedCategoryIndex = index
+                                                selectedPairIndex = 0
+                                            }
+                                        )
+                                    }
+                                    .padding(vertical = 9.dp)
                                     .testTag("tab_cat_${cat.name}"),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -265,48 +307,69 @@ fun UnitConverterDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Conversion Pairs in this category
-                Text(
-                    text = stringResource(R.string.converter_select_pair),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                conversionsInCategory.forEachIndexed { idx, pair ->
-                    val isAmoled = glassProps.isAmoled
-                    val isSelected = selectedPairIndex == idx
-                    val pairBg = if (isSelected) {
-                        if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
-                    } else {
-                        if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    }
-                    val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
-                    val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
-
-                    GlassSurface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                triggerHaptic()
-                                selectedPairIndex = idx
-                            }
-                            .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
-                        shape = RoundedCornerShape(50.dp),
-                        borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                        customBorderColor = pairBorder,
-                        customBgColor = pairBg
-                    ) {
+                AnimatedContent(
+                    targetState = selectedCategoryIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                                slideOutHorizontally { width -> -width } + fadeOut())
+                        } else {
+                            (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
+                                slideOutHorizontally { width -> width } + fadeOut())
+                        }
+                    },
+                    label = "cat_transition"
+                ) { targetIndex ->
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        val catToDisplay = categories[targetIndex]
+                        val pairs = UnitConverter.CONVERSIONS.filter { it.category == catToDisplay }
+                        
+                        // Conversion Pairs in this category
                         Text(
-                            text = stringResource(pair.labelResId),
-                            fontSize = 14.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = pairTextCol,
-                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                            text = stringResource(R.string.converter_select_pair),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                         )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        pairs.forEachIndexed { idx, pair ->
+                            val isSelected = selectedPairIndex == idx && targetIndex == selectedCategoryIndex
+                            val pairBg by animateColorAsState(
+                                targetValue = if (isSelected) {
+                                    if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                                } else {
+                                    if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                },
+                                label = "pair_bg_$idx"
+                            )
+                            val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                            val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+
+                            GlassSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .clickable {
+                                        triggerHaptic()
+                                        selectedPairIndex = idx
+                                    }
+                                    .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
+                                shape = RoundedCornerShape(50.dp),
+                                borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                                customBorderColor = pairBorder,
+                                customBgColor = pairBg
+                            ) {
+                                Text(
+                                    text = stringResource(pair.labelResId),
+                                    fontSize = 14.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = pairTextCol,
+                                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                                )
+                            }
+                        }
                     }
                 }
 

@@ -16,6 +16,15 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -230,6 +239,15 @@ fun SettingsDialog(
                 )
 
                 val tabScrollState = androidx.compose.foundation.rememberScrollState()
+                val density = LocalDensity.current
+                var tabPositions by remember { mutableStateOf(mapOf<Int, Pair<androidx.compose.ui.unit.Dp, androidx.compose.ui.unit.Dp>>()) }
+                
+                val targetPosition = tabPositions[selectedTab]?.first ?: 0.dp
+                val targetWidth = tabPositions[selectedTab]?.second ?: 0.dp
+                
+                val indicatorOffset by animateDpAsState(targetValue = targetPosition, label = "tab_indicator_offset")
+                val indicatorWidth by animateDpAsState(targetValue = targetWidth, label = "tab_indicator_width")
+
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -253,6 +271,18 @@ fun SettingsDialog(
                         )
                         .padding(4.dp)
                 ) {
+                    // Sliding Highlight Pill
+                    if (tabPositions.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .offset(x = indicatorOffset)
+                                .width(indicatorWidth)
+                                .height(40.dp) // Height matches vertical padding + content
+                                .clip(RoundedCornerShape(50.dp))
+                                .background(colorScheme.primaryContainer)
+                        )
+                    }
+
                     Row(
                         modifier = Modifier
                             .wrapContentWidth()
@@ -262,10 +292,11 @@ fun SettingsDialog(
                     ) {
                         tabs.forEach { (index, icon, label) ->
                             val isSelected = selectedTab == index
-                            val tabBg by animateColorAsState(
-                                targetValue = if (isSelected) colorScheme.primaryContainer else Color.Transparent,
-                                animationSpec = tween(durationMillis = 220),
-                                label = "tab_${index}_bg"
+                            var isPressed by remember { mutableStateOf(false) }
+                            val scale by animateFloatAsState(
+                                targetValue = if (isPressed) 0.94f else 1.0f,
+                                animationSpec = tween(durationMillis = 100),
+                                label = "tab_scale"
                             )
                             val tabTint by animateColorAsState(
                                 targetValue = if (isSelected) {
@@ -279,11 +310,29 @@ fun SettingsDialog(
 
                             Box(
                                 modifier = Modifier
+                                    .onGloballyPositioned { coords ->
+                                        val pos = coords.positionInParent().x
+                                        val width = coords.size.width
+                                        with(density) {
+                                            tabPositions = tabPositions + (index to (pos.toDp() to width.toDp()))
+                                        }
+                                    }
+                                    .graphicsLayer {
+                                        scaleX = scale
+                                        scaleY = scale
+                                    }
                                     .clip(RoundedCornerShape(50.dp))
-                                    .background(tabBg)
-                                    .clickable {
-                                        triggerHaptic()
-                                        selectedTab = index
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onPress = {
+                                                isPressed = true
+                                                try { awaitRelease() } finally { isPressed = false }
+                                            },
+                                            onTap = {
+                                                triggerHaptic()
+                                                selectedTab = index
+                                            }
+                                        )
                                     }
                                     .padding(vertical = 8.dp, horizontal = 10.dp)
                                     .testTag("tab_settings_$index"),
@@ -913,10 +962,11 @@ private fun DeveloperOptionsSection(
             }
         }
 
-        // Card 3: Haptic Feedback
+        // Card 3: Haptic Feedback with hardware motor detection
         val hasVibratorMotor = remember(context) { com.limonatalp4.glasscalcproject.ui.util.HapticUtil.hasVibrator(context) }
         val hapticMotorType = remember(context) { com.limonatalp4.glasscalcproject.ui.util.HapticUtil.getHapticMotorType(context) }
-        val isHapticUsable = hasVibratorMotor && effectiveApi >= 26
+        val isSupportedBySimulatedApi = effectiveApi >= 26
+        val isHapticUsable = hasVibratorMotor && isSupportedBySimulatedApi
 
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -925,28 +975,85 @@ private fun DeveloperOptionsSection(
             customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f).alpha(if (isHapticUsable) 1.0f else 0.5f)) {
-                        Text(text = stringResource(R.string.dev_haptic_title), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                        Text(text = stringResource(R.string.dev_haptic_desc), fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .alpha(if (isHapticUsable) 1.0f else 0.5f)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dev_haptic_title),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.dev_haptic_desc),
+                            fontSize = 12.sp,
+                            color = colorScheme.onSurfaceVariant
+                        )
                     }
                     Switch(
                         checked = if (isHapticUsable) hapticFeedbackEnabled else false,
-                        onCheckedChange = if (isHapticUsable) { { triggerHaptic(); onToggleHapticFeedback(it) } } else null,
+                        onCheckedChange = if (isHapticUsable) {
+                            {
+                                triggerHaptic()
+                                onToggleHapticFeedback(it)
+                            }
+                        } else null,
                         enabled = isHapticUsable,
-                        colors = SwitchDefaults.colors(checkedTrackColor = colorScheme.primary),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = colorScheme.onPrimary,
+                            checkedTrackColor = colorScheme.primary,
+                            uncheckedThumbColor = colorScheme.outline,
+                            uncheckedTrackColor = colorScheme.surfaceVariant,
+                            disabledCheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
+                            disabledCheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.38f),
+                            disabledUncheckedThumbColor = colorScheme.outline.copy(alpha = 0.38f),
+                            disabledUncheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.24f)
+                        ),
                         modifier = Modifier.testTag("switch_haptic_feedback")
                     )
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
+                
+                val motorLabel = when (hapticMotorType) {
+                    com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.LRA -> "LRA (Linear Resonant Actuator)"
+                    com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.ERM -> "ERM (Eccentric Rotating Mass)"
+                    else -> "NONE"
+                }
+                
+                Text(
+                    text = "Erkannter Motor: $motorLabel",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = colorScheme.primary.copy(alpha = 0.8f)
+                )
+
                 if (!hasVibratorMotor) {
-                    Text(text = stringResource(R.string.dev_haptic_unsupported_device), fontSize = 12.sp, color = colorScheme.error, modifier = Modifier.padding(top = 4.dp))
+                    Text(
+                        text = "Dieses Gerät unterstützt kein haptisches Feedback.",
+                        fontSize = 12.sp,
+                        color = colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 } else if (effectiveApi < 26) {
-                    Text(text = stringResource(R.string.dev_haptic_unsupported_api), fontSize = 12.sp, color = colorScheme.error, modifier = Modifier.padding(top = 4.dp))
+                    Text(
+                        text = "Haptik erfordert API 26 (Android 8.0).",
+                        fontSize = 12.sp,
+                        color = colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }
 
-        // Auto Result Switch
+        // Card 4: Auto Result Switch
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(18.dp),
@@ -962,7 +1069,7 @@ private fun DeveloperOptionsSection(
             }
         }
 
-        // Card 4: Lifecycle & State
+        // Card 5: Lifecycle & State
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(18.dp),
@@ -983,7 +1090,46 @@ private fun DeveloperOptionsSection(
             }
         }
 
-        // Card 5: Reset storage
+        // Card 6: Cache leeren (Eigene Karte)
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant,
+            customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Text(
+                    text = "Cache leeren",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                )
+                Text(
+                    text = "Löscht nur temporäre Systemdateien. Einstellungen und Verlauf bleiben erhalten.",
+                    fontSize = 12.sp,
+                    color = colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        triggerHaptic()
+                        try {
+                            context.cacheDir.deleteRecursively()
+                            Toast.makeText(context, "Cache geleert", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Fehler beim Leeren des Caches", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("btn_clear_cache"),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
+                    Text("Cache leeren", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
+        // Card 7: App-Speicher zurücksetzen
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(18.dp),
