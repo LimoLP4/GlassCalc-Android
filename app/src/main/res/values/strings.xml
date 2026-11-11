@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">GlassCalc</string>
     <string name="app_version_subtitle">Android 8.0 - 17 Bereit (API 26-37)</string>
-    <string name="app_version_tag">v1.2.4 • Android 8-17 Bereit</string>
+    <string name="app_version_tag">v1.2.5 • Android 8-17 Bereit</string>
     <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
 
     <!-- Navigation Drawer -->

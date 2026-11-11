@@ -1172,7 +1172,7 @@ private fun InformationSection(
             customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else glassProps.buttonBorderColor
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "GlassCalc v1.2.4", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
+                Text(text = "GlassCalc v1.2.5", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.app_version_subtitle), fontSize = 12.sp, color = colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.copyright_notice), fontSize = 11.sp, color = colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
             }
