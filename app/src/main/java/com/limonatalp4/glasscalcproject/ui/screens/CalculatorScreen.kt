@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import androidx.core.graphics.drawable.toBitmap
 import androidx.window.core.layout.WindowWidthSizeClass
@@ -322,7 +323,7 @@ fun CalculatorScreen(
                                     color = if (isAmoled) Color.White else onSurfaceColor
                                 )
                                 Text(
-                                    text = stringResource(R.string.app_version_tag),
+                                    text = stringResource(R.string.app_version_tag, BuildConfig.VERSION_NAME),
                                     fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
                                     color = primaryTint,

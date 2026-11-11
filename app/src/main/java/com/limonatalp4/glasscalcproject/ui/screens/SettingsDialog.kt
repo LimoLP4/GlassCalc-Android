@@ -21,8 +21,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.background
@@ -81,6 +80,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -105,6 +105,7 @@ import androidx.window.core.layout.WindowSizeClass
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
+import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
@@ -240,13 +241,29 @@ fun SettingsDialog(
 
                 val tabScrollState = androidx.compose.foundation.rememberScrollState()
                 val density = LocalDensity.current
-                var tabPositions by remember { mutableStateOf(mapOf<Int, Pair<androidx.compose.ui.unit.Dp, androidx.compose.ui.unit.Dp>>()) }
+                val tabWidths = remember { mutableStateMapOf<Int, androidx.compose.ui.unit.Dp>() }
+                var tabHeight by remember { mutableStateOf(0.dp) }
                 
-                val targetPosition = tabPositions[selectedTab]?.first ?: 0.dp
-                val targetWidth = tabPositions[selectedTab]?.second ?: 0.dp
+                val spacing = 4.dp
+                val targetPosition = remember(selectedTab, tabWidths.toMap()) {
+                    var pos = 0.dp
+                    for (i in 0 until selectedTab) {
+                        pos += (tabWidths[i] ?: 0.dp) + spacing
+                    }
+                    pos
+                }
+                val targetWidth = tabWidths[selectedTab] ?: 0.dp
                 
-                val indicatorOffset by animateDpAsState(targetValue = targetPosition, label = "tab_indicator_offset")
-                val indicatorWidth by animateDpAsState(targetValue = targetWidth, label = "tab_indicator_width")
+                val indicatorOffset by animateDpAsState(
+                    targetValue = targetPosition,
+                    animationSpec = tween(durationMillis = 250),
+                    label = "tab_indicator_offset"
+                )
+                val indicatorWidth by animateDpAsState(
+                    targetValue = targetWidth,
+                    animationSpec = tween(durationMillis = 250),
+                    label = "tab_indicator_width"
+                )
 
                 Box(
                     modifier = Modifier
@@ -271,92 +288,96 @@ fun SettingsDialog(
                         )
                         .padding(4.dp)
                 ) {
-                    // Sliding Highlight Pill
-                    if (tabPositions.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .offset(x = indicatorOffset)
-                                .width(indicatorWidth)
-                                .height(40.dp) // Height matches vertical padding + content
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(colorScheme.primaryContainer)
-                        )
-                    }
-
-                    Row(
+                    Box(
                         modifier = Modifier
                             .wrapContentWidth()
-                            .horizontalScroll(tabScrollState),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .horizontalScroll(tabScrollState)
                     ) {
-                        tabs.forEach { (index, icon, label) ->
-                            val isSelected = selectedTab == index
-                            var isPressed by remember { mutableStateOf(false) }
-                            val scale by animateFloatAsState(
-                                targetValue = if (isPressed) 0.94f else 1.0f,
-                                animationSpec = tween(durationMillis = 100),
-                                label = "tab_scale"
-                            )
-                            val tabTint by animateColorAsState(
-                                targetValue = if (isSelected) {
-                                    if (isAmoled || isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
-                                } else {
-                                    if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
-                                },
-                                animationSpec = tween(durationMillis = 220),
-                                label = "tab_${index}_tint"
-                            )
-
+                        // Sliding Highlight Pill INSIDE the scroll container
+                        if (targetWidth > 0.dp) {
                             Box(
                                 modifier = Modifier
-                                    .onGloballyPositioned { coords ->
-                                        val pos = coords.positionInParent().x
-                                        val width = coords.size.width
-                                        with(density) {
-                                            tabPositions = tabPositions + (index to (pos.toDp() to width.toDp()))
-                                        }
-                                    }
-                                    .graphicsLayer {
-                                        scaleX = scale
-                                        scaleY = scale
-                                    }
+                                    .align(Alignment.CenterStart)
+                                    .offset(x = indicatorOffset)
+                                    .width(indicatorWidth)
+                                    .height(if (tabHeight > 0.dp) tabHeight else 36.dp)
                                     .clip(RoundedCornerShape(50.dp))
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(
-                                            onPress = {
-                                                isPressed = true
-                                                try { awaitRelease() } finally { isPressed = false }
-                                            },
-                                            onTap = {
-                                                triggerHaptic()
-                                                selectedTab = index
-                                            }
+                                    .background(colorScheme.primaryContainer)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.wrapContentWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(spacing),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            tabs.forEach { (index, icon, label) ->
+                                val isSelected = selectedTab == index
+                                var isPressed by remember { mutableStateOf(false) }
+                                val scale by animateFloatAsState(
+                                    targetValue = if (isPressed) 0.94f else 1.0f,
+                                    animationSpec = tween(durationMillis = 100),
+                                    label = "tab_scale"
+                                )
+                                val tabTint by animateColorAsState(
+                                    targetValue = if (isSelected) {
+                                        if (isAmoled || isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
+                                    } else {
+                                        if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                                    },
+                                    animationSpec = tween(durationMillis = 220),
+                                    label = "tab_${index}_tint"
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .onSizeChanged { size ->
+                                            val w = with(density) { size.width.toDp() }
+                                            val h = with(density) { size.height.toDp() }
+                                            tabWidths[index] = w
+                                            if (h > tabHeight) tabHeight = h
+                                        }
+                                        .graphicsLayer {
+                                            scaleX = scale
+                                            scaleY = scale
+                                        }
+                                        .clip(RoundedCornerShape(50.dp))
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(
+                                                onPress = {
+                                                    isPressed = true
+                                                    try { awaitRelease() } finally { isPressed = false }
+                                                },
+                                                onTap = {
+                                                    triggerHaptic()
+                                                    selectedTab = index
+                                                }
+                                            )
+                                        }
+                                        .padding(vertical = 8.dp, horizontal = 10.dp)
+                                        .testTag("tab_settings_$index"),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = tabTint,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = label,
+                                            fontSize = 12.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = tabTint,
+                                            maxLines = 1,
+                                            softWrap = false
                                         )
                                     }
-                                    .padding(vertical = 8.dp, horizontal = 10.dp)
-                                    .testTag("tab_settings_$index"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = tabTint,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = label,
-                                        fontSize = 12.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = tabTint,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    )
                                 }
                             }
                         }
@@ -1172,7 +1193,7 @@ private fun InformationSection(
             customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else glassProps.buttonBorderColor
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "GlassCalc v1.2.5", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
+                Text(text = "GlassCalc v${BuildConfig.VERSION_NAME}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.app_version_subtitle), fontSize = 12.sp, color = colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.copyright_notice), fontSize = 11.sp, color = colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
             }
