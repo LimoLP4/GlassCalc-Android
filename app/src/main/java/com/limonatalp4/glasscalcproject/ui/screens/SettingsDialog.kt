@@ -142,7 +142,8 @@ fun SettingsDialog(
     val view = LocalView.current
 
     fun triggerHaptic() {
-        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+        if (!hapticFeedbackEnabled) return
+        HapticUtil.performAppHaptic(context, view, true)
     }
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
@@ -818,6 +819,8 @@ private fun DeveloperOptionsSection(
     context: android.content.Context,
     onSliderValueChange: (Float) -> Unit
 ) {
+    val view = LocalView.current
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -1019,9 +1022,11 @@ private fun DeveloperOptionsSection(
                     Switch(
                         checked = if (isHapticUsable) hapticFeedbackEnabled else false,
                         onCheckedChange = if (isHapticUsable) {
-                            {
-                                triggerHaptic()
-                                onToggleHapticFeedback(it)
+                            { enabled ->
+                                onToggleHapticFeedback(enabled)
+                                if (enabled) {
+                                    HapticUtil.performAppHaptic(context, view, true)
+                                }
                             }
                         } else null,
                         enabled = isHapticUsable,

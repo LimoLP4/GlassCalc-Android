@@ -70,12 +70,17 @@ fun GlassCalculatorButton(
     val coroutineScope = rememberCoroutineScope()
     var isLongPressTriggered by remember { mutableStateOf(false) }
 
+    val localHapticEnabled = LocalHapticFeedbackEnabled.current
+    val isHapticActive = hapticFeedbackEnabled && localHapticEnabled
+
     fun triggerHapticTap() {
-        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+        if (!isHapticActive) return
+        HapticUtil.performAppHaptic(context, view, isHapticActive)
     }
 
     fun triggerHapticLongPress() {
-        HapticUtil.performAppLongPressHaptic(context, view, hapticFeedbackEnabled)
+        if (!isHapticActive) return
+        HapticUtil.performAppLongPressHaptic(context, view, isHapticActive)
     }
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -150,7 +155,7 @@ fun GlassCalculatorButton(
         isRepeatable -> {
             Modifier
                 .indication(interactionSource, ripple(bounded = true, radius = 48.dp, color = textColor))
-                .pointerInput(onClick, hapticFeedbackEnabled) {
+                .pointerInput(onClick, isHapticActive) {
                     detectTapGestures(
                         onPress = { offset ->
                             val press = PressInteraction.Press(offset)
@@ -183,7 +188,7 @@ fun GlassCalculatorButton(
                 }
         }
         onLongClick != null -> {
-            Modifier.pointerInput(onLongClick, onClick, hapticFeedbackEnabled) {
+            Modifier.pointerInput(onLongClick, onClick, isHapticActive) {
                 detectTapGestures(
                     onTap = {
                         triggerHapticTap()
