@@ -1053,7 +1053,7 @@ private fun DeveloperOptionsSection(
                 }
                 
                 Text(
-                    text = "Erkannter Motor: $motorLabel",
+                    text = "${stringResource(R.string.dev_haptic_detected_motor)}: $motorLabel",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
                     color = colorScheme.primary.copy(alpha = 0.8f)
@@ -1061,14 +1061,14 @@ private fun DeveloperOptionsSection(
 
                 if (!hasVibratorMotor) {
                     Text(
-                        text = "Dieses Gerät unterstützt kein haptisches Feedback.",
+                        text = stringResource(R.string.dev_haptic_unsupported_device),
                         fontSize = 12.sp,
                         color = colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 } else if (effectiveApi < 26) {
                     Text(
-                        text = "Haptik erfordert API 26 (Android 8.0).",
+                        text = stringResource(R.string.dev_haptic_unsupported_api),
                         fontSize = 12.sp,
                         color = colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp)

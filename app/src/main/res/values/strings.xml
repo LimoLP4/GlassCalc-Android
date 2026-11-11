@@ -126,6 +126,7 @@
     <string name="dev_feature_not_supported">Nicht unterstützt</string>
     <string name="dev_haptic_title">Haptisches Feedback</string>
     <string name="dev_haptic_desc">Vibration bei Tastendruck und Schaltern</string>
+    <string name="dev_haptic_detected_motor">Erkannter Motor</string>
     <string name="dev_haptic_unsupported_device">Dieses Gerät unterstützt kein haptisches Feedback.</string>
     <string name="dev_haptic_unsupported_api">Wird von der simulierten API-Stufe nicht unterstützt.</string>
     <string name="dev_haptic_lra_detected">Hardware: LRA-Linearmotor erkannt (feine Haptik-Impulse aktiv)</string>
