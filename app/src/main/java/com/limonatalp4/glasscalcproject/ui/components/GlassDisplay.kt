@@ -290,19 +290,28 @@ private fun GlassDisplayContent(
                         )
                     }
 
-                    // Copy indicator button in corner
-                    IconButton(
-                        onClick = { performCopy() },
-                        modifier = Modifier
-                            .size(28.dp)
-                            .testTag("btn_copy_clipboard")
+                    // Copy indicator button in corner (Pill Glass Design)
+                    GlassSurface(
+                        shape = RoundedCornerShape(50),
+                        customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        customBorderColor = colorScheme.outline.copy(alpha = 0.3f),
+                        borderWidth = 1.dp,
+                        glassState = glassState
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = stringResource(R.string.btn_copy_clipboard),
-                            tint = copyIconColor,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        IconButton(
+                            onClick = { performCopy() },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .padding(4.dp)
+                                .testTag("btn_copy_clipboard")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = stringResource(R.string.btn_copy_clipboard),
+                                tint = colorScheme.onSurface,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }
