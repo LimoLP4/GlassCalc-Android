@@ -20,12 +20,12 @@
 *   **Information & Licensing Hub:** A dedicated "Information" tab to view the GitHub repository, the app's license, and third-party licenses.
 *   **Developer Options:** Built-in debug menu for testing API levels, simulating features, and managing cache.
 
-## 🌍 Localization / Sprache
+🌍 Localization / Sprache
 
-**Current Language: German (Deutsch)**
-Please note that the current version of GlassCalc is available **exclusively in German**. All buttons, menus, and descriptions are in German.
+Supported Languages: German (Deutsch) & English
+Since Version 1.2.4, GlassCalc fully supports both German and English. The app automatically follows your device's system language by default.
 
-**Future Update:** English support is currently **planned for a future update**. If you are interested in helping with the translation, feel free to reach out!
+Manual Selection: You can easily switch the language at runtime via the new "Language" (Sprache) tab in the Settings.
 
 ## 🛠️ Tech Stack & App Information
 
