@@ -8,6 +8,7 @@ import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
 import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
+import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.domain.evaluator.EvaluationResult
 import com.limonatalp4.glasscalcproject.domain.evaluator.ExpressionEvaluator
 import com.limonatalp4.glasscalcproject.lifecycle.AppLifecycleObserver
@@ -99,6 +100,9 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     val hapticFeedbackEnabled: StateFlow<Boolean> = preferences.hapticFeedbackEnabledFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
+    val hapticIntensity: StateFlow<Int> = preferences.hapticIntensityFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 1)
+
     val lifecycleStatus: StateFlow<String> = AppLifecycleObserver.lastLifecycleEvent
 
     private val _isAutoResultEnabled = preferences.autoResultEnabledFlow
@@ -114,6 +118,14 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     fun setHapticFeedbackEnabled(enabled: Boolean) {
         viewModelScope.launch {
             preferences.setHapticFeedbackEnabled(enabled)
+        }
+    }
+
+    fun setHapticIntensity(intensity: Int) {
+        val clamped = intensity.coerceIn(1, 10)
+        HapticUtil.currentIntensityLevel = clamped
+        viewModelScope.launch {
+            preferences.setHapticIntensity(clamped)
         }
     }
 
@@ -136,6 +148,13 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             onStop = { onAppStop() },
             onStart = { onAppStart() }
         )
+
+        // Keep HapticUtil intensity synced with persisted preference
+        viewModelScope.launch {
+            preferences.hapticIntensityFlow.collect { intensity ->
+                HapticUtil.currentIntensityLevel = intensity
+            }
+        }
     }
 
     fun onAppStop() {

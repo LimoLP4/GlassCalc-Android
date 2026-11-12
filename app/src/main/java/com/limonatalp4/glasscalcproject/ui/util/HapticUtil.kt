@@ -8,8 +8,11 @@ import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.runtime.compositionLocalOf
+import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 val LocalHapticFeedbackEnabled = compositionLocalOf { true }
+val LocalHapticIntensity = compositionLocalOf { 1 }
 
 enum class HapticMotorType {
     NONE,
@@ -18,6 +21,13 @@ enum class HapticMotorType {
 }
 
 object HapticUtil {
+
+    @Volatile
+    var currentIntensityLevel: Int = 1
+
+    fun levelToIntensityFloat(level: Int): Float {
+        return level.coerceIn(1, 10) / 10f
+    }
 
     fun getVibrator(context: Context): Vibrator? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -51,7 +61,12 @@ object HapticUtil {
         return getHapticMotorType(context) != HapticMotorType.NONE
     }
 
-    fun performAppHaptic(context: Context, view: View, enabled: Boolean) {
+    fun performAppHaptic(
+        context: Context,
+        view: View,
+        enabled: Boolean,
+        intensityLevel: Int = currentIntensityLevel
+    ) {
         if (!enabled) return
 
         val vibrator = getVibrator(context)
@@ -59,34 +74,51 @@ object HapticUtil {
             return
         }
 
-        // Standard View Haptic Feedback als Ergänzung
-        view.performHapticFeedback(
-            HapticFeedbackConstants.KEYBOARD_TAP,
-            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-        )
+        val intensityFloat = levelToIntensityFloat(intensityLevel)
 
         try {
-            val isLra = vibrator.hasAmplitudeControl()
-
-            if (isLra) {
-                // Für LRA-Motoren (hasAmplitudeControl() == true):
-                // Feine, moderne Haptik-Effekte (z.B. EFFECT_CLICK)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                } else {
-                    vibrator.vibrate(VibrationEffect.createOneShot(20L, VibrationEffect.DEFAULT_AMPLITUDE))
+            when (getHapticMotorType(context)) {
+                HapticMotorType.LRA -> {
+                    // Für LRA-Motoren (Amplitudenkontrolle unterstützt):
+                    // Amplitude (0.1f..1.0f) skalieren
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                        vibrator.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                    ) {
+                        val composition = VibrationEffect.startComposition()
+                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, intensityFloat)
+                            .compose()
+                        vibrator.vibrate(composition)
+                    } else {
+                        val amplitude = (intensityFloat * 255f).roundToInt().coerceIn(1, 255)
+                        vibrator.vibrate(VibrationEffect.createOneShot(20L, amplitude))
+                    }
                 }
-            } else {
-                // Für ERM-Motoren (hasAmplitudeControl() == false):
-                // Robuster Impuls
-                vibrator.vibrate(VibrationEffect.createOneShot(30L, VibrationEffect.DEFAULT_AMPLITUDE))
+                HapticMotorType.ERM -> {
+                    // Für ERM-Motoren (keine Amplitudenkontrolle):
+                    // Dauer leicht nach Intensitätsstufe skalieren (Stufe 1: ~20ms, Stufe 10: ~60ms)
+                    val durationMs = (15L + (intensityFloat * 45f).roundToLong()).coerceIn(15L, 65L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+                HapticMotorType.NONE -> return
             }
         } catch (e: Exception) {
-            // Ignoriere Hardware- oder Berechtigungsfehler sicher
+            // Fallback auf Standard View Haptic Feedback bei Hardware- oder Berechtigungsfehlern
+            try {
+                view.performHapticFeedback(
+                    HapticFeedbackConstants.KEYBOARD_TAP,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                )
+            } catch (_: Exception) {
+            }
         }
     }
 
-    fun performAppLongPressHaptic(context: Context, view: View, enabled: Boolean) {
+    fun performAppLongPressHaptic(
+        context: Context,
+        view: View,
+        enabled: Boolean,
+        intensityLevel: Int = currentIntensityLevel
+    ) {
         if (!enabled) return
 
         val vibrator = getVibrator(context)
@@ -94,25 +126,28 @@ object HapticUtil {
             return
         }
 
-        view.performHapticFeedback(
-            HapticFeedbackConstants.LONG_PRESS,
-            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-        )
+        val intensityFloat = levelToIntensityFloat(intensityLevel)
 
         try {
-            val isLra = vibrator.hasAmplitudeControl()
-            if (isLra) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
-                } else {
-                    vibrator.vibrate(VibrationEffect.createOneShot(50L, VibrationEffect.DEFAULT_AMPLITUDE))
+            when (getHapticMotorType(context)) {
+                HapticMotorType.LRA -> {
+                    val amplitude = (intensityFloat * 255f).roundToInt().coerceIn(1, 255)
+                    vibrator.vibrate(VibrationEffect.createOneShot(45L, amplitude))
                 }
-            } else {
-                vibrator.vibrate(VibrationEffect.createOneShot(60L, VibrationEffect.DEFAULT_AMPLITUDE))
+                HapticMotorType.ERM -> {
+                    val durationMs = (40L + (intensityFloat * 50f).roundToLong()).coerceIn(40L, 95L)
+                    vibrator.vibrate(VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+                HapticMotorType.NONE -> return
             }
         } catch (e: Exception) {
-            // Ignoriere Fehler
+            try {
+                view.performHapticFeedback(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                )
+            } catch (_: Exception) {
+            }
         }
     }
 }
-

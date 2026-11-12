@@ -3,6 +3,7 @@ package com.limonatalp4.glasscalcproject.ui.components
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -104,11 +105,15 @@ fun GlassSurface(
     shape: Shape = RoundedCornerShape(24.dp),
     borderWidth: Dp = 1.dp,
     customBorderColor: Color? = null,
+    borderStroke: BorderStroke? = null,
     customBgColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val glassProps = LocalGlassProperties.current
-    val effectiveBorderColor = customBorderColor ?: glassProps.buttonBorderColor
+    val effectiveBorder = borderStroke ?: BorderStroke(
+        width = borderWidth,
+        color = customBorderColor ?: glassProps.buttonBorderColor
+    )
     val effectiveBgColor = customBgColor ?: glassProps.cardBackground
 
     val state = glassState ?: rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
@@ -123,7 +128,7 @@ fun GlassSurface(
                 supportsBlur = isBlurActive
             )
             .background(effectiveBgColor, shape)
-            .border(borderWidth, effectiveBorderColor, shape)
+            .border(effectiveBorder, shape)
     ) {
         // Specular light reflection on the top-left edge
         Box(

@@ -18,6 +18,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
@@ -224,13 +225,22 @@ private fun GlassDisplayContent(
 
     val resultColor = colorScheme.onSurface
 
+    val displayBorder = BorderStroke(
+        width = 1.dp,
+        color = if (glassProps.isDark) {
+            glassProps.buttonBorderColor
+        } else {
+            colorScheme.onSurface.copy(alpha = 0.20f)
+        }
+    )
+
     GlassSurface(
         modifier = modifier
             .fillMaxWidth()
             .testTag("calculator_display"),
         glassState = glassState,
         shape = displayShape,
-        borderWidth = 1.2.dp,
+        borderStroke = displayBorder,
         customBgColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.08f) else null
     ) {
         Column(

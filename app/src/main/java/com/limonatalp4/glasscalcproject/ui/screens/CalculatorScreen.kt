@@ -3,6 +3,7 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -92,6 +93,7 @@ import com.limonatalp4.glasscalcproject.ui.components.rememberAdaptiveGlassState
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
 import io.github.nadeemiqbal.liquidglass.liquidGlassSource
 
@@ -127,8 +129,13 @@ fun CalculatorScreen(
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
     val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
     val hapticFeedbackEnabled by viewModel.hapticFeedbackEnabled.collectAsState()
+    val hapticIntensity by viewModel.hapticIntensity.collectAsState()
     val autoResultEnabled by viewModel.isAutoResultEnabled.collectAsState()
     val lifecycleStatus by viewModel.lifecycleStatus.collectAsState()
+
+    androidx.compose.runtime.LaunchedEffect(hapticIntensity) {
+        HapticUtil.currentIntensityLevel = hapticIntensity
+    }
 
     var showHistorySheet by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
@@ -138,7 +145,10 @@ fun CalculatorScreen(
 
     val glassState = rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
 
-    CompositionLocalProvider(LocalHapticFeedbackEnabled provides hapticFeedbackEnabled) {
+    CompositionLocalProvider(
+        LocalHapticFeedbackEnabled provides hapticFeedbackEnabled,
+        LocalHapticIntensity provides hapticIntensity
+    ) {
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -289,16 +299,24 @@ fun CalculatorScreen(
                         val onSurfaceColor = colorScheme.onSurface
                         val view = LocalView.current
                         
+                        val drawerBorder = BorderStroke(
+                            width = 1.2.dp,
+                            color = when {
+                                isAmoled || glassProps.isAmoled -> Color.White.copy(alpha = 0.28f)
+                                glassProps.isDark -> colorScheme.outline.copy(alpha = 0.45f)
+                                else -> colorScheme.onSurface.copy(alpha = 0.25f)
+                            }
+                        )
+
                         GlassSurface(
                             modifier = Modifier
                                 .width(300.dp)
                                 .testTag("floating_nav_menu"),
-                        shape = RoundedCornerShape(32.dp),
-                        borderWidth = 1.2.dp,
-                        customBgColor = if (isAmoled) Color.Black else drawerBgColor.copy(alpha = 0.9f),
-                        customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else null,
-                        glassState = glassState
-                    ) {
+                            shape = RoundedCornerShape(32.dp),
+                            borderStroke = drawerBorder,
+                            customBgColor = if (isAmoled) Color.Black else drawerBgColor.copy(alpha = 0.9f),
+                            glassState = glassState
+                        ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -444,6 +462,7 @@ fun CalculatorScreen(
                 simulatedApiEnabled = simulatedApiEnabled,
                 simulatedApiLevel = simulatedApiLevel,
                 hapticFeedbackEnabled = hapticFeedbackEnabled,
+                hapticIntensity = hapticIntensity,
                 lifecycleStatus = lifecycleStatus,
                 onSelectTheme = { theme -> viewModel.setTheme(theme) },
                 onSelectAngleMode = { mode ->
@@ -451,6 +470,7 @@ fun CalculatorScreen(
                 },
                 onSetSimulatedApi = { enabled, level -> viewModel.setSimulatedApi(enabled, level) },
                 onToggleHapticFeedback = { enabled -> viewModel.setHapticFeedbackEnabled(enabled) },
+                onSetHapticIntensity = { intensity -> viewModel.setHapticIntensity(intensity) },
                 onToggleAutoResult = { enabled -> viewModel.setAutoResultEnabled(enabled) },
                 onSimulateBackground = { viewModel.simulateBackgroundSave() },
                 onTestCrashProtection = { viewModel.testCrashProtection() },
@@ -536,6 +556,23 @@ private fun PortraitCalculatorLayout(
             )
 
             // Bar with DEG/RAD Toggle & Scientific Switch
+            val angleButtonBorder = BorderStroke(
+                width = 1.dp,
+                color = if (glassProps.isDark) {
+                    glassProps.buttonBorderColor
+                } else {
+                    colorScheme.onSurface.copy(alpha = 0.3f)
+                }
+            )
+            val scientificButtonBorder = BorderStroke(
+                width = 1.dp,
+                color = when {
+                    isScientificExpanded -> colorScheme.tertiary
+                    glassProps.isDark -> glassProps.buttonBorderColor
+                    else -> colorScheme.onSurface.copy(alpha = 0.3f)
+                }
+            )
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -547,7 +584,7 @@ private fun PortraitCalculatorLayout(
                 GlassSurface(
                     modifier = Modifier.testTag("btn_toggle_angle_mode"),
                     shape = CircleShape,
-                    borderWidth = 1.dp
+                    borderStroke = angleButtonBorder
                 ) {
                     IconButton(
                         onClick = {
@@ -569,8 +606,7 @@ private fun PortraitCalculatorLayout(
                 GlassSurface(
                     modifier = Modifier.testTag("btn_toggle_scientific"),
                     shape = CircleShape,
-                    borderWidth = 1.dp,
-                    customBorderColor = if (isScientificExpanded) colorScheme.tertiary else glassProps.buttonBorderColor
+                    borderStroke = scientificButtonBorder
                 ) {
                     IconButton(
                         onClick = {
@@ -672,6 +708,7 @@ private fun LandscapeCalculatorLayout(
     onOpenConstants: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val glassProps = LocalGlassProperties.current
     val localContext = LocalContext.current
     val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
@@ -737,10 +774,18 @@ private fun LandscapeCalculatorLayout(
                     )
 
                     // DEG/RAD Button rechtsbündig unter dem Display
+                    val landscapeAngleBorder = BorderStroke(
+                        width = 1.dp,
+                        color = if (glassProps.isDark) {
+                            glassProps.buttonBorderColor
+                        } else {
+                            colorScheme.onSurface.copy(alpha = 0.3f)
+                        }
+                    )
                     Box(modifier = Modifier.fillMaxWidth()) {
                         GlassSurface(
                             shape = CircleShape,
-                            borderWidth = 1.dp,
+                            borderStroke = landscapeAngleBorder,
                             modifier = Modifier.align(Alignment.CenterEnd)
                         ) {
                             IconButton(

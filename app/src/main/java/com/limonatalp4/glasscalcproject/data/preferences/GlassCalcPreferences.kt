@@ -34,6 +34,7 @@ class GlassCalcPreferences(private val context: Context) {
         val DEFAULT_LENGTH_UNIT = stringPreferencesKey("default_length_unit")
         val DEFAULT_MASS_UNIT = stringPreferencesKey("default_mass_unit")
         val HAPTIC_FEEDBACK_ENABLED = booleanPreferencesKey("haptic_feedback_enabled")
+        val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity")
         val AUTO_RESULT_ENABLED = booleanPreferencesKey("auto_result_enabled")
         val LANGUAGE = stringPreferencesKey("language")
     }
@@ -96,6 +97,10 @@ class GlassCalcPreferences(private val context: Context) {
         prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] ?: true
     }
 
+    val hapticIntensityFlow: Flow<Int> = safeDataFlow.map { prefs ->
+        (prefs[PreferencesKeys.HAPTIC_INTENSITY] ?: 1).coerceIn(1, 10)
+    }
+
     val autoResultEnabledFlow: Flow<Boolean> = safeDataFlow.map { prefs ->
         prefs[PreferencesKeys.AUTO_RESULT_ENABLED] ?: true
     }
@@ -108,6 +113,16 @@ class GlassCalcPreferences(private val context: Context) {
         try {
             context.dataStore.edit { prefs ->
                 prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] = enabled
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+        }
+    }
+
+    suspend fun setHapticIntensity(intensity: Int) {
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[PreferencesKeys.HAPTIC_INTENSITY] = intensity.coerceIn(1, 10)
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
@@ -221,6 +236,7 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.DEFAULT_LENGTH_UNIT] = "m"
                 prefs[PreferencesKeys.DEFAULT_MASS_UNIT] = "kg"
                 prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] = true
+                prefs[PreferencesKeys.HAPTIC_INTENSITY] = 1
                 prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = true
             }
         } catch (e: Exception) {

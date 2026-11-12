@@ -131,6 +131,8 @@
     <string name="dev_haptic_unsupported_api">Wird von der simulierten API-Stufe nicht unterstützt.</string>
     <string name="dev_haptic_lra_detected">Hardware: LRA-Linearmotor erkannt (feine Haptik-Impulse aktiv)</string>
     <string name="dev_haptic_erm_detected">Hardware: ERM-Rotationsmotor erkannt (robuste Impulssteuerung aktiv)</string>
+    <string name="dev_haptic_intensity_label">Intensität</string>
+    <string name="dev_haptic_intensity_level">Stufe %1$d / 10</string>
     <string name="dev_auto_result_title">Automatisches Ergebnis</string>
     <string name="dev_auto_result_desc">Ergebnis live bei Eingabe berechnen</string>
     <string name="dev_lifecycle_title">Zustandserhalt &amp; Lifecycle</string>

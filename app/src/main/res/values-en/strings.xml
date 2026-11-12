@@ -131,6 +131,8 @@
     <string name="dev_haptic_unsupported_api">Not supported by the simulated API level.</string>
     <string name="dev_haptic_lra_detected">Hardware: LRA linear motor detected (fine haptic pulses active)</string>
     <string name="dev_haptic_erm_detected">Hardware: ERM rotary motor detected (robust pulse control active)</string>
+    <string name="dev_haptic_intensity_label">Intensity</string>
+    <string name="dev_haptic_intensity_level">Level %1$d / 10</string>
     <string name="dev_auto_result_title">Automatic Result</string>
     <string name="dev_auto_result_desc">Compute result live during input</string>
     <string name="dev_lifecycle_title">State Preservation &amp; Lifecycle</string>

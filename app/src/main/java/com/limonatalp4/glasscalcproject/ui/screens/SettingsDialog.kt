@@ -108,7 +108,9 @@ import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
+import com.limonatalp4.glasscalcproject.ui.util.HapticMotorType
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -122,12 +124,14 @@ fun SettingsDialog(
     simulatedApiEnabled: Boolean,
     simulatedApiLevel: Int,
     hapticFeedbackEnabled: Boolean,
+    hapticIntensity: Int = 1,
     autoResultEnabled: Boolean,
     lifecycleStatus: String,
     onSelectTheme: (AppTheme) -> Unit,
     onSelectAngleMode: (AngleMode) -> Unit,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
     onToggleHapticFeedback: (Boolean) -> Unit,
+    onSetHapticIntensity: (Int) -> Unit = {},
     onToggleAutoResult: (Boolean) -> Unit,
     onSimulateBackground: () -> Unit,
     onTestCrashProtection: () -> Unit,
@@ -143,7 +147,7 @@ fun SettingsDialog(
 
     fun triggerHaptic() {
         if (!hapticFeedbackEnabled) return
-        HapticUtil.performAppHaptic(context, view, true)
+        HapticUtil.performAppHaptic(context, view, true, hapticIntensity)
     }
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
@@ -431,6 +435,7 @@ fun SettingsDialog(
                                 sliderMax = sliderMax,
                                 sliderSteps = sliderSteps,
                                 hapticFeedbackEnabled = hapticFeedbackEnabled,
+                                hapticIntensity = hapticIntensity,
                                 autoResultEnabled = autoResultEnabled,
                                 lifecycleStatus = lifecycleStatus,
                                 isAmoled = isAmoled,
@@ -438,6 +443,7 @@ fun SettingsDialog(
                                 colorScheme = colorScheme,
                                 onSetSimulatedApi = onSetSimulatedApi,
                                 onToggleHapticFeedback = onToggleHapticFeedback,
+                                onSetHapticIntensity = onSetHapticIntensity,
                                 onToggleAutoResult = onToggleAutoResult,
                                 onSimulateBackground = onSimulateBackground,
                                 onTestCrashProtection = onTestCrashProtection,
@@ -804,6 +810,7 @@ private fun DeveloperOptionsSection(
     sliderMax: Float,
     sliderSteps: Int,
     hapticFeedbackEnabled: Boolean,
+    hapticIntensity: Int,
     autoResultEnabled: Boolean,
     lifecycleStatus: String,
     isAmoled: Boolean,
@@ -811,6 +818,7 @@ private fun DeveloperOptionsSection(
     colorScheme: androidx.compose.material3.ColorScheme,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
     onToggleHapticFeedback: (Boolean) -> Unit,
+    onSetHapticIntensity: (Int) -> Unit,
     onToggleAutoResult: (Boolean) -> Unit,
     onSimulateBackground: () -> Unit,
     onTestCrashProtection: () -> Unit,
@@ -985,10 +993,14 @@ private fun DeveloperOptionsSection(
         }
 
         // Card 3: Haptic Feedback with hardware motor detection
-        val hasVibratorMotor = remember(context) { com.limonatalp4.glasscalcproject.ui.util.HapticUtil.hasVibrator(context) }
-        val hapticMotorType = remember(context) { com.limonatalp4.glasscalcproject.ui.util.HapticUtil.getHapticMotorType(context) }
+        val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
+        val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
         val isSupportedBySimulatedApi = effectiveApi >= 26
         val isHapticUsable = hasVibratorMotor && isSupportedBySimulatedApi
+        val isIntensitySliderEnabled = hapticMotorType != HapticMotorType.NONE && isSupportedBySimulatedApi && hapticFeedbackEnabled
+        var sliderIntensity by remember(hapticIntensity) {
+            mutableFloatStateOf(hapticIntensity.toFloat().coerceIn(1f, 10f))
+        }
 
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1025,7 +1037,12 @@ private fun DeveloperOptionsSection(
                             { enabled ->
                                 onToggleHapticFeedback(enabled)
                                 if (enabled) {
-                                    HapticUtil.performAppHaptic(context, view, true)
+                                    HapticUtil.performAppHaptic(
+                                        context,
+                                        view,
+                                        true,
+                                        sliderIntensity.roundToInt().coerceIn(1, 10)
+                                    )
                                 }
                             }
                         } else null,
@@ -1045,13 +1062,13 @@ private fun DeveloperOptionsSection(
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
-                
+
                 val motorLabel = when (hapticMotorType) {
-                    com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.LRA -> "LRA (Linear Resonant Actuator)"
-                    com.limonatalp4.glasscalcproject.ui.util.HapticMotorType.ERM -> "ERM (Eccentric Rotating Mass)"
+                    HapticMotorType.LRA -> "LRA (Linear Resonant Actuator)"
+                    HapticMotorType.ERM -> "ERM (Eccentric Rotating Mass)"
                     else -> "NONE"
                 }
-                
+
                 Text(
                     text = "${stringResource(R.string.dev_haptic_detected_motor)}: $motorLabel",
                     fontSize = 11.sp,
@@ -1059,19 +1076,118 @@ private fun DeveloperOptionsSection(
                     color = colorScheme.primary.copy(alpha = 0.8f)
                 )
 
+                // Haptic Intensity Slider (10 levels: 1..10, default 1)
+                val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            when {
+                                isAmoled -> Color.White.copy(alpha = 0.05f)
+                                isTiefschwarz -> Color.White.copy(alpha = 0.04f)
+                                else -> colorScheme.surface.copy(alpha = 0.45f)
+                            }
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (isAmoled) {
+                                Color.White.copy(alpha = 0.18f)
+                            } else {
+                                colorScheme.outline.copy(alpha = 0.18f)
+                            },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(if (isIntensitySliderEnabled) 1.0f else 0.45f),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dev_haptic_intensity_label),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.dev_haptic_intensity_level, currentLevel),
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isIntensitySliderEnabled) colorScheme.primary else colorScheme.onSurfaceVariant,
+                            modifier = Modifier.testTag("text_haptic_intensity_level")
+                        )
+                    }
+
+                    Slider(
+                        value = sliderIntensity,
+                        onValueChange = { newValue ->
+                            val newLevel = newValue.roundToInt().coerceIn(1, 10)
+                            val previousLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
+                            sliderIntensity = newLevel.toFloat()
+                            if (newLevel != previousLevel) {
+                                onSetHapticIntensity(newLevel)
+                                HapticUtil.performAppHaptic(context, view, true, newLevel)
+                            }
+                        },
+                        onValueChangeFinished = {
+                            onSetHapticIntensity(sliderIntensity.roundToInt().coerceIn(1, 10))
+                        },
+                        valueRange = 1f..10f,
+                        steps = 8,
+                        enabled = isIntensitySliderEnabled,
+                        colors = SliderDefaults.colors(
+                            thumbColor = colorScheme.primary,
+                            activeTrackColor = colorScheme.primary,
+                            inactiveTrackColor = if (isAmoled) {
+                                Color.White.copy(alpha = 0.22f)
+                            } else {
+                                colorScheme.onSurface.copy(alpha = 0.2f)
+                            },
+                            activeTickColor = colorScheme.onPrimary.copy(alpha = 0.7f),
+                            inactiveTickColor = if (isAmoled) {
+                                Color.White.copy(alpha = 0.4f)
+                            } else {
+                                colorScheme.onSurface.copy(alpha = 0.35f)
+                            },
+                            disabledThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
+                            disabledActiveTrackColor = colorScheme.onSurface.copy(alpha = 0.28f),
+                            disabledInactiveTrackColor = if (isAmoled) {
+                                Color.White.copy(alpha = 0.12f)
+                            } else {
+                                colorScheme.onSurface.copy(alpha = 0.12f)
+                            },
+                            disabledActiveTickColor = colorScheme.onSurface.copy(alpha = 0.2f),
+                            disabledInactiveTickColor = if (isAmoled) {
+                                Color.White.copy(alpha = 0.2f)
+                            } else {
+                                colorScheme.onSurface.copy(alpha = 0.18f)
+                            }
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("slider_haptic_intensity")
+                    )
+                }
+
                 if (!hasVibratorMotor) {
                     Text(
                         text = stringResource(R.string.dev_haptic_unsupported_device),
                         fontSize = 12.sp,
                         color = colorScheme.error,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 } else if (effectiveApi < 26) {
                     Text(
                         text = stringResource(R.string.dev_haptic_unsupported_api),
                         fontSize = 12.sp,
                         color = colorScheme.error,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 }
             }

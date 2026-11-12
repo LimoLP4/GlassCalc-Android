@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,16 +72,17 @@ fun GlassCalculatorButton(
     var isLongPressTriggered by remember { mutableStateOf(false) }
 
     val localHapticEnabled = LocalHapticFeedbackEnabled.current
+    val localHapticIntensity = LocalHapticIntensity.current
     val isHapticActive = hapticFeedbackEnabled && localHapticEnabled
 
     fun triggerHapticTap() {
         if (!isHapticActive) return
-        HapticUtil.performAppHaptic(context, view, isHapticActive)
+        HapticUtil.performAppHaptic(context, view, isHapticActive, localHapticIntensity)
     }
 
     fun triggerHapticLongPress() {
         if (!isHapticActive) return
-        HapticUtil.performAppLongPressHaptic(context, view, isHapticActive)
+        HapticUtil.performAppLongPressHaptic(context, view, isHapticActive, localHapticIntensity)
     }
 
     val interactionSource = remember { MutableInteractionSource() }
