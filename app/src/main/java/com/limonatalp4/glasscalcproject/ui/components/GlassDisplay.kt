@@ -4,26 +4,34 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.ui.res.stringResource
-import com.limonatalp4.glasscalcproject.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,12 +44,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
@@ -50,30 +62,34 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Isolated GlassDisplay collecting from StateFlows directly.
- * This prevents the entire parent Screen and all 25 keyboard buttons
- * from recomposing on every single keystroke, eliminating typing lags.
+ * Displays cursor navigation for precise editing with robust crash protection.
  */
 @Composable
 fun GlassDisplay(
     expressionFlow: StateFlow<String>,
     resultFlow: StateFlow<String>,
+    cursorPositionFlow: StateFlow<Int>,
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
     errorMessageFlow: StateFlow<String?>,
+    onCursorPositionChanged: (Int) -> Unit = {},
     isCompact: Boolean = false,
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
 ) {
     val expression by expressionFlow.collectAsState()
     val result by resultFlow.collectAsState()
+    val cursorPosition by cursorPositionFlow.collectAsState()
     val errorMessage by errorMessageFlow.collectAsState()
 
     GlassDisplayContent(
         expression = expression,
         result = result,
+        cursorPosition = cursorPosition,
         angleMode = angleMode,
         isScientificExpanded = isScientificExpanded,
         errorMessage = errorMessage,
+        onCursorPositionChanged = onCursorPositionChanged,
         isCompact = isCompact,
         modifier = modifier,
         glassState = glassState
@@ -84,9 +100,11 @@ fun GlassDisplay(
 fun GlassDisplay(
     expression: String,
     result: String,
+    cursorPosition: Int = expression.length,
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
     errorMessage: String? = null,
+    onCursorPositionChanged: (Int) -> Unit = {},
     isCompact: Boolean = false,
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
@@ -94,9 +112,11 @@ fun GlassDisplay(
     GlassDisplayContent(
         expression = expression,
         result = result,
+        cursorPosition = cursorPosition,
         angleMode = angleMode,
         isScientificExpanded = isScientificExpanded,
         errorMessage = errorMessage,
+        onCursorPositionChanged = onCursorPositionChanged,
         isCompact = isCompact,
         modifier = modifier,
         glassState = glassState
@@ -107,9 +127,11 @@ fun GlassDisplay(
 private fun GlassDisplayContent(
     expression: String,
     result: String,
+    cursorPosition: Int,
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
     errorMessage: String? = null,
+    onCursorPositionChanged: (Int) -> Unit = {},
     isCompact: Boolean = false,
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
@@ -117,12 +139,25 @@ private fun GlassDisplayContent(
     val context = LocalContext.current
     val glassProps = LocalGlassProperties.current
     val exprScrollState = rememberScrollState()
+    val density = LocalDensity.current
 
     var isCopyFlashed by remember { mutableStateOf(false) }
     val flashAlpha by animateFloatAsState(
         targetValue = if (isCopyFlashed) 0.35f else 0.0f,
         animationSpec = tween(durationMillis = 180),
         label = "display_copy_flash"
+    )
+
+    // Cursor blinking animation
+    val infiniteTransition = rememberInfiniteTransition(label = "cursor_blink")
+    val cursorAlpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cursor_alpha"
     )
 
     fun performCopy() {
@@ -149,9 +184,19 @@ private fun GlassDisplayContent(
         }
     }
 
-    // Auto-scroll to end on new typing
-    LaunchedEffect(expression) {
-        exprScrollState.animateScrollTo(exprScrollState.maxValue)
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+
+    // Auto-scroll to keep cursor visible safely
+    LaunchedEffect(expression, cursorPosition, textLayoutResult) {
+        textLayoutResult?.let { layout ->
+            runCatching {
+                val maxLen = layout.layoutInput.text.length
+                val safePos = cursorPosition.coerceIn(0, maxLen)
+                val cursorX = layout.getCursorRect(safePos).left.toInt()
+                val targetScroll = (cursorX - 100).coerceAtLeast(0)
+                exprScrollState.animateScrollTo(targetScroll)
+            }
+        }
     }
 
     val displayShape = RoundedCornerShape(if (isCompact) 20.dp else 28.dp)
@@ -174,12 +219,6 @@ private fun GlassDisplayContent(
     GlassSurface(
         modifier = modifier
             .fillMaxWidth()
-            .pointerInput(expression, result) {
-                detectTapGestures(
-                    onTap = { performCopy() },
-                    onLongPress = { performCopy() }
-                )
-            }
             .testTag("calculator_display"),
         glassState = glassState,
         shape = displayShape,
@@ -243,19 +282,24 @@ private fun GlassDisplayContent(
                         )
                     }
 
-                    // Copy indicator icon
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = stringResource(R.string.btn_copy_clipboard),
-                        tint = copyIconColor,
+                    // Copy indicator button in corner
+                    IconButton(
+                        onClick = { performCopy() },
                         modifier = Modifier
-                            .size(16.dp)
-                            .testTag("icon_copy_clipboard")
-                    )
+                            .size(28.dp)
+                            .testTag("btn_copy_clipboard")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = stringResource(R.string.btn_copy_clipboard),
+                            tint = copyIconColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
 
-            // Running expression input (top)
+            // Running expression input with Cursor (top)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -263,14 +307,61 @@ private fun GlassDisplayContent(
                     .horizontalScroll(exprScrollState),
                 horizontalArrangement = Arrangement.End
             ) {
-                Text(
-                    text = if (expression.isEmpty()) "0" else expression,
-                    fontSize = if (isCompact) 19.sp else 24.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = exprColor,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.testTag("display_expression_text")
-                )
+                Box(
+                    modifier = Modifier.pointerInput(expression) {
+                        detectTapGestures { tapOffset ->
+                            val layout = textLayoutResult
+                            if (layout != null && expression.isNotEmpty()) {
+                                runCatching {
+                                    val tappedPos = layout.getOffsetForPosition(tapOffset)
+                                    onCursorPositionChanged(tappedPos.coerceIn(0, expression.length))
+                                }.onFailure {
+                                    onCursorPositionChanged(expression.length)
+                                }
+                            } else {
+                                onCursorPositionChanged(0)
+                            }
+                        }
+                    }
+                ) {
+                    val textToShow = if (expression.isEmpty()) "0" else expression
+
+                    Text(
+                        text = textToShow,
+                        fontSize = if (isCompact) 19.sp else 24.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = exprColor,
+                        onTextLayout = { textLayoutResult = it },
+                        modifier = Modifier.testTag("display_expression_text")
+                    )
+
+                    // Blinking cursor bar with layout-bounds validation
+                    textLayoutResult?.let { layout ->
+                        val layoutTextLen = layout.layoutInput.text.length
+                        val safePos = if (expression.isEmpty()) 0 else cursorPosition.coerceIn(0, layoutTextLen)
+
+                        val cursorRect = runCatching {
+                            layout.getCursorRect(safePos)
+                        }.getOrNull()
+
+                        if (cursorRect != null) {
+                            val cursorX = with(density) { cursorRect.left.toDp() }
+                            val cursorY = with(density) { cursorRect.top.toDp() }
+                            val cursorH = with(density) { cursorRect.height.toDp() }
+
+                            Box(
+                                modifier = Modifier
+                                    .offset(x = cursorX, y = cursorY)
+                                    .width(2.5.dp)
+                                    .height(if (cursorH > 0.dp) cursorH else if (isCompact) 20.dp else 26.dp)
+                                    .background(
+                                        color = colorScheme.primary.copy(alpha = cursorAlpha),
+                                        shape = RoundedCornerShape(1.dp)
+                                    )
+                            )
+                        }
+                    }
+                }
             }
 
             // Evaluated result (bottom, large & prominent)

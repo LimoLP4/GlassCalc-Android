@@ -524,9 +524,11 @@ private fun PortraitCalculatorLayout(
             GlassDisplay(
                 expressionFlow = viewModel.expression,
                 resultFlow = viewModel.result,
+                cursorPositionFlow = viewModel.cursorPosition,
                 errorMessageFlow = viewModel.errorMessage,
                 angleMode = angleMode,
                 isScientificExpanded = isScientificExpanded,
+                onCursorPositionChanged = { viewModel.setCursorPosition(it) },
                 isCompact = false,
                 glassState = glassState
             )
@@ -724,9 +726,11 @@ private fun LandscapeCalculatorLayout(
                     GlassDisplay(
                         expressionFlow = viewModel.expression,
                         resultFlow = viewModel.result,
+                        cursorPositionFlow = viewModel.cursorPosition,
                         errorMessageFlow = viewModel.errorMessage,
                         angleMode = angleMode,
                         isScientificExpanded = true,
+                        onCursorPositionChanged = { viewModel.setCursorPosition(it) },
                         isCompact = false,
                         glassState = glassState,
                         modifier = Modifier.fillMaxWidth()

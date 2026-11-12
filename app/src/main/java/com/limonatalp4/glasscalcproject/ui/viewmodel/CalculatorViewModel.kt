@@ -28,8 +28,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val _expression = MutableStateFlow("")
     val expression: StateFlow<String> = _expression.asStateFlow()
 
+    private val _cursorPosition = MutableStateFlow(0)
+    val cursorPosition: StateFlow<Int> = _cursorPosition.asStateFlow()
+
     private val _result = MutableStateFlow("0")
     val result: StateFlow<String> = _result.asStateFlow()
+
+    fun setCursorPosition(position: Int) {
+        _cursorPosition.value = position.coerceIn(0, _expression.value.length)
+    }
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
@@ -117,6 +124,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             preferences.savedStateFlow.collect { (savedExpr, savedRes) ->
                 if (_expression.value.isEmpty() && savedExpr.isNotEmpty()) {
                     _expression.value = savedExpr
+                    _cursorPosition.value = savedExpr.length
                     _result.value = savedRes
                 }
             }
@@ -168,67 +176,100 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     fun onCharacterInput(char: String) {
         _errorMessage.value = null
 
+        var curr = _expression.value
+        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+
         if (justCalculated) {
             val chainingRes = getValidChainingResult()
             if (chainingRes != null && (isOperator(char) || char == "²" || char == "³" || char == "^" || char == "!" || char == "%")) {
-                _expression.value = chainingRes
+                curr = chainingRes
+                pos = curr.length
             } else {
-                _expression.value = ""
+                curr = ""
+                pos = 0
             }
         }
         justCalculated = false
 
-        _expression.value += char
+        val updated = curr.substring(0, pos) + char + curr.substring(pos)
+        _expression.value = updated
+        _cursorPosition.value = pos + char.length
         tryLivePreview()
     }
 
     fun onScientificFunction(fnName: String) {
         _errorMessage.value = null
+
+        var curr = _expression.value
+        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+
         if (justCalculated) {
             val chainingRes = getValidChainingResult()
             if (chainingRes != null) {
-                _expression.value = "$fnName($chainingRes)"
+                val expr = "$fnName($chainingRes)"
+                _expression.value = expr
+                _cursorPosition.value = expr.length
                 justCalculated = false
                 tryLivePreview()
                 return
             } else {
-                _expression.value = ""
+                curr = ""
+                pos = 0
             }
         }
         justCalculated = false
 
-        _expression.value += "$fnName("
+        val insertStr = "$fnName("
+        val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
+        _expression.value = updated
+        _cursorPosition.value = pos + insertStr.length
         tryLivePreview()
     }
 
     fun onConstant(constant: String) {
         _errorMessage.value = null
+
+        var curr = _expression.value
+        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+
         if (justCalculated) {
-            _expression.value = ""
+            curr = ""
+            pos = 0
         }
         justCalculated = false
 
-        _expression.value += constant
+        val updated = curr.substring(0, pos) + constant + curr.substring(pos)
+        _expression.value = updated
+        _cursorPosition.value = pos + constant.length
         tryLivePreview()
     }
 
     fun onPower(exponent: String) {
         _errorMessage.value = null
+
+        var curr = _expression.value
+        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+
         if (justCalculated) {
             val chainingRes = getValidChainingResult()
             if (chainingRes != null) {
-                _expression.value = chainingRes
+                curr = chainingRes
+                pos = curr.length
             } else {
-                _expression.value = ""
+                curr = ""
+                pos = 0
             }
         }
         justCalculated = false
 
-        _expression.value += when (exponent) {
+        val insertStr = when (exponent) {
             "2" -> "^2"
             "3" -> "^3"
             else -> "^"
         }
+        val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
+        _expression.value = updated
+        _cursorPosition.value = pos + insertStr.length
         tryLivePreview()
     }
 
@@ -236,14 +277,17 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         _errorMessage.value = null
         justCalculated = false
         val curr = _expression.value
+        val pos = _cursorPosition.value.coerceIn(0, curr.length)
+
         if (curr.isEmpty()) {
             _expression.value = "−"
-        } else if (curr.startsWith("−")) {
+            _cursorPosition.value = 1
+        } else if (curr.startsWith("−") || curr.startsWith("-")) {
             _expression.value = curr.substring(1)
-        } else if (curr.startsWith("-")) {
-            _expression.value = curr.substring(1)
+            _cursorPosition.value = (pos - 1).coerceAtLeast(0)
         } else {
             _expression.value = "−$curr"
+            _cursorPosition.value = pos + 1
         }
         tryLivePreview()
     }
@@ -252,31 +296,36 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         _errorMessage.value = null
         justCalculated = false
         val curr = _expression.value
-        if (curr.isNotEmpty()) {
-            // If ends with function like "sin(", "cos(", "log(", remove the entire token
+        val pos = _cursorPosition.value.coerceIn(0, curr.length)
+
+        if (curr.isNotEmpty() && pos > 0) {
+            val textBeforeCursor = curr.substring(0, pos)
+            val textAfterCursor = curr.substring(pos)
+
             val funcs = listOf(
                 "arcsin(", "arccos(", "arctan(",
                 "sinh(", "cosh(", "tanh(",
                 "d/dx(", "der(", "int(", "abs(", "mod(", "log(", "ln(",
                 "sin(", "cos(", "tan(", "³√(", "√("
             )
-            var handled = false
+            var deletedLen = 1
             for (f in funcs) {
-                if (curr.endsWith(f)) {
-                    _expression.value = curr.dropLast(f.length)
-                    handled = true
+                if (textBeforeCursor.endsWith(f)) {
+                    deletedLen = f.length
                     break
                 }
             }
-            if (!handled) {
-                _expression.value = curr.dropLast(1)
-            }
+
+            val newTextBefore = textBeforeCursor.dropLast(deletedLen)
+            _expression.value = newTextBefore + textAfterCursor
+            _cursorPosition.value = pos - deletedLen
         }
         tryLivePreview()
     }
 
     fun onClearAll() {
         _expression.value = ""
+        _cursorPosition.value = 0
         _result.value = "0"
         _errorMessage.value = null
         justCalculated = false
@@ -295,6 +344,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                 _result.value = formatted
                 _errorMessage.value = null
                 justCalculated = true
+                _cursorPosition.value = _expression.value.length
 
                 val historyItem = CalculationHistoryItem(
                     expression = expr,
@@ -358,6 +408,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun restoreHistoryItem(item: CalculationHistoryItem) {
         _expression.value = item.expression
+        _cursorPosition.value = item.expression.length
         _result.value = item.result
         _errorMessage.value = null
         justCalculated = false
@@ -379,6 +430,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             preferences.resetAll()
             _expression.value = ""
+            _cursorPosition.value = 0
             _result.value = "0"
             _errorMessage.value = null
             _isScientificExpanded.value = false
