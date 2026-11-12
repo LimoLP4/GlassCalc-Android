@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -154,13 +155,13 @@ private fun GlassDisplayContent(
         label = "display_copy_flash"
     )
 
-    // Cursor blinking animation
+    // Cursor blinking animation (calmer 450ms half-cycle)
     val infiniteTransition = rememberInfiniteTransition(label = "cursor_blink")
     val cursorAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 400, easing = LinearEasing),
+            animation = tween(durationMillis = 450, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "cursor_alpha"
@@ -338,13 +339,15 @@ private fun GlassDisplayContent(
                         fontWeight = FontWeight.Normal,
                         color = exprColor,
                         onTextLayout = { textLayoutResult = it },
-                        modifier = Modifier.testTag("display_expression_text")
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .testTag("display_expression_text")
                     )
 
-                    // Blinking cursor bar with layout-bounds validation
+                    // Blinking cursor bar with layout-bounds validation and Z-index overlay
                     textLayoutResult?.let { layout ->
                         val layoutTextLen = layout.layoutInput.text.length
-                        val safePos = if (expression.isEmpty()) 0 else cursorPosition.coerceIn(0, layoutTextLen)
+                        val safePos = cursorPosition.coerceIn(0, layoutTextLen)
 
                         val cursorRect = runCatching {
                             layout.getCursorRect(safePos)
@@ -357,11 +360,12 @@ private fun GlassDisplayContent(
 
                             Box(
                                 modifier = Modifier
+                                    .zIndex(2f)
                                     .offset(x = cursorX, y = cursorY)
                                     .width(2.5.dp)
                                     .height(if (cursorH > 0.dp) cursorH else if (isCompact) 20.dp else 26.dp)
                                     .background(
-                                        color = colorScheme.primary.copy(alpha = cursorAlpha),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = cursorAlpha),
                                         shape = RoundedCornerShape(1.dp)
                                     )
                             )

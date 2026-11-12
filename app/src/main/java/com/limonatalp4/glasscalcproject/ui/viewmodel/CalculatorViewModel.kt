@@ -28,14 +28,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val _expression = MutableStateFlow("")
     val expression: StateFlow<String> = _expression.asStateFlow()
 
-    private val _cursorPosition = MutableStateFlow(0)
+    private val _cursorPosition = MutableStateFlow(1)
     val cursorPosition: StateFlow<Int> = _cursorPosition.asStateFlow()
 
     private val _result = MutableStateFlow("0")
     val result: StateFlow<String> = _result.asStateFlow()
 
     fun setCursorPosition(position: Int) {
-        _cursorPosition.value = position.coerceIn(0, _expression.value.length)
+        val maxLen = if (_expression.value.isEmpty()) 1 else _expression.value.length
+        _cursorPosition.value = position.coerceIn(0, maxLen)
     }
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -325,7 +326,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun onClearAll() {
         _expression.value = ""
-        _cursorPosition.value = 0
+        _cursorPosition.value = 1
         _result.value = "0"
         _errorMessage.value = null
         justCalculated = false
@@ -430,7 +431,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             preferences.resetAll()
             _expression.value = ""
-            _cursorPosition.value = 0
+            _cursorPosition.value = 1
             _result.value = "0"
             _errorMessage.value = null
             _isScientificExpanded.value = false
