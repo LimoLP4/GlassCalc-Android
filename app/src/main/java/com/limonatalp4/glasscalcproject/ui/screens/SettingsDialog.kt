@@ -933,7 +933,7 @@ private fun DeveloperOptionsSection(
                             .padding(horizontal = 18.dp, vertical = 12.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.dev_api_level_slider, currentSliderApi.toInt()),
+                            text = stringResource(R.string.dev_api_level_slider, currentSliderApi.roundToInt()),
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
@@ -942,9 +942,21 @@ private fun DeveloperOptionsSection(
                         Spacer(modifier = Modifier.height(4.dp))
                         Slider(
                             value = currentSliderApi,
-                            onValueChange = onSliderValueChange,
+                            onValueChange = { newValue ->
+                                val newApi = newValue.roundToInt()
+                                val previousApi = currentSliderApi.roundToInt()
+                                onSliderValueChange(newApi.toFloat())
+                                if (newApi != previousApi && hapticFeedbackEnabled) {
+                                    HapticUtil.performAppHaptic(
+                                        context = context,
+                                        view = view,
+                                        enabled = hapticFeedbackEnabled,
+                                        intensityLevel = hapticIntensity
+                                    )
+                                }
+                            },
                             onValueChangeFinished = {
-                                onSetSimulatedApi(true, currentSliderApi.toInt())
+                                onSetSimulatedApi(true, currentSliderApi.roundToInt())
                             },
                             valueRange = sliderMin..sliderMax,
                             steps = sliderSteps,
