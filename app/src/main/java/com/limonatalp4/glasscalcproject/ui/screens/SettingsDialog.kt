@@ -24,6 +24,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -124,7 +125,7 @@ fun SettingsDialog(
     simulatedApiEnabled: Boolean,
     simulatedApiLevel: Int,
     hapticFeedbackEnabled: Boolean,
-    hapticIntensity: Int = 1,
+    hapticIntensity: Int = 5,
     autoResultEnabled: Boolean,
     lifecycleStatus: String,
     onSelectTheme: (AppTheme) -> Unit,
@@ -916,26 +917,49 @@ private fun DeveloperOptionsSection(
                 }
 
                 if (simulatedApiEnabled) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = stringResource(R.string.dev_api_level_slider, currentSliderApi.toInt()),
-                        fontSize = 12.sp,
-                        color = colorScheme.primary
+                    val apiSliderPillShape = RoundedCornerShape(24.dp)
+                    val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    val apiSliderPillBorder = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                     )
-                    Slider(
-                        value = currentSliderApi,
-                        onValueChange = onSliderValueChange,
-                        onValueChangeFinished = {
-                            onSetSimulatedApi(true, currentSliderApi.toInt())
-                        },
-                        valueRange = sliderMin..sliderMax,
-                        steps = sliderSteps,
-                        colors = SliderDefaults.colors(
-                            thumbColor = colorScheme.primary,
-                            activeTrackColor = colorScheme.primary
-                        ),
-                        modifier = Modifier.testTag("slider_simulated_api")
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp)
+                            .clip(apiSliderPillShape)
+                            .background(apiSliderPillBg)
+                            .border(apiSliderPillBorder, shape = apiSliderPillShape)
+                            .padding(horizontal = 18.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dev_api_level_slider, currentSliderApi.toInt()),
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Slider(
+                            value = currentSliderApi,
+                            onValueChange = onSliderValueChange,
+                            onValueChangeFinished = {
+                                onSetSimulatedApi(true, currentSliderApi.toInt())
+                            },
+                            valueRange = sliderMin..sliderMax,
+                            steps = sliderSteps,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                                inactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("slider_simulated_api")
+                        )
+                    }
                 }
 
                 // Dynamic API Feature Legend
@@ -1076,30 +1100,22 @@ private fun DeveloperOptionsSection(
                     color = colorScheme.primary.copy(alpha = 0.8f)
                 )
 
-                // Haptic Intensity Slider (10 levels: 1..10, default 1)
+                // Haptic Intensity Slider Pill (10 levels: 1..10, default 5)
                 val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
+                val sliderPillShape = RoundedCornerShape(24.dp)
+                val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                val sliderPillBorder = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 10.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            when {
-                                isAmoled -> Color.White.copy(alpha = 0.05f)
-                                isTiefschwarz -> Color.White.copy(alpha = 0.04f)
-                                else -> colorScheme.surface.copy(alpha = 0.45f)
-                            }
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = if (isAmoled) {
-                                Color.White.copy(alpha = 0.18f)
-                            } else {
-                                colorScheme.outline.copy(alpha = 0.18f)
-                            },
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(top = 12.dp)
+                        .clip(sliderPillShape)
+                        .background(sliderPillBg)
+                        .border(sliderPillBorder, shape = sliderPillShape)
+                        .padding(horizontal = 18.dp, vertical = 12.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -1112,17 +1128,19 @@ private fun DeveloperOptionsSection(
                             text = stringResource(R.string.dev_haptic_intensity_label),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             text = stringResource(R.string.dev_haptic_intensity_level, currentLevel),
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = if (isIntensitySliderEnabled) colorScheme.primary else colorScheme.onSurfaceVariant,
+                            color = if (isIntensitySliderEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.testTag("text_haptic_intensity_level")
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Slider(
                         value = sliderIntensity,
@@ -1142,32 +1160,16 @@ private fun DeveloperOptionsSection(
                         steps = 8,
                         enabled = isIntensitySliderEnabled,
                         colors = SliderDefaults.colors(
-                            thumbColor = colorScheme.primary,
-                            activeTrackColor = colorScheme.primary,
-                            inactiveTrackColor = if (isAmoled) {
-                                Color.White.copy(alpha = 0.22f)
-                            } else {
-                                colorScheme.onSurface.copy(alpha = 0.2f)
-                            },
-                            activeTickColor = colorScheme.onPrimary.copy(alpha = 0.7f),
-                            inactiveTickColor = if (isAmoled) {
-                                Color.White.copy(alpha = 0.4f)
-                            } else {
-                                colorScheme.onSurface.copy(alpha = 0.35f)
-                            },
-                            disabledThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
-                            disabledActiveTrackColor = colorScheme.onSurface.copy(alpha = 0.28f),
-                            disabledInactiveTrackColor = if (isAmoled) {
-                                Color.White.copy(alpha = 0.12f)
-                            } else {
-                                colorScheme.onSurface.copy(alpha = 0.12f)
-                            },
-                            disabledActiveTickColor = colorScheme.onSurface.copy(alpha = 0.2f),
-                            disabledInactiveTickColor = if (isAmoled) {
-                                Color.White.copy(alpha = 0.2f)
-                            } else {
-                                colorScheme.onSurface.copy(alpha = 0.18f)
-                            }
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                            inactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                            disabledThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                            disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                            disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                            disabledActiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
                         ),
                         modifier = Modifier
                             .fillMaxWidth()

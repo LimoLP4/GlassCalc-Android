@@ -12,7 +12,7 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 val LocalHapticFeedbackEnabled = compositionLocalOf { true }
-val LocalHapticIntensity = compositionLocalOf { 1 }
+val LocalHapticIntensity = compositionLocalOf { 5 }
 
 enum class HapticMotorType {
     NONE,
@@ -23,7 +23,7 @@ enum class HapticMotorType {
 object HapticUtil {
 
     @Volatile
-    var currentIntensityLevel: Int = 1
+    var currentIntensityLevel: Int = 5
 
     fun levelToIntensityFloat(level: Int): Float {
         return level.coerceIn(1, 10) / 10f

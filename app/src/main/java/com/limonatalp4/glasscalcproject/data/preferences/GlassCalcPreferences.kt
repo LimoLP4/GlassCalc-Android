@@ -98,7 +98,7 @@ class GlassCalcPreferences(private val context: Context) {
     }
 
     val hapticIntensityFlow: Flow<Int> = safeDataFlow.map { prefs ->
-        (prefs[PreferencesKeys.HAPTIC_INTENSITY] ?: 1).coerceIn(1, 10)
+        (prefs[PreferencesKeys.HAPTIC_INTENSITY] ?: 5).coerceIn(1, 10)
     }
 
     val autoResultEnabledFlow: Flow<Boolean> = safeDataFlow.map { prefs ->
@@ -236,7 +236,7 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.DEFAULT_LENGTH_UNIT] = "m"
                 prefs[PreferencesKeys.DEFAULT_MASS_UNIT] = "kg"
                 prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] = true
-                prefs[PreferencesKeys.HAPTIC_INTENSITY] = 1
+                prefs[PreferencesKeys.HAPTIC_INTENSITY] = 5
                 prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = true
             }
         } catch (e: Exception) {

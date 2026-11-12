@@ -101,7 +101,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val hapticIntensity: StateFlow<Int> = preferences.hapticIntensityFlow
-        .stateIn(viewModelScope, SharingStarted.Eagerly, 1)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 5)
 
     val lifecycleStatus: StateFlow<String> = AppLifecycleObserver.lastLifecycleEvent
 
