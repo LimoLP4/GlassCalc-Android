@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -153,6 +154,7 @@ fun CalculatorScreen(
             // Main Content
             Scaffold(
                 containerColor = Color.Transparent,
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
                 topBar = {
                     Row(
                         modifier = Modifier
@@ -632,7 +634,7 @@ private fun PortraitCalculatorLayout(
                             )
                         }
                     }
-                    .verticalScroll(scrollState, enabled = isScientificExpanded),
+                    .verticalScroll(scrollState, enabled = true),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -656,9 +658,7 @@ private fun PortraitCalculatorLayout(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (isScientificExpanded) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
@@ -1094,7 +1094,7 @@ private fun MainKeyboardGrid(
         ) {
             GlassCalculatorButton(
                 text = "±",
-                type = ButtonType.FUNCTION,
+                type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_sign",
                 modifier = buttonModifier()
