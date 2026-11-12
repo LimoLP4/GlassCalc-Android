@@ -104,7 +104,7 @@ fun GlassCalculatorButton(
         type, glassProps.isDark, glassProps.isAmoled, glassProps.isMaterialYou, colorScheme, glassProps.buttonBackgroundAlpha
     ) {
         when (type) {
-            ButtonType.EQUALS -> {
+            ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> {
                 val gradient = Brush.linearGradient(
                     listOf(
                         colorScheme.primary,
@@ -121,15 +121,6 @@ fun GlassCalculatorButton(
                     )
                 )
                 Triple(brush, colorScheme.onPrimaryContainer, colorScheme.primary.copy(alpha = 0.50f))
-            }
-            ButtonType.ACTION_CLEAR -> {
-                val brush = Brush.verticalGradient(
-                    listOf(
-                        colorScheme.errorContainer.copy(alpha = 0.80f),
-                        colorScheme.errorContainer.copy(alpha = 0.60f)
-                    )
-                )
-                Triple(brush, colorScheme.onErrorContainer, colorScheme.error.copy(alpha = 0.50f))
             }
             ButtonType.FUNCTION -> {
                 val brush = Brush.verticalGradient(
@@ -226,7 +217,7 @@ fun GlassCalculatorButton(
             .scale(scale)
             .clip(CircleShape)
             .safeLiquidGlass(
-                state = if (type != ButtonType.EQUALS) glassState else null,
+                state = if (type != ButtonType.EQUALS && type != ButtonType.ACTION_CLEAR) glassState else null,
                 shape = CircleShape,
                 supportsBlur = glassProps.supportsBlur
             )
@@ -269,7 +260,7 @@ fun GlassCalculatorButton(
         Text(
             text = text,
             fontSize = calculatedFontSize,
-            fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR) FontWeight.Bold else FontWeight.Medium,
+            fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR || type == ButtonType.ACTION_CLEAR) FontWeight.Bold else FontWeight.Medium,
             color = if (isLongPressTriggered) Color.White else textColor,
             textAlign = TextAlign.Center,
             maxLines = 1,
