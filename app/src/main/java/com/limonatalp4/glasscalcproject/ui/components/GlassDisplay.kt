@@ -4,6 +4,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -154,7 +160,7 @@ private fun GlassDisplayContent(
         initialValue = 1f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 500, easing = LinearEasing),
+            animation = tween(durationMillis = 400, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "cursor_alpha"
@@ -364,19 +370,30 @@ private fun GlassDisplayContent(
                 }
             }
 
-            // Evaluated result (bottom, large & prominent)
-            Text(
-                text = result,
-                fontSize = if (isCompact) 32.sp else 42.sp,
-                fontWeight = FontWeight.Bold,
-                color = resultColor,
-                textAlign = TextAlign.End,
-                maxLines = 1,
+            // Evaluated result (bottom, large & prominent with smooth animation)
+            AnimatedContent(
+                targetState = result,
+                transitionSpec = {
+                    (fadeIn(animationSpec = tween(160)) + slideInVertically(animationSpec = tween(160)) { height -> height / 3 })
+                        .togetherWith(fadeOut(animationSpec = tween(160)) + slideOutVertically(animationSpec = tween(160)) { height -> -height / 3 })
+                },
+                label = "result_text_anim",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (isCompact) 2.dp else 4.dp)
-                    .testTag("display_result_text")
-            )
+            ) { targetResult ->
+                Text(
+                    text = targetResult,
+                    fontSize = if (isCompact) 32.sp else 42.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = resultColor,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("display_result_text")
+                )
+            }
         }
     }
 }
