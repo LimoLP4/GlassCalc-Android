@@ -242,30 +242,228 @@ class ExampleUnitTest {
                 "Formula '${formula.id}' (${formula.insertExpression}) failed to evaluate",
                 res is EvaluationResult.Success
             )
+            assertTrue(formula.keywordsResIds.isNotEmpty())
         }
 
-        // Verify search filtering matches titles, previews, and keywords
-        val pairs = formulas.map { formula ->
-            val title = when (formula.id) {
-                "circle_area" -> "Kreisfläche"
-                "pythagoras" -> "Pythagoras"
-                "compound_interest" -> "Zinseszins"
-                else -> formula.id
+        // German locale simulation: "Kreis" / "Fläche" match, English "Circle" does not
+        val germanEntries = formulas.map { formula ->
+            when (formula.id) {
+                "circle_area" -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Kreisfläche", listOf("kreis", "fläche", "radius", "pi")
+                )
+                "pythagoras" -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Pythagoras", listOf("pythagoras", "dreieck")
+                )
+                else -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Sonstige Formel", emptyList()
+                )
             }
-            formula to title
+        }
+        assertEquals(
+            listOf("circle_area"),
+            com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Fläche", germanEntries).map { it.formula.id }
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Circle", germanEntries).isEmpty()
+        )
+
+        // English locale simulation: "Circle" / "Area" match
+        val englishEntries = formulas.map { formula ->
+            when (formula.id) {
+                "circle_area" -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Circle Area", listOf("circle", "area", "radius", "pi")
+                )
+                else -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Other Formula", emptyList()
+                )
+            }
+        }
+        assertEquals(
+            listOf("circle_area"),
+            com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Area", englishEntries).map { it.formula.id }
+        )
+
+        // Spanish locale simulation: "Círculo" / "Área" match
+        val spanishEntries = formulas.map { formula ->
+            when (formula.id) {
+                "circle_area" -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Área del círculo", listOf("círculo", "área", "radio", "pi")
+                )
+                else -> com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                    formula, "Otra fórmula", emptyList()
+                )
+            }
+        }
+        assertEquals(
+            listOf("circle_area"),
+            com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Círculo", spanishEntries).map { it.formula.id }
+        )
+
+        val emptyQuery = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("   ", germanEntries)
+        assertTrue(emptyQuery.isEmpty())
+    }
+
+    @Test
+    fun testSystemLanguageResolutionAndEnglishFallback() {
+        val resolve = com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel::resolveEffectiveLanguageTag
+
+        // Supported system languages stay active when System ("") is chosen
+        assertEquals("de", resolve("", java.util.Locale("de", "DE")))
+        assertEquals("en", resolve("", java.util.Locale("en", "US")))
+        assertEquals("es", resolve("", java.util.Locale("es", "MX")))
+        assertEquals("fr", resolve("", java.util.Locale("fr", "CA")))
+        assertEquals("ja", resolve("", java.util.Locale("ja", "JP")))
+        assertEquals("zh", resolve("", java.util.Locale("zh", "CN")))
+        assertEquals("tlh", resolve("", java.util.Locale("tlh")))
+
+        // Unsupported system languages must automatically fall back to English ("en")
+        assertEquals("en", resolve("", java.util.Locale("ko", "KR")))
+        assertEquals("en", resolve("", java.util.Locale("ar", "SA")))
+        assertEquals("en", resolve("", java.util.Locale("ru", "RU")))
+        assertEquals("en", resolve("", java.util.Locale("tr", "TR")))
+
+        // Explicit selections override system locale
+        assertEquals("ja", resolve("ja", java.util.Locale("de", "DE")))
+        assertEquals("zh", resolve("zh", java.util.Locale("ko", "KR")))
+        assertEquals("tlh", resolve("tlh", java.util.Locale("de", "DE")))
+        assertEquals("es", resolve("es", java.util.Locale("ko", "KR")))
+        assertEquals("fr", resolve("fr", java.util.Locale("ru", "RU")))
+        assertEquals("en", resolve("invalid", java.util.Locale("de", "DE")))
+    }
+
+    @Test
+    fun testSettingsSearchFiltering() {
+        // Empty query shows all cards
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "", "Haptisches Feedback", "haptik,intensität"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "   ", "AMOLED Dark"
+            )
+        )
+
+        // German Haptic search matches haptic card but not language card
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Haptik",
+                "Haptisches Feedback",
+                "Vibration bei Tastendruck und Schaltern",
+                "Intensität",
+                "entwickler,haptik,vibration,intensität,motor,lra,erm"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Haptik Intensität",
+                "Haptisches Feedback",
+                "Intensität",
+                "entwickler,haptik,intensität"
+            )
+        )
+        assertTrue(
+            !com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Haptik",
+                "Deutsch",
+                "Sprache",
+                "sprache,sprachen,systemsprache"
+            )
+        )
+
+        // Language search matches all language options when section keyword is included
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Sprache", "Deutsch", "Sprache", "sprache,sprachen,systemsprache"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Sprache", "Español", "Sprache", "sprache,sprachen,systemsprache"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Deutsch", "Deutsch", "Sprache", "sprache,sprachen"
+            )
+        )
+        assertTrue(
+            !com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Deutsch", "Español", "Sprache", "sprache,sprachen"
+            )
+        )
+
+        // Language isolation: searching English "Haptic" should NOT match German-only strings
+        assertTrue(
+            !com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Haptic",
+                "Haptisches Feedback",
+                "Vibration bei Tastendruck",
+                "entwickler,haptik,vibration,intensität"
+            )
+        )
+        // ...whereas in English it matches cleanly
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Haptic",
+                "Haptic Feedback",
+                "Vibration on keypress and switches",
+                "developer,haptic,haptics,vibration,intensity"
+            )
+        )
+    }
+
+    @Test
+    fun testUnitConverterSearchFiltering() {
+        val localizedGermanPairs = UnitConverter.CONVERSIONS.map { pair ->
+            val label = when (pair.unitFrom to pair.unitTo) {
+                "m" to "ft" -> "Meter ↔ Fuß (m ↔ ft)"
+                "cm" to "in" -> "Zentimeter ↔ Zoll (cm ↔ in)"
+                "km" to "mi" -> "Kilometer ↔ Meilen (km ↔ mi)"
+                "kg" to "lb" -> "Kilogramm ↔ Pfund (kg ↔ lb)"
+                "°C" to "°F" -> "Celsius ↔ Fahrenheit (°C ↔ °F)"
+                "l" to "gal" -> "Liter ↔ Gallonen (l ↔ gal)"
+                "B" to "KB" -> "Byte ↔ Kilobyte (B ↔ KB)"
+                "KB" to "MB" -> "Kilobyte ↔ Megabyte (KB ↔ MB)"
+                "MB" to "GB" -> "Megabyte ↔ Gigabyte (MB ↔ GB)"
+                "GB" to "TB" -> "Gigabyte ↔ Terabyte (GB ↔ TB)"
+                else -> "${pair.unitFrom} ↔ ${pair.unitTo}"
+            }
+            val keywords = when (pair.category) {
+                UnitCategory.LENGTH -> listOf("länge", "meter", "fuß", "zentimeter", "zoll", "kilometer", "meilen")
+                UnitCategory.MASS -> listOf("masse", "gewicht", "kilogramm", "pfund")
+                UnitCategory.TEMPERATURE -> listOf("temperatur", "celsius", "fahrenheit")
+                UnitCategory.VOLUME -> listOf("volumen", "liter", "gallonen")
+                UnitCategory.DATA -> listOf("daten", "speicher", "byte", "gigabyte")
+                UnitCategory.TIME -> listOf("zeit", "sekunden", "minuten", "stunden")
+            }
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair(
+                pair = pair,
+                localizedLabel = label,
+                localizedCategoryName = pair.category.name,
+                localizedCategoryKeywords = keywords
+            )
         }
 
-        val pythMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("pyth", pairs)
-        assertEquals(listOf("pythagoras"), pythMatches.map { it.first.id })
+        // "Meter" matches all meter-based length conversions
+        val meterResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Meter", localizedGermanPairs)
+        assertEquals(listOf("m", "cm", "km"), meterResults.map { it.unitFrom })
 
-        val kreisMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Kreis", pairs)
-        assertTrue(kreisMatches.any { it.first.id == "circle_area" })
-        assertTrue(kreisMatches.any { it.first.id == "circle_circumference" })
+        // "m" puts exact symbol match "m ↔ ft" first
+        val mResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("m", localizedGermanPairs)
+        assertTrue(mResults.isNotEmpty())
+        assertEquals("m", mResults.first().unitFrom)
 
-        val zinsMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("zins", pairs)
-        assertEquals(listOf("compound_interest"), zinsMatches.map { it.first.id })
+        // "GB" finds data pairs MB↔GB and GB↔TB across categories
+        val gbResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("GB", localizedGermanPairs)
+        assertEquals(listOf("MB" to "GB", "GB" to "TB"), gbResults.map { it.unitFrom to it.unitTo })
 
-        val emptyQuery = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("   ", pairs)
-        assertTrue(emptyQuery.isEmpty())
+        // "Gewicht" matches only Mass (kg↔lb) in German
+        val weightResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Gewicht", localizedGermanPairs)
+        assertEquals(listOf("kg" to "lb"), weightResults.map { it.unitFrom to it.unitTo })
+
+        // Empty search returns empty list (dialog switches back to active category view)
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("   ", localizedGermanPairs).isEmpty())
     }
 }

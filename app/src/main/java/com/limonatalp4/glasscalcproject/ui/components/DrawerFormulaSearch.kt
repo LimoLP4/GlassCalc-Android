@@ -32,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +50,13 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog
 import com.limonatalp4.glasscalcproject.domain.formulas.MathFormula
 
+@Immutable
+internal data class LocalizedFormula(
+    val formula: MathFormula,
+    val localizedName: String,
+    val localizedKeywords: List<String>
+)
+
 @Composable
 fun DrawerFormulaSearch(
     query: String,
@@ -61,13 +69,25 @@ fun DrawerFormulaSearch(
     val searchBarShape = RoundedCornerShape(percent = 50)
     val dropdownShape = RoundedCornerShape(22.dp)
 
-    val formulasWithTitles = FormulaCatalog.FORMULAS.map { formula ->
-        formula to stringResource(formula.titleResId)
+    // Namen und Keywords werden dynamisch aus der aktuell aktiven Sprache geladen
+    val localizedFormulas = FormulaCatalog.FORMULAS.map { item ->
+        val name = stringResource(item.nameResId)
+        val keywords = item.keywordsResIds.flatMap { resId ->
+            stringResource(resId)
+                .split(',', ';')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+        }
+        LocalizedFormula(
+            formula = item,
+            localizedName = name,
+            localizedKeywords = keywords
+        )
     }
 
     val trimmedQuery = query.trim()
-    val filteredFormulas = remember(trimmedQuery, formulasWithTitles) {
-        filterFormulas(trimmedQuery, formulasWithTitles)
+    val filteredFormulas = remember(trimmedQuery, localizedFormulas) {
+        filterFormulas(trimmedQuery, localizedFormulas)
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -174,17 +194,17 @@ fun DrawerFormulaSearch(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                     )
                 } else {
-                    filteredFormulas.forEachIndexed { index, (formula, localizedTitle) ->
+                    filteredFormulas.forEachIndexed { index, entry ->
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .defaultMinSize(minHeight = 48.dp)
-                                .clickable { onFormulaSelected(formula) }
+                                .clickable { onFormulaSelected(entry.formula) }
                                 .padding(horizontal = 14.dp, vertical = 10.dp)
-                                .testTag("formula_item_${formula.id}")
+                                .testTag("formula_item_${entry.formula.id}")
                         ) {
                             Text(
-                                text = localizedTitle,
+                                text = entry.localizedName,
                                 color = colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
@@ -193,7 +213,7 @@ fun DrawerFormulaSearch(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = formula.previewFormula,
+                                text = entry.formula.formula,
                                 color = colorScheme.primary,
                                 fontSize = 12.sp,
                                 fontFamily = FontFamily.Monospace,
@@ -216,13 +236,13 @@ fun DrawerFormulaSearch(
 
 internal fun filterFormulas(
     query: String,
-    formulasWithTitles: List<Pair<MathFormula, String>>
-): List<Pair<MathFormula, String>> {
+    localizedFormulas: List<LocalizedFormula>
+): List<LocalizedFormula> {
     val trimmed = query.trim()
     if (trimmed.isEmpty()) return emptyList()
-    return formulasWithTitles.filter { (formula, localizedTitle) ->
-        localizedTitle.contains(trimmed, ignoreCase = true) ||
-            formula.previewFormula.contains(trimmed, ignoreCase = true) ||
-            formula.keywords.any { keyword -> keyword.contains(trimmed, ignoreCase = true) }
+    return localizedFormulas.filter { entry ->
+        entry.localizedName.contains(trimmed, ignoreCase = true) ||
+            entry.formula.formula.contains(trimmed, ignoreCase = true) ||
+            entry.localizedKeywords.any { keyword -> keyword.contains(trimmed, ignoreCase = true) }
     }
 }

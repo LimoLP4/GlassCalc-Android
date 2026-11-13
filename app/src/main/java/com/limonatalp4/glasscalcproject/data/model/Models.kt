@@ -19,7 +19,12 @@ enum class AngleMode {
 enum class Language(val stringResId: Int, val localeTag: String) {
     SYSTEM(R.string.language_system, ""),
     GERMAN(R.string.language_german, "de"),
-    ENGLISH(R.string.language_english, "en")
+    ENGLISH(R.string.language_english, "en"),
+    SPANISH(R.string.language_spanish, "es"),
+    FRENCH(R.string.language_french, "fr"),
+    JAPANESE(R.string.language_japanese, "ja"),
+    CHINESE(R.string.language_chinese, "zh"),
+    KLINGON(R.string.language_klingon, "tlh")
 }
 
 @Immutable

@@ -1,0 +1,250 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">Android 8.0 - 17 対応 (API 26-37)</string>
+    <string name="app_version_tag">v%s • Android 8-17 対応</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <!-- Navigation Drawer -->
+    <string name="nav_open_menu">メニューを開く</string>
+    <string name="nav_calculator">電卓</string>
+    <string name="nav_history">履歴</string>
+    <string name="nav_converter">単位変換</string>
+    <string name="nav_graph">グラフ</string>
+    <string name="nav_settings">設定</string>
+    <string name="nav_close">閉じる</string>
+    <string name="nav_history_show">履歴を表示</string>
+
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">標準</string>
+    <string name="mode_scientific">関数</string>
+    <string name="btn_constants">定数</string>
+    <string name="btn_constants_desc">物理および数学定数</string>
+    <string name="btn_fraction_slash_desc">分数スラッシュ</string>
+    <string name="btn_euler_desc">ネイピア数 e</string>
+    <string name="btn_power_xy_desc">べき乗 x の y 乗</string>
+    <string name="btn_nth_root_desc">n 乗根</string>
+    <string name="btn_integral_desc">積分</string>
+    <string name="btn_var_x_desc">変数 x</string>
+    <string name="btn_semicolon_desc">引数区切り</string>
+    <string name="btn_del_desc">削除 (長押しで連続削除)</string>
+    <string name="btn_copy_clipboard">結果をクリップボードにコピー</string>
+    <string name="toast_copied">クリップボードにコピーしました: %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">0 で割ることはできません</string>
+    <string name="error_syntax">構文エラー</string>
+    <string name="error_not_defined">未定義</string>
+    <string name="error_calculation">計算エラー</string>
+    <string name="error_invalid_expression">無効な式です</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">履歴 (最新 20 件)</string>
+    <string name="history_empty">保存された計算はまだありません。</string>
+    <string name="btn_history_clear">消去</string>
+    <string name="btn_history_clear_desc">履歴を消去</string>
+
+    <!-- Unit Converter Dialog -->
+    <string name="title_converter">単位変換</string>
+    <string name="cat_length">長さ</string>
+    <string name="cat_mass">質量</string>
+    <string name="cat_temp">温度</string>
+    <string name="cat_volume">体積</string>
+    <string name="cat_data">データ</string>
+    <string name="cat_time">時間</string>
+    <string name="converter_select_pair">変換を選択:</string>
+    <string name="converter_input_label">入力 (%s):</string>
+    <string name="converter_swap_direction">方向を反転</string>
+    <string name="converter_result_label">結果 (%s):</string>
+    <string name="converter_import">電卓に取り込む</string>
+
+    <!-- Unit Pairs -->
+    <string name="unit_m_ft">メートル ↔ フィート (m ↔ ft)</string>
+    <string name="unit_cm_in">センチ ↔ インチ (cm ↔ in)</string>
+    <string name="unit_km_mi">キロメートル ↔ マイル (km ↔ mi)</string>
+    <string name="unit_kg_lb">キログラム ↔ ポンド (kg ↔ lb)</string>
+    <string name="unit_c_f">摂氏 ↔ 華氏 (°C ↔ °F)</string>
+    <string name="unit_l_gal">リットル ↔ ガロン (l ↔ gal)</string>
+    <string name="unit_b_kb">バイト ↔ キロバイト (B ↔ KB)</string>
+    <string name="unit_kb_mb">キロバイト ↔ メガバイト (KB ↔ MB)</string>
+    <string name="unit_mb_gb">メガバイト ↔ ギガバイト (MB ↔ GB)</string>
+    <string name="unit_gb_tb">ギガバイト ↔ テラバイト (GB ↔ TB)</string>
+    <string name="unit_s_ms">秒 ↔ ミリ秒 (s ↔ ms)</string>
+    <string name="unit_min_s">分 ↔ 秒 (min ↔ s)</string>
+    <string name="unit_h_min">時間 ↔ 分 (h ↔ min)</string>
+    <string name="unit_d_h">日 ↔ 時間 (d ↔ h)</string>
+
+    <!-- Constants Dialog -->
+    <string name="title_constants">科学定数</string>
+    <string name="cat_constants_math">数学</string>
+    <string name="cat_constants_physics">物理</string>
+    <string name="cat_constants_astro">天文</string>
+    <string name="constants_apply_hint">タップして現在の計算式に値を直接挿入します。</string>
+    <string name="constants_select_heading">物理定数または数学定数を選択:</string>
+    <string name="const_pi">円周率 π</string>
+    <string name="const_e">ネイピア数 e</string>
+    <string name="const_c">光速</string>
+    <string name="const_g">標準重力加速度</string>
+    <string name="const_h">プランク定数</string>
+    <string name="const_G">万有引力定数</string>
+    <string name="const_na">アボガドロ定数</string>
+    <string name="const_k">ボルツマン定数</string>
+
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">関数グラフ</string>
+    <string name="graph_hint_expression">式を入力 (例: sin(x), x^2, cos(x)*2):</string>
+    <string name="graph_gesture_locked">操作ロック中</string>
+    <string name="graph_gesture_unlocked">操作有効</string>
+    <string name="graph_gesture_unlock">グラフ操作のロック解除</string>
+    <string name="graph_gesture_lock">グラフ操作をロック</string>
+    <string name="graph_hint_scan">タップして点を設定</string>
+    <string name="graph_pan_left">左へ移動</string>
+    <string name="graph_pan_right">右へ移動</string>
+    <string name="graph_zoom_in">拡大</string>
+    <string name="graph_zoom_out">縮小</string>
+    <string name="graph_reset">リセット</string>
+    <string name="graph_btn_apply_to_calc">電卓に適用</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">設定</string>
+    <string name="title_appearance">外観</string>
+    <string name="title_units">単位</string>
+    <string name="title_dev_options">開発者</string>
+    <string name="title_info">情報</string>
+    <string name="tab_language">言語</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">テーマを選択:</string>
+    <string name="theme_material_you">Material You (ダイナミックカラー)</string>
+    <string name="theme_automatic">自動 (システム)</string>
+    <string name="theme_white_mode">White Mode (ライト)</string>
+    <string name="theme_standard_dark">Dark Mode (標準)</string>
+    <string name="theme_dark_mode">Dark Mode (ディープブラック)</string>
+    <string name="theme_amoled_dark">AMOLED Dark (ピュアブラック)</string>
+    <string name="theme_material_you_unsupported">この Android バージョンでは非対応 (API 31+ が必要、現在: API %d)</string>
+    <string name="theme_amoled_desc">完全な黒 #000000 と 10〜15% のホワイトガラスで OLED 消費電力を最小化</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">三角関数の既定角度モード:</string>
+    <string name="angle_deg_label">度 (DEG)</string>
+    <string name="angle_deg_desc">円周 = 360°</string>
+    <string name="angle_rad_label">ラジアン (RAD)</string>
+    <string name="angle_rad_desc">円周 = 2π</string>
+    <string name="units_supported_systems">対応する変換単位:</string>
+    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体積 (l ↔ gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">画面サイズとスケーリング</string>
+    <string name="dev_resolution">解像度: %1$ddp x %2$ddp</string>
+    <string name="dev_simulated_api_title">シミュレート Android バージョン</string>
+    <string name="dev_effective_ui_api">有効な UI API: %d</string>
+    <string name="dev_simulate_api_switch">API レベルをシミュレート</string>
+    <string name="dev_api_level_slider">レベル: API %d</string>
+    <string name="dev_api_feature_compatibility">API 機能互換性 (端末上限: API %d):</string>
+    <string name="dev_feature_supported">対応</string>
+    <string name="dev_feature_not_supported">非対応</string>
+    <string name="dev_haptic_title">触覚フィードバック</string>
+    <string name="dev_haptic_desc">キーやスイッチ操作時のバイブレーション</string>
+    <string name="dev_haptic_detected_motor">検出されたモーター</string>
+    <string name="dev_haptic_unsupported_device">この端末は触覚フィードバックに対応していません。</string>
+    <string name="dev_haptic_unsupported_api">シミュレート中の API レベルでは非対応です。</string>
+    <string name="dev_haptic_lra_detected">ハードウェア: LRA リニアモーター検出 (繊細な触覚パルス有効)</string>
+    <string name="dev_haptic_erm_detected">ハードウェア: ERM 回転モーター検出 (標準パルス制御有効)</string>
+    <string name="dev_haptic_intensity_label">強度</string>
+    <string name="dev_haptic_intensity_level">レベル %1$d / 10</string>
+    <string name="dev_auto_result_title">自動計算結果</string>
+    <string name="dev_auto_result_desc">入力中にリアルタイムで結果を計算</string>
+    <string name="dev_lifecycle_title">状態保持とライフサイクル</string>
+    <string name="dev_btn_background">バックグラウンド</string>
+    <string name="dev_btn_crash_test">クラッシュテスト</string>
+    <string name="dev_reset_storage_title">アプリデータをリセット</string>
+    <string name="dev_reset_storage_desc">すべての履歴、保存された式、設定を初期状態に戻します。</string>
+    <string name="dev_btn_reset_storage">設定をリセット</string>
+    <string name="dev_clear_cache_title">キャッシュを消去</string>
+    <string name="dev_clear_cache_desc">設定や履歴を保持したまま一時ファイルを削除します。</string>
+    <string name="dev_btn_clear_cache">キャッシュを消去</string>
+    <string name="toast_cache_cleared">キャッシュを消去しました</string>
+    <string name="toast_cache_error">キャッシュを完全に消去できませんでした</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">GitHub リポジトリ</string>
+    <string name="info_github_open">GitHub で開く</string>
+    <string name="info_oss_licenses">サードパーティライセンス</string>
+    <string name="info_oss_licenses_desc">使用しているすべてのオープンソースライブラリとそのライセンス一覧。</string>
+    <string name="info_btn_oss_licenses">オープンソースライセンスを表示</string>
+    <string name="info_used_libraries">使用ライブラリ</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3: モダン UI フレームワーク\n• LiquidGlass (nadeemiqbal): 流体ブラー・ガラスシェーダー\n• mXparser: 数式解析・微積分・グラフ評価\n• DataStore Preferences: 非同期の堅牢なデータ保存\n• Play Services OSS Licenses: ライセンス管理</string>
+
+    <!-- Settings: Language Tab -->
+    <string name="language_select_heading">言語を選択:</string>
+    <string name="language_system">システム言語 (既定)</string>
+    <string name="language_german">Deutsch (ドイツ語)</string>
+    <string name="language_english">English (英語)</string>
+    <string name="language_spanish">Español (スペイン語)</string>
+    <string name="language_french">Français (フランス語)</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese">中文 (中国語)</string>
+    <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">アプリをリセットしますか？</string>
+    <string name="dialog_reset_text">すべての DataStore 設定、保存済みの計算、履歴が完全に削除されます。</string>
+    <string name="dialog_reset_confirm">リセット</string>
+    <string name="dialog_reset_cancel">キャンセル</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">公式を検索...</string>
+    <string name="formula_search_clear">検索をクリア</string>
+    <string name="formula_search_empty">一致する公式が見つかりません</string>
+    <string name="formula_circle_area">円の面積</string>
+    <string name="formula_circle_circumference">円周の長さ</string>
+    <string name="formula_pythagoras">三平方の定理</string>
+    <string name="formula_compound_interest">複利計算</string>
+    <string name="formula_sphere_volume">球の体積</string>
+    <string name="formula_sphere_surface">球の表面積</string>
+    <string name="formula_cylinder_volume">円柱の体積</string>
+    <string name="formula_triangle_area">三角形の面積</string>
+    <string name="formula_quadratic">二次方程式の解 (x₁)</string>
+    <string name="formula_percentage">パーセント値</string>
+    <string name="formula_integral_example">定積分</string>
+    <string name="formula_derivative_example">微分 (d/dx)</string>
+    <string name="formula_circle_area_keywords">円,面積,半径,円周率,pi,r^2</string>
+    <string name="formula_circle_circumference_keywords">円,円周,周囲,直径,半径,pi</string>
+    <string name="formula_pythagoras_keywords">三平方,ピタゴラス,直角三角形,斜辺,定理</string>
+    <string name="formula_compound_interest_keywords">複利,利息,元金,利率,パーセント</string>
+    <string name="formula_sphere_volume_keywords">球,体積,半径,円周率,pi,r^3</string>
+    <string name="formula_sphere_surface_keywords">球,表面積,面積,半径,pi</string>
+    <string name="formula_cylinder_volume_keywords">円柱,体積,高さ,半径,pi</string>
+    <string name="formula_triangle_area_keywords">三角形,面積,底辺,高さ</string>
+    <string name="formula_quadratic_keywords">二次方程式,解の公式,判別式,x1</string>
+    <string name="formula_percentage_keywords">パーセント,割合,割引,消費税,%</string>
+    <string name="formula_integral_example_keywords">定積分,積分,面積,シンプソン,微積分</string>
+    <string name="formula_derivative_example_keywords">微分,導関数,傾き,接線,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">設定を検索...</string>
+    <string name="settings_search_clear">検索をクリア</string>
+    <string name="settings_search_empty">一致する設定が見つかりません</string>
+    <string name="settings_keywords_appearance">外観,デザイン,テーマ,カラー,色,ライト,ダーク,モード</string>
+    <string name="settings_keywords_units">単位,角度,三角関数,度数法,弧度法,変換</string>
+    <string name="settings_keywords_dev_screen">開発者,画面,解像度,スケーリング,サイズ</string>
+    <string name="settings_keywords_dev_api">開発者,api,android,バージョン,シミュレーション,material you,ぼかし</string>
+    <string name="settings_keywords_dev_haptic">開発者,ハプティクス,触覚,振動,バイブレーション,強さ,強度,レベル,モーター,lra,erm</string>
+    <string name="settings_keywords_dev_auto_result">開発者,結果,自動,ライブ,プレビュー,計算</string>
+    <string name="settings_keywords_dev_lifecycle">開発者,ライフサイクル,状態,バックグラウンド,クラッシュ,テスト</string>
+    <string name="settings_keywords_dev_cache">開発者,キャッシュ,ストレージ,一時,消去,削除</string>
+    <string name="settings_keywords_dev_reset">開発者,ストレージ,リセット,初期化,履歴,データ,削除</string>
+    <string name="settings_keywords_info_version">バージョン,アプリ,著作権,android</string>
+    <string name="settings_keywords_info_license">ライセンス,apache,オープンソース,著作権</string>
+    <string name="settings_keywords_language">言語,システム言語,翻訳,ローカライズ</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">単位を検索...</string>
+    <string name="converter_search_clear">検索をクリア</string>
+    <string name="converter_search_empty">一致する単位が見つかりません</string>
+    <string name="converter_keywords_length">長さ,距離,メートル,フィート,センチ,インチ,キロ,マイル</string>
+    <string name="converter_keywords_mass">質量,重さ,キログラム,ポンド</string>
+    <string name="converter_keywords_temp">温度,摂氏,華氏,セルシウス,ファーレンハイト</string>
+    <string name="converter_keywords_volume">体積,容量,リットル,ガロン</string>
+    <string name="converter_keywords_data">データ,容量,ストレージ,バイト,キロバイト,メガバイト,ギガバイト,テラバイト</string>
+    <string name="converter_keywords_time">時間,秒,ミリ秒,分,時,日</string>
+</resources>

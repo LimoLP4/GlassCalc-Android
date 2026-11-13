@@ -1,0 +1,250 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">Android 8.0 - 17 QaQ (API 26-37)</string>
+    <string name="app_version_tag">v%s • Android 8-17 QaQ</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <!-- Navigation Drawer -->
+    <string name="nav_open_menu">HIDjIran poSmoH</string>
+    <string name="nav_calculator">mI\' qelwI\'</string>
+    <string name="nav_history">qonpu\'bogh</string>
+    <string name="nav_converter">juvmeH choHwI\'</string>
+    <string name="nav_graph">He\'rIn</string>
+    <string name="nav_settings">DuH</string>
+    <string name="nav_close">SoQmoH</string>
+    <string name="nav_history_show">qonpu\'bogh cha\'</string>
+
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">motlh</string>
+    <string name="mode_scientific">QeD</string>
+    <string name="btn_constants">ru\'Ha\'</string>
+    <string name="btn_constants_desc">yIn QeD je ru\'Ha\'wI\'pu\'</string>
+    <string name="btn_fraction_slash_desc">wavmeH tlhIm</string>
+    <string name="btn_euler_desc">Euler mI\' e</string>
+    <string name="btn_power_xy_desc">HoS x pow y</string>
+    <string name="btn_nth_root_desc">n-wa\'DIch mIn</string>
+    <string name="btn_integral_desc">Integral</string>
+    <string name="btn_var_x_desc">choHlaH x</string>
+    <string name="btn_semicolon_desc">gherwI\' chev</string>
+    <string name="btn_del_desc">teq (yI\'uchtaH)</string>
+    <string name="btn_copy_clipboard">qonwI\'Daq ngaSmoH</string>
+    <string name="toast_copied">ngaSmoHpu\': %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">pagh wavlaHbe\'</string>
+    <string name="error_syntax">mu\'tlhegh Qagh</string>
+    <string name="error_not_defined">wuqbe\'lu\'pu\'</string>
+    <string name="error_calculation">qel Qagh</string>
+    <string name="error_invalid_expression">Qapla\'be\'</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">qonpu\'bogh (20 Qav)</string>
+    <string name="history_empty">pagh qonlu\'pu\'.</string>
+    <string name="btn_history_clear">chImmoH</string>
+    <string name="btn_history_clear_desc">qonpu\'bogh chImmoH</string>
+
+    <!-- Unit Converter Dialog -->
+    <string name="title_converter">juvmeH choHwI\'</string>
+    <string name="cat_length">\'ab</string>
+    <string name="cat_mass">ngI\'</string>
+    <string name="cat_temp">tuj</string>
+    <string name="cat_volume">bal</string>
+    <string name="cat_data">De\'</string>
+    <string name="cat_time">poH</string>
+    <string name="converter_select_pair">choH wIv:</string>
+    <string name="converter_input_label">chel (%s):</string>
+    <string name="converter_swap_direction">He choH</string>
+    <string name="converter_result_label">van (%s):</string>
+    <string name="converter_import">mI\' qelwI\'Daq lan</string>
+
+    <!-- Unit Pairs -->
+    <string name="unit_m_ft">Meter ↔ Fuß (m ↔ ft)</string>
+    <string name="unit_cm_in">Centimeter ↔ Zoll (cm ↔ in)</string>
+    <string name="unit_km_mi">Kilometer ↔ Meilen (km ↔ mi)</string>
+    <string name="unit_kg_lb">Kilogramm ↔ Pfund (kg ↔ lb)</string>
+    <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
+    <string name="unit_l_gal">Liter ↔ Gallonen (l ↔ gal)</string>
+    <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
+    <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
+    <string name="unit_mb_gb">Megabyte ↔ Gigabyte (MB ↔ GB)</string>
+    <string name="unit_gb_tb">Gigabyte ↔ Terabyte (GB ↔ TB)</string>
+    <string name="unit_s_ms">lup ↔ lupHom (s ↔ ms)</string>
+    <string name="unit_min_s">tup ↔ lup (min ↔ s)</string>
+    <string name="unit_h_min">rep ↔ tup (h ↔ min)</string>
+    <string name="unit_d_h">jaj ↔ rep (d ↔ h)</string>
+
+    <!-- Constants Dialog -->
+    <string name="title_constants">QeD ru\'Ha\'wI\'pu\'</string>
+    <string name="cat_constants_math">mI\' QeD</string>
+    <string name="cat_constants_physics">yIn QeD</string>
+    <string name="cat_constants_astro">\'ejDo\' QeD</string>
+    <string name="constants_apply_hint">yIHot, mI\' chelmeH.</string>
+    <string name="constants_select_heading">ru\'Ha\'wI\' yIwIv:</string>
+    <string name="const_pi">gho mI\' Pi</string>
+    <string name="const_e">Euler mI\'</string>
+    <string name="const_c">wov Do</string>
+    <string name="const_g">tlhIm ngI\'</string>
+    <string name="const_h">Planck ru\'Ha\'</string>
+    <string name="const_G">yuQ HoS</string>
+    <string name="const_na">Avogadro mI\'</string>
+    <string name="const_k">Boltzmann ru\'Ha\'</string>
+
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">He\'rIn</string>
+    <string name="graph_hint_expression">nab yIghItlh (e.g. sin(x), x^2):</string>
+    <string name="graph_gesture_locked">ngaQtaH</string>
+    <string name="graph_gesture_unlocked">poStaH</string>
+    <string name="graph_gesture_unlock">He\'rIn poSmoH</string>
+    <string name="graph_gesture_lock">He\'rIn ngaQmoH</string>
+    <string name="graph_hint_scan">yIHot, Daq wIvmeH</string>
+    <string name="graph_pan_left">poSDaq yIvIHmoH</string>
+    <string name="graph_pan_right">nIHqaqDaq yIvIHmoH</string>
+    <string name="graph_zoom_in">tInmoH</string>
+    <string name="graph_zoom_out">machmoH</string>
+    <string name="graph_reset">naDevmoH</string>
+    <string name="graph_btn_apply_to_calc">mI\' qelwI\'Daq lan</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">DuH</string>
+    <string name="title_appearance">jIH</string>
+    <string name="title_units">juvmeH</string>
+    <string name="title_dev_options">cherwI\'</string>
+    <string name="title_info">De\'</string>
+    <string name="tab_language">Hol</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">jIH wIv:</string>
+    <string name="theme_material_you">Material You (nguv choH)</string>
+    <string name="theme_automatic">pat (motlh)</string>
+    <string name="theme_white_mode">chIS (wov)</string>
+    <string name="theme_standard_dark">qIj (motlh)</string>
+    <string name="theme_dark_mode">qIjqu\'</string>
+    <string name="theme_amoled_dark">AMOLED qIj (Hurghqu\')</string>
+    <string name="theme_material_you_unsupported">AndroidvamDaq Qapbe\' (API 31+ poQ, DaH: API %d)</string>
+    <string name="theme_amoled_desc">Hurghqu\' #000000, HoS polmeH</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">tajwI\' juvmeH:</string>
+    <string name="angle_deg_label">DEG (360°)</string>
+    <string name="angle_deg_desc">motlh gho = 360°</string>
+    <string name="angle_rad_label">RAD (2π)</string>
+    <string name="angle_rad_desc">naQ gho = 2π</string>
+    <string name="units_supported_systems">patmey:</string>
+    <string name="units_systems_detail">• Metric ↔ US (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• tuj (°C ↔ °F)\n• bal (l ↔ gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">jIH tIn</string>
+    <string name="dev_resolution">jIH: %1$ddp x %2$ddp</string>
+    <string name="dev_simulated_api_title">Android API ngeb</string>
+    <string name="dev_effective_ui_api">API Qapbogh: %d</string>
+    <string name="dev_simulate_api_switch">API ngeb chu\'</string>
+    <string name="dev_api_level_slider">pat: API %d</string>
+    <string name="dev_api_feature_compatibility">API QapmeH (jan: API %d):</string>
+    <string name="dev_feature_supported">Qap</string>
+    <string name="dev_feature_not_supported">Qapbe\'</string>
+    <string name="dev_haptic_title">vIH Hot</string>
+    <string name="dev_haptic_desc">leQ yIHotDI\' vIH</string>
+    <string name="dev_haptic_detected_motor">jochwI\' tu\'lu\'pu\'</string>
+    <string name="dev_haptic_unsupported_device">janvam vIHlaHbe\'.</string>
+    <string name="dev_haptic_unsupported_api">API ngebDaq Qapbe\'.</string>
+    <string name="dev_haptic_lra_detected">LRA jochwI\' tu\'lu\'pu\'</string>
+    <string name="dev_haptic_erm_detected">ERM jochwI\' tu\'lu\'pu\'</string>
+    <string name="dev_haptic_intensity_label">HoS</string>
+    <string name="dev_haptic_intensity_level">pat %1$d / 10</string>
+    <string name="dev_auto_result_title">nom van</string>
+    <string name="dev_auto_result_desc">yIghItlhDI\' nom yIqel</string>
+    <string name="dev_lifecycle_title">yIn pol</string>
+    <string name="dev_btn_background">yISo\'</string>
+    <string name="dev_btn_crash_test">Qagh waH</string>
+    <string name="dev_reset_storage_title">polwI\' chImmoH</string>
+    <string name="dev_reset_storage_desc">Hoch qonpu\'bogh DuH je teq.</string>
+    <string name="dev_btn_reset_storage">naDevmoH</string>
+    <string name="dev_clear_cache_title">Cache chImmoH</string>
+    <string name="dev_clear_cache_desc">De\' ru\' teq, DuH poltaH.</string>
+    <string name="dev_btn_clear_cache">Cache chImmoH</string>
+    <string name="toast_cache_cleared">Cache chImpu\'</string>
+    <string name="toast_cache_error">Cache teqlaHbe\'pu\'</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">GitHub ngaSwI\'</string>
+    <string name="info_github_open">GitHub poSmoH</string>
+    <string name="info_oss_licenses">chaw\' De\'</string>
+    <string name="info_oss_licenses_desc">Hoch chaw\'mey cha\'.</string>
+    <string name="info_btn_oss_licenses">chaw\' cha\'</string>
+    <string name="info_used_libraries">paq\'a\'mey</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3\n• LiquidGlass (nadeemiqbal)\n• mXparser\n• DataStore Preferences\n• Play Services OSS Licenses</string>
+
+    <!-- Settings: Language Tab -->
+    <string name="language_select_heading">Hol yIwIv:</string>
+    <string name="language_system">pat Hol (motlh)</string>
+    <string name="language_german">DoyIchlan Hol (Deutsch)</string>
+    <string name="language_english">DIvI\' Hol (English)</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_japanese">日本語 (nIppon Hol)</string>
+    <string name="language_chinese">中文 (jungwoq Hol)</string>
+    <string name="language_klingon">tlhIngan Hol</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">Hoch chImmoH\'a\'?</string>
+    <string name="dialog_reset_text">Hoch De\' qonpu\'bogh je teqlu\'.</string>
+    <string name="dialog_reset_confirm">chImmoH</string>
+    <string name="dialog_reset_cancel">qIl</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">nab yInej...</string>
+    <string name="formula_search_clear">nej chImmoH</string>
+    <string name="formula_search_empty">pagh nab tu\'lu\'</string>
+    <string name="formula_circle_area">gho mich</string>
+    <string name="formula_circle_circumference">gho HeH</string>
+    <string name="formula_pythagoras">Pythagoras nab</string>
+    <string name="formula_compound_interest">Huch boS nab</string>
+    <string name="formula_sphere_volume">moQ bal</string>
+    <string name="formula_sphere_surface">moQ \'eq</string>
+    <string name="formula_cylinder_volume">ngop bal</string>
+    <string name="formula_triangle_area">wejhuy mich</string>
+    <string name="formula_quadratic">cha\'DIch nab (x₁)</string>
+    <string name="formula_percentage">vatlhvI\'</string>
+    <string name="formula_integral_example">Integral</string>
+    <string name="formula_derivative_example">choH Do (d/dx)</string>
+    <string name="formula_circle_area_keywords">gho,mich,pi,r^2</string>
+    <string name="formula_circle_circumference_keywords">gho,heh,pi</string>
+    <string name="formula_pythagoras_keywords">pythagoras,wejhuy,nab</string>
+    <string name="formula_compound_interest_keywords">huch,bos,vatlhvi\',nab</string>
+    <string name="formula_sphere_volume_keywords">moq,bal,pi,r^3</string>
+    <string name="formula_sphere_surface_keywords">moq,\'eq,pi</string>
+    <string name="formula_cylinder_volume_keywords">ngop,bal,pi</string>
+    <string name="formula_triangle_area_keywords">wejhuy,mich</string>
+    <string name="formula_quadratic_keywords">cha\'dich,nab,x1</string>
+    <string name="formula_percentage_keywords">vatlhvi\',%</string>
+    <string name="formula_integral_example_keywords">integral,mich,simpson</string>
+    <string name="formula_derivative_example_keywords">choh,do,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">DuH yInej...</string>
+    <string name="settings_search_clear">nej chImmoH</string>
+    <string name="settings_search_empty">pagh DuH tu\'lu\'</string>
+    <string name="settings_keywords_appearance">jih,wiv,nguv,chis,qij,hurgh</string>
+    <string name="settings_keywords_units">juvmeh,tajwi\',gho,patmey</string>
+    <string name="settings_keywords_dev_screen">cherwi\',jih,tin</string>
+    <string name="settings_keywords_dev_api">cherwi\',api,android,ngeb,material you</string>
+    <string name="settings_keywords_dev_haptic">cherwi\',vih,hot,hos,jochwi\',lra,erm</string>
+    <string name="settings_keywords_dev_auto_result">cherwi\',nom,van,qel</string>
+    <string name="settings_keywords_dev_lifecycle">cherwi\',yin,pol,so\',qagh</string>
+    <string name="settings_keywords_dev_cache">cherwi\',cache,chimmoH,teq</string>
+    <string name="settings_keywords_dev_reset">cherwi\',polwi\',chimmoH,duH</string>
+    <string name="settings_keywords_info_version">de\',pong,android,copyright</string>
+    <string name="settings_keywords_info_license">chaw\',apache,de\'</string>
+    <string name="settings_keywords_language">hol,tlhingan,divi\',doyichlan</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">juvmeH yInej...</string>
+    <string name="converter_search_clear">nej chImmoH</string>
+    <string name="converter_search_empty">pagh juvmeH tu\'lu\'</string>
+    <string name="converter_keywords_length">juvmeh,\'ab,meter,qelqam</string>
+    <string name="converter_keywords_mass">ngI\',cheb,kilogram</string>
+    <string name="converter_keywords_temp">tuj,bIr,hat</string>
+    <string name="converter_keywords_volume">bal,liter</string>
+    <string name="converter_keywords_data">de\',ngaq,byte,kb,mb,gb,tb</string>
+    <string name="converter_keywords_time">poh,lup,rep,jaj</string>
+</resources>

@@ -3,11 +3,13 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,17 +17,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,9 +82,11 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.res.stringResource
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
@@ -278,22 +285,45 @@ fun CalculatorScreen(
                 }
             }
             
-            // Popup Menu
+            // In-window Floating Navigation Menu (avoids Android PopupWindow BLASTBufferQueue dtor leaks)
             if (menuVisibleState.targetState || menuVisibleState.currentState) {
-                androidx.compose.ui.window.Popup(
-                    alignment = Alignment.TopStart,
-                    offset = androidx.compose.ui.unit.IntOffset(16, 160),
-                    onDismissRequest = { menuVisibleState.targetState = false },
-                    properties = androidx.compose.ui.window.PopupProperties(focusable = true)
+                BackHandler(enabled = menuVisibleState.targetState) {
+                    menuVisibleState.targetState = false
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zIndex(10f)
                 ) {
-                    androidx.compose.animation.AnimatedVisibility(
-                        visibleState = menuVisibleState,
-                        enter = androidx.compose.animation.slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
-                        ) + androidx.compose.animation.fadeIn(
-                            animationSpec = tween(durationMillis = 200)
-                        ),
+                    // Transparent outside-tap scrim to dismiss drawer
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                menuVisibleState.targetState = false
+                            }
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .statusBarsPadding()
+                            .navigationBarsPadding()
+                            .imePadding()
+                            .padding(start = 16.dp, top = 66.dp, bottom = 16.dp)
+                    ) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visibleState = menuVisibleState,
+                            enter = androidx.compose.animation.slideInHorizontally(
+                                initialOffsetX = { -it },
+                                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                            ) + androidx.compose.animation.fadeIn(
+                                animationSpec = tween(durationMillis = 200)
+                            ),
                         exit = androidx.compose.animation.slideOutHorizontally(
                             targetOffsetX = { -it },
                             animationSpec = tween(durationMillis = 220, easing = FastOutLinearInEasing)
@@ -420,7 +450,7 @@ fun CalculatorScreen(
                                         modifier = Modifier
                                             .padding(horizontal = 4.dp, vertical = 2.dp)
                                             .fillMaxWidth()
-                                            .height(48.dp)
+                                            .defaultMinSize(minHeight = 48.dp)
                                             .clip(RoundedCornerShape(percent = 50))
                                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                             .clickable {
@@ -441,7 +471,7 @@ fun CalculatorScreen(
                                         contentAlignment = Alignment.CenterStart
                                     ) {
                                         Row(
-                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
@@ -460,6 +490,9 @@ fun CalculatorScreen(
                                             Text(
                                                 text = stringResource(labelRes),
                                                 fontSize = 15.sp,
+                                                lineHeight = 19.sp,
+                                                maxLines = 2,
+                                                overflow = TextOverflow.Ellipsis,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                                 color = if (isAmoled) Color.White else (if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor)
                                             )
@@ -470,7 +503,8 @@ fun CalculatorScreen(
                         }
                     }
                 }
-            }
+                }
+                }
             }
         }
 
@@ -648,12 +682,16 @@ private fun PortraitCalculatorLayout(
                             HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
                             viewModel.toggleScientificPanel()
                         },
-                        modifier = Modifier.size(width = 120.dp, height = 36.dp)
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .widthIn(min = 108.dp)
+                            .height(36.dp)
+                            .padding(horizontal = 10.dp)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(horizontal = 4.dp)
+                            modifier = Modifier.padding(horizontal = 2.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Science,
@@ -665,6 +703,9 @@ private fun PortraitCalculatorLayout(
                                 text = if (isScientificExpanded) stringResource(R.string.mode_standard) else stringResource(R.string.mode_scientific),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis,
                                 color = if (isScientificExpanded) colorScheme.tertiary else colorScheme.onSurface
                             )
                         }

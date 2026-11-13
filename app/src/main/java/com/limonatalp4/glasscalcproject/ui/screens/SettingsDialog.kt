@@ -108,6 +108,10 @@ import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchBar
+import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchEmptyState
+import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchVisibility
+import com.limonatalp4.glasscalcproject.ui.components.rememberSettingsSearchVisibility
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticMotorType
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
@@ -140,6 +144,7 @@ fun SettingsDialog(
     onDismiss: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+    var searchQuery by remember { mutableStateOf("") }
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
     val config = LocalConfiguration.current
@@ -168,6 +173,11 @@ fun SettingsDialog(
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
     val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
+    val searchVisibility = rememberSettingsSearchVisibility(
+        query = searchQuery,
+        effectiveApiLevel = effectiveApi
+    )
+    val isSearchActive = searchQuery.trim().isNotEmpty()
     val coroutineScope = rememberCoroutineScope()
     var isDismissing by remember { mutableStateOf(false) }
     val alphaAnim by androidx.compose.animation.core.animateFloatAsState(
@@ -232,7 +242,36 @@ fun SettingsDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Liquid-Glass Settings Search Bar (direkt unter Titel "Einstellungen" und über Pill-Leiste)
+                SettingsSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { newValue ->
+                        if (newValue != searchQuery) {
+                            HapticUtil.performAppHaptic(
+                                context = context,
+                                view = view,
+                                enabled = hapticFeedbackEnabled,
+                                intensityLevel = hapticIntensity
+                            )
+                        }
+                        searchQuery = newValue
+                    },
+                    onClearClick = {
+                        HapticUtil.performAppHaptic(
+                            context = context,
+                            view = view,
+                            enabled = hapticFeedbackEnabled,
+                            intensityLevel = hapticIntensity
+                        )
+                        searchQuery = ""
+                    },
+                    isAmoled = isAmoled,
+                    isTiefschwarz = isTiefschwarz
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // 5-Tab Segmented Control (Pill-Design)
                 val tabs = listOf(
@@ -355,6 +394,7 @@ fun SettingsDialog(
                                                 onTap = {
                                                     triggerHaptic()
                                                     selectedTab = index
+                                                    searchQuery = ""
                                                 }
                                             )
                                         }
@@ -390,93 +430,201 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                AnimatedContent(
-                    targetState = selectedTab,
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                                slideOutHorizontally { width -> -width } + fadeOut())
-                        } else {
-                            (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                                slideOutHorizontally { width -> width } + fadeOut())
-                        }.using(SizeTransform(clip = false))
-                    },
-                    label = "tab_transition",
-                    modifier = Modifier.fillMaxWidth()
-                ) { targetTab ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        when (targetTab) {
-                            0 -> AppearanceSection(
-                                currentTheme = currentTheme,
-                                effectiveApiLevel = effectiveApiLevel,
-                                isAmoled = isAmoled,
-                                isTiefschwarz = isTiefschwarz,
-                                colorScheme = colorScheme,
-                                glassProps = glassProps,
-                                onSelectTheme = onSelectTheme,
-                                triggerHaptic = ::triggerHaptic
-                            )
-                            1 -> UnitsSection(
-                                currentAngleMode = currentAngleMode,
-                                isAmoled = isAmoled,
-                                isTiefschwarz = isTiefschwarz,
-                                colorScheme = colorScheme,
-                                glassProps = glassProps,
-                                onSelectAngleMode = onSelectAngleMode,
-                                triggerHaptic = ::triggerHaptic
-                            )
-                            2 -> DeveloperOptionsSection(
-                                windowSizeClass = windowSizeClass,
-                                config = config,
-                                simulatedApiEnabled = simulatedApiEnabled,
-                                effectiveApi = effectiveApi,
-                                realDeviceApi = realDeviceApi,
-                                currentSliderApi = currentSliderApi,
-                                sliderMin = sliderMin,
-                                sliderMax = sliderMax,
-                                sliderSteps = sliderSteps,
-                                hapticFeedbackEnabled = hapticFeedbackEnabled,
-                                hapticIntensity = hapticIntensity,
-                                autoResultEnabled = autoResultEnabled,
-                                lifecycleStatus = lifecycleStatus,
-                                isAmoled = isAmoled,
-                                isTiefschwarz = isTiefschwarz,
-                                colorScheme = colorScheme,
-                                onSetSimulatedApi = onSetSimulatedApi,
-                                onToggleHapticFeedback = onToggleHapticFeedback,
-                                onSetHapticIntensity = onSetHapticIntensity,
-                                onToggleAutoResult = onToggleAutoResult,
-                                onSimulateBackground = onSimulateBackground,
-                                onTestCrashProtection = onTestCrashProtection,
-                                onResetAppRequest = { showResetConfirmDialog = true },
-                                triggerHaptic = ::triggerHaptic,
-                                context = context,
-                                onSliderValueChange = { currentSliderApi = it }
-                            )
-                            3 -> InformationSection(
-                                isAmoled = isAmoled,
-                                isTiefschwarz = isTiefschwarz,
-                                colorScheme = colorScheme,
-                                glassProps = glassProps,
-                                apacheAccordionOpen = apacheAccordionOpen,
-                                mxparserAccordionOpen = mxparserAccordionOpen,
-                                onToggleApache = { apacheAccordionOpen = !apacheAccordionOpen },
-                                onToggleMxparser = { mxparserAccordionOpen = !mxparserAccordionOpen },
-                                triggerHaptic = ::triggerHaptic,
-                                context = context
-                            )
-                            4 -> LanguageSection(
-                                currentLanguage = currentLanguage,
-                                isAmoled = isAmoled,
-                                isTiefschwarz = isTiefschwarz,
-                                colorScheme = colorScheme,
-                                glassProps = glassProps,
-                                onSelectLanguage = onSelectLanguage,
-                                onDismiss = onDismiss,
-                                triggerHaptic = ::triggerHaptic,
-                                coroutineScope = coroutineScope,
-                                onSetDismissing = { isDismissing = it }
-                            )
+                if (isSearchActive) {
+                    if (!searchVisibility.hasAnyMatch) {
+                        SettingsSearchEmptyState(
+                            isAmoled = isAmoled,
+                            isTiefschwarz = isTiefschwarz
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("settings_search_results"),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            if (searchVisibility.hasAnyAppearanceMatch) {
+                                AppearanceSection(
+                                    currentTheme = currentTheme,
+                                    effectiveApiLevel = effectiveApiLevel,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    onSelectTheme = onSelectTheme,
+                                    triggerHaptic = ::triggerHaptic,
+                                    visibleThemes = searchVisibility.matchingThemes,
+                                    showHeading = false
+                                )
+                            }
+                            if (searchVisibility.hasAnyUnitsMatch) {
+                                UnitsSection(
+                                    currentAngleMode = currentAngleMode,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    onSelectAngleMode = onSelectAngleMode,
+                                    triggerHaptic = ::triggerHaptic,
+                                    showDegCard = searchVisibility.showDegCard,
+                                    showRadCard = searchVisibility.showRadCard,
+                                    showSystemsCard = searchVisibility.showUnitsSystemsCard,
+                                    showHeading = false
+                                )
+                            }
+                            if (searchVisibility.hasAnyDeveloperMatch) {
+                                DeveloperOptionsSection(
+                                    windowSizeClass = windowSizeClass,
+                                    config = config,
+                                    simulatedApiEnabled = simulatedApiEnabled,
+                                    effectiveApi = effectiveApi,
+                                    realDeviceApi = realDeviceApi,
+                                    currentSliderApi = currentSliderApi,
+                                    sliderMin = sliderMin,
+                                    sliderMax = sliderMax,
+                                    sliderSteps = sliderSteps,
+                                    hapticFeedbackEnabled = hapticFeedbackEnabled,
+                                    hapticIntensity = hapticIntensity,
+                                    autoResultEnabled = autoResultEnabled,
+                                    lifecycleStatus = lifecycleStatus,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    onSetSimulatedApi = onSetSimulatedApi,
+                                    onToggleHapticFeedback = onToggleHapticFeedback,
+                                    onSetHapticIntensity = onSetHapticIntensity,
+                                    onToggleAutoResult = onToggleAutoResult,
+                                    onSimulateBackground = onSimulateBackground,
+                                    onTestCrashProtection = onTestCrashProtection,
+                                    onResetAppRequest = { showResetConfirmDialog = true },
+                                    triggerHaptic = ::triggerHaptic,
+                                    context = context,
+                                    onSliderValueChange = { currentSliderApi = it },
+                                    searchVisibility = searchVisibility
+                                )
+                            }
+                            if (searchVisibility.hasAnyInfoMatch) {
+                                InformationSection(
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    apacheAccordionOpen = apacheAccordionOpen,
+                                    mxparserAccordionOpen = mxparserAccordionOpen,
+                                    onToggleApache = { apacheAccordionOpen = !apacheAccordionOpen },
+                                    onToggleMxparser = { mxparserAccordionOpen = !mxparserAccordionOpen },
+                                    triggerHaptic = ::triggerHaptic,
+                                    context = context,
+                                    searchVisibility = searchVisibility
+                                )
+                            }
+                            if (searchVisibility.hasAnyLanguageMatch) {
+                                LanguageSection(
+                                    currentLanguage = currentLanguage,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    onSelectLanguage = onSelectLanguage,
+                                    onDismiss = onDismiss,
+                                    triggerHaptic = ::triggerHaptic,
+                                    coroutineScope = coroutineScope,
+                                    onSetDismissing = { isDismissing = it },
+                                    visibleLanguages = searchVisibility.matchingLanguages,
+                                    showHeading = false
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    AnimatedContent(
+                        targetState = selectedTab,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> -width } + fadeOut())
+                            } else {
+                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> width } + fadeOut())
+                            }.using(SizeTransform(clip = false))
+                        },
+                        label = "tab_transition",
+                        modifier = Modifier.fillMaxWidth()
+                    ) { targetTab ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            when (targetTab) {
+                                0 -> AppearanceSection(
+                                    currentTheme = currentTheme,
+                                    effectiveApiLevel = effectiveApiLevel,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    onSelectTheme = onSelectTheme,
+                                    triggerHaptic = ::triggerHaptic
+                                )
+                                1 -> UnitsSection(
+                                    currentAngleMode = currentAngleMode,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    onSelectAngleMode = onSelectAngleMode,
+                                    triggerHaptic = ::triggerHaptic
+                                )
+                                2 -> DeveloperOptionsSection(
+                                    windowSizeClass = windowSizeClass,
+                                    config = config,
+                                    simulatedApiEnabled = simulatedApiEnabled,
+                                    effectiveApi = effectiveApi,
+                                    realDeviceApi = realDeviceApi,
+                                    currentSliderApi = currentSliderApi,
+                                    sliderMin = sliderMin,
+                                    sliderMax = sliderMax,
+                                    sliderSteps = sliderSteps,
+                                    hapticFeedbackEnabled = hapticFeedbackEnabled,
+                                    hapticIntensity = hapticIntensity,
+                                    autoResultEnabled = autoResultEnabled,
+                                    lifecycleStatus = lifecycleStatus,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    onSetSimulatedApi = onSetSimulatedApi,
+                                    onToggleHapticFeedback = onToggleHapticFeedback,
+                                    onSetHapticIntensity = onSetHapticIntensity,
+                                    onToggleAutoResult = onToggleAutoResult,
+                                    onSimulateBackground = onSimulateBackground,
+                                    onTestCrashProtection = onTestCrashProtection,
+                                    onResetAppRequest = { showResetConfirmDialog = true },
+                                    triggerHaptic = ::triggerHaptic,
+                                    context = context,
+                                    onSliderValueChange = { currentSliderApi = it }
+                                )
+                                3 -> InformationSection(
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    apacheAccordionOpen = apacheAccordionOpen,
+                                    mxparserAccordionOpen = mxparserAccordionOpen,
+                                    onToggleApache = { apacheAccordionOpen = !apacheAccordionOpen },
+                                    onToggleMxparser = { mxparserAccordionOpen = !mxparserAccordionOpen },
+                                    triggerHaptic = ::triggerHaptic,
+                                    context = context
+                                )
+                                4 -> LanguageSection(
+                                    currentLanguage = currentLanguage,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    glassProps = glassProps,
+                                    onSelectLanguage = onSelectLanguage,
+                                    onDismiss = onDismiss,
+                                    triggerHaptic = ::triggerHaptic,
+                                    coroutineScope = coroutineScope,
+                                    onSetDismissing = { isDismissing = it }
+                                )
+                            }
                         }
                     }
                 }
@@ -488,8 +636,8 @@ fun SettingsDialog(
         AlertDialog(
             onDismissRequest = { showResetConfirmDialog = false },
             icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = colorScheme.error) },
-            title = { Text("App wirklich zurücksetzen?") },
-            text = { Text("Alle DataStore-Einstellungen, gespeicherten Berechnungen und der gesamte Verlauf werden unwiderruflich gelöscht.") },
+            title = { Text(stringResource(R.string.dialog_reset_title)) },
+            text = { Text(stringResource(R.string.dialog_reset_text)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -500,7 +648,7 @@ fun SettingsDialog(
                     },
                     modifier = Modifier.testTag("btn_confirm_reset")
                 ) {
-                    Text("Zurücksetzen", color = colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.dialog_reset_confirm), color = colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -508,7 +656,7 @@ fun SettingsDialog(
                     triggerHaptic()
                     showResetConfirmDialog = false
                 }) {
-                    Text("Abbrechen")
+                    Text(stringResource(R.string.dialog_reset_cancel))
                 }
             }
         )
@@ -525,22 +673,26 @@ private fun AppearanceSection(
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     onSelectTheme: (AppTheme) -> Unit,
-    triggerHaptic: () -> Unit
+    triggerHaptic: () -> Unit,
+    visibleThemes: List<AppTheme> = AppTheme.entries,
+    showHeading: Boolean = true
 ) {
-    Text(
-        text = androidx.compose.ui.res.stringResource(id = R.string.theme_select_heading),
-        fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
-    )
+    if (showHeading) {
+        Text(
+            text = androidx.compose.ui.res.stringResource(id = R.string.theme_select_heading),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
+        )
 
-    Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        AppTheme.entries.forEach { themeOption ->
+        visibleThemes.forEach { themeOption ->
             val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
             val isSupported = !isMaterialYou || effectiveApiLevel >= 31
             val isSelected = currentTheme == themeOption && isSupported
@@ -643,21 +795,29 @@ private fun UnitsSection(
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     onSelectAngleMode: (AngleMode) -> Unit,
-    triggerHaptic: () -> Unit
+    triggerHaptic: () -> Unit,
+    showDegCard: Boolean = true,
+    showRadCard: Boolean = true,
+    showSystemsCard: Boolean = true,
+    showHeading: Boolean = true
 ) {
-    Text(
-        text = androidx.compose.ui.res.stringResource(id = R.string.units_angle_heading),
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Bold,
-        color = colorScheme.onSurface
-    )
+    if (showHeading) {
+        Text(
+            text = androidx.compose.ui.res.stringResource(id = R.string.units_angle_heading),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.onSurface
+        )
 
-    Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+    }
 
+    if (showDegCard || showRadCard) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
+        if (showDegCard) {
         // Option 1: DEG
         val isDeg = currentAngleMode == AngleMode.DEG
         val degBg = if (isDeg) {
@@ -714,7 +874,9 @@ private fun UnitsSection(
                 }
             }
         }
+        }
 
+        if (showRadCard) {
         // Option 2: RAD
         val isRad = currentAngleMode == AngleMode.RAD
         val radBg = if (isRad) {
@@ -770,31 +932,37 @@ private fun UnitsSection(
                 }
             }
         }
+        }
+    }
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    if (showSystemsCard) {
+        if (showDegCard || showRadCard) {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-    // Supported Systems Card
-    GlassSurface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        borderWidth = 1.dp,
-        customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-        customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = androidx.compose.ui.res.stringResource(id = R.string.units_supported_systems),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = androidx.compose.ui.res.stringResource(id = R.string.units_systems_detail),
-                fontSize = 13.sp,
-                color = colorScheme.onSurface.copy(alpha = 0.75f)
-            )
+        // Supported Systems Card
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            borderWidth = 1.dp,
+            customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.35f),
+            customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Text(
+                    text = androidx.compose.ui.res.stringResource(id = R.string.units_supported_systems),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = androidx.compose.ui.res.stringResource(id = R.string.units_systems_detail),
+                    fontSize = 13.sp,
+                    color = colorScheme.onSurface.copy(alpha = 0.75f)
+                )
+            }
         }
     }
 }
@@ -826,7 +994,8 @@ private fun DeveloperOptionsSection(
     onResetAppRequest: () -> Unit,
     triggerHaptic: () -> Unit,
     context: android.content.Context,
-    onSliderValueChange: (Float) -> Unit
+    onSliderValueChange: (Float) -> Unit,
+    searchVisibility: SettingsSearchVisibility? = null
 ) {
     val view = LocalView.current
 
@@ -834,6 +1003,7 @@ private fun DeveloperOptionsSection(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        if (searchVisibility?.showDevScreenCard != false) {
         // Card 1: Screen & WindowSizeClass
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -865,7 +1035,9 @@ private fun DeveloperOptionsSection(
                 )
             }
         }
+        }
 
+        if (searchVisibility?.showDevApiCard != false) {
         // Card 2: Simulated API Level
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1027,7 +1199,9 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
+        }
 
+        if (searchVisibility?.showDevHapticCard != false) {
         // Card 3: Haptic Feedback with hardware motor detection
         val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
         val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
@@ -1206,7 +1380,9 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
+        }
 
+        if (searchVisibility?.showDevAutoResultCard != false) {
         // Card 4: Auto Result Switch
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1222,7 +1398,9 @@ private fun DeveloperOptionsSection(
                 Switch(checked = autoResultEnabled, onCheckedChange = { triggerHaptic(); onToggleAutoResult(it) }, modifier = Modifier.testTag("switch_auto_result"))
             }
         }
+        }
 
+        if (searchVisibility?.showDevLifecycleCard != false) {
         // Card 5: Lifecycle & State
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1243,7 +1421,9 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
+        }
 
+        if (searchVisibility?.showDevClearCacheCard != false) {
         // Card 6: Cache leeren (Eigene Karte)
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1253,13 +1433,13 @@ private fun DeveloperOptionsSection(
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Text(
-                    text = "Cache leeren",
+                    text = stringResource(R.string.dev_clear_cache_title),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary
                 )
                 Text(
-                    text = "Löscht nur temporäre Systemdateien. Einstellungen und Verlauf bleiben erhalten.",
+                    text = stringResource(R.string.dev_clear_cache_desc),
                     fontSize = 12.sp,
                     color = colorScheme.onSurfaceVariant
                 )
@@ -1269,20 +1449,22 @@ private fun DeveloperOptionsSection(
                         triggerHaptic()
                         try {
                             context.cacheDir.deleteRecursively()
-                            Toast.makeText(context, "Cache geleert", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.toast_cache_cleared), Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) {
-                            Toast.makeText(context, "Fehler beim Leeren des Caches", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.toast_cache_error), Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier.fillMaxWidth().testTag("btn_clear_cache"),
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
-                    Text("Cache leeren", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.dev_btn_clear_cache), fontWeight = FontWeight.Bold)
                 }
             }
         }
+        }
 
+        if (searchVisibility?.showDevResetStorageCard != false) {
         // Card 7: App-Speicher zurücksetzen
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1298,6 +1480,7 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
+        }
     }
 }
 
@@ -1312,12 +1495,14 @@ private fun InformationSection(
     onToggleApache: () -> Unit,
     onToggleMxparser: () -> Unit,
     triggerHaptic: () -> Unit,
-    context: android.content.Context
+    context: android.content.Context,
+    searchVisibility: SettingsSearchVisibility? = null
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        if (searchVisibility?.showInfoVersionCard != false) {
         // App Version Card
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1331,7 +1516,9 @@ private fun InformationSection(
                 Text(text = stringResource(R.string.copyright_notice), fontSize = 11.sp, color = colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
             }
         }
+        }
 
+        if (searchVisibility?.showInfoGitHubCard != false) {
         // GitHub Repository Card
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1355,7 +1542,9 @@ private fun InformationSection(
                 Icon(imageVector = Icons.Default.OpenInBrowser, contentDescription = null, tint = colorScheme.primary)
             }
         }
+        }
 
+        if (searchVisibility?.showInfoOssCard != false) {
         // Third-Party OSS Licenses Button
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1383,7 +1572,9 @@ private fun InformationSection(
                 }
             }
         }
+        }
 
+        if (searchVisibility?.showInfoApacheCard != false) {
         // Accordion 1: Apache
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1407,6 +1598,7 @@ private fun InformationSection(
                 }
             }
         }
+        }
     }
 }
 
@@ -1421,17 +1613,21 @@ private fun LanguageSection(
     onDismiss: () -> Unit,
     triggerHaptic: () -> Unit,
     coroutineScope: kotlinx.coroutines.CoroutineScope,
-    onSetDismissing: (Boolean) -> Unit
+    onSetDismissing: (Boolean) -> Unit,
+    visibleLanguages: List<Language> = Language.entries,
+    showHeading: Boolean = true
 ) {
-    Text(
-        text = stringResource(R.string.language_select_heading),
-        fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
-    )
-    Spacer(modifier = Modifier.height(10.dp))
+    if (showHeading) {
+        Text(
+            text = stringResource(R.string.language_select_heading),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+    }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        Language.entries.forEach { langOption ->
+        visibleLanguages.forEach { langOption ->
             val isSelected = currentLanguage == langOption.localeTag
             val cardBg = if (isSelected) colorScheme.primaryContainer else if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             val textColor = if (isAmoled || isTiefschwarz) Color.White else if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
@@ -1442,15 +1638,15 @@ private fun LanguageSection(
                     coroutineScope.launch {
                         onSetDismissing(true)
                         delay(200)
-                        onSelectLanguage(langOption.localeTag)
                         onDismiss()
+                        onSelectLanguage(langOption.localeTag)
                     }
                 }.testTag("radio_lang_${langOption.name}"),
                 shape = RoundedCornerShape(24.dp),
                 customBgColor = cardBg
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = isSelected, onClick = { triggerHaptic(); coroutineScope.launch { onSetDismissing(true); delay(200); onSelectLanguage(langOption.localeTag); onDismiss() } })
+                    RadioButton(selected = isSelected, onClick = { triggerHaptic(); coroutineScope.launch { onSetDismissing(true); delay(200); onDismiss(); onSelectLanguage(langOption.localeTag) } })
                     Text(text = stringResource(langOption.stringResId), color = textColor, modifier = Modifier.padding(start = 12.dp))
                 }
             }

@@ -179,6 +179,11 @@
     <string name="language_system">System Language (Default)</string>
     <string name="language_german">German (Deutsch)</string>
     <string name="language_english">English (Englisch)</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_japanese">日本語 (Japanese)</string>
+    <string name="language_chinese">中文 (Chinese)</string>
+    <string name="language_klingon">Klingon (tlhIngan Hol)</string>
 
     <!-- Reset Dialog -->
     <string name="dialog_reset_title">Really reset the app?</string>
@@ -202,4 +207,44 @@
     <string name="formula_percentage">Percentage Value</string>
     <string name="formula_integral_example">Definite Integral</string>
     <string name="formula_derivative_example">Derivative (d/dx)</string>
+    <string name="formula_circle_area_keywords">circle,area,radius,pi,r^2</string>
+    <string name="formula_circle_circumference_keywords">circle,circumference,perimeter,diameter,radius,pi</string>
+    <string name="formula_pythagoras_keywords">pythagoras,pythagorean,triangle,hypotenuse,right</string>
+    <string name="formula_compound_interest_keywords">compound,interest,principal,rate,capital,percent</string>
+    <string name="formula_sphere_volume_keywords">sphere,ball,volume,radius,pi,r^3</string>
+    <string name="formula_sphere_surface_keywords">sphere,surface,area,radius,pi</string>
+    <string name="formula_cylinder_volume_keywords">cylinder,volume,height,radius,pi</string>
+    <string name="formula_triangle_area_keywords">triangle,area,base,height</string>
+    <string name="formula_quadratic_keywords">quadratic,equation,roots,parabola,discriminant</string>
+    <string name="formula_percentage_keywords">percentage,percent,discount,tax,rate,%</string>
+    <string name="formula_integral_example_keywords">integral,definite,area,simpson,calculus</string>
+    <string name="formula_derivative_example_keywords">derivative,slope,differential,tangent,calculus,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">Search settings...</string>
+    <string name="settings_search_clear">Clear search</string>
+    <string name="settings_search_empty">No matching settings found</string>
+    <string name="settings_keywords_appearance">appearance,design,theme,color,colors,light,dark,mode</string>
+    <string name="settings_keywords_units">units,angle,trigonometry,degrees,radians,conversion</string>
+    <string name="settings_keywords_dev_screen">developer,screen,resolution,scaling,size</string>
+    <string name="settings_keywords_dev_api">developer,api,android,version,simulation,material you,blur,edge-to-edge,swipe</string>
+    <string name="settings_keywords_dev_haptic">developer,haptic,haptics,vibration,vibrate,intensity,strength,level,motor,lra,erm,feedback</string>
+    <string name="settings_keywords_dev_auto_result">developer,result,automatic,auto,live,preview,calculate</string>
+    <string name="settings_keywords_dev_lifecycle">developer,lifecycle,state,background,crash,test,status</string>
+    <string name="settings_keywords_dev_cache">developer,cache,storage,temporary,clear,delete</string>
+    <string name="settings_keywords_dev_reset">developer,storage,reset,history,data,delete,default</string>
+    <string name="settings_keywords_info_version">version,app,build,copyright,android</string>
+    <string name="settings_keywords_info_license">license,licenses,apache,open-source,copyright</string>
+    <string name="settings_keywords_language">language,languages,system,locale,translation,localization</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">Search units...</string>
+    <string name="converter_search_clear">Clear search</string>
+    <string name="converter_search_empty">No matching units found</string>
+    <string name="converter_keywords_length">length,distance,meters,feet,centimeters,inches,kilometers,miles</string>
+    <string name="converter_keywords_mass">mass,weight,kilograms,pounds</string>
+    <string name="converter_keywords_temp">temperature,degrees,celsius,fahrenheit</string>
+    <string name="converter_keywords_volume">volume,capacity,liters,gallons</string>
+    <string name="converter_keywords_data">data,storage,memory,byte,kilobyte,megabyte,gigabyte,terabyte</string>
+    <string name="converter_keywords_time">time,duration,seconds,milliseconds,minutes,hours,days</string>
 </resources>

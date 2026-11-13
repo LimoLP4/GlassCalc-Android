@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
@@ -249,23 +250,39 @@ fun GlassCalculatorButton(
                 )
         )
 
+        val hasCjk = remember(text) {
+            text.any { ch ->
+                when (Character.UnicodeScript.of(ch.code)) {
+                    Character.UnicodeScript.HAN,
+                    Character.UnicodeScript.HIRAGANA,
+                    Character.UnicodeScript.KATAKANA,
+                    Character.UnicodeScript.HANGUL -> true
+                    else -> false
+                }
+            }
+        }
         val baseFontSize = (maxHeight.value * 0.36f).coerceIn(14f, 32f)
+        val cjkScale = if (hasCjk && text.length >= 2) 0.78f else 1f
         val calculatedFontSize = when {
-            text.length > 4 -> (baseFontSize * 0.65f).coerceAtLeast(10f).sp
-            text.length > 3 -> (baseFontSize * 0.78f).coerceAtLeast(11f).sp
-            text.length > 2 -> (baseFontSize * 0.88f).coerceAtLeast(12f).sp
+            text.length > 4 -> (baseFontSize * 0.65f * cjkScale).coerceAtLeast(9.5f).sp
+            text.length > 3 -> (baseFontSize * 0.78f * cjkScale).coerceAtLeast(10f).sp
+            text.length > 2 -> (baseFontSize * 0.88f * cjkScale).coerceAtLeast(11f).sp
+            hasCjk && text.length == 2 -> (baseFontSize * 0.82f).coerceAtLeast(11f).sp
             else -> baseFontSize.sp
         }
+        val allowWrap = hasCjk && text.length > 2
 
         Text(
             text = text,
             fontSize = calculatedFontSize,
+            lineHeight = (calculatedFontSize.value * 1.15f).sp,
             fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR || type == ButtonType.ACTION_CLEAR) FontWeight.Bold else FontWeight.Medium,
             color = if (isLongPressTriggered) Color.White else textColor,
             textAlign = TextAlign.Center,
-            maxLines = 1,
-            softWrap = false,
-            modifier = Modifier.padding(horizontal = 2.dp)
+            maxLines = if (allowWrap) 2 else 1,
+            softWrap = allowWrap,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
     }
 }

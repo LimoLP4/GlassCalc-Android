@@ -1,0 +1,250 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">支持 Android 8.0 - 17 (API 26-37)</string>
+    <string name="app_version_tag">v%s • Android 8-17 就绪</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <!-- Navigation Drawer -->
+    <string name="nav_open_menu">打开菜单</string>
+    <string name="nav_calculator">计算器</string>
+    <string name="nav_history">历史记录</string>
+    <string name="nav_converter">单位换算</string>
+    <string name="nav_graph">函数图像</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_close">关闭</string>
+    <string name="nav_history_show">查看历史</string>
+
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">标准</string>
+    <string name="mode_scientific">科学</string>
+    <string name="btn_constants">常数</string>
+    <string name="btn_constants_desc">物理与数学常数</string>
+    <string name="btn_fraction_slash_desc">分数线</string>
+    <string name="btn_euler_desc">自然常数 e</string>
+    <string name="btn_power_xy_desc">幂运算 x 的 y 次方</string>
+    <string name="btn_nth_root_desc">n 次方根</string>
+    <string name="btn_integral_desc">积分</string>
+    <string name="btn_var_x_desc">变量 x</string>
+    <string name="btn_semicolon_desc">参数分隔符</string>
+    <string name="btn_del_desc">删除 (长按连续删除)</string>
+    <string name="btn_copy_clipboard">复制结果到剪贴板</string>
+    <string name="toast_copied">已复制到剪贴板: %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">不能除以 0</string>
+    <string name="error_syntax">语法错误</string>
+    <string name="error_not_defined">未定义</string>
+    <string name="error_calculation">计算错误</string>
+    <string name="error_invalid_expression">无效表达式</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">历史记录 (最近 20 条)</string>
+    <string name="history_empty">暂无保存的计算记录。</string>
+    <string name="btn_history_clear">清空</string>
+    <string name="btn_history_clear_desc">清空历史记录</string>
+
+    <!-- Unit Converter Dialog -->
+    <string name="title_converter">单位换算</string>
+    <string name="cat_length">长度</string>
+    <string name="cat_mass">质量</string>
+    <string name="cat_temp">温度</string>
+    <string name="cat_volume">体积</string>
+    <string name="cat_data">数据</string>
+    <string name="cat_time">时间</string>
+    <string name="converter_select_pair">选择换算:</string>
+    <string name="converter_input_label">输入 (%s):</string>
+    <string name="converter_swap_direction">交换方向</string>
+    <string name="converter_result_label">结果 (%s):</string>
+    <string name="converter_import">导入到计算器</string>
+
+    <!-- Unit Pairs -->
+    <string name="unit_m_ft">米 ↔ 英尺 (m ↔ ft)</string>
+    <string name="unit_cm_in">厘米 ↔ 英寸 (cm ↔ in)</string>
+    <string name="unit_km_mi">千米 ↔ 英里 (km ↔ mi)</string>
+    <string name="unit_kg_lb">千克 ↔ 磅 (kg ↔ lb)</string>
+    <string name="unit_c_f">摄氏度 ↔ 华氏度 (°C ↔ °F)</string>
+    <string name="unit_l_gal">升 ↔ 加仑 (l ↔ gal)</string>
+    <string name="unit_b_kb">字节 ↔ 千字节 (B ↔ KB)</string>
+    <string name="unit_kb_mb">千字节 ↔ 兆字节 (KB ↔ MB)</string>
+    <string name="unit_mb_gb">兆字节 ↔ 吉字节 (MB ↔ GB)</string>
+    <string name="unit_gb_tb">吉字节 ↔ 太字节 (GB ↔ TB)</string>
+    <string name="unit_s_ms">秒 ↔ 毫秒 (s ↔ ms)</string>
+    <string name="unit_min_s">分 ↔ 秒 (min ↔ s)</string>
+    <string name="unit_h_min">小时 ↔ 分 (h ↔ min)</string>
+    <string name="unit_d_h">天 ↔ 小时 (d ↔ h)</string>
+
+    <!-- Constants Dialog -->
+    <string name="title_constants">科学常数</string>
+    <string name="cat_constants_math">数学</string>
+    <string name="cat_constants_physics">物理</string>
+    <string name="cat_constants_astro">天文</string>
+    <string name="constants_apply_hint">点击即可将数值直接插入当前计算中。</string>
+    <string name="constants_select_heading">选择物理或数学常数:</string>
+    <string name="const_pi">圆周率 π</string>
+    <string name="const_e">自然常数 e</string>
+    <string name="const_c">光速</string>
+    <string name="const_g">标准重力加速度</string>
+    <string name="const_h">普朗克常数</string>
+    <string name="const_G">万有引力常数</string>
+    <string name="const_na">阿伏伽德罗常数</string>
+    <string name="const_k">玻尔兹曼常数</string>
+
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">函数图像</string>
+    <string name="graph_hint_expression">输入公式 (例如 sin(x), x^2, cos(x)*2):</string>
+    <string name="graph_gesture_locked">手势已锁定</string>
+    <string name="graph_gesture_unlocked">手势已启用</string>
+    <string name="graph_gesture_unlock">解锁图像手势</string>
+    <string name="graph_gesture_lock">锁定图像手势</string>
+    <string name="graph_hint_scan">点击选取坐标点</string>
+    <string name="graph_pan_left">向左平移</string>
+    <string name="graph_pan_right">向右平移</string>
+    <string name="graph_zoom_in">放大</string>
+    <string name="graph_zoom_out">缩小</string>
+    <string name="graph_reset">重置</string>
+    <string name="graph_btn_apply_to_calc">应用到计算器</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">设置</string>
+    <string name="title_appearance">外观</string>
+    <string name="title_units">单位</string>
+    <string name="title_dev_options">开发者</string>
+    <string name="title_info">关于</string>
+    <string name="tab_language">语言</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">选择主题:</string>
+    <string name="theme_material_you">Material You (动态配色)</string>
+    <string name="theme_automatic">自动 (跟随系统)</string>
+    <string name="theme_white_mode">White Mode (浅色)</string>
+    <string name="theme_standard_dark">Dark Mode (标准深色)</string>
+    <string name="theme_dark_mode">Dark Mode (深邃黑)</string>
+    <string name="theme_amoled_dark">AMOLED Dark (纯黑省电)</string>
+    <string name="theme_material_you_unsupported">当前 Android 版本不支持 (需要 API 31+，当前: API %d)</string>
+    <string name="theme_amoled_desc">纯黑 #000000 搭配 10-15% 白玻璃质感，最大化节省 OLED 电量</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">三角函数默认角度模式:</string>
+    <string name="angle_deg_label">角度 (DEG)</string>
+    <string name="angle_deg_desc">标准圆 = 360°</string>
+    <string name="angle_rad_label">弧度 (RAD)</string>
+    <string name="angle_rad_desc">整圆 = 2π</string>
+    <string name="units_supported_systems">支持的换算系统:</string>
+    <string name="units_systems_detail">• 公制 ↔ 英制 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体积 (l ↔ gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">屏幕尺寸与缩放</string>
+    <string name="dev_resolution">分辨率: %1$ddp x %2$ddp</string>
+    <string name="dev_simulated_api_title">模拟 Android 版本</string>
+    <string name="dev_effective_ui_api">当前生效 UI API: %d</string>
+    <string name="dev_simulate_api_switch">模拟 API 级别</string>
+    <string name="dev_api_level_slider">级别: API %d</string>
+    <string name="dev_api_feature_compatibility">API 特性兼容性 (设备上限: API %d):</string>
+    <string name="dev_feature_supported">支持</string>
+    <string name="dev_feature_not_supported">不支持</string>
+    <string name="dev_haptic_title">触觉反馈</string>
+    <string name="dev_haptic_desc">按键与开关操作时触发振动</string>
+    <string name="dev_haptic_detected_motor">检测到的马达</string>
+    <string name="dev_haptic_unsupported_device">此设备不支持触觉反馈。</string>
+    <string name="dev_haptic_unsupported_api">当前模拟 API 级别不支持。</string>
+    <string name="dev_haptic_lra_detected">硬件: 已检测到 LRA 线性马达 (细腻触感脉冲已启用)</string>
+    <string name="dev_haptic_erm_detected">硬件: 已检测到 ERM 转子马达 (标准脉冲控制已启用)</string>
+    <string name="dev_haptic_intensity_label">强度</string>
+    <string name="dev_haptic_intensity_level">等级 %1$d / 10</string>
+    <string name="dev_auto_result_title">自动实时计算</string>
+    <string name="dev_auto_result_desc">输入时实时显示计算结果</string>
+    <string name="dev_lifecycle_title">状态保存与生命周期</string>
+    <string name="dev_btn_background">后台切换</string>
+    <string name="dev_btn_crash_test">崩溃测试</string>
+    <string name="dev_reset_storage_title">重置应用存储</string>
+    <string name="dev_reset_storage_desc">清除所有历史记录、已保存的表达式并恢复默认设置。</string>
+    <string name="dev_btn_reset_storage">重置设置</string>
+    <string name="dev_clear_cache_title">清除缓存</string>
+    <string name="dev_clear_cache_desc">释放临时空间，不会影响您的设置或历史记录。</string>
+    <string name="dev_btn_clear_cache">清除缓存</string>
+    <string name="toast_cache_cleared">缓存已清除</string>
+    <string name="toast_cache_error">无法完全清除缓存</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">GitHub 仓库</string>
+    <string name="info_github_open">在 GitHub 上打开</string>
+    <string name="info_oss_licenses">第三方开源许可</string>
+    <string name="info_oss_licenses_desc">所有使用的开源库及其许可证完整列表。</string>
+    <string name="info_btn_oss_licenses">查看开源许可证</string>
+    <string name="info_used_libraries">使用的开源库</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3: 现代化界面框架\n• LiquidGlass (nadeemiqbal): 流体玻璃模糊着色器\n• mXparser: 数学表达式解析、微积分与函数图像\n• DataStore Preferences: 异步持久化存储\n• Play Services OSS Licenses: 开源许可管理</string>
+
+    <!-- Settings: Language Tab -->
+    <string name="language_select_heading">选择语言:</string>
+    <string name="language_system">系统语言 (默认)</string>
+    <string name="language_german">Deutsch (德语)</string>
+    <string name="language_english">English (英语)</string>
+    <string name="language_spanish">Español (西班牙语)</string>
+    <string name="language_french">Français (法语)</string>
+    <string name="language_japanese">日本語 (日语)</string>
+    <string name="language_chinese">中文 (简体)</string>
+    <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">确定重置应用？</string>
+    <string name="dialog_reset_text">所有 DataStore 设置、保存的计算和全部历史记录将被永久删除。</string>
+    <string name="dialog_reset_confirm">重置</string>
+    <string name="dialog_reset_cancel">取消</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">搜索公式...</string>
+    <string name="formula_search_clear">清空搜索</string>
+    <string name="formula_search_empty">未找到匹配的公式</string>
+    <string name="formula_circle_area">圆的面积</string>
+    <string name="formula_circle_circumference">圆的周长</string>
+    <string name="formula_pythagoras">勾股定理</string>
+    <string name="formula_compound_interest">复利公式</string>
+    <string name="formula_sphere_volume">球体体积</string>
+    <string name="formula_sphere_surface">球体表面积</string>
+    <string name="formula_cylinder_volume">圆柱体体积</string>
+    <string name="formula_triangle_area">三角形面积</string>
+    <string name="formula_quadratic">一元二次方程 (x₁)</string>
+    <string name="formula_percentage">百分比数值</string>
+    <string name="formula_integral_example">定积分</string>
+    <string name="formula_derivative_example">导数 (d/dx)</string>
+    <string name="formula_circle_area_keywords">圆,面积,半径,圆周率,pi,r^2</string>
+    <string name="formula_circle_circumference_keywords">圆,周长,直径,半径,圆周率,pi</string>
+    <string name="formula_pythagoras_keywords">勾股定理,毕达哥拉斯,直角三角形,斜边</string>
+    <string name="formula_compound_interest_keywords">复利,利息,本金,利率,百分比</string>
+    <string name="formula_sphere_volume_keywords">球,球体,体积,半径,圆周率,r^3</string>
+    <string name="formula_sphere_surface_keywords">球,球体,表面积,面积,半径,pi</string>
+    <string name="formula_cylinder_volume_keywords">圆柱,圆柱体,体积,高,半径,pi</string>
+    <string name="formula_triangle_area_keywords">三角形,面积,底边,高</string>
+    <string name="formula_quadratic_keywords">一元二次方程,求根公式,判别式,方程</string>
+    <string name="formula_percentage_keywords">百分比,百分数,折扣,税率,%</string>
+    <string name="formula_integral_example_keywords">定积分,积分,面积,辛普森,微积分</string>
+    <string name="formula_derivative_example_keywords">导数,微分,斜率,切线,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">搜索设置...</string>
+    <string name="settings_search_clear">清空搜索</string>
+    <string name="settings_search_empty">未找到匹配的设置</string>
+    <string name="settings_keywords_appearance">外观,设计,主题,颜色,色彩,浅色,深色,模式</string>
+    <string name="settings_keywords_units">单位,角度,三角函数,角度制,弧度制,转换</string>
+    <string name="settings_keywords_dev_screen">开发者,屏幕,分辨率,缩放,尺寸</string>
+    <string name="settings_keywords_dev_api">开发者,api,android,版本,模拟,material you,模糊</string>
+    <string name="settings_keywords_dev_haptic">开发者,触觉,触感,振动,震动,强度,力度,等级,马达,lra,erm</string>
+    <string name="settings_keywords_dev_auto_result">开发者,结果,自动,实时,预览,计算</string>
+    <string name="settings_keywords_dev_lifecycle">开发者,生命周期,状态,后台,崩溃,测试</string>
+    <string name="settings_keywords_dev_cache">开发者,缓存,存储,临时,清理,清除</string>
+    <string name="settings_keywords_dev_reset">开发者,存储,重置,恢复默认,历史,数据,清除</string>
+    <string name="settings_keywords_info_version">版本,应用,版权,android</string>
+    <string name="settings_keywords_info_license">许可证,协议,apache,开源,版权</string>
+    <string name="settings_keywords_language">语言,系统语言,翻译,本地化</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">搜索单位...</string>
+    <string name="converter_search_clear">清空搜索</string>
+    <string name="converter_search_empty">未找到匹配的单位</string>
+    <string name="converter_keywords_length">长度,距离,米,英尺,厘米,英寸,千米,公里,英里</string>
+    <string name="converter_keywords_mass">质量,重量,千克,公斤,磅</string>
+    <string name="converter_keywords_temp">温度,摄氏度,华氏度</string>
+    <string name="converter_keywords_volume">体积,容积,升,加仑</string>
+    <string name="converter_keywords_data">数据,存储,容量,字节,千字节,兆字节,吉字节,太字节</string>
+    <string name="converter_keywords_time">时间,时长,秒,毫秒,分钟,小时,天</string>
+</resources>

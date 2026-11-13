@@ -64,9 +64,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.domain.converter.ConversionPair
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
+import com.limonatalp4.glasscalcproject.ui.components.ConverterSearchEmptyState
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair
+import com.limonatalp4.glasscalcproject.ui.components.UnitConverterSearchBar
+import com.limonatalp4.glasscalcproject.ui.components.categoryKeywordsResId
+import com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
@@ -104,6 +110,7 @@ fun UnitConverterDialog(
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
+    var searchQuery by remember { mutableStateOf("") }
     var selectedCategoryIndex by remember { mutableIntStateOf(0) }
     val categories = UnitCategory.entries
 
@@ -112,8 +119,33 @@ fun UnitConverterDialog(
         UnitConverter.CONVERSIONS.filter { it.category == currentCategory }
     }
 
-    var selectedPairIndex by remember { mutableIntStateOf(0) }
-    val currentPair = conversionsInCategory.getOrElse(selectedPairIndex) { conversionsInCategory.first() }
+    val localizedPairs = UnitConverter.CONVERSIONS.map { pair ->
+        val label = stringResource(pair.labelResId)
+        val categoryName = stringResource(pair.category.stringResId)
+        val keywords = stringResource(categoryKeywordsResId(pair.category))
+            .split(',', ';')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+        LocalizedConversionPair(
+            pair = pair,
+            localizedLabel = label,
+            localizedCategoryName = categoryName,
+            localizedCategoryKeywords = keywords
+        )
+    }
+
+    val isSearchActive = searchQuery.trim().isNotEmpty()
+    val filteredPairs = remember(searchQuery, localizedPairs) {
+        filterConversionPairs(searchQuery, localizedPairs)
+    }
+
+    var selectedPair by remember { mutableStateOf(UnitConverter.CONVERSIONS.first()) }
+    val displayedPairs = if (isSearchActive) filteredPairs else conversionsInCategory
+    val currentPair = if (selectedPair in displayedPairs) {
+        selectedPair
+    } else {
+        displayedPairs.firstOrNull() ?: selectedPair
+    }
 
     var isForward by remember { mutableStateOf(true) }
     var inputValue by remember { mutableStateOf("1") }
@@ -192,6 +224,35 @@ fun UnitConverterDialog(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Liquid-Glass Einheiten-Suchleiste (direkt unter Titel und über Kategorie-Pill-Leiste)
+                UnitConverterSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { newValue ->
+                        if (newValue != searchQuery) {
+                            HapticUtil.performAppHaptic(
+                                context = context,
+                                view = view,
+                                enabled = hapticFeedbackEnabled,
+                                intensityLevel = hapticIntensity
+                            )
+                        }
+                        searchQuery = newValue
+                    },
+                    onClearClick = {
+                        HapticUtil.performAppHaptic(
+                            context = context,
+                            view = view,
+                            enabled = hapticFeedbackEnabled,
+                            intensityLevel = hapticIntensity
+                        )
+                        searchQuery = ""
+                    },
+                    isAmoled = isAmoled,
+                    isTiefschwarz = isTiefschwarz
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -322,8 +383,9 @@ fun UnitConverterDialog(
                                                 },
                                                 onTap = {
                                                     triggerHaptic()
+                                                    searchQuery = ""
                                                     selectedCategoryIndex = index
-                                                    selectedPairIndex = 0
+                                                    selectedPair = UnitConverter.CONVERSIONS.first { it.category == cat }
                                                 }
                                             )
                                         }
@@ -359,67 +421,128 @@ fun UnitConverterDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                AnimatedContent(
-                    targetState = selectedCategoryIndex,
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                                slideOutHorizontally { width -> -width } + fadeOut())
-                        } else {
-                            (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                                slideOutHorizontally { width -> width } + fadeOut())
-                        }
-                    },
-                    label = "cat_transition"
-                ) { targetIndex ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        val catToDisplay = categories[targetIndex]
-                        val pairs = UnitConverter.CONVERSIONS.filter { it.category == catToDisplay }
-                        
-                        // Conversion Pairs in this category
-                        Text(
-                            text = stringResource(R.string.converter_select_pair),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                if (isSearchActive) {
+                    if (filteredPairs.isEmpty()) {
+                        ConverterSearchEmptyState(
+                            isAmoled = isAmoled,
+                            isTiefschwarz = isTiefschwarz
                         )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        pairs.forEachIndexed { idx, pair ->
-                            val isSelected = selectedPairIndex == idx && targetIndex == selectedCategoryIndex
-                            val pairBg by animateColorAsState(
-                                targetValue = if (isSelected) {
-                                    if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
-                                } else {
-                                    if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                },
-                                label = "pair_bg_$idx"
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("converter_search_results")
+                        ) {
+                            Text(
+                                text = stringResource(R.string.converter_select_pair),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                             )
-                            val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
-                            val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
 
-                            GlassSurface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                                    .clickable {
-                                        triggerHaptic()
-                                        selectedPairIndex = idx
-                                    }
-                                    .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
-                                shape = RoundedCornerShape(50.dp),
-                                borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                                customBorderColor = pairBorder,
-                                customBgColor = pairBg
-                            ) {
-                                Text(
-                                    text = stringResource(pair.labelResId),
-                                    fontSize = 14.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = pairTextCol,
-                                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            filteredPairs.forEachIndexed { idx, pair ->
+                                val isSelected = pair == currentPair
+                                val pairBg by animateColorAsState(
+                                    targetValue = if (isSelected) {
+                                        if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                                    } else {
+                                        if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    },
+                                    label = "search_pair_bg_$idx"
                                 )
+                                val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                                val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+
+                                GlassSurface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable {
+                                            triggerHaptic()
+                                            selectedPair = pair
+                                        }
+                                        .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
+                                    shape = RoundedCornerShape(50.dp),
+                                    borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                                    customBorderColor = pairBorder,
+                                    customBgColor = pairBg
+                                ) {
+                                    Text(
+                                        text = stringResource(pair.labelResId),
+                                        fontSize = 14.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = pairTextCol,
+                                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    AnimatedContent(
+                        targetState = selectedCategoryIndex,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> -width } + fadeOut())
+                            } else {
+                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> width } + fadeOut())
+                            }
+                        },
+                        label = "cat_transition"
+                    ) { targetIndex ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            val catToDisplay = categories[targetIndex]
+                            val pairs = UnitConverter.CONVERSIONS.filter { it.category == catToDisplay }
+
+                            // Conversion Pairs in this category
+                            Text(
+                                text = stringResource(R.string.converter_select_pair),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            pairs.forEachIndexed { idx, pair ->
+                                val isSelected = pair == currentPair && targetIndex == selectedCategoryIndex
+                                val pairBg by animateColorAsState(
+                                    targetValue = if (isSelected) {
+                                        if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                                    } else {
+                                        if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    },
+                                    label = "pair_bg_$idx"
+                                )
+                                val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                                val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+
+                                GlassSurface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable {
+                                            triggerHaptic()
+                                            selectedPair = pair
+                                        }
+                                        .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
+                                    shape = RoundedCornerShape(50.dp),
+                                    borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                                    customBorderColor = pairBorder,
+                                    customBgColor = pairBg
+                                ) {
+                                    Text(
+                                        text = stringResource(pair.labelResId),
+                                        fontSize = 14.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = pairTextCol,
+                                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                                    )
+                                }
                             }
                         }
                     }

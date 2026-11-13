@@ -40,26 +40,37 @@ fun GlassCalcAppRoot() {
     val currentTheme by viewModel.currentTheme.collectAsState()
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
     val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
-    val language by viewModel.language.collectAsState()
+    val effectiveLanguage by viewModel.effectiveLanguage.collectAsState()
+    val isLanguageLoaded by viewModel.isLanguageLoaded.collectAsState()
 
     // Asynchrone und sichere Sprach-Initialisierung nach dem UI-Aufbau
-    LaunchedEffect(language) {
+    LaunchedEffect(effectiveLanguage, isLanguageLoaded) {
+        if (!isLanguageLoaded) return@LaunchedEffect
         try {
             val currentLocales = AppCompatDelegate.getApplicationLocales()
             val currentTag = if (currentLocales.isEmpty) "" else currentLocales.toLanguageTags()
-            
-            // Nur aktualisieren, wenn sich die Sprache tatsächlich unterscheidet
-            if (currentTag != language) {
-                val localeList = if (language.isEmpty()) {
-                    LocaleListCompat.getEmptyLocaleList()
-                } else {
-                    LocaleListCompat.forLanguageTags(language)
-                }
+            val currentPrimaryTag = currentTag
+                .split(',')
+                .firstOrNull()
+                ?.trim()
+                ?.lowercase(java.util.Locale.ROOT)
+                ?.substringBefore('-')
+                .orEmpty()
+
+            // Nur aktualisieren, wenn sich die effektive Sprache tatsächlich unterscheidet
+            if (currentPrimaryTag != effectiveLanguage) {
+                kotlinx.coroutines.delay(60)
+                val localeList = LocaleListCompat.forLanguageTags(effectiveLanguage)
                 AppCompatDelegate.setApplicationLocales(localeList)
             }
         } catch (e: Throwable) {
-            // Crash-Schutz: Bei Fehlern sicher auf die Systemsprache zurückfallen
-            Log.e("GlassCalc", "Fehler bei Sprach-Initialisierung, Fallback auf System", e)
+            // Crash-Schutz: Bei Fehlern sicher auf Englisch zurückfallen
+            Log.e("GlassCalc", "Fehler bei Sprach-Initialisierung, Fallback auf Englisch", e)
+            runCatching {
+                AppCompatDelegate.setApplicationLocales(
+                    LocaleListCompat.forLanguageTags(CalculatorViewModel.FALLBACK_LANGUAGE_TAG)
+                )
+            }
         }
     }
 

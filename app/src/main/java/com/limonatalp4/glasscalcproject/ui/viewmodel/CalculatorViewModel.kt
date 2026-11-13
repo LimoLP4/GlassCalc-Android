@@ -1,7 +1,11 @@
 package com.limonatalp4.glasscalcproject.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.content.res.Resources
 import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
@@ -11,6 +15,8 @@ import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.domain.evaluator.EvaluationResult
 import com.limonatalp4.glasscalcproject.domain.evaluator.ExpressionEvaluator
+import com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog
+import com.limonatalp4.glasscalcproject.domain.formulas.MathFormula
 import com.limonatalp4.glasscalcproject.lifecycle.AppLifecycleObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -109,6 +116,25 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         tryLivePreview()
     }
 
+    val formulas: List<MathFormula> = FormulaCatalog.FORMULAS
+
+    fun searchFormulas(query: String, context: Context): List<MathFormula> {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return emptyList()
+        return formulas.filter { item ->
+            val localizedName = context.getString(item.nameResId)
+            val localizedKeywords = item.keywordsResIds.flatMap { resId ->
+                context.getString(resId)
+                    .split(',', ';')
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+            }
+            localizedName.contains(trimmed, ignoreCase = true) ||
+                item.formula.contains(trimmed, ignoreCase = true) ||
+                localizedKeywords.any { it.contains(trimmed, ignoreCase = true) }
+        }
+    }
+
     val angleMode: StateFlow<AngleMode> = preferences.angleModeFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, AngleMode.DEG)
 
@@ -118,15 +144,35 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     val simulatedApiLevel: StateFlow<Int> = preferences.simulatedApiLevelFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, 30)
 
+    private val _systemLocaleRefreshTrigger = MutableStateFlow(0)
+    private val _isLanguageLoaded = MutableStateFlow(false)
+    val isLanguageLoaded: StateFlow<Boolean> = _isLanguageLoaded.asStateFlow()
+
     val language: StateFlow<String> = preferences.languageFlow
-        .catch { emit("") }
+        .onEach { _isLanguageLoaded.value = true }
+        .catch {
+            _isLanguageLoaded.value = true
+            emit("")
+        }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    val effectiveLanguage: StateFlow<String> = combine(
+        language,
+        _systemLocaleRefreshTrigger
+    ) { selectedLanguageTag, _ ->
+        resolveEffectiveLanguageTag(selectedLanguageTag)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        resolveEffectiveLanguageTag("")
+    )
 
     fun setLanguage(languageTag: String) {
         viewModelScope.launch {
             try {
                 preferences.setLanguage(languageTag)
-            } catch (e: Exception) {
+                _systemLocaleRefreshTrigger.value += 1
+            } catch (_: Exception) {
                 // Fallback / ignore exception to prevent crash
             }
         }
@@ -221,7 +267,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onAppStart() {
-        // State is already maintained in ViewModel / DataStore
+        // Re-check device locale in case system language changed while in background
+        _systemLocaleRefreshTrigger.value += 1
     }
 
     fun simulateBackgroundSave() {
@@ -564,5 +611,54 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun getEffectiveApiLevel(): Int {
         return if (simulatedApiEnabled.value) simulatedApiLevel.value else Build.VERSION.SDK_INT
+    }
+
+    companion object {
+        val SUPPORTED_LANGUAGE_TAGS: Set<String> = setOf("de", "en", "es", "fr", "ja", "zh", "tlh")
+        const val FALLBACK_LANGUAGE_TAG: String = "en"
+
+        fun resolveEffectiveLanguageTag(
+            selectedLanguageTag: String,
+            systemLocale: Locale = resolveDeviceSystemLocale()
+        ): String {
+            val trimmed = selectedLanguageTag.trim()
+            if (trimmed.isNotEmpty()) {
+                val explicitTag = trimmed.lowercase(Locale.ROOT)
+                    .substringBefore('-')
+                    .substringBefore('_')
+                return if (explicitTag in SUPPORTED_LANGUAGE_TAGS) {
+                    explicitTag
+                } else {
+                    FALLBACK_LANGUAGE_TAG
+                }
+            }
+
+            val systemTag = systemLocale.language.lowercase(Locale.ROOT)
+                .substringBefore('-')
+                .substringBefore('_')
+            return if (systemTag in SUPPORTED_LANGUAGE_TAGS) {
+                systemTag
+            } else {
+                FALLBACK_LANGUAGE_TAG
+            }
+        }
+
+        fun resolveDeviceSystemLocale(): Locale {
+            return try {
+                val appLocales = AppCompatDelegate.getApplicationLocales()
+                if (!appLocales.isEmpty) {
+                    val sysLocales = ConfigurationCompat.getLocales(Resources.getSystem().configuration)
+                    if (!sysLocales.isEmpty) {
+                        sysLocales[0] ?: Locale.getDefault()
+                    } else {
+                        Locale.getDefault()
+                    }
+                } else {
+                    Locale.getDefault()
+                }
+            } catch (_: Throwable) {
+                Locale.getDefault()
+            }
+        }
     }
 }
