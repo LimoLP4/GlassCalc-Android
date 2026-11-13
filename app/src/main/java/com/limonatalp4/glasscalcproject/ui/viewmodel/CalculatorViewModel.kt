@@ -20,6 +20,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.round
 
 class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -51,6 +56,34 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun setGraphLocked(locked: Boolean) {
         _isGraphLocked.value = locked
+    }
+
+    fun applyGraphPointToCalculator(x: Double, y: Double) {
+        if (!x.isFinite() || !y.isFinite()) return
+        val xFormatted = formatGraphCoordinate(x)
+        val yFormatted = formatGraphCoordinate(y)
+        val newExpr = if (yFormatted.startsWith("−")) {
+            "$xFormatted + ($yFormatted)"
+        } else {
+            "$xFormatted + $yFormatted"
+        }
+        _errorMessage.value = null
+        justCalculated = false
+        _expression.value = newExpr
+        _cursorPosition.value = newExpr.length
+        tryLivePreview()
+    }
+
+    private fun formatGraphCoordinate(value: Double): String {
+        if (abs(value) < 1e-9) return "0"
+        if (abs(value - round(value)) < 1e-7 && abs(value) < 1e12) {
+            return round(value).toLong().toString().replace("-", "−")
+        }
+        val symbols = DecimalFormatSymbols(Locale.GERMANY)
+        val formatter = DecimalFormat("#,##0.####", symbols).apply {
+            isGroupingUsed = false
+        }
+        return formatter.format(value).replace("-", "−")
     }
 
     val angleMode: StateFlow<AngleMode> = preferences.angleModeFlow

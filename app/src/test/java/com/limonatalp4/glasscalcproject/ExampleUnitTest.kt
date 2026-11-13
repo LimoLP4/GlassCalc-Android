@@ -119,4 +119,15 @@ class ExampleUnitTest {
         assertTrue(sq is EvaluationResult.Success)
         assertEquals(6.25, (sq as EvaluationResult.Success).value, 1e-6)
     }
+
+    @Test
+    fun testGraphPointTransferExpressionEvaluation() {
+        val positive = evaluator.evaluate("1,5708 + 1")
+        assertTrue(positive is EvaluationResult.Success)
+        assertEquals(2.5708, (positive as EvaluationResult.Success).value, 1e-4)
+
+        val negativeY = evaluator.evaluate("1,5708 + (−0,5)")
+        assertTrue(negativeY is EvaluationResult.Success)
+        assertEquals(1.0708, (negativeY as EvaluationResult.Success).value, 1e-4)
+    }
 }

@@ -2,9 +2,12 @@ package com.limonatalp4.glasscalcproject.ui.components
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
@@ -46,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,10 +73,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.Role
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -142,6 +150,8 @@ private fun sanitizeForGraphParser(expr: String): String {
         .replace("−", "-")
         .replace("×", "*")
         .replace("÷", "/")
+        .replace("⁄", "/")
+        .replace(",", ".")
         .replace("²", "^2")
         .replace("³", "^3")
         .replace("√", "sqrt")
@@ -155,6 +165,54 @@ private fun sanitizeForGraphParser(expr: String): String {
         .replace("mod", "#")
 }
 
+private fun resolveActiveFormula(preset: GraphPreset, expression: String): String {
+    return when (preset) {
+        GraphPreset.CUSTOM -> {
+            if (expression.isNotBlank() && expression.contains("x", ignoreCase = true)) {
+                expression
+            } else if (expression.isNotBlank()) {
+                "($expression) * sin(x)"
+            } else {
+                "sin(x)"
+            }
+        }
+        else -> preset.formula
+    }
+}
+
+private fun evaluateFormulaAtX(
+    formula: String,
+    x: Double,
+    angleMode: AngleMode
+): Double? {
+    if (!x.isFinite()) return null
+    return try {
+        try {
+            License.iConfirmNonCommercialUse("limonatalp4")
+        } catch (_: Exception) {}
+
+        if (angleMode == AngleMode.DEG) {
+            mXparser.setDegreesMode()
+        } else {
+            mXparser.setRadiansMode()
+        }
+
+        val sanitizedExpr = sanitizeForGraphParser(formula)
+        val argX = Argument("x = 0")
+        argX.argumentValue = x
+        val expr = Expression(sanitizedExpr, argX)
+        val y = expr.calculate()
+
+        if (y.isNaN() || y.isInfinite() || abs(y) > 1e8) {
+            null
+        } else {
+            y
+        }
+    } catch (_: Exception) {
+        null
+    }
+}
+
 @Composable
 fun FunctionGraphView(
     expression: String,
@@ -162,16 +220,18 @@ fun FunctionGraphView(
     isGestureLocked: Boolean,
     onGestureLockChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    glassState: LiquidGlassState? = null
+    glassState: LiquidGlassState? = null,
+    onApplyPointToCalculator: ((Double, Double) -> Unit)? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val localContext = LocalContext.current
     val view = LocalView.current
     val textMeasurer = rememberTextMeasurer()
     val hapticEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
 
     fun triggerClickHaptic() {
-        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
+        HapticUtil.performAppHaptic(localContext, view, hapticEnabled, hapticIntensity)
     }
 
     var selectedPreset by remember { mutableStateOf(GraphPreset.SIN) }
@@ -190,11 +250,17 @@ fun FunctionGraphView(
     // Cached curve evaluation points (normalized t from 0..1, y value)
     var cachedPoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
 
-    // Active touch-to-trace state
-    var isTracing by remember { mutableStateOf(false) }
+    // Active inspected point state (single marker at mathematical (x, y))
     var inspectedPoint by remember { mutableStateOf<GraphPoint?>(null) }
-    var inspectedCanvasPos by remember { mutableStateOf<Offset?>(null) }
     var lastHapticTime by remember { mutableStateOf(0L) }
+
+    // Keep latest parameters accessible inside long-lived pointerInput blocks
+    val currentPreset by rememberUpdatedState(selectedPreset)
+    val currentExpression by rememberUpdatedState(expression)
+    val currentAngleMode by rememberUpdatedState(angleMode)
+    val currentIsGraphLocked by rememberUpdatedState(isGraphLocked)
+    val currentHapticEnabled by rememberUpdatedState(hapticEnabled)
+    val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
 
     // Auto-Zoom & Auto-Lock: Adjust range and re-lock when switching DEG/RAD
     LaunchedEffect(angleMode) {
@@ -208,17 +274,14 @@ fun FunctionGraphView(
         yMin = -2.0
         yMax = 2.0
         inspectedPoint = null
-        inspectedCanvasPos = null
     }
 
-    // Auto-reset inspected points on Preset change
+    // Auto-reset inspected point on Preset change
     LaunchedEffect(selectedPreset) {
         inspectedPoint = null
-        inspectedCanvasPos = null
     }
 
     // Asynchronous background computation of curve points (Dispatchers.Default)
-    // Only re-runs when the function or viewport boundaries change, NEVER when tracing!
     LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
         withContext(Dispatchers.Default) {
             try {
@@ -231,19 +294,7 @@ fun FunctionGraphView(
                 mXparser.setRadiansMode()
             }
 
-            val formulaString = when (selectedPreset) {
-                GraphPreset.CUSTOM -> {
-                    if (expression.isNotBlank() && expression.contains("x", ignoreCase = true)) {
-                        expression
-                    } else if (expression.isNotBlank()) {
-                        "($expression) * sin(x)"
-                    } else {
-                        "sin(x)"
-                    }
-                }
-                else -> selectedPreset.formula
-            }
-
+            val formulaString = resolveActiveFormula(selectedPreset, expression)
             val sanitizedExpr = sanitizeForGraphParser(formulaString)
             val steps = 360 // High quality, low CPU footprint
             val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
@@ -277,21 +328,27 @@ fun FunctionGraphView(
         yMin = -3.0
         yMax = 3.0
         inspectedPoint = null
-        inspectedCanvasPos = null
-        isTracing = false
         triggerClickHaptic()
     }
 
-    // High performance trace lookup: interpolates from already calculated cached points (instant O(1))
-    fun updateTraceFromCache(offset: Offset, width: Float, height: Float) {
-        if (width <= 0 || height <= 0 || cachedPoints.isEmpty()) return
-        val touchFraction = (offset.x / width).coerceIn(0f, 1f)
-        val index = (touchFraction * (cachedPoints.size - 1)).toInt().coerceIn(0, cachedPoints.size - 1)
-        val pt = cachedPoints[index]
-        if (!pt.second.isNaN()) {
-            inspectedPoint = GraphPoint(pt.first, pt.second)
-            val py = (height - ((pt.second - yMin) / (yMax - yMin) * height)).toFloat()
-            inspectedCanvasPos = Offset(offset.x.coerceIn(0f, width), py.coerceIn(0f, height))
+    fun tryPlacePointAtTap(tapOffset: Offset, canvasWidth: Float) {
+        if (currentIsGraphLocked || canvasWidth <= 0f) return
+        val xSpan = xMax - xMin
+        if (xSpan <= 0.0) return
+
+        val fraction = (tapOffset.x / canvasWidth).coerceIn(0f, 1f).toDouble()
+        val tappedX = xMin + fraction * xSpan
+        val formula = resolveActiveFormula(currentPreset, currentExpression)
+        val evaluatedY = evaluateFormulaAtX(formula, tappedX, currentAngleMode)
+
+        if (evaluatedY != null) {
+            inspectedPoint = GraphPoint(tappedX, evaluatedY)
+            HapticUtil.performAppHaptic(
+                localContext,
+                view,
+                currentHapticEnabled,
+                currentHapticIntensity
+            )
         }
     }
 
@@ -299,7 +356,6 @@ fun FunctionGraphView(
     val gridColor = colorScheme.onSurface.copy(alpha = 0.16f)
     val axisColor = colorScheme.onSurface.copy(alpha = 0.55f)
     val labelColor = colorScheme.onSurface.copy(alpha = 0.70f)
-    val traceLineColor = colorScheme.tertiary
 
     GlassSurface(
         modifier = modifier
@@ -392,7 +448,19 @@ fun FunctionGraphView(
                     .border(1.dp, gridColor, RoundedCornerShape(16.dp))
                     .pointerInput(isGraphLocked) {
                         if (!isGraphLocked) {
-                            detectTransformGestures { centroid, pan, zoom, rotation ->
+                            detectTapGestures(
+                                onTap = { offset ->
+                                    tryPlacePointAtTap(offset, size.width.toFloat())
+                                },
+                                onLongPress = { offset ->
+                                    tryPlacePointAtTap(offset, size.width.toFloat())
+                                }
+                            )
+                        }
+                    }
+                    .pointerInput(isGraphLocked) {
+                        if (!isGraphLocked) {
+                            detectTransformGestures { _, pan, zoom, _ ->
                                 val width = size.width.toFloat()
                                 val height = size.height.toFloat()
                                 if (width > 0f && height > 0f) {
@@ -419,9 +487,14 @@ fun FunctionGraphView(
                                     }
 
                                     val now = System.currentTimeMillis()
-                                    if (hapticEnabled && now - lastHapticTime > 80L) {
+                                    if (currentHapticEnabled && now - lastHapticTime > 80L) {
                                         lastHapticTime = now
-                                        HapticUtil.performAppHaptic(localContext, view, hapticEnabled)
+                                        HapticUtil.performAppHaptic(
+                                            localContext,
+                                            view,
+                                            currentHapticEnabled,
+                                            currentHapticIntensity
+                                        )
                                     }
                                 }
                             }
@@ -611,45 +684,54 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // 4. TOUCH-TO-TRACE INTERACTION OVERLAYS
-                    inspectedCanvasPos?.let { pos ->
+                    // 4. POINT MARKER OVERLAY (Dynamically projected from mathematical (x, y) point)
+                    inspectedPoint?.let { pt ->
+                        val px = ((pt.x - xMin) / (xMax - xMin) * width).toFloat()
+                        val py = (height - ((pt.y - yMin) / (yMax - yMin) * height)).toFloat()
+                        val markerPos = Offset(px, py)
                         val crosshairPathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
 
-                        drawLine(
-                            color = traceLineColor.copy(alpha = 0.70f),
-                            start = Offset(pos.x, 0f),
-                            end = Offset(pos.x, height),
-                            strokeWidth = 1.4.dp.toPx(),
-                            pathEffect = crosshairPathEffect
-                        )
+                        if (px in 0f..width) {
+                            drawLine(
+                                color = graphColor.copy(alpha = 0.55f),
+                                start = Offset(px, 0f),
+                                end = Offset(px, height),
+                                strokeWidth = 1.3.dp.toPx(),
+                                pathEffect = crosshairPathEffect
+                            )
+                        }
 
-                        drawLine(
-                            color = traceLineColor.copy(alpha = 0.70f),
-                            start = Offset(0f, pos.y),
-                            end = Offset(width, pos.y),
-                            strokeWidth = 1.4.dp.toPx(),
-                            pathEffect = crosshairPathEffect
-                        )
+                        if (py in 0f..height) {
+                            drawLine(
+                                color = graphColor.copy(alpha = 0.55f),
+                                start = Offset(0f, py),
+                                end = Offset(width, py),
+                                strokeWidth = 1.3.dp.toPx(),
+                                pathEffect = crosshairPathEffect
+                            )
+                        }
 
-                        drawCircle(
-                            color = traceLineColor.copy(alpha = 0.28f),
-                            radius = 11.dp.toPx(),
-                            center = pos
-                        )
-                        drawCircle(
-                            color = traceLineColor,
-                            radius = 5.5.dp.toPx(),
-                            center = pos
-                        )
-                        drawCircle(
-                            color = Color.White,
-                            radius = 2.8.dp.toPx(),
-                            center = pos
-                        )
+                        if (px in -20f..(width + 20f) && py in -20f..(height + 20f)) {
+                            drawCircle(
+                                color = graphColor.copy(alpha = 0.28f),
+                                radius = 11.dp.toPx(),
+                                center = markerPos
+                            )
+                            drawCircle(
+                                color = graphColor,
+                                radius = 6.dp.toPx(),
+                                center = markerPos
+                            )
+                            drawCircle(
+                                color = colorScheme.onPrimary,
+                                radius = 2.6.dp.toPx(),
+                                center = markerPos
+                            )
+                        }
                     }
                 }
 
-                // Interactive Touch-To-Trace HUD Tooltip
+                // Interactive Point HUD Tooltip
                 inspectedPoint?.let { pt ->
                     Box(
                         modifier = Modifier
@@ -657,7 +739,7 @@ fun FunctionGraphView(
                             .padding(8.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.92f))
-                            .border(1.2.dp, traceLineColor.copy(alpha = 0.8f), RoundedCornerShape(10.dp))
+                            .border(1.2.dp, graphColor.copy(alpha = 0.8f), RoundedCornerShape(10.dp))
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                             .testTag("graph_trace_hud")
                     ) {
@@ -671,7 +753,7 @@ fun FunctionGraphView(
                                     text = "$formulaText @ [${angleMode.name}]",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = traceLineColor
+                                    color = graphColor
                                 )
                                 Text(
                                     text = String.format(Locale.US, "x: %.3f  |  y: %.4f", pt.x, pt.y),
@@ -685,7 +767,6 @@ fun FunctionGraphView(
                             IconButton(
                                 onClick = {
                                     inspectedPoint = null
-                                    inspectedCanvasPos = null
                                     triggerClickHaptic()
                                 },
                                 modifier = Modifier.size(20.dp)
@@ -693,7 +774,7 @@ fun FunctionGraphView(
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = stringResource(R.string.nav_close),
-                                    tint = traceLineColor,
+                                    tint = graphColor,
                                     modifier = Modifier.size(14.dp)
                                 )
                             }
@@ -841,6 +922,69 @@ fun FunctionGraphView(
                             contentDescription = stringResource(R.string.graph_reset),
                             tint = colorScheme.onSurface.copy(alpha = 0.70f),
                             modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
+            if (onApplyPointToCalculator != null) {
+                Spacer(modifier = Modifier.height(10.dp))
+
+                val activePoint = inspectedPoint
+                val hasActivePoint = activePoint != null
+
+                GlassSurface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 48.dp)
+                        .clip(RoundedCornerShape(50))
+                        .clickable(
+                            enabled = hasActivePoint,
+                            role = Role.Button
+                        ) {
+                            activePoint?.let { pt ->
+                                triggerClickHaptic()
+                                onApplyPointToCalculator(pt.x, pt.y)
+                            }
+                        }
+                        .testTag("btn_apply_graph_point"),
+                    glassState = glassState,
+                    shape = RoundedCornerShape(50),
+                    borderStroke = if (hasActivePoint) {
+                        BorderStroke(1.dp, colorScheme.onPrimary.copy(alpha = 0.25f))
+                    } else {
+                        BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
+                    },
+                    customBgColor = if (hasActivePoint) {
+                        colorScheme.primary.copy(alpha = 0.90f)
+                    } else {
+                        colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val contentColor = if (hasActivePoint) {
+                            colorScheme.onPrimary
+                        } else {
+                            colorScheme.onSurface.copy(alpha = 0.45f)
+                        }
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = null,
+                            tint = contentColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.graph_btn_apply_to_calc),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor
                         )
                     }
                 }

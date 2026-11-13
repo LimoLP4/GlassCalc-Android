@@ -80,12 +80,13 @@
     <string name="graph_gesture_unlocked">Gesten aktiv</string>
     <string name="graph_gesture_unlock">Graph-Gesten entsperren</string>
     <string name="graph_gesture_lock">Graph-Gesten sperren</string>
-    <string name="graph_hint_scan">Wischen zum Abtasten</string>
+    <string name="graph_hint_scan">Tippen für Punkt</string>
     <string name="graph_pan_left">Links schwenken</string>
     <string name="graph_pan_right">Rechts schwenken</string>
     <string name="graph_zoom_in">Vergrößern</string>
     <string name="graph_zoom_out">Verkleinern</string>
     <string name="graph_reset">Zurücksetzen</string>
+    <string name="graph_btn_apply_to_calc">In Rechner übernehmen</string>
 
     <!-- Settings Dialog Titles & Tabs -->
     <string name="title_settings">Einstellungen</string>

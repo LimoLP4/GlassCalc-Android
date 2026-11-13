@@ -80,12 +80,13 @@
     <string name="graph_gesture_unlocked">Gestures enabled</string>
     <string name="graph_gesture_unlock">Unlock graph gestures</string>
     <string name="graph_gesture_lock">Lock graph gestures</string>
-    <string name="graph_hint_scan">Swipe to inspect</string>
+    <string name="graph_hint_scan">Tap to set point</string>
     <string name="graph_pan_left">Pan left</string>
     <string name="graph_pan_right">Pan right</string>
     <string name="graph_zoom_in">Zoom in</string>
     <string name="graph_zoom_out">Zoom out</string>
     <string name="graph_reset">Reset</string>
+    <string name="graph_btn_apply_to_calc">Use in Calculator</string>
 
     <!-- Settings Dialog Titles & Tabs -->
     <string name="title_settings">Settings</string>

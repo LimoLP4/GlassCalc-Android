@@ -34,6 +34,7 @@ import com.limonatalp4.glasscalcproject.ui.components.FunctionGraphView
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,13 +46,14 @@ fun GraphDialog(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val context = LocalContext.current
     val view = LocalView.current
     val expression by viewModel.expression.collectAsState()
     val isGestureLocked by viewModel.isGraphLocked.collectAsState()
 
     fun triggerHaptic() {
-        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
     BasicAlertDialog(
@@ -105,7 +107,11 @@ fun GraphDialog(
                     angleMode = angleMode,
                     isGestureLocked = isGestureLocked,
                     onGestureLockChange = { viewModel.setGraphLocked(it) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    onApplyPointToCalculator = { x, y ->
+                        viewModel.applyGraphPointToCalculator(x, y)
+                        onDismiss()
+                    }
                 )
             }
         }
