@@ -92,6 +92,32 @@ class ExampleUnitTest {
         val cToF = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }
         val fVal = UnitConverter.convert(0.0, cToF, forward = true)
         assertEquals("32", fVal)
+
+        // Data: Binary standard (1024) in both directions
+        val mbToGb = UnitConverter.CONVERSIONS.first { it.unitFrom == "MB" && it.unitTo == "GB" }
+        assertEquals("1", UnitConverter.convert(1024.0, mbToGb, forward = true))
+        assertEquals("1024", UnitConverter.convert(1.0, mbToGb, forward = false))
+
+        val bToKb = UnitConverter.CONVERSIONS.first { it.unitFrom == "B" && it.unitTo == "KB" }
+        assertEquals("0,5", UnitConverter.convert(512.0, bToKb, forward = true))
+        assertEquals("2048", UnitConverter.convert(2.0, bToKb, forward = false))
+
+        val gbToTb = UnitConverter.CONVERSIONS.first { it.unitFrom == "GB" && it.unitTo == "TB" }
+        assertEquals("1", UnitConverter.convert(1024.0, gbToTb, forward = true))
+        assertEquals("1024", UnitConverter.convert(1.0, gbToTb, forward = false))
+
+        // Time: ms, s, min, h, d in both directions
+        val hToMin = UnitConverter.CONVERSIONS.first { it.unitFrom == "h" && it.unitTo == "min" }
+        assertEquals("60", UnitConverter.convert(1.0, hToMin, forward = true))
+        assertEquals("2", UnitConverter.convert(120.0, hToMin, forward = false))
+
+        val sToMs = UnitConverter.CONVERSIONS.first { it.unitFrom == "s" && it.unitTo == "ms" }
+        assertEquals("1500", UnitConverter.convert(1.5, sToMs, forward = true))
+        assertEquals("1", UnitConverter.convert(1000.0, sToMs, forward = false))
+
+        val dToH = UnitConverter.CONVERSIONS.first { it.unitFrom == "d" && it.unitTo == "h" }
+        assertEquals("48", UnitConverter.convert(2.0, dToH, forward = true))
+        assertEquals("1", UnitConverter.convert(24.0, dToH, forward = false))
     }
 
     @Test

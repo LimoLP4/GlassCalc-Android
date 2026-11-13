@@ -5,15 +5,18 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,6 +26,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.ContentCopy
@@ -38,8 +43,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,6 +70,7 @@ import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -72,10 +80,12 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,11 +96,12 @@ fun UnitConverterDialog(
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val context = LocalContext.current
     val view = LocalView.current
 
     fun triggerHaptic() {
-        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
     var selectedCategoryIndex by remember { mutableIntStateOf(0) }
@@ -184,15 +195,49 @@ fun UnitConverterDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Pill-Design Segmented Control for Categories (matching SettingsDialog design)
+                // Horizontally Scrollable Pill-Design Segmented Control for Categories
                 val categoryTabs = listOf(
                     Triple(UnitCategory.LENGTH, Icons.Default.Straighten, R.string.cat_length),
                     Triple(UnitCategory.MASS, Icons.Default.FitnessCenter, R.string.cat_mass),
                     Triple(UnitCategory.TEMPERATURE, Icons.Default.Thermostat, R.string.cat_temp),
-                    Triple(UnitCategory.VOLUME, Icons.Default.Opacity, R.string.cat_volume)
+                    Triple(UnitCategory.VOLUME, Icons.Default.Opacity, R.string.cat_volume),
+                    Triple(UnitCategory.DATA, Icons.Default.Storage, R.string.cat_data),
+                    Triple(UnitCategory.TIME, Icons.Default.Schedule, R.string.cat_time)
                 )
 
-                BoxWithConstraints(
+                val tabScrollState = rememberScrollState()
+                val density = LocalDensity.current
+                val tabWidths = remember { mutableStateMapOf<Int, Dp>() }
+                var tabHeight by remember { mutableStateOf(0.dp) }
+                val tabSpacing = 4.dp
+
+                val targetPosition = remember(selectedCategoryIndex, tabWidths.toMap()) {
+                    var pos = 0.dp
+                    for (i in 0 until selectedCategoryIndex) {
+                        pos += (tabWidths[i] ?: 0.dp) + tabSpacing
+                    }
+                    pos
+                }
+                val targetWidth = tabWidths[selectedCategoryIndex] ?: 0.dp
+
+                val indicatorOffset by animateDpAsState(
+                    targetValue = targetPosition,
+                    animationSpec = tween(durationMillis = 250),
+                    label = "cat_indicator_offset"
+                )
+                val indicatorWidth by animateDpAsState(
+                    targetValue = targetWidth,
+                    animationSpec = tween(durationMillis = 250),
+                    label = "cat_indicator_width"
+                )
+
+                LaunchedEffect(selectedCategoryIndex, targetPosition) {
+                    val targetPx = with(density) { targetPosition.roundToPx() }
+                    val offsetPaddingPx = with(density) { 32.dp.roundToPx() }
+                    tabScrollState.animateScrollTo((targetPx - offsetPaddingPx).coerceAtLeast(0))
+                }
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
@@ -214,90 +259,98 @@ fun UnitConverterDialog(
                         )
                         .padding(4.dp)
                 ) {
-                    val tabWidth = maxWidth / categoryTabs.size
-                    val indicatorOffset by animateDpAsState(
-                        targetValue = tabWidth * selectedCategoryIndex,
-                        animationSpec = tween(durationMillis = 250),
-                        label = "cat_indicator_offset"
-                    )
-
-                    // Sliding Highlight Pill
                     Box(
                         modifier = Modifier
-                            .offset(x = indicatorOffset)
-                            .width(tabWidth)
-                            .height(40.dp) // Approximate height matching padding
-                            .clip(RoundedCornerShape(50.dp))
-                            .background(primaryContainerColor)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(0.dp), // Spacing handled by weights
-                        verticalAlignment = Alignment.CenterVertically
+                            .fillMaxWidth()
+                            .horizontalScroll(tabScrollState)
                     ) {
-                        categoryTabs.forEachIndexed { index, (cat, icon, shortLabelRes) ->
-                            val isSelected = selectedCategoryIndex == index
-                            var isPressed by remember { mutableStateOf(false) }
-                            val scale by animateFloatAsState(
-                                targetValue = if (isPressed) 0.94f else 1.0f,
-                                animationSpec = tween(durationMillis = 100),
-                                label = "cat_tab_scale_$index"
-                            )
-                            val tabTint by animateColorAsState(
-                                targetValue = if (isSelected) {
-                                    if (isAmoled || isTiefschwarz) Color.White else onPrimaryContainerColor
-                                } else {
-                                    if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
-                                },
-                                animationSpec = tween(durationMillis = 220),
-                                label = "cat_tab_tint_$index"
-                            )
-
+                        // Sliding Highlight Pill INSIDE the horizontal scroll container
+                        if (targetWidth > 0.dp) {
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .graphicsLayer {
-                                        scaleX = scale
-                                        scaleY = scale
-                                    }
+                                    .align(Alignment.CenterStart)
+                                    .offset(x = indicatorOffset)
+                                    .width(indicatorWidth)
+                                    .height(if (tabHeight > 0.dp) tabHeight else 40.dp)
                                     .clip(RoundedCornerShape(50.dp))
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(
-                                            onPress = {
-                                                isPressed = true
-                                                try { awaitRelease() } finally { isPressed = false }
-                                            },
-                                            onTap = {
-                                                triggerHaptic()
-                                                selectedCategoryIndex = index
-                                                selectedPairIndex = 0
-                                            }
+                                    .background(primaryContainerColor)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.wrapContentWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(tabSpacing),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            categoryTabs.forEachIndexed { index, (cat, icon, shortLabelRes) ->
+                                val isSelected = selectedCategoryIndex == index
+                                var isPressed by remember { mutableStateOf(false) }
+                                val scale by animateFloatAsState(
+                                    targetValue = if (isPressed) 0.94f else 1.0f,
+                                    animationSpec = tween(durationMillis = 100),
+                                    label = "cat_tab_scale_$index"
+                                )
+                                val tabTint by animateColorAsState(
+                                    targetValue = if (isSelected) {
+                                        if (isAmoled || isTiefschwarz) Color.White else onPrimaryContainerColor
+                                    } else {
+                                        if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                                    },
+                                    animationSpec = tween(durationMillis = 220),
+                                    label = "cat_tab_tint_$index"
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .defaultMinSize(minHeight = 40.dp)
+                                        .onSizeChanged { size ->
+                                            val w = with(density) { size.width.toDp() }
+                                            val h = with(density) { size.height.toDp() }
+                                            tabWidths[index] = w
+                                            if (h > tabHeight) tabHeight = h
+                                        }
+                                        .graphicsLayer {
+                                            scaleX = scale
+                                            scaleY = scale
+                                        }
+                                        .clip(RoundedCornerShape(50.dp))
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(
+                                                onPress = {
+                                                    isPressed = true
+                                                    try { awaitRelease() } finally { isPressed = false }
+                                                },
+                                                onTap = {
+                                                    triggerHaptic()
+                                                    selectedCategoryIndex = index
+                                                    selectedPairIndex = 0
+                                                }
+                                            )
+                                        }
+                                        .padding(vertical = 9.dp, horizontal = 12.dp)
+                                        .testTag("tab_cat_${cat.name}"),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = tabTint,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = stringResource(shortLabelRes),
+                                            fontSize = 11.5.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = tabTint,
+                                            maxLines = 1,
+                                            softWrap = false
                                         )
                                     }
-                                    .padding(vertical = 9.dp)
-                                    .testTag("tab_cat_${cat.name}"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = tabTint,
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(3.dp))
-                                    Text(
-                                        text = stringResource(shortLabelRes),
-                                        fontSize = 11.5.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = tabTint,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    )
                                 }
                             }
                         }

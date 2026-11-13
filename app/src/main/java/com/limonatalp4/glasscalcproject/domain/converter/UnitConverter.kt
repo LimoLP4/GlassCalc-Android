@@ -10,7 +10,9 @@ enum class UnitCategory(val stringResId: Int) {
     LENGTH(R.string.cat_length),
     MASS(R.string.cat_mass),
     TEMPERATURE(R.string.cat_temp),
-    VOLUME(R.string.cat_volume)
+    VOLUME(R.string.cat_volume),
+    DATA(R.string.cat_data),
+    TIME(R.string.cat_time)
 }
 
 @Immutable
@@ -24,7 +26,9 @@ data class ConversionPair(
 )
 
 object UnitConverter {
-    private val FORMAT = DecimalFormat("#,##0.######", DecimalFormatSymbols(Locale.GERMANY))
+    private val FORMAT = DecimalFormat("#,##0.######", DecimalFormatSymbols(Locale.GERMANY)).apply {
+        isGroupingUsed = false
+    }
 
     val CONVERSIONS = listOf(
         // Length
@@ -78,6 +82,72 @@ object UnitConverter {
             labelResId = R.string.unit_l_gal,
             formulaFromTo = { it * 0.2641720524 },
             formulaToFrom = { it / 0.2641720524 }
+        ),
+        // Data (Binary standard: 1024)
+        ConversionPair(
+            category = UnitCategory.DATA,
+            unitFrom = "B",
+            unitTo = "KB",
+            labelResId = R.string.unit_b_kb,
+            formulaFromTo = { it / 1024.0 },
+            formulaToFrom = { it * 1024.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA,
+            unitFrom = "KB",
+            unitTo = "MB",
+            labelResId = R.string.unit_kb_mb,
+            formulaFromTo = { it / 1024.0 },
+            formulaToFrom = { it * 1024.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA,
+            unitFrom = "MB",
+            unitTo = "GB",
+            labelResId = R.string.unit_mb_gb,
+            formulaFromTo = { it / 1024.0 },
+            formulaToFrom = { it * 1024.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA,
+            unitFrom = "GB",
+            unitTo = "TB",
+            labelResId = R.string.unit_gb_tb,
+            formulaFromTo = { it / 1024.0 },
+            formulaToFrom = { it * 1024.0 }
+        ),
+        // Time
+        ConversionPair(
+            category = UnitCategory.TIME,
+            unitFrom = "s",
+            unitTo = "ms",
+            labelResId = R.string.unit_s_ms,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.TIME,
+            unitFrom = "min",
+            unitTo = "s",
+            labelResId = R.string.unit_min_s,
+            formulaFromTo = { it * 60.0 },
+            formulaToFrom = { it / 60.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.TIME,
+            unitFrom = "h",
+            unitTo = "min",
+            labelResId = R.string.unit_h_min,
+            formulaFromTo = { it * 60.0 },
+            formulaToFrom = { it / 60.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.TIME,
+            unitFrom = "d",
+            unitTo = "h",
+            labelResId = R.string.unit_d_h,
+            formulaFromTo = { it * 24.0 },
+            formulaToFrom = { it / 24.0 }
         )
     )
 

@@ -43,6 +43,8 @@
     <string name="cat_mass">Mass</string>
     <string name="cat_temp">Temp.</string>
     <string name="cat_volume">Volume</string>
+    <string name="cat_data">Data</string>
+    <string name="cat_time">Time</string>
     <string name="converter_select_pair">Select conversion:</string>
     <string name="converter_input_label">Input (%s):</string>
     <string name="converter_swap_direction">Reverse direction</string>
@@ -56,6 +58,14 @@
     <string name="unit_kg_lb">Kilograms ↔ Pounds (kg ↔ lb)</string>
     <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
     <string name="unit_l_gal">Liters ↔ Gallons (l ↔ gal)</string>
+    <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
+    <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
+    <string name="unit_mb_gb">Megabyte ↔ Gigabyte (MB ↔ GB)</string>
+    <string name="unit_gb_tb">Gigabyte ↔ Terabyte (GB ↔ TB)</string>
+    <string name="unit_s_ms">Seconds ↔ Milliseconds (s ↔ ms)</string>
+    <string name="unit_min_s">Minutes ↔ Seconds (min ↔ s)</string>
+    <string name="unit_h_min">Hours ↔ Minutes (h ↔ min)</string>
+    <string name="unit_d_h">Days ↔ Hours (d ↔ h)</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">Scientific Constants</string>
@@ -114,7 +124,7 @@
     <string name="angle_rad_label">Radian (RAD)</string>
     <string name="angle_rad_desc">Full circle = 2π</string>
     <string name="units_supported_systems">Supported conversion systems:</string>
-    <string name="units_systems_detail">• Metric ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperature (°C ↔ °F)\n• Volume (l ↔ gal)</string>
+    <string name="units_systems_detail">• Metric ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperature (°C ↔ °F)\n• Volume (l ↔ gal)\n• Data Storage (B, KB, MB, GB, TB)\n• Time (ms, s, min, h, d)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Screen Size &amp; Scaling</string>
