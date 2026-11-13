@@ -1,0 +1,83 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">Android 8.0 - 17 Ready (API 26-37)</string>
+    <string name="app_version_tag">v%s • Android 8-17 Ready</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <string name="nav_open_menu">Abrir menu</string>
+    <string name="nav_calculator">Calculadora</string>
+    <string name="nav_history">Histórico</string>
+    <string name="nav_converter">Conversor de Unidades</string>
+    <string name="nav_graph">Gráfico</string>
+    <string name="nav_settings">Configurações</string>
+    <string name="nav_close">Fechar</string>
+    <string name="nav_history_show">Mostrar histórico</string>
+
+    <string name="title_converter">Conversor de Unidades</string>
+    <string name="cat_length">Comprimento</string>
+    <string name="cat_mass">Massa</string>
+    <string name="cat_temp">Temp.</string>
+    <string name="cat_volume">Volume</string>
+    <string name="cat_data">Dados</string>
+    <string name="cat_time">Tempo</string>
+    <string name="converter_select_pair">Selecionar conversão:</string>
+    <string name="converter_input_label">Entrada (%s):</string>
+    <string name="converter_swap_direction">Inverter direção</string>
+    <string name="converter_result_label">Resultado (%s):</string>
+    <string name="converter_import">Importar para a calculadora</string>
+
+    <string name="unit_m_ft">Metros ↔ Pés (m ↔ ft)</string>
+    <string name="unit_cm_in">Centímetros ↔ Polegadas (cm ↔ in)</string>
+    <string name="unit_km_mi">Quilômetros ↔ Milhas (km ↔ mi)</string>
+    <string name="unit_kg_lb">Quilogramas ↔ Libras (kg ↔ lb)</string>
+    <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
+    <string name="unit_l_gal">Litros ↔ Galões (l ↔ gal)</string>
+    <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
+    <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
+    <string name="unit_mb_gb">Megabyte ↔ Gigabyte (MB ↔ GB)</string>
+    <string name="unit_gb_tb">Gigabyte ↔ Terabyte (GB ↔ TB)</string>
+    <string name="unit_s_ms">Segundos ↔ Milissegundos (s ↔ ms)</string>
+    <string name="unit_min_s">Minutos ↔ Segundos (min ↔ s)</string>
+    <string name="unit_h_min">Horas ↔ Minutos (h ↔ min)</string>
+    <string name="unit_d_h">Dias ↔ Horas (d ↔ h)</string>
+
+    <string name="unit_name_meter">Metro</string>
+    <string name="unit_name_feet">Pés</string>
+    <string name="unit_name_centimeter">Centímetro</string>
+    <string name="unit_name_inch">Polegada</string>
+    <string name="unit_name_kilometer">Quilômetro</string>
+    <string name="unit_name_mile">Milha</string>
+    <string name="unit_name_kilogram">Quilograma</string>
+    <string name="unit_name_pound">Libra</string>
+    <string name="unit_name_celsius">Celsius</string>
+    <string name="unit_name_fahrenheit">Fahrenheit</string>
+    <string name="unit_name_liter">Litro</string>
+    <string name="unit_name_gallon">Galão</string>
+    <string name="unit_name_byte">Byte</string>
+    <string name="unit_name_kilobyte">Kilobyte</string>
+    <string name="unit_name_megabyte">Megabyte</string>
+    <string name="unit_name_gigabyte">Gigabyte</string>
+    <string name="unit_name_terabyte">Terabyte</string>
+    <string name="unit_name_seconds">Segundos</string>
+    <string name="unit_name_milliseconds">Milissegundos</string>
+    <string name="unit_name_minutes">Minutos</string>
+    <string name="unit_name_hours">Horas</string>
+    <string name="unit_name_days">Dias</string>
+
+    <string name="converter_search_placeholder">Pesquisar unidades...</string>
+    <string name="converter_search_clear">Limpar pesquisa</string>
+    <string name="converter_search_empty">Nenhuma unidade encontrada</string>
+
+    <string name="language_select_heading">Selecionar idioma:</string>
+    <string name="language_system">Idioma do sistema (Padrão)</string>
+    <string name="language_german">Deutsch (Alemão)</string>
+    <string name="language_english">English (Inglês)</string>
+    <string name="language_spanish">Español (Espanhol)</string>
+    <string name="language_french">Français (Francês)</string>
+    <string name="language_japanese">日本語 (Japonês)</string>
+    <string name="language_chinese">中文 (Chinês)</string>
+    <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+    <string name="language_russian">Русский (Russo)</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_hindi">हिन्दी (Hindi)</string>
+</resources>

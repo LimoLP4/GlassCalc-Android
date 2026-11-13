@@ -614,7 +614,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     companion object {
-        val SUPPORTED_LANGUAGE_TAGS: Set<String> = setOf("de", "en", "es", "fr", "ja", "zh", "tlh")
+        val SUPPORTED_LANGUAGE_TAGS: Set<String> = setOf("de", "en", "es", "fr", "ja", "zh", "tlh", "ru", "pt", "hi")
         const val FALLBACK_LANGUAGE_TAG: String = "en"
 
         fun resolveEffectiveLanguageTag(

@@ -319,8 +319,12 @@ class ExampleUnitTest {
         // Unsupported system languages must automatically fall back to English ("en")
         assertEquals("en", resolve("", java.util.Locale("ko", "KR")))
         assertEquals("en", resolve("", java.util.Locale("ar", "SA")))
-        assertEquals("en", resolve("", java.util.Locale("ru", "RU")))
         assertEquals("en", resolve("", java.util.Locale("tr", "TR")))
+
+        // Newly supported system languages (ru, pt, hi) resolve correctly
+        assertEquals("ru", resolve("", java.util.Locale("ru", "RU")))
+        assertEquals("pt", resolve("", java.util.Locale("pt", "BR")))
+        assertEquals("hi", resolve("", java.util.Locale("hi", "IN")))
 
         // Explicit selections override system locale
         assertEquals("ja", resolve("ja", java.util.Locale("de", "DE")))
@@ -465,5 +469,128 @@ class ExampleUnitTest {
 
         // Empty search returns empty list (dialog switches back to active category view)
         assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("   ", localizedGermanPairs).isEmpty())
+    }
+
+    @Test
+    fun testUnitConverterCategorySynchronization() {
+        val categories = UnitCategory.entries
+        // GB ↔ TB belongs to DATA -> index 4
+        val gbPair = UnitConverter.CONVERSIONS.first { it.unitFrom == "GB" && it.unitTo == "TB" }
+        assertEquals(UnitCategory.DATA, gbPair.category)
+        val dataCatIndex = categories.indexOf(gbPair.category)
+        assertEquals(4, dataCatIndex)
+
+        // Celsius belongs to TEMPERATURE -> index 2
+        val tempPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }
+        val tempCatIndex = categories.indexOf(tempPair.category)
+        assertEquals(2, tempCatIndex)
+
+        // Length (m ↔ ft) -> index 0
+        val lengthPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.LENGTH }
+        val lengthCatIndex = categories.indexOf(lengthPair.category)
+        assertEquals(0, lengthCatIndex)
+
+        // Mass (kg ↔ lb) -> index 1
+        val massPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.MASS }
+        val massCatIndex = categories.indexOf(massPair.category)
+        assertEquals(1, massCatIndex)
+
+        // Volume (l ↔ gal) -> index 3
+        val volPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.VOLUME }
+        val volCatIndex = categories.indexOf(volPair.category)
+        assertEquals(3, volCatIndex)
+
+        // Time (s ↔ min) -> index 5
+        val timePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TIME }
+        val timeCatIndex = categories.indexOf(timePair.category)
+        assertEquals(5, timeCatIndex)
+    }
+
+    @Test
+    fun testUnitSuggestionsDropdownFiltering() {
+        val germanSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
+            val localizedName = when (item.id) {
+                "meter" -> "Meter"
+                "feet" -> "Fuß"
+                "centimeter" -> "Zentimeter"
+                "inch" -> "Zoll"
+                "kilometer" -> "Kilometer"
+                "mile" -> "Meilen"
+                "kilogram" -> "Kilogramm"
+                "pound" -> "Pfund"
+                "celsius" -> "Celsius"
+                "fahrenheit" -> "Fahrenheit"
+                "liter" -> "Liter"
+                "gallon" -> "Gallonen"
+                "byte" -> "Byte"
+                "kilobyte" -> "Kilobyte"
+                "megabyte" -> "Megabyte"
+                "gigabyte" -> "Gigabyte"
+                "terabyte" -> "Terabyte"
+                "second" -> "Sekunden"
+                "millisecond" -> "Millisekunden"
+                "minute" -> "Minuten"
+                "hour" -> "Stunden"
+                "day" -> "Tage"
+                else -> item.id
+            }
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = item,
+                localizedName = localizedName,
+                symbol = item.symbol
+            )
+        }
+
+        // 1. "gig" matches "Gigabyte"
+        val gigResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("gig", germanSuggestions)
+        assertEquals(1, gigResults.size)
+        assertEquals("Gigabyte", gigResults.first().localizedName)
+        assertEquals(UnitCategory.DATA, gigResults.first().item.category)
+
+        // 2. "giga" matches "Gigabyte"
+        val gigaResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("giga", germanSuggestions)
+        assertEquals(1, gigaResults.size)
+        assertEquals("Gigabyte", gigaResults.first().localizedName)
+
+        // 3. "m" prioritizes exact match / prefix (Meter, Meilen, Megabyte, etc.)
+        val mResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("m", germanSuggestions)
+        assertTrue(mResults.isNotEmpty())
+        assertEquals("Meter", mResults.first().localizedName)
+
+        // 4. Spanish localization test ("Pulgadas")
+        val spanishSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
+            val localizedName = when (item.id) {
+                "inch" -> "Pulgadas"
+                "gigabyte" -> "Gigabyte"
+                else -> item.id
+            }
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = item,
+                localizedName = localizedName,
+                symbol = item.symbol
+            )
+        }
+        val pulgResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("pulg", spanishSuggestions)
+        assertEquals(1, pulgResults.size)
+        assertEquals("Pulgadas", pulgResults.first().localizedName)
+        assertEquals(UnitCategory.LENGTH, pulgResults.first().item.category)
+
+        // 5. French localization test ("Octet")
+        val frenchSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
+            val localizedName = when (item.id) {
+                "byte" -> "Octet"
+                "gigabyte" -> "Gigaoctet"
+                else -> item.id
+            }
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = item,
+                localizedName = localizedName,
+                symbol = item.symbol
+            )
+        }
+        val octResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("oct", frenchSuggestions)
+        assertTrue(octResults.isNotEmpty())
+        assertTrue(octResults.any { it.localizedName == "Octet" })
+        assertTrue(octResults.any { it.localizedName == "Gigaoctet" })
     }
 }

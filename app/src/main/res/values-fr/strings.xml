@@ -73,6 +73,30 @@
     <string name="unit_h_min">Heures ↔ Minutes (h ↔ min)</string>
     <string name="unit_d_h">Jours ↔ Heures (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
+    <string name="unit_name_meter">Mètre</string>
+    <string name="unit_name_feet">Pieds</string>
+    <string name="unit_name_centimeter">Centimètre</string>
+    <string name="unit_name_inch">Pouces</string>
+    <string name="unit_name_kilometer">Kilomètre</string>
+    <string name="unit_name_mile">Milles</string>
+    <string name="unit_name_kilogram">Kilogramme</string>
+    <string name="unit_name_pound">Livres</string>
+    <string name="unit_name_celsius">Celsius</string>
+    <string name="unit_name_fahrenheit">Fahrenheit</string>
+    <string name="unit_name_liter">Litre</string>
+    <string name="unit_name_gallon">Gallons</string>
+    <string name="unit_name_byte">Octet</string>
+    <string name="unit_name_kilobyte">Kilooctet</string>
+    <string name="unit_name_megabyte">Mégaoctet</string>
+    <string name="unit_name_gigabyte">Gigaoctet</string>
+    <string name="unit_name_terabyte">Téraoctet</string>
+    <string name="unit_name_seconds">Secondes</string>
+    <string name="unit_name_milliseconds">Millisecondes</string>
+    <string name="unit_name_minutes">Minutes</string>
+    <string name="unit_name_hours">Heures</string>
+    <string name="unit_name_days">Jours</string>
+
     <!-- Constants Dialog -->
     <string name="title_constants">Constantes scientifiques</string>
     <string name="cat_constants_math">Mathématiques</string>
@@ -184,6 +208,9 @@
     <string name="language_japanese">日本語 (Japonais)</string>
     <string name="language_chinese">中文 (Chinois)</string>
     <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+    <string name="language_russian">Русский (Russe)</string>
+    <string name="language_portuguese">Português (Portugais)</string>
+    <string name="language_hindi">हिन्दी (Hindi)</string>
 
     <!-- Reset Dialog -->
     <string name="dialog_reset_title">Vraiment réinitialiser l\'app ?</string>

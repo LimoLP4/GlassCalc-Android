@@ -73,6 +73,30 @@
     <string name="unit_h_min">Horas ↔ Minutos (h ↔ min)</string>
     <string name="unit_d_h">Días ↔ Horas (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
+    <string name="unit_name_meter">Metro</string>
+    <string name="unit_name_feet">Pies</string>
+    <string name="unit_name_centimeter">Centímetro</string>
+    <string name="unit_name_inch">Pulgadas</string>
+    <string name="unit_name_kilometer">Kilómetro</string>
+    <string name="unit_name_mile">Millas</string>
+    <string name="unit_name_kilogram">Kilogramo</string>
+    <string name="unit_name_pound">Libras</string>
+    <string name="unit_name_celsius">Celsius</string>
+    <string name="unit_name_fahrenheit">Fahrenheit</string>
+    <string name="unit_name_liter">Litro</string>
+    <string name="unit_name_gallon">Galones</string>
+    <string name="unit_name_byte">Byte</string>
+    <string name="unit_name_kilobyte">Kilobyte</string>
+    <string name="unit_name_megabyte">Megabyte</string>
+    <string name="unit_name_gigabyte">Gigabyte</string>
+    <string name="unit_name_terabyte">Terabyte</string>
+    <string name="unit_name_seconds">Segundos</string>
+    <string name="unit_name_milliseconds">Milisegundos</string>
+    <string name="unit_name_minutes">Minutos</string>
+    <string name="unit_name_hours">Horas</string>
+    <string name="unit_name_days">Días</string>
+
     <!-- Constants Dialog -->
     <string name="title_constants">Constantes científicas</string>
     <string name="cat_constants_math">Matemáticas</string>
@@ -184,6 +208,9 @@
     <string name="language_japanese">日本語 (Japonés)</string>
     <string name="language_chinese">中文 (Chino)</string>
     <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+    <string name="language_russian">Русский (Ruso)</string>
+    <string name="language_portuguese">Português (Portugués)</string>
+    <string name="language_hindi">हिन्दी (Hindi)</string>
 
     <!-- Reset Dialog -->
     <string name="dialog_reset_title">¿Restablecer la app?</string>

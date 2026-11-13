@@ -73,6 +73,30 @@
     <string name="unit_h_min">rep ↔ tup (h ↔ min)</string>
     <string name="unit_d_h">jaj ↔ rep (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
+    <string name="unit_name_meter">\'uj</string>
+    <string name="unit_name_feet">qam</string>
+    <string name="unit_name_centimeter">vI\'</string>
+    <string name="unit_name_inch">\'Inche</string>
+    <string name="unit_name_kilometer">qelI\'qam</string>
+    <string name="unit_name_mile">vatlh qelI\'qam</string>
+    <string name="unit_name_kilogram">cheb</string>
+    <string name="unit_name_pound">DIS</string>
+    <string name="unit_name_celsius">Hat (Celsius)</string>
+    <string name="unit_name_fahrenheit">Hat (Fahrenheit)</string>
+    <string name="unit_name_liter">bal</string>
+    <string name="unit_name_gallon">tlha\'</string>
+    <string name="unit_name_byte">De\' vI\'</string>
+    <string name="unit_name_kilobyte">De\' kilo</string>
+    <string name="unit_name_megabyte">De\' mega</string>
+    <string name="unit_name_gigabyte">De\' giga</string>
+    <string name="unit_name_terabyte">De\' tera</string>
+    <string name="unit_name_seconds">lup</string>
+    <string name="unit_name_milliseconds">lupHom</string>
+    <string name="unit_name_minutes">tup</string>
+    <string name="unit_name_hours">rep</string>
+    <string name="unit_name_days">jaj</string>
+
     <!-- Constants Dialog -->
     <string name="title_constants">QeD ru\'Ha\'wI\'pu\'</string>
     <string name="cat_constants_math">mI\' QeD</string>
@@ -184,6 +208,9 @@
     <string name="language_japanese">日本語 (nIppon Hol)</string>
     <string name="language_chinese">中文 (jungwoq Hol)</string>
     <string name="language_klingon">tlhIngan Hol</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_hindi">हिन्दी</string>
 
     <!-- Reset Dialog -->
     <string name="dialog_reset_title">Hoch chImmoH\'a\'?</string>

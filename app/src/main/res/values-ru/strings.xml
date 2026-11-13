@@ -1,0 +1,83 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">Android 8.0 - 17 Ready (API 26-37)</string>
+    <string name="app_version_tag">v%s • Android 8-17 Ready</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <string name="nav_open_menu">Открыть меню</string>
+    <string name="nav_calculator">Калькулятор</string>
+    <string name="nav_history">История</string>
+    <string name="nav_converter">Конвертер величин</string>
+    <string name="nav_graph">График</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="nav_close">Закрыть</string>
+    <string name="nav_history_show">Показать историю</string>
+
+    <string name="title_converter">Конвертер величин</string>
+    <string name="cat_length">Длина</string>
+    <string name="cat_mass">Масса</string>
+    <string name="cat_temp">Темп.</string>
+    <string name="cat_volume">Объем</string>
+    <string name="cat_data">Данные</string>
+    <string name="cat_time">Время</string>
+    <string name="converter_select_pair">Выберите конвертацию:</string>
+    <string name="converter_input_label">Ввод (%s):</string>
+    <string name="converter_swap_direction">Поменять направление</string>
+    <string name="converter_result_label">Результат (%s):</string>
+    <string name="converter_import">Импортировать в калькулятор</string>
+
+    <string name="unit_m_ft">Метры ↔ Футы (m ↔ ft)</string>
+    <string name="unit_cm_in">Сантиметры ↔ Дюймы (cm ↔ in)</string>
+    <string name="unit_km_mi">Километры ↔ Мили (km ↔ mi)</string>
+    <string name="unit_kg_lb">Килограммы ↔ Фунты (kg ↔ lb)</string>
+    <string name="unit_c_f">Цельсий ↔ Фаренгейт (°C ↔ °F)</string>
+    <string name="unit_l_gal">Литры ↔ Галлоны (l ↔ gal)</string>
+    <string name="unit_b_kb">Байт ↔ Килобайт (B ↔ KB)</string>
+    <string name="unit_kb_mb">Килобайт ↔ Мегабайт (KB ↔ MB)</string>
+    <string name="unit_mb_gb">Мегабайт ↔ Гигабайт (MB ↔ GB)</string>
+    <string name="unit_gb_tb">Гигабайт ↔ Терабайт (GB ↔ TB)</string>
+    <string name="unit_s_ms">Секунды ↔ Миллисекунды (s ↔ ms)</string>
+    <string name="unit_min_s">Минуты ↔ Секунды (min ↔ s)</string>
+    <string name="unit_h_min">Часы ↔ Минуты (h ↔ min)</string>
+    <string name="unit_d_h">Дни ↔ Часы (d ↔ h)</string>
+
+    <string name="unit_name_meter">Метр</string>
+    <string name="unit_name_feet">Футы</string>
+    <string name="unit_name_centimeter">Сантиметр</string>
+    <string name="unit_name_inch">Дюйм</string>
+    <string name="unit_name_kilometer">Километр</string>
+    <string name="unit_name_mile">Миля</string>
+    <string name="unit_name_kilogram">Килограмм</string>
+    <string name="unit_name_pound">Фунт</string>
+    <string name="unit_name_celsius">Цельсий</string>
+    <string name="unit_name_fahrenheit">Фаренгейт</string>
+    <string name="unit_name_liter">Литр</string>
+    <string name="unit_name_gallon">Галлон</string>
+    <string name="unit_name_byte">Байт</string>
+    <string name="unit_name_kilobyte">Килобайт</string>
+    <string name="unit_name_megabyte">Мегабайт</string>
+    <string name="unit_name_gigabyte">Гигабайт</string>
+    <string name="unit_name_terabyte">Терабайт</string>
+    <string name="unit_name_seconds">Секунды</string>
+    <string name="unit_name_milliseconds">Миллисекунды</string>
+    <string name="unit_name_minutes">Минуты</string>
+    <string name="unit_name_hours">Часы</string>
+    <string name="unit_name_days">Дни</string>
+
+    <string name="converter_search_placeholder">Поиск единиц...</string>
+    <string name="converter_search_clear">Очистить поиск</string>
+    <string name="converter_search_empty">Единицы не найдены</string>
+
+    <string name="language_select_heading">Выберите язык:</string>
+    <string name="language_system">Системный язык (По умолчанию)</string>
+    <string name="language_german">Deutsch (Немецкий)</string>
+    <string name="language_english">English (Английский)</string>
+    <string name="language_spanish">Español (Испанский)</string>
+    <string name="language_french">Français (Французский)</string>
+    <string name="language_japanese">日本語 (Японский)</string>
+    <string name="language_chinese">中文 (Китайский)</string>
+    <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_portuguese">Português (Португальский)</string>
+    <string name="language_hindi">हिन्दी (Хинди)</string>
+</resources>

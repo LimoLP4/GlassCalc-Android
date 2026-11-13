@@ -73,6 +73,30 @@
     <string name="unit_h_min">時間 ↔ 分 (h ↔ min)</string>
     <string name="unit_d_h">日 ↔ 時間 (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
+    <string name="unit_name_meter">メートル</string>
+    <string name="unit_name_feet">フィート</string>
+    <string name="unit_name_centimeter">センチメートル</string>
+    <string name="unit_name_inch">インチ</string>
+    <string name="unit_name_kilometer">キロメートル</string>
+    <string name="unit_name_mile">マイル</string>
+    <string name="unit_name_kilogram">キログラム</string>
+    <string name="unit_name_pound">ポンド</string>
+    <string name="unit_name_celsius">摂氏</string>
+    <string name="unit_name_fahrenheit">華氏</string>
+    <string name="unit_name_liter">リットル</string>
+    <string name="unit_name_gallon">ガロン</string>
+    <string name="unit_name_byte">バイト</string>
+    <string name="unit_name_kilobyte">キロバイト</string>
+    <string name="unit_name_megabyte">メガバイト</string>
+    <string name="unit_name_gigabyte">ギガバイト</string>
+    <string name="unit_name_terabyte">テラバイト</string>
+    <string name="unit_name_seconds">秒</string>
+    <string name="unit_name_milliseconds">ミリ秒</string>
+    <string name="unit_name_minutes">分</string>
+    <string name="unit_name_hours">時間</string>
+    <string name="unit_name_days">日</string>
+
     <!-- Constants Dialog -->
     <string name="title_constants">科学定数</string>
     <string name="cat_constants_math">数学</string>
@@ -184,6 +208,9 @@
     <string name="language_japanese">日本語</string>
     <string name="language_chinese">中文 (中国語)</string>
     <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+    <string name="language_russian">Русский (ロシア語)</string>
+    <string name="language_portuguese">Português (ポルトガル語)</string>
+    <string name="language_hindi">हिन्दी (ヒンディー語)</string>
 
     <!-- Reset Dialog -->
     <string name="dialog_reset_title">アプリをリセットしますか？</string>

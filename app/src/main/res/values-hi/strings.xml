@@ -1,0 +1,83 @@
+<resources>
+    <string name="app_name">GlassCalc</string>
+    <string name="app_version_subtitle">Android 8.0 - 17 Ready (API 26-37)</string>
+    <string name="app_version_tag">v%s • Android 8-17 Ready</string>
+    <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
+
+    <string name="nav_open_menu">मेनू खोलें</string>
+    <string name="nav_calculator">कैलकुलेटर</string>
+    <string name="nav_history">इतिहास</string>
+    <string name="nav_converter">इकाई परिवर्तक</string>
+    <string name="nav_graph">ग्राफ़</string>
+    <string name="nav_settings">सेटिंग्स</string>
+    <string name="nav_close">बंद करें</string>
+    <string name="nav_history_show">इतिहास दिखाएं</string>
+
+    <string name="title_converter">इकाई परिवर्तक</string>
+    <string name="cat_length">लंबाई</string>
+    <string name="cat_mass">द्रव्यमान</string>
+    <string name="cat_temp">तापमान</string>
+    <string name="cat_volume">आयतन</string>
+    <string name="cat_data">डेटा</string>
+    <string name="cat_time">समय</string>
+    <string name="converter_select_pair">रूपांतरण चुनें:</string>
+    <string name="converter_input_label">इनपुट (%s):</string>
+    <string name="converter_swap_direction">दिशा बदलें</string>
+    <string name="converter_result_label">परिणाम (%s):</string>
+    <string name="converter_import">कैलकुलेटर में आयात करें</string>
+
+    <string name="unit_m_ft">मीटर ↔ फीट (m ↔ ft)</string>
+    <string name="unit_cm_in">सेंटीमीटर ↔ इंच (cm ↔ in)</string>
+    <string name="unit_km_mi">किलोमीटर ↔ मील (km ↔ mi)</string>
+    <string name="unit_kg_lb">किलोग्राम ↔ पाउंड (kg ↔ lb)</string>
+    <string name="unit_c_f">सेल्सियस ↔ फारेनहाइट (°C ↔ °F)</string>
+    <string name="unit_l_gal">लीटर ↔ गैलन (l ↔ gal)</string>
+    <string name="unit_b_kb">बाइट ↔ किलोबाइट (B ↔ KB)</string>
+    <string name="unit_kb_mb">किलोबाइट ↔ मेगाबाइट (KB ↔ MB)</string>
+    <string name="unit_mb_gb">मेगाबाइट ↔ गीगाबाइट (MB ↔ GB)</string>
+    <string name="unit_gb_tb">गीगाबाइट ↔ टेराबाइट (GB ↔ TB)</string>
+    <string name="unit_s_ms">सेकंड ↔ मिलीसेकंड (s ↔ ms)</string>
+    <string name="unit_min_s">मिनट ↔ सेकंड (min ↔ s)</string>
+    <string name="unit_h_min">घंटे ↔ मिनट (h ↔ min)</string>
+    <string name="unit_d_h">दिन ↔ घंटे (d ↔ h)</string>
+
+    <string name="unit_name_meter">मीटर</string>
+    <string name="unit_name_feet">फीट</string>
+    <string name="unit_name_centimeter">सेंटीमीटर</string>
+    <string name="unit_name_inch">इंच</string>
+    <string name="unit_name_kilometer">किलोमीटर</string>
+    <string name="unit_name_mile">मील</string>
+    <string name="unit_name_kilogram">किलोग्राम</string>
+    <string name="unit_name_pound">पाउंड</string>
+    <string name="unit_name_celsius">सेल्सियस</string>
+    <string name="unit_name_fahrenheit">फारेनहाइट</string>
+    <string name="unit_name_liter">लीटर</string>
+    <string name="unit_name_gallon">गैलन</string>
+    <string name="unit_name_byte">बाइट</string>
+    <string name="unit_name_kilobyte">किलोबाइट</string>
+    <string name="unit_name_megabyte">मेगाबाइट</string>
+    <string name="unit_name_gigabyte">गीगाबाइट</string>
+    <string name="unit_name_terabyte">टेराबाइट</string>
+    <string name="unit_name_seconds">सेकंड</string>
+    <string name="unit_name_milliseconds">मिलीसेकंड</string>
+    <string name="unit_name_minutes">मिनट</string>
+    <string name="unit_name_hours">घंटे</string>
+    <string name="unit_name_days">दिन</string>
+
+    <string name="converter_search_placeholder">इकाइयां खोजें...</string>
+    <string name="converter_search_clear">खोज साफ़ करें</string>
+    <string name="converter_search_empty">कोई मिलती-जुलती इकाई नहीं मिली</string>
+
+    <string name="language_select_heading">भाषा चुनें:</string>
+    <string name="language_system">सिस्टम भाषा (डिफ़ॉल्ट)</string>
+    <string name="language_german">जर्मन (Deutsch)</string>
+    <string name="language_english">अंग्रेज़ी (English)</string>
+    <string name="language_spanish">स्पेनिश (Español)</string>
+    <string name="language_french">फ्रेंच (Français)</string>
+    <string name="language_japanese">जापानी (日本語)</string>
+    <string name="language_chinese">चीनी (中文)</string>
+    <string name="language_klingon">क्लिंगन (tlhIngan Hol)</string>
+    <string name="language_russian">रूसी (Russian)</string>
+    <string name="language_portuguese">पुर्तगाली (Portuguese)</string>
+    <string name="language_hindi">हिन्दी</string>
+</resources>

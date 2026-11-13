@@ -24,7 +24,10 @@ enum class Language(val stringResId: Int, val localeTag: String) {
     FRENCH(R.string.language_french, "fr"),
     JAPANESE(R.string.language_japanese, "ja"),
     CHINESE(R.string.language_chinese, "zh"),
-    KLINGON(R.string.language_klingon, "tlh")
+    KLINGON(R.string.language_klingon, "tlh"),
+    RUSSIAN(R.string.language_russian, "ru"),
+    PORTUGUESE(R.string.language_portuguese, "pt"),
+    HINDI(R.string.language_hindi, "hi")
 }
 
 @Immutable

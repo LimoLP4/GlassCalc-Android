@@ -73,6 +73,30 @@
     <string name="unit_h_min">Hours ↔ Minutes (h ↔ min)</string>
     <string name="unit_d_h">Days ↔ Hours (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
+    <string name="unit_name_meter">Meter</string>
+    <string name="unit_name_feet">Feet</string>
+    <string name="unit_name_centimeter">Centimeter</string>
+    <string name="unit_name_inch">Inch</string>
+    <string name="unit_name_kilometer">Kilometer</string>
+    <string name="unit_name_mile">Miles</string>
+    <string name="unit_name_kilogram">Kilogram</string>
+    <string name="unit_name_pound">Pound</string>
+    <string name="unit_name_celsius">Celsius</string>
+    <string name="unit_name_fahrenheit">Fahrenheit</string>
+    <string name="unit_name_liter">Liter</string>
+    <string name="unit_name_gallon">Gallon</string>
+    <string name="unit_name_byte">Byte</string>
+    <string name="unit_name_kilobyte">Kilobyte</string>
+    <string name="unit_name_megabyte">Megabyte</string>
+    <string name="unit_name_gigabyte">Gigabyte</string>
+    <string name="unit_name_terabyte">Terabyte</string>
+    <string name="unit_name_seconds">Seconds</string>
+    <string name="unit_name_milliseconds">Milliseconds</string>
+    <string name="unit_name_minutes">Minutes</string>
+    <string name="unit_name_hours">Hours</string>
+    <string name="unit_name_days">Days</string>
+
     <!-- Constants Dialog -->
     <string name="title_constants">Scientific Constants</string>
     <string name="cat_constants_math">Mathematics</string>
@@ -184,6 +208,9 @@
     <string name="language_japanese">日本語 (Japanese)</string>
     <string name="language_chinese">中文 (Chinese)</string>
     <string name="language_klingon">Klingon (tlhIngan Hol)</string>
+    <string name="language_russian">Русский (Russian)</string>
+    <string name="language_portuguese">Português (Portuguese)</string>
+    <string name="language_hindi">हिन्दी (Hindi)</string>
 
     <!-- Reset Dialog -->
     <string name="dialog_reset_title">Really reset the app?</string>
