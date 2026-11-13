@@ -125,7 +125,7 @@ dependencies {
   implementation(libs.androidx.lifecycle.process)
   implementation(libs.liquid.glass)
   implementation(libs.mxparser)
-  implementation("com.google.android.gms:play-services-oss-licenses:17.5.2")
+  implementation("com.google.android.gms:play-services-oss-licenses:17.5.3")
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.androidx.appcompat)
