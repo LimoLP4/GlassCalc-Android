@@ -904,7 +904,7 @@ private fun ScientificKeyboardGrid(
             }
         }
 
-        // Row 2: ln, log, x², x³, x^y
+        // Row 2: ln, log, x², x^y, ³√
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -918,24 +918,21 @@ private fun ScientificKeyboardGrid(
             GlassCalculatorButton(text = "x²", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onPower("2")
             }
-            GlassCalculatorButton(text = "x³", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onPower("3")
-            }
             GlassCalculatorButton(text = "xʸ", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onPower("y")
             }
+            GlassCalculatorButton(text = "³√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("³√")
+            }
         }
 
-        // Row 3: √, ³√, n!, (, )
+        // Row 3: √, n!, (, ), /
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
         ) {
             GlassCalculatorButton(text = "√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onScientificFunction("√")
-            }
-            GlassCalculatorButton(text = "³√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onScientificFunction("³√")
             }
             GlassCalculatorButton(text = "n!", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onCharacterInput("!")
@@ -945,6 +942,16 @@ private fun ScientificKeyboardGrid(
             }
             GlassCalculatorButton(text = ")", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onCharacterInput(")")
+            }
+            GlassCalculatorButton(
+                text = "/",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_fraction_slash",
+                contentDesc = stringResource(R.string.btn_fraction_slash_desc),
+                modifier = buttonModifier()
+            ) {
+                viewModel.onFractionSlash()
             }
         }
 

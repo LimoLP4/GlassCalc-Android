@@ -19,6 +19,7 @@
     <string name="mode_scientific">Scientific</string>
     <string name="btn_constants">Const.</string>
     <string name="btn_constants_desc">Physical and mathematical constants</string>
+    <string name="btn_fraction_slash_desc">Fraction slash</string>
     <string name="btn_del_desc">Delete (Hold to delete continuously)</string>
     <string name="btn_copy_clipboard">Copy result to clipboard</string>
     <string name="toast_copied">Copied to clipboard: %s</string>

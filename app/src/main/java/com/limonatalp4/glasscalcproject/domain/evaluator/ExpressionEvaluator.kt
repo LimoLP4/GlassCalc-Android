@@ -82,6 +82,7 @@ class ExpressionEvaluator {
         return expr
             .replace("×", "*")
             .replace("÷", "/")
+            .replace("⁄", "/")
             .replace("−", "-")
             .replace(",", ".")
             .replace("π", "pi")

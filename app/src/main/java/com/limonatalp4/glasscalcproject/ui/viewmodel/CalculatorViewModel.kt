@@ -293,6 +293,30 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         tryLivePreview()
     }
 
+    fun onFractionSlash() {
+        _errorMessage.value = null
+
+        var curr = _expression.value
+        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+
+        if (justCalculated) {
+            val chainingRes = getValidChainingResult()
+            if (chainingRes != null) {
+                curr = chainingRes
+                pos = curr.length
+            } else {
+                curr = ""
+                pos = 0
+            }
+        }
+        justCalculated = false
+
+        val updated = curr.substring(0, pos) + "/" + curr.substring(pos)
+        _expression.value = updated
+        _cursorPosition.value = pos + 1
+        tryLivePreview()
+    }
+
     fun onToggleSign() {
         _errorMessage.value = null
         justCalculated = false

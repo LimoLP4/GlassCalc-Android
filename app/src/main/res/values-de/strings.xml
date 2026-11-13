@@ -19,6 +19,7 @@
     <string name="mode_scientific">Wissensch.</string>
     <string name="btn_constants">Konst.</string>
     <string name="btn_constants_desc">Physikalische und mathematische Konstanten</string>
+    <string name="btn_fraction_slash_desc">Bruchstrich</string>
     <string name="btn_del_desc">Löschen (Gedrückt halten zum kontinuierlichen Löschen)</string>
     <string name="btn_copy_clipboard">Ergebnis in Zwischenablage kopieren</string>
     <string name="toast_copied">In Zwischenablage kopiert: %s</string>
