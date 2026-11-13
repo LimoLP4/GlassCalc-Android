@@ -1,5 +1,6 @@
 package com.limonatalp4.glasscalcproject.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -314,19 +315,19 @@ fun SettingsSearchBar(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(percent = 50)
-    val bgColor = when {
-        isAmoled -> Color.White.copy(alpha = 0.08f)
-        isTiefschwarz -> colorScheme.surfaceVariant.copy(alpha = 0.65f)
-        else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    val searchBarBgColor = when {
+        isAmoled -> Color(0xFF0A0A0A)
+        isTiefschwarz -> colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        else -> colorScheme.surfaceVariant.copy(alpha = 0.3f)
     }
-    val borderColor = when {
-        isAmoled -> Color.White.copy(alpha = 0.2f)
-        isTiefschwarz -> Color.White.copy(alpha = 0.14f)
-        else -> colorScheme.outline.copy(alpha = 0.3f)
+    val searchBarBorder = when {
+        isAmoled -> BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        isTiefschwarz -> BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        else -> BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
     }
     val textColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
     val hintColor = if (isAmoled || isTiefschwarz) {
-        Color.White.copy(alpha = 0.65f)
+        Color.White.copy(alpha = 0.6f)
     } else {
         colorScheme.onSurfaceVariant
     }
@@ -336,8 +337,8 @@ fun SettingsSearchBar(
             .fillMaxWidth()
             .defaultMinSize(minHeight = 48.dp)
             .clip(shape)
-            .background(bgColor)
-            .border(width = 1.dp, color = borderColor, shape = shape)
+            .background(searchBarBgColor)
+            .border(searchBarBorder, shape = shape)
             .padding(
                 start = 14.dp,
                 end = if (query.isNotEmpty()) 4.dp else 14.dp
