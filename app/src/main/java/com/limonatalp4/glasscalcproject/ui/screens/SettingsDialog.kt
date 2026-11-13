@@ -92,6 +92,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -178,6 +179,45 @@ fun SettingsDialog(
         effectiveApiLevel = effectiveApi
     )
     val isSearchActive = searchQuery.trim().isNotEmpty()
+    var preSearchTab by remember { mutableStateOf(0) }
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            preSearchTab = selectedTab
+            when {
+                searchVisibility.hasAnyAppearanceMatch -> selectedTab = 0
+                searchVisibility.hasAnyUnitsMatch -> selectedTab = 1
+                searchVisibility.hasAnyDeveloperMatch -> selectedTab = 2
+                searchVisibility.hasAnyInfoMatch -> selectedTab = 3
+                searchVisibility.hasAnyLanguageMatch -> selectedTab = 4
+            }
+        } else {
+            selectedTab = preSearchTab
+        }
+    }
+
+    LaunchedEffect(searchQuery) {
+        if (isSearchActive && searchVisibility.hasAnyMatch) {
+            val hasMatchInCurrent = when (selectedTab) {
+                0 -> searchVisibility.hasAnyAppearanceMatch
+                1 -> searchVisibility.hasAnyUnitsMatch
+                2 -> searchVisibility.hasAnyDeveloperMatch
+                3 -> searchVisibility.hasAnyInfoMatch
+                4 -> searchVisibility.hasAnyLanguageMatch
+                else -> false
+            }
+            if (!hasMatchInCurrent) {
+                when {
+                    searchVisibility.hasAnyAppearanceMatch -> selectedTab = 0
+                    searchVisibility.hasAnyUnitsMatch -> selectedTab = 1
+                    searchVisibility.hasAnyDeveloperMatch -> selectedTab = 2
+                    searchVisibility.hasAnyInfoMatch -> selectedTab = 3
+                    searchVisibility.hasAnyLanguageMatch -> selectedTab = 4
+                }
+            }
+        }
+    }
+
     val coroutineScope = rememberCoroutineScope()
     var isDismissing by remember { mutableStateOf(false) }
     val alphaAnim by androidx.compose.animation.core.animateFloatAsState(
@@ -430,21 +470,29 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if (isSearchActive) {
-                    if (!searchVisibility.hasAnyMatch) {
-                        SettingsSearchEmptyState(
-                            isAmoled = isAmoled,
-                            isTiefschwarz = isTiefschwarz
-                        )
-                    } else {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("settings_search_results"),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            if (searchVisibility.hasAnyAppearanceMatch) {
-                                AppearanceSection(
+                if (isSearchActive && !searchVisibility.hasAnyMatch) {
+                    SettingsSearchEmptyState(
+                        isAmoled = isAmoled,
+                        isTiefschwarz = isTiefschwarz
+                    )
+                } else {
+                    AnimatedContent(
+                        targetState = selectedTab,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> -width } + fadeOut())
+                            } else {
+                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
+                                    slideOutHorizontally { width -> width } + fadeOut())
+                            }.using(SizeTransform(clip = false))
+                        },
+                        label = "tab_transition",
+                        modifier = Modifier.fillMaxWidth()
+                    ) { targetTab ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            when (targetTab) {
+                                0 -> AppearanceSection(
                                     currentTheme = currentTheme,
                                     effectiveApiLevel = effectiveApiLevel,
                                     isAmoled = isAmoled,
@@ -454,11 +502,9 @@ fun SettingsDialog(
                                     onSelectTheme = onSelectTheme,
                                     triggerHaptic = ::triggerHaptic,
                                     visibleThemes = searchVisibility.matchingThemes,
-                                    showHeading = false
+                                    showHeading = !isSearchActive
                                 )
-                            }
-                            if (searchVisibility.hasAnyUnitsMatch) {
-                                UnitsSection(
+                                1 -> UnitsSection(
                                     currentAngleMode = currentAngleMode,
                                     isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
@@ -469,11 +515,9 @@ fun SettingsDialog(
                                     showDegCard = searchVisibility.showDegCard,
                                     showRadCard = searchVisibility.showRadCard,
                                     showSystemsCard = searchVisibility.showUnitsSystemsCard,
-                                    showHeading = false
+                                    showHeading = !isSearchActive
                                 )
-                            }
-                            if (searchVisibility.hasAnyDeveloperMatch) {
-                                DeveloperOptionsSection(
+                                2 -> DeveloperOptionsSection(
                                     windowSizeClass = windowSizeClass,
                                     config = config,
                                     simulatedApiEnabled = simulatedApiEnabled,
@@ -502,9 +546,7 @@ fun SettingsDialog(
                                     onSliderValueChange = { currentSliderApi = it },
                                     searchVisibility = searchVisibility
                                 )
-                            }
-                            if (searchVisibility.hasAnyInfoMatch) {
-                                InformationSection(
+                                3 -> InformationSection(
                                     isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
@@ -517,9 +559,7 @@ fun SettingsDialog(
                                     context = context,
                                     searchVisibility = searchVisibility
                                 )
-                            }
-                            if (searchVisibility.hasAnyLanguageMatch) {
-                                LanguageSection(
+                                4 -> LanguageSection(
                                     currentLanguage = currentLanguage,
                                     isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
@@ -531,98 +571,7 @@ fun SettingsDialog(
                                     coroutineScope = coroutineScope,
                                     onSetDismissing = { isDismissing = it },
                                     visibleLanguages = searchVisibility.matchingLanguages,
-                                    showHeading = false
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    AnimatedContent(
-                        targetState = selectedTab,
-                        transitionSpec = {
-                            if (targetState > initialState) {
-                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                                    slideOutHorizontally { width -> -width } + fadeOut())
-                            } else {
-                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                                    slideOutHorizontally { width -> width } + fadeOut())
-                            }.using(SizeTransform(clip = false))
-                        },
-                        label = "tab_transition",
-                        modifier = Modifier.fillMaxWidth()
-                    ) { targetTab ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            when (targetTab) {
-                                0 -> AppearanceSection(
-                                    currentTheme = currentTheme,
-                                    effectiveApiLevel = effectiveApiLevel,
-                                    isAmoled = isAmoled,
-                                    isTiefschwarz = isTiefschwarz,
-                                    colorScheme = colorScheme,
-                                    glassProps = glassProps,
-                                    onSelectTheme = onSelectTheme,
-                                    triggerHaptic = ::triggerHaptic
-                                )
-                                1 -> UnitsSection(
-                                    currentAngleMode = currentAngleMode,
-                                    isAmoled = isAmoled,
-                                    isTiefschwarz = isTiefschwarz,
-                                    colorScheme = colorScheme,
-                                    glassProps = glassProps,
-                                    onSelectAngleMode = onSelectAngleMode,
-                                    triggerHaptic = ::triggerHaptic
-                                )
-                                2 -> DeveloperOptionsSection(
-                                    windowSizeClass = windowSizeClass,
-                                    config = config,
-                                    simulatedApiEnabled = simulatedApiEnabled,
-                                    effectiveApi = effectiveApi,
-                                    realDeviceApi = realDeviceApi,
-                                    currentSliderApi = currentSliderApi,
-                                    sliderMin = sliderMin,
-                                    sliderMax = sliderMax,
-                                    sliderSteps = sliderSteps,
-                                    hapticFeedbackEnabled = hapticFeedbackEnabled,
-                                    hapticIntensity = hapticIntensity,
-                                    autoResultEnabled = autoResultEnabled,
-                                    lifecycleStatus = lifecycleStatus,
-                                    isAmoled = isAmoled,
-                                    isTiefschwarz = isTiefschwarz,
-                                    colorScheme = colorScheme,
-                                    onSetSimulatedApi = onSetSimulatedApi,
-                                    onToggleHapticFeedback = onToggleHapticFeedback,
-                                    onSetHapticIntensity = onSetHapticIntensity,
-                                    onToggleAutoResult = onToggleAutoResult,
-                                    onSimulateBackground = onSimulateBackground,
-                                    onTestCrashProtection = onTestCrashProtection,
-                                    onResetAppRequest = { showResetConfirmDialog = true },
-                                    triggerHaptic = ::triggerHaptic,
-                                    context = context,
-                                    onSliderValueChange = { currentSliderApi = it }
-                                )
-                                3 -> InformationSection(
-                                    isAmoled = isAmoled,
-                                    isTiefschwarz = isTiefschwarz,
-                                    colorScheme = colorScheme,
-                                    glassProps = glassProps,
-                                    apacheAccordionOpen = apacheAccordionOpen,
-                                    mxparserAccordionOpen = mxparserAccordionOpen,
-                                    onToggleApache = { apacheAccordionOpen = !apacheAccordionOpen },
-                                    onToggleMxparser = { mxparserAccordionOpen = !mxparserAccordionOpen },
-                                    triggerHaptic = ::triggerHaptic,
-                                    context = context
-                                )
-                                4 -> LanguageSection(
-                                    currentLanguage = currentLanguage,
-                                    isAmoled = isAmoled,
-                                    isTiefschwarz = isTiefschwarz,
-                                    colorScheme = colorScheme,
-                                    glassProps = glassProps,
-                                    onSelectLanguage = onSelectLanguage,
-                                    onDismiss = onDismiss,
-                                    triggerHaptic = ::triggerHaptic,
-                                    coroutineScope = coroutineScope,
-                                    onSetDismissing = { isDismissing = it }
+                                    showHeading = !isSearchActive
                                 )
                             }
                         }
