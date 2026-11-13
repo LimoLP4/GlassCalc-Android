@@ -20,6 +20,12 @@
     <string name="btn_constants">Const.</string>
     <string name="btn_constants_desc">Physical and mathematical constants</string>
     <string name="btn_fraction_slash_desc">Fraction slash</string>
+    <string name="btn_euler_desc">Euler\'s number e</string>
+    <string name="btn_power_xy_desc">Power x to the y</string>
+    <string name="btn_nth_root_desc">n-th root</string>
+    <string name="btn_integral_desc">Integral</string>
+    <string name="btn_var_x_desc">Variable x</string>
+    <string name="btn_semicolon_desc">Argument separator</string>
     <string name="btn_del_desc">Delete (Hold to delete continuously)</string>
     <string name="btn_copy_clipboard">Copy result to clipboard</string>
     <string name="toast_copied">Copied to clipboard: %s</string>
@@ -179,4 +185,21 @@
     <string name="dialog_reset_text">All DataStore settings, saved calculations, and the entire history will be permanently deleted.</string>
     <string name="dialog_reset_confirm">Reset</string>
     <string name="dialog_reset_cancel">Cancel</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">Search formula...</string>
+    <string name="formula_search_clear">Clear search</string>
+    <string name="formula_search_empty">No matching formula found</string>
+    <string name="formula_circle_area">Circle Area</string>
+    <string name="formula_circle_circumference">Circle Circumference</string>
+    <string name="formula_pythagoras">Pythagorean Theorem</string>
+    <string name="formula_compound_interest">Compound Interest</string>
+    <string name="formula_sphere_volume">Sphere Volume</string>
+    <string name="formula_sphere_surface">Sphere Surface</string>
+    <string name="formula_cylinder_volume">Cylinder Volume</string>
+    <string name="formula_triangle_area">Triangle Area</string>
+    <string name="formula_quadratic">Quadratic Equation (x₁)</string>
+    <string name="formula_percentage">Percentage Value</string>
+    <string name="formula_integral_example">Definite Integral</string>
+    <string name="formula_derivative_example">Derivative (d/dx)</string>
 </resources>

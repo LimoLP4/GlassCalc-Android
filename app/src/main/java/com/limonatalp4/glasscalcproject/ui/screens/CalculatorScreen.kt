@@ -86,6 +86,7 @@ import com.limonatalp4.glasscalcproject.R
 import androidx.core.graphics.drawable.toBitmap
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.limonatalp4.glasscalcproject.ui.components.ButtonType
+import com.limonatalp4.glasscalcproject.ui.components.DrawerFormulaSearch
 import com.limonatalp4.glasscalcproject.ui.components.GlassCalculatorButton
 import com.limonatalp4.glasscalcproject.ui.components.GlassDisplay
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
@@ -142,6 +143,13 @@ fun CalculatorScreen(
     var showConverterDialog by remember { mutableStateOf(false) }
     var showConstantsDialog by remember { mutableStateOf(false) }
     var showGraphDialog by remember { mutableStateOf(false) }
+    var formulaSearchQuery by remember { mutableStateOf("") }
+
+    androidx.compose.runtime.LaunchedEffect(menuVisibleState.targetState) {
+        if (!menuVisibleState.targetState) {
+            formulaSearchQuery = ""
+        }
+    }
 
     val glassState = rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
 
@@ -354,8 +362,35 @@ fun CalculatorScreen(
                                 )
                             }
                             HorizontalDivider(color = (if (isAmoled) Color.White else onSurfaceColor).copy(alpha = 0.08f))
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            DrawerFormulaSearch(
+                                query = formulaSearchQuery,
+                                onQueryChange = { formulaSearchQuery = it },
+                                onClearClick = {
+                                    HapticUtil.performAppHaptic(
+                                        context = context,
+                                        view = view,
+                                        enabled = hapticFeedbackEnabled,
+                                        intensityLevel = hapticIntensity
+                                    )
+                                    formulaSearchQuery = ""
+                                },
+                                onFormulaSelected = { formula ->
+                                    HapticUtil.performAppHaptic(
+                                        context = context,
+                                        view = view,
+                                        enabled = hapticFeedbackEnabled,
+                                        intensityLevel = hapticIntensity
+                                    )
+                                    viewModel.insertFormula(formula.insertExpression)
+                                    formulaSearchQuery = ""
+                                    menuVisibleState.targetState = false
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
                             val menuItems = listOf(
                                 Triple(Icons.Default.Calculate, R.string.nav_calculator, "nav_item_calculator"),
                                 Triple(Icons.Default.History, R.string.nav_history, "nav_item_history"),
@@ -733,9 +768,9 @@ private fun LandscapeCalculatorLayout(
         // We calculate maxButtonWidth so all 9 buttons fit horizontally within the right half:
         val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.dp * 7)) / 9.2f)
 
-        // For vertical height: 5 rows of buttons in both grids.
-        // 5 * buttonSize + 4 * spacing <= availableHeight
-        val maxButtonHeight = ((availableHeight - 12.dp) / 5.2f)
+        // For vertical height: 6 rows in scientific grid and 5 rows in main grid.
+        // 6 * buttonSize + 5 * spacing <= availableHeight
+        val maxButtonHeight = ((availableHeight - 14.dp) / 6.3f)
 
         // Button size fits both dimensions perfectly
         val buttonSize = minOf(maxButtonWidth, maxButtonHeight).coerceIn(28.dp, 62.dp)
@@ -851,12 +886,13 @@ private fun LandscapeCalculatorLayout(
 }
 
 /**
- * 5-row Scientific Grid including:
+ * 6-row x 5-column Scientific Grid:
  * Row 1: sin, cos, tan, π, e
- * Row 2: ln, log, x², x³, x^y
- * Row 3: √, ³√, n!, (, )
- * Row 4: asin, acos, atan, |x|, mod
- * Row 5: sinh, cosh, tanh, d/dx, ∫
+ * Row 2: ln, log, x², x³, xʸ
+ * Row 3: √, ³√, ⁿ√, n!, /
+ * Row 4: asin, acos, atan, (, )
+ * Row 5: sinh, cosh, tanh, |x|, mod
+ * Row 6: d/dx, ∫, x, ;, Konst.
  */
 @Composable
 private fun ScientificKeyboardGrid(
@@ -875,7 +911,7 @@ private fun ScientificKeyboardGrid(
         verticalArrangement = Arrangement.spacedBy(spacing),
         horizontalAlignment = if (buttonSize != null) Alignment.CenterHorizontally else Alignment.Start
     ) {
-        // Row 1: sin, cos, tan, π, Konst.
+        // Row 1: sin, cos, tan, π, e
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -893,18 +929,18 @@ private fun ScientificKeyboardGrid(
                 viewModel.onConstant("π")
             }
             GlassCalculatorButton(
-                text = stringResource(R.string.btn_constants),
+                text = "e",
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
-                testTag = "btn_constants",
-                contentDesc = stringResource(R.string.btn_constants_desc),
+                testTag = "btn_euler",
+                contentDesc = stringResource(R.string.btn_euler_desc),
                 modifier = buttonModifier()
             ) {
-                onOpenConstants()
+                viewModel.onConstant("e")
             }
         }
 
-        // Row 2: ln, log, x², x^y, ³√
+        // Row 2: ln, log, x², x³, xʸ
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -918,15 +954,28 @@ private fun ScientificKeyboardGrid(
             GlassCalculatorButton(text = "x²", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onPower("2")
             }
-            GlassCalculatorButton(text = "xʸ", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onPower("y")
+            GlassCalculatorButton(
+                text = "x³",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_power_cube",
+                modifier = buttonModifier()
+            ) {
+                viewModel.onPower("3")
             }
-            GlassCalculatorButton(text = "³√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onScientificFunction("³√")
+            GlassCalculatorButton(
+                text = "xʸ",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_power_xy",
+                contentDesc = stringResource(R.string.btn_power_xy_desc),
+                modifier = buttonModifier()
+            ) {
+                viewModel.onPower("y")
             }
         }
 
-        // Row 3: √, n!, (, ), /
+        // Row 3: √, ³√, ⁿ√, n!, /
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -934,14 +983,21 @@ private fun ScientificKeyboardGrid(
             GlassCalculatorButton(text = "√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onScientificFunction("√")
             }
+            GlassCalculatorButton(text = "³√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("³√")
+            }
+            GlassCalculatorButton(
+                text = "ⁿ√",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_nth_root",
+                contentDesc = stringResource(R.string.btn_nth_root_desc),
+                modifier = buttonModifier()
+            ) {
+                viewModel.onNthRoot()
+            }
             GlassCalculatorButton(text = "n!", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onCharacterInput("!")
-            }
-            GlassCalculatorButton(text = "(", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onCharacterInput("(")
-            }
-            GlassCalculatorButton(text = ")", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onCharacterInput(")")
             }
             GlassCalculatorButton(
                 text = "/",
@@ -955,7 +1011,7 @@ private fun ScientificKeyboardGrid(
             }
         }
 
-        // Row 4: asin, acos, atan, |x|, mod
+        // Row 4: asin, acos, atan, (, )
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -969,15 +1025,15 @@ private fun ScientificKeyboardGrid(
             GlassCalculatorButton(text = "atan", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onScientificFunction("arctan")
             }
-            GlassCalculatorButton(text = "|x|", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onScientificFunction("abs")
+            GlassCalculatorButton(text = "(", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onCharacterInput("(")
             }
-            GlassCalculatorButton(text = "mod", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onCharacterInput(" mod ")
+            GlassCalculatorButton(text = ")", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onCharacterInput(")")
             }
         }
 
-        // Row 5: sinh, cosh, tanh, d/dx, ∫
+        // Row 5: sinh, cosh, tanh, |x|, mod
         Row(
             modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing)
@@ -991,11 +1047,61 @@ private fun ScientificKeyboardGrid(
             GlassCalculatorButton(text = "tanh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
                 viewModel.onScientificFunction("tanh")
             }
-            GlassCalculatorButton(text = "d/dx", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onScientificFunction("der")
+            GlassCalculatorButton(text = "|x|", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("abs")
             }
-            GlassCalculatorButton(text = "∫", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
-                viewModel.onScientificFunction("int")
+            GlassCalculatorButton(text = "mod", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onCharacterInput(" mod ")
+            }
+        }
+
+        // Row 6: d/dx, ∫, x, ;, Konst.
+        Row(
+            modifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(spacing)
+        ) {
+            GlassCalculatorButton(text = "d/dx", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier()) {
+                viewModel.onScientificFunction("d/dx")
+            }
+            GlassCalculatorButton(
+                text = "∫",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_integral",
+                contentDesc = stringResource(R.string.btn_integral_desc),
+                modifier = buttonModifier()
+            ) {
+                viewModel.onScientificFunction("∫")
+            }
+            GlassCalculatorButton(
+                text = "x",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_var_x",
+                contentDesc = stringResource(R.string.btn_var_x_desc),
+                modifier = buttonModifier()
+            ) {
+                viewModel.onCharacterInput("x")
+            }
+            GlassCalculatorButton(
+                text = ";",
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_semicolon",
+                contentDesc = stringResource(R.string.btn_semicolon_desc),
+                modifier = buttonModifier()
+            ) {
+                viewModel.onCharacterInput("; ")
+            }
+            GlassCalculatorButton(
+                text = stringResource(R.string.btn_constants),
+                type = ButtonType.FUNCTION,
+                glassState = glassState,
+                testTag = "btn_constants",
+                contentDesc = stringResource(R.string.btn_constants_desc),
+                modifier = buttonModifier()
+            ) {
+                onOpenConstants()
             }
         }
     }

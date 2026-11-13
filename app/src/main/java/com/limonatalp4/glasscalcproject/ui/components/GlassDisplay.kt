@@ -54,6 +54,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -65,6 +66,9 @@ import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
+import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -146,7 +150,10 @@ private fun GlassDisplayContent(
     glassState: LiquidGlassState? = null
 ) {
     val context = LocalContext.current
+    val view = LocalView.current
     val glassProps = LocalGlassProperties.current
+    val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val exprScrollState = rememberScrollState()
     val density = LocalDensity.current
 
@@ -309,7 +316,15 @@ private fun GlassDisplayContent(
                         glassState = glassState
                     ) {
                         IconButton(
-                            onClick = { performCopy() },
+                            onClick = {
+                                HapticUtil.performAppHaptic(
+                                    context = context,
+                                    view = view,
+                                    enabled = hapticFeedbackEnabled,
+                                    intensityLevel = hapticIntensity
+                                )
+                                performCopy()
+                            },
                             modifier = Modifier
                                 .size(32.dp)
                                 .padding(4.dp)

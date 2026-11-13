@@ -86,6 +86,29 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         return formatter.format(value).replace("-", "−")
     }
 
+    fun insertFormula(formulaExpression: String) {
+        if (formulaExpression.isBlank()) return
+        _errorMessage.value = null
+        val curr = _expression.value
+        val pos = _cursorPosition.value.coerceIn(0, curr.length)
+        val shouldInsertAtCursor = !justCalculated &&
+            curr.isNotEmpty() &&
+            pos > 0 &&
+            curr[pos - 1] in "+-−*/×÷(;"
+
+        val (updated, nextCursor) = if (shouldInsertAtCursor) {
+            val inserted = curr.substring(0, pos) + formulaExpression + curr.substring(pos)
+            inserted to (pos + formulaExpression.length)
+        } else {
+            formulaExpression to formulaExpression.length
+        }
+
+        justCalculated = false
+        _expression.value = updated
+        _cursorPosition.value = nextCursor
+        tryLivePreview()
+    }
+
     val angleMode: StateFlow<AngleMode> = preferences.angleModeFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, AngleMode.DEG)
 
@@ -350,6 +373,31 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         tryLivePreview()
     }
 
+    fun onNthRoot() {
+        _errorMessage.value = null
+
+        var curr = _expression.value
+        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+
+        if (justCalculated) {
+            val chainingRes = getValidChainingResult()
+            if (chainingRes != null) {
+                curr = chainingRes
+                pos = curr.length
+            } else {
+                curr = ""
+                pos = 0
+            }
+        }
+        justCalculated = false
+
+        val insertStr = "ⁿ√("
+        val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
+        _expression.value = updated
+        _cursorPosition.value = pos + insertStr.length
+        tryLivePreview()
+    }
+
     fun onToggleSign() {
         _errorMessage.value = null
         justCalculated = false
@@ -382,8 +430,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             val funcs = listOf(
                 "arcsin(", "arccos(", "arctan(",
                 "sinh(", "cosh(", "tanh(",
-                "d/dx(", "der(", "int(", "abs(", "mod(", "log(", "ln(",
-                "sin(", "cos(", "tan(", "³√(", "√("
+                "d/dx(", "der(", "int(", "∫(", "abs(", "mod(", "log(", "ln(",
+                "sin(", "cos(", "tan(", "³√(", "ⁿ√(", "√("
             )
             var deletedLen = 1
             for (f in funcs) {
@@ -445,8 +493,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             _result.value = "0"
             return
         }
-        // Live preview only if expression has operators/functions
-        val hasOp = expr.any { it in "+-*÷×/^%!scl" }
+        // Live preview only if expression has operators/functions/constants
+        val hasOp = expr.any { it in "+-*÷×/^%!scl∫√ⁿeπdat;" }
         if (hasOp && _isAutoResultEnabled.value) {
             viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
                 when (val eval = evaluator.evaluate(expr, angleMode.value)) {

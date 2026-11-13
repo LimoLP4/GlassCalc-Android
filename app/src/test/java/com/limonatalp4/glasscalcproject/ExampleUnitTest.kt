@@ -156,4 +156,116 @@ class ExampleUnitTest {
         assertTrue(negativeY is EvaluationResult.Success)
         assertEquals(1.0708, (negativeY as EvaluationResult.Success).value, 1e-4)
     }
+
+    @Test
+    fun testEulerNthRootPowerAndFractionSlash() {
+        // Euler's number e
+        val eulerRes = evaluator.evaluate("ln(e^2)")
+        assertTrue(eulerRes is EvaluationResult.Success)
+        assertEquals(2.0, (eulerRes as EvaluationResult.Success).value, 1e-6)
+
+        // General power x^y
+        val powRes = evaluator.evaluate("2^5")
+        assertTrue(powRes is EvaluationResult.Success)
+        assertEquals("32", (powRes as EvaluationResult.Success).formatted)
+
+        // n-th root: infix & prefix
+        val infixRoot = evaluator.evaluate("3ⁿ√(27)")
+        assertTrue(infixRoot is EvaluationResult.Success)
+        assertEquals(3.0, (infixRoot as EvaluationResult.Success).value, 1e-6)
+
+        val plainInfixRoot = evaluator.evaluate("4ⁿ√16")
+        assertTrue(plainInfixRoot is EvaluationResult.Success)
+        assertEquals(2.0, (plainInfixRoot as EvaluationResult.Success).value, 1e-6)
+
+        val prefixRoot = evaluator.evaluate("ⁿ√(3; 64)")
+        assertTrue(prefixRoot is EvaluationResult.Success)
+        assertEquals(4.0, (prefixRoot as EvaluationResult.Success).value, 1e-6)
+
+        // Fraction slash and decimal denominator
+        val frac = evaluator.evaluate("3/4")
+        assertTrue(frac is EvaluationResult.Success)
+        assertEquals("0,75", (frac as EvaluationResult.Success).formatted)
+
+        val halfDiv = evaluator.evaluate("10/0,5")
+        assertTrue(halfDiv is EvaluationResult.Success)
+        assertEquals("20", (halfDiv as EvaluationResult.Success).formatted)
+    }
+
+    @Test
+    fun testNumericalSimpsonIntegrationAndDerivative() {
+        // ∫_0^3 x^2 dx = 9
+        val cubicInt = evaluator.evaluate("∫(x^2; 0; 3)")
+        assertTrue(cubicInt is EvaluationResult.Success)
+        assertEquals(9.0, (cubicInt as EvaluationResult.Success).value, 1e-5)
+
+        // Reversed bounds: ∫_3^0 x^2 dx = -9
+        val reversedInt = evaluator.evaluate("∫(x^2; 3; 0)")
+        assertTrue(reversedInt is EvaluationResult.Success)
+        assertEquals(-9.0, (reversedInt as EvaluationResult.Success).value, 1e-5)
+
+        // ∫_0^π sin(x) dx = 2 (RAD)
+        val sinInt = evaluator.evaluate("∫(sin(x); 0; π)", AngleMode.RAD)
+        assertTrue(sinInt is EvaluationResult.Success)
+        assertEquals(2.0, (sinInt as EvaluationResult.Success).value, 1e-6)
+
+        // 4-arg int(t; t; 0; 2) = 2
+        val fourArgInt = evaluator.evaluate("int(t; t; 0; 2)")
+        assertTrue(fourArgInt is EvaluationResult.Success)
+        assertEquals(2.0, (fourArgInt as EvaluationResult.Success).value, 1e-6)
+
+        // 1-arg default [0, 1]: ∫_0^1 x^2 dx = 1/3
+        val oneArgInt = evaluator.evaluate("∫(x^2)")
+        assertTrue(oneArgInt is EvaluationResult.Success)
+        assertEquals(1.0 / 3.0, (oneArgInt as EvaluationResult.Success).value, 1e-6)
+
+        // Composite outer expression: 2 * ∫_1^3 x dx + 1 = 2 * 4 + 1 = 9
+        val composite = evaluator.evaluate("2*∫(x; 1; 3)+1")
+        assertTrue(composite is EvaluationResult.Success)
+        assertEquals(9.0, (composite as EvaluationResult.Success).value, 1e-6)
+
+        // Numerical derivative d/dx(x^3; 2) = 12
+        val deriv = evaluator.evaluate("d/dx(x^3; 2)")
+        assertTrue(deriv is EvaluationResult.Success)
+        assertEquals(12.0, (deriv as EvaluationResult.Success).value, 1e-4)
+    }
+
+    @Test
+    fun testFormulaCatalogSearchAndEvaluation() {
+        val formulas = com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog.FORMULAS
+        assertTrue(formulas.isNotEmpty())
+
+        // Every formula in the catalog must evaluate cleanly in the calculator
+        formulas.forEach { formula ->
+            val res = evaluator.evaluate(formula.insertExpression, AngleMode.DEG)
+            assertTrue(
+                "Formula '${formula.id}' (${formula.insertExpression}) failed to evaluate",
+                res is EvaluationResult.Success
+            )
+        }
+
+        // Verify search filtering matches titles, previews, and keywords
+        val pairs = formulas.map { formula ->
+            val title = when (formula.id) {
+                "circle_area" -> "Kreisfläche"
+                "pythagoras" -> "Pythagoras"
+                "compound_interest" -> "Zinseszins"
+                else -> formula.id
+            }
+            formula to title
+        }
+
+        val pythMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("pyth", pairs)
+        assertEquals(listOf("pythagoras"), pythMatches.map { it.first.id })
+
+        val kreisMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Kreis", pairs)
+        assertTrue(kreisMatches.any { it.first.id == "circle_area" })
+        assertTrue(kreisMatches.any { it.first.id == "circle_circumference" })
+
+        val zinsMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("zins", pairs)
+        assertEquals(listOf("compound_interest"), zinsMatches.map { it.first.id })
+
+        val emptyQuery = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("   ", pairs)
+        assertTrue(emptyQuery.isEmpty())
+    }
 }

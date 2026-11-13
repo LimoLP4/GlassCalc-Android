@@ -20,6 +20,12 @@
     <string name="btn_constants">Konst.</string>
     <string name="btn_constants_desc">Physikalische und mathematische Konstanten</string>
     <string name="btn_fraction_slash_desc">Bruchstrich</string>
+    <string name="btn_euler_desc">Eulersche Zahl e</string>
+    <string name="btn_power_xy_desc">Allgemeine Potenz x hoch y</string>
+    <string name="btn_nth_root_desc">n-te Wurzel</string>
+    <string name="btn_integral_desc">Integral</string>
+    <string name="btn_var_x_desc">Variable x</string>
+    <string name="btn_semicolon_desc">Argument-Trennzeichen</string>
     <string name="btn_del_desc">Löschen (Gedrückt halten zum kontinuierlichen Löschen)</string>
     <string name="btn_copy_clipboard">Ergebnis in Zwischenablage kopieren</string>
     <string name="toast_copied">In Zwischenablage kopiert: %s</string>
@@ -179,4 +185,21 @@
     <string name="dialog_reset_text">Alle DataStore-Einstellungen, gespeicherten Berechnungen und der gesamte Verlauf werden unwiderruflich gelöscht.</string>
     <string name="dialog_reset_confirm">Zurücksetzen</string>
     <string name="dialog_reset_cancel">Abbrechen</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">Formel suchen...</string>
+    <string name="formula_search_clear">Suche leeren</string>
+    <string name="formula_search_empty">Keine passende Formel gefunden</string>
+    <string name="formula_circle_area">Kreisfläche</string>
+    <string name="formula_circle_circumference">Kreisumfang</string>
+    <string name="formula_pythagoras">Pythagoras</string>
+    <string name="formula_compound_interest">Zinseszins</string>
+    <string name="formula_sphere_volume">Kugelvolumen</string>
+    <string name="formula_sphere_surface">Kugeloberfläche</string>
+    <string name="formula_cylinder_volume">Zylindervolumen</string>
+    <string name="formula_triangle_area">Dreiecksfläche</string>
+    <string name="formula_quadratic">Quadratische Gleichung (x₁)</string>
+    <string name="formula_percentage">Prozentwert</string>
+    <string name="formula_integral_example">Bestimmtes Integral</string>
+    <string name="formula_derivative_example">Ableitung (d/dx)</string>
 </resources>
