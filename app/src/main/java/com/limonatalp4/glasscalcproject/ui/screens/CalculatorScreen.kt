@@ -23,13 +23,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -78,6 +86,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -311,13 +320,31 @@ fun CalculatorScreen(
                             }
                     )
 
+                    val density = LocalDensity.current
+                    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+                    val drawerTopPadding = if (isLandscape && isImeVisible) 8.dp else 66.dp
+                    val drawerBottomPadding = if (isLandscape && isImeVisible) 8.dp else 16.dp
+                    val drawerScrollState = rememberScrollState()
+
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopStart)
-                            .statusBarsPadding()
-                            .navigationBarsPadding()
-                            .imePadding()
-                            .padding(start = 16.dp, top = 66.dp, bottom = 16.dp)
+                            .windowInsetsPadding(
+                                WindowInsets.statusBars
+                                    .union(WindowInsets.displayCutout)
+                                    .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                            )
+                            .windowInsetsPadding(
+                                WindowInsets.ime
+                                    .union(WindowInsets.navigationBars)
+                                    .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                            )
+                            .padding(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = drawerTopPadding,
+                                bottom = drawerBottomPadding
+                            )
                     ) {
                         androidx.compose.animation.AnimatedVisibility(
                             visibleState = menuVisibleState,
@@ -351,7 +378,8 @@ fun CalculatorScreen(
 
                         GlassSurface(
                             modifier = Modifier
-                                .width(300.dp)
+                                .widthIn(max = 300.dp)
+                                .fillMaxWidth()
                                 .testTag("floating_nav_menu"),
                             shape = RoundedCornerShape(32.dp),
                             borderStroke = drawerBorder,
@@ -362,7 +390,7 @@ fun CalculatorScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(drawerScrollState)
                         ) {
                             // Header
                             Column(

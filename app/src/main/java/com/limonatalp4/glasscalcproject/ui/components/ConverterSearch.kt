@@ -46,8 +46,14 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.converter.ConversionPair
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
@@ -170,6 +176,25 @@ fun UnitConverterSearchBar(
     val view = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
+    val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+    val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
+
+    val focusRequester = remember { FocusRequester() }
+    val pillInteractionSource = remember { MutableInteractionSource() }
+    val textFieldInteractionSource = remember { MutableInteractionSource() }
+
+    LaunchedEffect(textFieldInteractionSource) {
+        textFieldInteractionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) {
+                HapticUtil.performAppHaptic(
+                    context = context,
+                    view = view,
+                    enabled = currentHapticEnabled,
+                    intensityLevel = currentHapticIntensity
+                )
+            }
+        }
+    }
 
     Row(
         modifier = modifier
@@ -178,12 +203,17 @@ fun UnitConverterSearchBar(
             .clip(shape)
             .background(searchBarBgColor)
             .border(searchBarBorder, shape = shape)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                    }
+            .clickable(
+                interactionSource = pillInteractionSource,
+                indication = null
+            ) {
+                HapticUtil.performAppHaptic(
+                    context = context,
+                    view = view,
+                    enabled = currentHapticEnabled,
+                    intensityLevel = currentHapticIntensity
                 )
+                focusRequester.requestFocus()
             }
             .padding(
                 start = 14.dp,
@@ -206,6 +236,7 @@ fun UnitConverterSearchBar(
                 value = query,
                 onValueChange = onQueryChange,
                 singleLine = true,
+                interactionSource = textFieldInteractionSource,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
                     onSearch = {
@@ -220,6 +251,7 @@ fun UnitConverterSearchBar(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .focusRequester(focusRequester)
                     .testTag("converter_search_input"),
                 decorationBox = { innerTextField ->
                     Box(

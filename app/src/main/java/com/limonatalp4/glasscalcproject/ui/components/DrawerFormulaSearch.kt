@@ -46,10 +46,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import kotlinx.coroutines.delay
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog
 import com.limonatalp4.glasscalcproject.domain.formulas.MathFormula
@@ -94,8 +108,41 @@ fun DrawerFormulaSearch(
 
     val context = LocalContext.current
     val view = LocalView.current
+    val density = LocalDensity.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
+
+    val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+    val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
+
+    val focusRequester = remember { FocusRequester() }
+    val pillInteractionSource = remember { MutableInteractionSource() }
+    val textFieldInteractionSource = remember { MutableInteractionSource() }
+
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+    val isImeVisible = imeBottomPx > 0
+
+    LaunchedEffect(textFieldInteractionSource) {
+        textFieldInteractionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) {
+                HapticUtil.performAppHaptic(
+                    context = context,
+                    view = view,
+                    enabled = currentHapticEnabled,
+                    intensityLevel = currentHapticIntensity
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(isSearchFocused, imeBottomPx) {
+        if (isSearchFocused) {
+            delay(80)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
 
     val trimmedQuery = query.trim()
     val filteredFormulas = remember(trimmedQuery, localizedFormulas) {
@@ -108,6 +155,7 @@ fun DrawerFormulaSearch(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
+                .bringIntoViewRequester(bringIntoViewRequester)
                 .clip(searchBarShape)
                 .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 .border(
@@ -115,12 +163,17 @@ fun DrawerFormulaSearch(
                     color = colorScheme.outline.copy(alpha = 0.3f),
                     shape = searchBarShape
                 )
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                        }
+                .clickable(
+                    interactionSource = pillInteractionSource,
+                    indication = null
+                ) {
+                    HapticUtil.performAppHaptic(
+                        context = context,
+                        view = view,
+                        enabled = currentHapticEnabled,
+                        intensityLevel = currentHapticIntensity
                     )
+                    focusRequester.requestFocus()
                 }
                 .padding(
                     start = 14.dp,
@@ -143,6 +196,7 @@ fun DrawerFormulaSearch(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
+                    interactionSource = textFieldInteractionSource,
                     textStyle = TextStyle(
                         color = colorScheme.onSurface,
                         fontSize = 14.sp,
@@ -151,6 +205,10 @@ fun DrawerFormulaSearch(
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState ->
+                            isSearchFocused = focusState.isFocused
+                        }
                         .testTag("drawer_formula_search_input"),
                     decorationBox = { innerTextField ->
                         Box(
@@ -205,7 +263,7 @@ fun DrawerFormulaSearch(
                         color = colorScheme.outline.copy(alpha = 0.3f),
                         shape = dropdownShape
                     )
-                    .heightIn(max = 220.dp)
+                    .heightIn(max = if (isImeVisible) 150.dp else 220.dp)
                     .verticalScroll(rememberScrollState())
                     .padding(vertical = 4.dp)
                     .testTag("drawer_formula_dropdown")
