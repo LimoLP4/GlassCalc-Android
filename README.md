@@ -4,28 +4,46 @@
 
 > ⚠️ **Note:** This project is currently in an experimental phase. The core code was generated with the assistance of AI (Google AI Studio) and has been iteratively curated, tested, and refined by the developer.
 
-## 🚀 Features
+## 🚀 Features & Changelog
 
-*   **Liquid Glass UI:** Beautifully blurred, semi-transparent buttons and panels with dynamic Material You colors.
-*   **Refined App Icon:** A minimalist, custom-designed "GC" monogram with a liquid glass aesthetic, fully compatible with Material You (Monet) adaptive icons.
-*   **Advanced Scientific Mode:** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, derivatives (d/dx), and integrals (∫).
-*   **Physical & Mathematical Constants:** A dedicated menu for constants like π, e, c (speed of light), g (gravity), h (Planck), G (gravitational), Na (Avogadro), and k (Boltzmann).
-*   **Interactive Graphing:** Plot mathematical functions dynamically. Includes a lock feature to freeze the graph view.
-*   **Material You (Dynamic Colors):** Fully supports Android 12+ dynamic theming, adapting the app's colors to your device's wallpaper and system theme.
+Here is a comprehensive overview of all features included in GlassCalc, categorized by the version in which they were introduced.
+
+### 📱 Core & Design (Since v1.0.0)
+*   **Liquid Glass UI:** Beautifully blurred, semi-transparent buttons and panels for a modern aesthetic.
+*   **Material You (Dynamic Colors):** Fully supports Android 12+ dynamic theming, adapting the app's colors to your device's wallpaper.
 *   **Multiple Themes:** Includes Automatic (System), White Mode, Dark Mode, and a true **AMOLED Dark Mode** (pure black for battery saving).
-*   **Unit Conversion:** Seamlessly convert between Metric and US/Imperial units (m↔ft, cm↔in, kg↔lb, etc.) with a sleek, rounded interface.
-*   **History:** Keeps track of your recent calculations in a modern, scrollable bottom sheet.
 *   **Adaptive Layout:** Optimized for both smartphones and tablets, in portrait and landscape orientations.
-*   **Haptic Feedback:** Tactile response on button presses, graph interactions, sliders, and switches (with OEM-specific fallbacks).
-*   **Information & Licensing Hub:** A dedicated "Information" tab to view the GitHub repository, the app's license, and third-party licenses.
-*   **Developer Options:** Built-in debug menu for testing API levels, simulating features, and managing cache.
+*   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
+*   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-🌍 Localization / Sprache
+### 🔄 Intermediate Updates (v1.2.0 - v1.2.7)
+*   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
+*   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
+*   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
+*   **Smart Haptics (v1.2.2):** Intelligent hardware detection (LRA vs. ERM) with a safety fallback for devices without vibration motors or old APIs.
+*   **Enhanced DEL Button (v1.2.2):** Long-pressing the DEL key now continuously deletes characters one by one.
+*   **Standard Dark Theme (v1.2.2):** Added a new manually selectable theme matching the system's dark mode colors.
+*   **Cursor Navigation (v1.2.6):** Blinking cursor in the display field for precise value insertion. (Replaces the "tap to copy" behavior, which is now handled via the dedicated Copy button).
+*   **Fluid Value Transitions (v1.2.6):** Smooth fade/transition animations when numbers change in the display.
+*   **Haptic Intensity Slider (v1.2.7):** 10-step intensity slider in the Developer Options (Default: Level 5). LRA motors adjust amplitude; ERM motors adjust duration.
+*   **3-Button Navigation Support (v1.2.7):** Fixed UI bugs where the bottom row of keys was covered by classic 3-button navigation bars.
 
-Supported Languages: German (Deutsch) & English
-Since Version 1.2.4, GlassCalc fully supports both German and English. The app automatically follows your device's system language by default.
+### 🌍 The Massive v1.2.8 Update (Latest)
+*   **Global Localization:** Full support for **10 languages**: German, English, Spanish, French, Japanese, Chinese, Russian, Portuguese, Hindi, and Klingon (as an Easter Egg).
+*   **Smart System Language Fallback:** Automatically follows your device language. If the system language is not supported (e.g., Turkish), the app gracefully falls back to English.
+*   **Three New Search Bars:**
+    *   **Hamburger Menu:** Search through a massive database of formulas (Geometry, Physics, Finance).
+    *   **Settings:** Search for specific settings (e.g., "Haptic", "Language") and jump directly to the correct tab.
+    *   **Unit Converter:** Search for specific units (e.g., "Gigabyte") and automatically jump to the correct category tab.
+*   **New SCI Keys:** Added `10^x`, `2^x`, `log_n`, `Ans` (last result), and `EXP` (scientific notation).
+*   **Integral Function Fix:** The `∫` key now works correctly (using an own numerical integration approach).
+*   **Extended Unit Conversion:** Added "Data" (Byte to TB) and "Time" (ms to Days) categories.
+*   **Advanced Haptics Integration:** The complex haptic logic (LRA/ERM, intensity, on/off) is now fully integrated into the new search bars and formula suggestions. Haptics trigger only when tapping a search field or selecting a result, avoiding double vibrations during typing.
 
-Manual Selection: You can easily switch the language at runtime via the new "Language" (Sprache) tab in the Settings.
+## 🌍 Localization / Sprache
+
+**Supported Languages:** German, English, Spanish, French, Japanese, Chinese, Russian, Portuguese, Hindi, and Klingon.
+Since **Version 1.2.8**, GlassCalc fully supports all these languages. The app automatically follows your device's system language by default (with an English fallback). You can manually switch languages at runtime via the "Language" tab in the Settings.
 
 ## 🛠️ Tech Stack & App Information
 
@@ -38,6 +56,7 @@ Manual Selection: You can easily switch the language at runtime via the new "Lan
 *   **Target SDK:** Android 17 (API 37)
 *   **Compile SDK:** Android 17 (API 37)
 *   **ABI Support:** `arm64-v8a` and `armeabi-v7a`
+*   **Optimization:** R8 Minification (ProGuard) enabled for release builds.
 
 ## ⚠️ Experimental Disclaimer
 
