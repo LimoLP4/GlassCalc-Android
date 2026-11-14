@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.2.7)
+### 🔄 Intermediate Updates (v1.2.0 - v1.2.8)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
@@ -27,18 +27,11 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Fluid Value Transitions (v1.2.6):** Smooth fade/transition animations when numbers change in the display.
 *   **Haptic Intensity Slider (v1.2.7):** 10-step intensity slider in the Developer Options (Default: Level 5). LRA motors adjust amplitude; ERM motors adjust duration.
 *   **3-Button Navigation Support (v1.2.7):** Fixed UI bugs where the bottom row of keys was covered by classic 3-button navigation bars.
-
-### 🌍 The Massive v1.2.8 Update (Latest)
-*   **Global Localization:** Full support for **10 languages**: German, English, Spanish, French, Japanese, Chinese, Russian, Portuguese, Hindi, and Klingon (as an Easter Egg).
-*   **Smart System Language Fallback:** Automatically follows your device language. If the system language is not supported (e.g., Turkish), the app gracefully falls back to English.
-*   **Three New Search Bars:**
-    *   **Hamburger Menu:** Search through a massive database of formulas (Geometry, Physics, Finance).
-    *   **Settings:** Search for specific settings (e.g., "Haptic", "Language") and jump directly to the correct tab.
-    *   **Unit Converter:** Search for specific units (e.g., "Gigabyte") and automatically jump to the correct category tab.
-*   **New SCI Keys:** Added `10^x`, `2^x`, `log_n`, `Ans` (last result), and `EXP` (scientific notation).
-*   **Integral Function Fix:** The `∫` key now works correctly (using an own numerical integration approach).
-*   **Extended Unit Conversion:** Added "Data" (Byte to TB) and "Time" (ms to Days) categories.
-*   **Advanced Haptics Integration:** The complex haptic logic (LRA/ERM, intensity, on/off) is now fully integrated into the new search bars and formula suggestions. Haptics trigger only when tapping a search field or selecting a result, avoiding double vibrations during typing.
+*   **Global Localization (v1.2.8):** Full support for 10 languages (including Klingon) with intelligent English fallback.
+*   **Three New Search Bars (v1.2.8):** Added search functionality in Hamburger Menu (formulas), Settings, and Unit Converter with automatic tab synchronization.
+*   **New SCI Keys & Integral Fix (v1.2.8):** Added `10^x`, `2^x`, `log_n`, `Ans`, `EXP`, and fixed the numerical integration for `∫`.
+*   **Extended Unit Conversion (v1.2.8):** Added "Data" (Byte to TB) and "Time" (ms to Days) categories.
+*   **Advanced Haptics Integration (v1.2.8) (Latest):** Complex haptic logic fully integrated into search bars, avoiding double vibrations during typing.
 
 ## 🌍 Localization / Sprache
 
