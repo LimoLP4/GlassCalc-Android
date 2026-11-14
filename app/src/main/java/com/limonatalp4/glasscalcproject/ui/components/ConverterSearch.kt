@@ -162,7 +162,7 @@ fun UnitConverterSearchBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 48.dp)
+            .height(48.dp)
             .clip(shape)
             .background(searchBarBgColor)
             .border(searchBarBorder, shape = shape)
@@ -203,16 +203,21 @@ fun UnitConverterSearchBar(
                     .fillMaxWidth()
                     .testTag("converter_search_input"),
                 decorationBox = { innerTextField ->
-                    if (query.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.converter_search_placeholder),
-                            color = hintColor,
-                            fontSize = 14.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (query.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.converter_search_placeholder),
+                                color = hintColor,
+                                fontSize = 14.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
             )
         }

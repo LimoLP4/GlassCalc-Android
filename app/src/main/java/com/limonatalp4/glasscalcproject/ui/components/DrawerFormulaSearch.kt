@@ -95,7 +95,7 @@ fun DrawerFormulaSearch(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 48.dp)
+                .height(48.dp)
                 .clip(searchBarShape)
                 .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 .border(
@@ -134,16 +134,21 @@ fun DrawerFormulaSearch(
                         .fillMaxWidth()
                         .testTag("drawer_formula_search_input"),
                     decorationBox = { innerTextField ->
-                        if (query.isEmpty()) {
-                            Text(
-                                text = stringResource(R.string.formula_search_placeholder),
-                                color = colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (query.isEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.formula_search_placeholder),
+                                    color = colorScheme.onSurfaceVariant,
+                                    fontSize = 14.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
                     }
                 )
             }
