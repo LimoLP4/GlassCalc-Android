@@ -30,12 +30,16 @@ object HapticUtil {
     }
 
     fun getVibrator(context: Context): Vibrator? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-            vibratorManager?.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                vibratorManager?.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            }
+        } catch (_: Throwable) {
+            null
         }
     }
 
@@ -46,19 +50,27 @@ object HapticUtil {
      *   Bei false handelt es sich um einen einfachen ERM-Motor (Eccentric Rotating Mass).
      */
     fun getHapticMotorType(context: Context): HapticMotorType {
-        val vibrator = getVibrator(context) ?: return HapticMotorType.NONE
-        if (!vibrator.hasVibrator()) {
-            return HapticMotorType.NONE
-        }
-        return if (vibrator.hasAmplitudeControl()) {
-            HapticMotorType.LRA
-        } else {
-            HapticMotorType.ERM
+        return try {
+            val vibrator = getVibrator(context) ?: return HapticMotorType.NONE
+            if (!vibrator.hasVibrator()) {
+                return HapticMotorType.NONE
+            }
+            if (vibrator.hasAmplitudeControl()) {
+                HapticMotorType.LRA
+            } else {
+                HapticMotorType.ERM
+            }
+        } catch (_: Throwable) {
+            HapticMotorType.NONE
         }
     }
 
     fun hasVibrator(context: Context): Boolean {
-        return getHapticMotorType(context) != HapticMotorType.NONE
+        return try {
+            getHapticMotorType(context) != HapticMotorType.NONE
+        } catch (_: Throwable) {
+            false
+        }
     }
 
     fun performAppHaptic(
@@ -69,14 +81,14 @@ object HapticUtil {
     ) {
         if (!enabled) return
 
-        val vibrator = getVibrator(context)
-        if (vibrator == null || !vibrator.hasVibrator()) {
-            return
-        }
-
-        val intensityFloat = levelToIntensityFloat(intensityLevel)
-
         try {
+            val vibrator = getVibrator(context)
+            if (vibrator == null || !vibrator.hasVibrator()) {
+                return
+            }
+
+            val intensityFloat = levelToIntensityFloat(intensityLevel)
+
             when (getHapticMotorType(context)) {
                 HapticMotorType.LRA -> {
                     // Für LRA-Motoren (Amplitudenkontrolle unterstützt):
@@ -101,14 +113,14 @@ object HapticUtil {
                 }
                 HapticMotorType.NONE -> return
             }
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             // Fallback auf Standard View Haptic Feedback bei Hardware- oder Berechtigungsfehlern
             try {
                 view.performHapticFeedback(
                     HapticFeedbackConstants.KEYBOARD_TAP,
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                 )
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
             }
         }
     }
@@ -121,14 +133,14 @@ object HapticUtil {
     ) {
         if (!enabled) return
 
-        val vibrator = getVibrator(context)
-        if (vibrator == null || !vibrator.hasVibrator()) {
-            return
-        }
-
-        val intensityFloat = levelToIntensityFloat(intensityLevel)
-
         try {
+            val vibrator = getVibrator(context)
+            if (vibrator == null || !vibrator.hasVibrator()) {
+                return
+            }
+
+            val intensityFloat = levelToIntensityFloat(intensityLevel)
+
             when (getHapticMotorType(context)) {
                 HapticMotorType.LRA -> {
                     val amplitude = (intensityFloat * 255f).roundToInt().coerceIn(1, 255)
@@ -140,13 +152,13 @@ object HapticUtil {
                 }
                 HapticMotorType.NONE -> return
             }
-        } catch (e: Exception) {
+        } catch (_: Throwable) {
             try {
                 view.performHapticFeedback(
                     HapticFeedbackConstants.LONG_PRESS,
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                 )
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
             }
         }
     }

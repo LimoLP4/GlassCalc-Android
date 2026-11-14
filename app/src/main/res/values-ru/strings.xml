@@ -4,6 +4,7 @@
     <string name="app_version_tag">v%s • Android 8-17 Ready</string>
     <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
 
+    <!-- Navigation Drawer -->
     <string name="nav_open_menu">Открыть меню</string>
     <string name="nav_calculator">Калькулятор</string>
     <string name="nav_history">История</string>
@@ -13,6 +14,36 @@
     <string name="nav_close">Закрыть</string>
     <string name="nav_history_show">Показать историю</string>
 
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">Стандарт</string>
+    <string name="mode_scientific">Инженерн.</string>
+    <string name="btn_constants">Конст.</string>
+    <string name="btn_constants_desc">Физические и математические константы</string>
+    <string name="btn_fraction_slash_desc">Дробная черта</string>
+    <string name="btn_euler_desc">Число Эйлера e</string>
+    <string name="btn_power_xy_desc">Степень x в степени y</string>
+    <string name="btn_nth_root_desc">Корень n-й степени</string>
+    <string name="btn_integral_desc">Интеграл</string>
+    <string name="btn_var_x_desc">Переменная x</string>
+    <string name="btn_semicolon_desc">Разделитель аргументов</string>
+    <string name="btn_del_desc">Удалить (Удерживайте для непрерывного удаления)</string>
+    <string name="btn_copy_clipboard">Скопировать результат в буфер обмена</string>
+    <string name="toast_copied">Скопировано в буфер обмена: %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">Деление на 0 невозможно</string>
+    <string name="error_syntax">Синтаксическая ошибка</string>
+    <string name="error_not_defined">Не определено</string>
+    <string name="error_calculation">Ошибка вычисления</string>
+    <string name="error_invalid_expression">Недопустимое выражение</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">История (Последние 20)</string>
+    <string name="history_empty">Вычисления пока не сохранены.</string>
+    <string name="btn_history_clear">Очистить</string>
+    <string name="btn_history_clear_desc">Очистить историю</string>
+
+    <!-- Unit Converter Dialog -->
     <string name="title_converter">Конвертер величин</string>
     <string name="cat_length">Длина</string>
     <string name="cat_mass">Масса</string>
@@ -26,6 +57,7 @@
     <string name="converter_result_label">Результат (%s):</string>
     <string name="converter_import">Импортировать в калькулятор</string>
 
+    <!-- Unit Pairs -->
     <string name="unit_m_ft">Метры ↔ Футы (m ↔ ft)</string>
     <string name="unit_cm_in">Сантиметры ↔ Дюймы (cm ↔ in)</string>
     <string name="unit_km_mi">Километры ↔ Мили (km ↔ mi)</string>
@@ -41,6 +73,7 @@
     <string name="unit_h_min">Часы ↔ Минуты (h ↔ min)</string>
     <string name="unit_d_h">Дни ↔ Часы (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">Метр</string>
     <string name="unit_name_feet">Футы</string>
     <string name="unit_name_centimeter">Сантиметр</string>
@@ -64,10 +97,114 @@
     <string name="unit_name_hours">Часы</string>
     <string name="unit_name_days">Дни</string>
 
-    <string name="converter_search_placeholder">Поиск единиц...</string>
-    <string name="converter_search_clear">Очистить поиск</string>
-    <string name="converter_search_empty">Единицы не найдены</string>
+    <!-- Constants Dialog -->
+    <string name="title_constants">Научные константы</string>
+    <string name="cat_constants_math">Математика</string>
+    <string name="cat_constants_physics">Физика</string>
+    <string name="cat_constants_astro">Астрономия</string>
+    <string name="constants_apply_hint">Нажмите, чтобы вставить значение прямо в текущее вычисление.</string>
+    <string name="constants_select_heading">Выберите физическую или математическую константу:</string>
+    <string name="const_pi">Пи (Число Пи)</string>
+    <string name="const_e">Число Эйлера</string>
+    <string name="const_c">Скорость света</string>
+    <string name="const_g">Ускорение свободного падения</string>
+    <string name="const_h">Постоянная Планка</string>
+    <string name="const_G">Гравитационная постоянная</string>
+    <string name="const_na">Постоянная Авогадро</string>
+    <string name="const_k">Постоянная Больцмана</string>
 
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">График функции</string>
+    <string name="graph_hint_expression">Введите формулу (например, sin(x), x^2, cos(x)*2):</string>
+    <string name="graph_gesture_locked">Жесты заблокированы</string>
+    <string name="graph_gesture_unlocked">Жесты включены</string>
+    <string name="graph_gesture_unlock">Разблокировать жесты графика</string>
+    <string name="graph_gesture_lock">Заблокировать жесты графика</string>
+    <string name="graph_hint_scan">Нажмите для установки точки</string>
+    <string name="graph_pan_left">Сдвиг влево</string>
+    <string name="graph_pan_right">Сдвиг вправо</string>
+    <string name="graph_zoom_in">Приблизить</string>
+    <string name="graph_zoom_out">Отдалить</string>
+    <string name="graph_reset">Сброс</string>
+    <string name="graph_btn_apply_to_calc">Использовать в калькуляторе</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">Настройки</string>
+    <string name="title_appearance">Оформление</string>
+    <string name="title_units">Единицы</string>
+    <string name="title_dev_options">Разработчик</string>
+    <string name="title_info">Инфо</string>
+    <string name="tab_language">Язык</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">Выберите тему:</string>
+    <string name="theme_material_you">Material You (Динамические цвета)</string>
+    <string name="theme_automatic">Автоматически (Система)</string>
+    <string name="theme_white_mode">Светлая тема</string>
+    <string name="theme_standard_dark">Тёмная тема (Стандарт)</string>
+    <string name="theme_dark_mode">Тёмная тема (Глубокий чёрный)</string>
+    <string name="theme_amoled_dark">AMOLED Тёмная (Чистый чёрный)</string>
+    <string name="theme_material_you_unsupported">Не поддерживается этой версией Android (требуется API 31+, активен: API %d)</string>
+    <string name="theme_amoled_desc">Чистый чёрный #000000 с 10-15% белого стекла для максимальной экономии батареи OLED</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">Режим углов для тригонометрии:</string>
+    <string name="angle_deg_label">Градусы (DEG)</string>
+    <string name="angle_deg_desc">Полный круг = 360°</string>
+    <string name="angle_rad_label">Радианы (RAD)</string>
+    <string name="angle_rad_desc">Полный круг = 2π</string>
+    <string name="units_supported_systems">Поддерживаемые системы конвертации:</string>
+    <string name="units_systems_detail">• Метрическая ↔ Имперская (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Температура (°C ↔ °F)\n• Объем (l ↔ gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">Размер экрана и масштабирование</string>
+    <string name="dev_resolution">Разрешение: %1$ddp x %2$ddp</string>
+    <string name="dev_simulated_api_title">Имитация версии Android</string>
+    <string name="dev_effective_ui_api">Эффективный UI API: %d</string>
+    <string name="dev_simulate_api_switch">Имитировать уровень API</string>
+    <string name="dev_api_level_slider">Уровень: API %d</string>
+    <string name="dev_api_feature_compatibility">Совместимость функций API (Лимит устройства: API %d):</string>
+    <string name="dev_feature_supported">Поддерживается</string>
+    <string name="dev_feature_not_supported">Не поддерживается</string>
+    <string name="dev_api_level_plus">API %d+</string>
+    <string name="dev_feature_vibration_effect">VibrationEffect</string>
+    <string name="dev_feature_edge_to_edge">Edge-to-Edge</string>
+    <string name="dev_feature_material_you">Material You</string>
+    <string name="dev_feature_blur_effect">Эффект размытия</string>
+    <string name="dev_feature_swipe_gestures">Жесты свайпа</string>
+    <string name="dev_haptic_title">Тактильный отклик</string>
+    <string name="dev_haptic_desc">Вибрация при нажатии кнопок и переключателей</string>
+    <string name="dev_haptic_detected_motor">Обнаруженный вибромотор</string>
+    <string name="dev_haptic_unsupported_device">Это устройство не поддерживает тактильный отклик.</string>
+    <string name="dev_haptic_unsupported_api">Не поддерживается имитируемым уровнем API.</string>
+    <string name="dev_haptic_lra_detected">Оборудование: Обнаружен линейный вибромотор LRA (активны точные импульсы)</string>
+    <string name="dev_haptic_erm_detected">Оборудование: Обнаружен роторный вибромотор ERM (активно импульсное управление)</string>
+    <string name="dev_haptic_intensity_label">Интенсивность</string>
+    <string name="dev_haptic_intensity_level">Уровень %1$d / 10</string>
+    <string name="dev_auto_result_title">Автоматический результат</string>
+    <string name="dev_auto_result_desc">Вычислять результат в реальном времени при вводе</string>
+    <string name="dev_lifecycle_title">Сохранение состояния и жизненный цикл</string>
+    <string name="dev_btn_background">Фоновый режим</string>
+    <string name="dev_btn_crash_test">Краш-тест</string>
+    <string name="dev_reset_storage_title">Сброс данных приложения</string>
+    <string name="dev_reset_storage_desc">Удаляет всю историю, сохраненные выражения и возвращает все настройки по умолчанию.</string>
+    <string name="dev_btn_reset_storage">Сбросить настройки</string>
+    <string name="dev_clear_cache_title">Очистить кэш</string>
+    <string name="dev_clear_cache_desc">Освобождает временную память без изменения ваших настроек или истории.</string>
+    <string name="dev_btn_clear_cache">Очистить кэш</string>
+    <string name="toast_cache_cleared">Кэш успешно очищен</string>
+    <string name="toast_cache_error">Не удалось полностью очистить кэш</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">Репозиторий GitHub</string>
+    <string name="info_github_open">Открыть на GitHub</string>
+    <string name="info_oss_licenses">Лицензии стороннего ПО</string>
+    <string name="info_oss_licenses_desc">Полный обзор всех используемых библиотек с открытым исходным кодом и их лицензий.</string>
+    <string name="info_btn_oss_licenses">Показать лицензии открытого ПО</string>
+    <string name="info_used_libraries">Используемые библиотеки</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3: Современный UI-фреймворк\n• LiquidGlass (nadeemiqbal): Размытие и стеклянные шейдеры\n• mXparser: Вычисление формул, математический анализ и графики\n• DataStore Preferences: Асинхронное надежное хранилище данных\n• Play Services OSS Licenses: Автоматическое управление лицензиями</string>
+
+    <!-- Settings: Language Tab -->
     <string name="language_select_heading">Выберите язык:</string>
     <string name="language_system">Системный язык (По умолчанию)</string>
     <string name="language_german">Deutsch (Немецкий)</string>
@@ -80,4 +217,67 @@
     <string name="language_russian">Русский</string>
     <string name="language_portuguese">Português (Португальский)</string>
     <string name="language_hindi">हिन्दी (Хинди)</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">Действительно сбросить приложение?</string>
+    <string name="dialog_reset_text">Все настройки DataStore, сохраненные вычисления и вся история будут безвозвратно удалены.</string>
+    <string name="dialog_reset_confirm">Сбросить</string>
+    <string name="dialog_reset_cancel">Отмена</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">Поиск формулы...</string>
+    <string name="formula_search_clear">Очистить поиск</string>
+    <string name="formula_search_empty">Подходящих формул не найдено</string>
+    <string name="formula_circle_area">Площадь круга</string>
+    <string name="formula_circle_circumference">Длина окружности</string>
+    <string name="formula_pythagoras">Теорема Пифагора</string>
+    <string name="formula_compound_interest">Сложные проценты</string>
+    <string name="formula_sphere_volume">Объем сферы</string>
+    <string name="formula_sphere_surface">Площадь сферы</string>
+    <string name="formula_cylinder_volume">Объем цилиндра</string>
+    <string name="formula_triangle_area">Площадь треугольника</string>
+    <string name="formula_quadratic">Квадратное уравнение (x₁)</string>
+    <string name="formula_percentage">Процентное значение</string>
+    <string name="formula_integral_example">Определенный интеграл</string>
+    <string name="formula_derivative_example">Производная (d/dx)</string>
+    <string name="formula_circle_area_keywords">круг,площадь,радиус,пи,r^2,окружность</string>
+    <string name="formula_circle_circumference_keywords">окружность,периметр,длина,диаметр,радиус,пи</string>
+    <string name="formula_pythagoras_keywords">пифагор,теорема,треугольник,гипотенуза,катет</string>
+    <string name="formula_compound_interest_keywords">сложные,проценты,капитал,ставка,доход,депозит</string>
+    <string name="formula_sphere_volume_keywords">сфера,шар,объем,радиус,пи,r^3</string>
+    <string name="formula_sphere_surface_keywords">сфера,шар,площадь,поверхность,радиус,пи</string>
+    <string name="formula_cylinder_volume_keywords">цилиндр,объем,высота,радиус,пи</string>
+    <string name="formula_triangle_area_keywords">треугольник,площадь,основание,высота</string>
+    <string name="formula_quadratic_keywords">квадратное,уравнение,корни,дискриминант,парабола</string>
+    <string name="formula_percentage_keywords">процент,проценты,скидка,ставка,доля,%</string>
+    <string name="formula_integral_example_keywords">интеграл,определенный,площадь,анализ,исчисление</string>
+    <string name="formula_derivative_example_keywords">производная,наклон,дифференциал,касательная,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">Поиск настроек...</string>
+    <string name="settings_search_clear">Очистить поиск</string>
+    <string name="settings_search_empty">Настройки не найдены</string>
+    <string name="settings_keywords_appearance">оформление,дизайн,тема,цвет,цвета,светлая,темная,amoled,режим</string>
+    <string name="settings_keywords_units">единицы,угол,тригонометрия,градусы,радианы,конвертация</string>
+    <string name="settings_keywords_dev_screen">разработчик,экран,разрешение,масштаб,размер</string>
+    <string name="settings_keywords_dev_api">разработчик,api,android,версия,симуляция,material you,размытие</string>
+    <string name="settings_keywords_dev_haptic">разработчик,тактильный,вибрация,виброотклик,интенсивность,мотор,lra,erm</string>
+    <string name="settings_keywords_dev_auto_result">разработчик,результат,автоматически,живой,вычисление</string>
+    <string name="settings_keywords_dev_lifecycle">разработчик,жизненный цикл,фон,краш,тест,состояние</string>
+    <string name="settings_keywords_dev_cache">разработчик,кэш,память,временные файлы,очистить,удалить</string>
+    <string name="settings_keywords_dev_reset">разработчик,хранилище,сброс,история,данные,удалить,по умолчанию</string>
+    <string name="settings_keywords_info_version">версия,приложение,сборка,авторские права,android</string>
+    <string name="settings_keywords_info_license">лицензия,лицензии,apache,open source,авторские права</string>
+    <string name="settings_keywords_language">язык,языки,система,локаль,перевод,локализация</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">Поиск единиц...</string>
+    <string name="converter_search_clear">Очистить поиск</string>
+    <string name="converter_search_empty">Единицы не найдены</string>
+    <string name="converter_keywords_length">длина,расстояние,метры,футы,сантиметры,дюймы,километры,мили</string>
+    <string name="converter_keywords_mass">масса,вес,килограммы,фунты</string>
+    <string name="converter_keywords_temp">температура,градусы,цельсий,фаренгейт</string>
+    <string name="converter_keywords_volume">объем,емкость,литры,галлоны</string>
+    <string name="converter_keywords_data">данные,память,хранилище,байт,килобайт,мегабайт,гигабайт,терабайт</string>
+    <string name="converter_keywords_time">время,длительность,секунды,миллисекунды,минуты,часы,дни</string>
 </resources>

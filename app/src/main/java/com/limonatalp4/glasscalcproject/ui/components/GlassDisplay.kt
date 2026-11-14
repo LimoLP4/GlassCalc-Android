@@ -176,6 +176,8 @@ private fun GlassDisplayContent(
         label = "cursor_alpha"
     )
 
+    val copiedToastTemplate = stringResource(R.string.toast_copied, "__GLASSCALC_VAL__")
+
     fun performCopy() {
         val textToCopy = if (result.isNotEmpty() && result != "0") result else if (expression.isNotEmpty()) expression else result
         if (textToCopy.isNotEmpty()) {
@@ -184,7 +186,7 @@ private fun GlassDisplayContent(
                 if (clipboard != null) {
                     val clip = ClipData.newPlainText("GlassCalc", textToCopy)
                     clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, context.getString(R.string.toast_copied, textToCopy), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, copiedToastTemplate.replace("__GLASSCALC_VAL__", textToCopy), Toast.LENGTH_SHORT).show()
                     isCopyFlashed = true
                 }
             } catch (e: Exception) {

@@ -153,6 +153,7 @@ fun UnitConverterDialog(
     }
 
     fun selectConversionPair(pair: ConversionPair) {
+        triggerHaptic()
         selectedPair = pair
         val targetCatIndex = categories.indexOf(pair.category)
         if (targetCatIndex >= 0) {
@@ -269,6 +270,7 @@ fun UnitConverterDialog(
                         if (firstMatch != null) {
                             selectUnitSuggestion(firstMatch)
                         } else {
+                            triggerHaptic()
                             searchQuery = ""
                         }
                     },

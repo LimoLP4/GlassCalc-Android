@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import android.os.Build
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.ConfigurationCompat
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
@@ -18,14 +20,17 @@ import com.limonatalp4.glasscalcproject.domain.evaluator.ExpressionEvaluator
 import com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog
 import com.limonatalp4.glasscalcproject.domain.formulas.MathFormula
 import com.limonatalp4.glasscalcproject.lifecycle.AppLifecycleObserver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -63,6 +68,16 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun setGraphLocked(locked: Boolean) {
         _isGraphLocked.value = locked
+    }
+
+    fun importConvertedValue(value: String) {
+        val cleaned = value.trim()
+        if (cleaned.isEmpty()) return
+        _errorMessage.value = null
+        justCalculated = false
+        _expression.value = cleaned
+        _cursorPosition.value = cleaned.length
+        tryLivePreview()
     }
 
     fun applyGraphPointToCalculator(x: Double, y: Double) {
@@ -148,13 +163,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val _isLanguageLoaded = MutableStateFlow(false)
     val isLanguageLoaded: StateFlow<Boolean> = _isLanguageLoaded.asStateFlow()
 
-    val language: StateFlow<String> = preferences.languageFlow
-        .onEach { _isLanguageLoaded.value = true }
-        .catch {
-            _isLanguageLoaded.value = true
-            emit("")
-        }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    private val _language = MutableStateFlow("SYSTEM")
+    val language: StateFlow<String> = _language.asStateFlow()
 
     val effectiveLanguage: StateFlow<String> = combine(
         language,
@@ -164,16 +174,30 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        resolveEffectiveLanguageTag("")
+        resolveEffectiveLanguageTag("SYSTEM")
     )
 
     fun setLanguage(languageTag: String) {
+        val isSystem = languageTag.isBlank() || languageTag.equals("SYSTEM", ignoreCase = true)
+        val normalizedTag = if (isSystem) "SYSTEM" else languageTag.trim().lowercase(Locale.ROOT)
+
+        _language.value = normalizedTag
+        _systemLocaleRefreshTrigger.value += 1
+
         viewModelScope.launch {
             try {
-                preferences.setLanguage(languageTag)
-                _systemLocaleRefreshTrigger.value += 1
+                preferences.setLanguage(normalizedTag)
             } catch (_: Exception) {
-                // Fallback / ignore exception to prevent crash
+            }
+
+            try {
+                if (isSystem) {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+                } else {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(normalizedTag))
+                }
+            } catch (e: Throwable) {
+                Log.e("GlassCalc", "Fehler beim Setzen von setApplicationLocales", e)
             }
         }
     }
@@ -196,8 +220,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.AUTOMATIC)
 
-    val history: StateFlow<List<CalculationHistoryItem>> = preferences.historyFlow
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    private val _history = MutableStateFlow<List<CalculationHistoryItem>>(emptyList())
+    val history: StateFlow<List<CalculationHistoryItem>> = _history.asStateFlow()
 
     val hapticFeedbackEnabled: StateFlow<Boolean> = preferences.hapticFeedbackEnabledFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -232,15 +256,43 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private var justCalculated = false
+    private var isHistoryCleared = false
+    private var previewJob: Job? = null
 
     init {
-        // Load saved state from DataStore crash-safe
+        // Load and observe saved language from DataStore
         viewModelScope.launch {
-            preferences.savedStateFlow.collect { (savedExpr, savedRes) ->
+            preferences.languageFlow.collect { savedLang ->
+                val normalized = if (savedLang.isBlank() || savedLang.equals("SYSTEM", ignoreCase = true)) {
+                    "SYSTEM"
+                } else {
+                    savedLang
+                }
+                _language.value = normalized
+                _isLanguageLoaded.value = true
+            }
+        }
+
+        // Load saved state once from DataStore crash-safe
+        viewModelScope.launch {
+            runCatching {
+                val (savedExpr, savedRes) = preferences.savedStateFlow.first()
                 if (_expression.value.isEmpty() && savedExpr.isNotEmpty()) {
                     _expression.value = savedExpr
                     _cursorPosition.value = savedExpr.length
                     _result.value = savedRes
+                }
+            }
+        }
+
+        // Load initial history once from DataStore without overwriting optimistic updates
+        viewModelScope.launch {
+            runCatching {
+                val stored = preferences.historyFlow.first()
+                if (!isHistoryCleared && stored.isNotEmpty()) {
+                    val currentLocal = _history.value
+                    val merged = (currentLocal + stored.filter { s -> currentLocal.none { it.id == s.id } }).take(20)
+                    _history.value = merged
                 }
             }
         }
@@ -522,6 +574,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                     expression = expr,
                     result = formatted
                 )
+                isHistoryCleared = false
+                _history.value = (listOf(historyItem) + _history.value).take(20)
                 viewModelScope.launch {
                     preferences.addHistoryItem(historyItem)
                     preferences.saveCalculationState(expr, formatted)
@@ -535,6 +589,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun tryLivePreview() {
+        previewJob?.cancel()
         val expr = _expression.value.trim()
         if (expr.isEmpty()) {
             _result.value = "0"
@@ -543,10 +598,12 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         // Live preview only if expression has operators/functions/constants
         val hasOp = expr.any { it in "+-*÷×/^%!scl∫√ⁿeπdat;" }
         if (hasOp && _isAutoResultEnabled.value) {
-            viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+            previewJob = viewModelScope.launch(Dispatchers.Default) {
                 when (val eval = evaluator.evaluate(expr, angleMode.value)) {
                     is EvaluationResult.Success -> {
-                        _result.value = eval.formatted
+                        if (_expression.value.trim() == expr) {
+                            _result.value = eval.formatted
+                        }
                     }
                     is EvaluationResult.Error -> {
                         // Do not show errors during typing preview
@@ -587,6 +644,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun clearHistory() {
+        isHistoryCleared = true
+        _history.value = emptyList()
         viewModelScope.launch {
             preferences.clearHistory()
         }
@@ -599,6 +658,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun resetApp() {
+        isHistoryCleared = true
+        _history.value = emptyList()
         viewModelScope.launch {
             preferences.resetAll()
             _expression.value = ""
@@ -617,12 +678,19 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         val SUPPORTED_LANGUAGE_TAGS: Set<String> = setOf("de", "en", "es", "fr", "ja", "zh", "tlh", "ru", "pt", "hi")
         const val FALLBACK_LANGUAGE_TAG: String = "en"
 
+        fun isSystemLocaleSupported(systemLocale: Locale = resolveDeviceSystemLocale()): Boolean {
+            val systemTag = systemLocale.language.lowercase(Locale.ROOT)
+                .substringBefore('-')
+                .substringBefore('_')
+            return systemTag in SUPPORTED_LANGUAGE_TAGS
+        }
+
         fun resolveEffectiveLanguageTag(
             selectedLanguageTag: String,
             systemLocale: Locale = resolveDeviceSystemLocale()
         ): String {
             val trimmed = selectedLanguageTag.trim()
-            if (trimmed.isNotEmpty()) {
+            if (trimmed.isNotEmpty() && !trimmed.equals("SYSTEM", ignoreCase = true)) {
                 val explicitTag = trimmed.lowercase(Locale.ROOT)
                     .substringBefore('-')
                     .substringBefore('_')
@@ -645,14 +713,9 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
         fun resolveDeviceSystemLocale(): Locale {
             return try {
-                val appLocales = AppCompatDelegate.getApplicationLocales()
-                if (!appLocales.isEmpty) {
-                    val sysLocales = ConfigurationCompat.getLocales(Resources.getSystem().configuration)
-                    if (!sysLocales.isEmpty) {
-                        sysLocales[0] ?: Locale.getDefault()
-                    } else {
-                        Locale.getDefault()
-                    }
+                val sysLocales = ConfigurationCompat.getLocales(Resources.getSystem().configuration)
+                if (!sysLocales.isEmpty && sysLocales[0] != null) {
+                    sysLocales[0]!!
                 } else {
                     Locale.getDefault()
                 }

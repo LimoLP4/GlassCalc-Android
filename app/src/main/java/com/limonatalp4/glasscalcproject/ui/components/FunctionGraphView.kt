@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.Role
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import com.limonatalp4.glasscalcproject.domain.evaluator.MxParserLock
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
@@ -117,8 +118,9 @@ enum class GraphPreset(val label: String, val formula: String) {
 data class GraphPoint(val x: Double, val y: Double)
 
 private fun calculateNiceStep(range: Double, targetSteps: Int): Double {
-    if (range <= 0.0) return 1.0
+    if (!range.isFinite() || range <= 1e-12) return 1.0
     val rawStep = range / targetSteps.coerceAtLeast(1)
+    if (!rawStep.isFinite() || rawStep <= 1e-12) return 1.0
     val exponent = floor(log10(rawStep))
     val magnitude = 10.0.pow(exponent)
     val normalized = rawStep / magnitude
@@ -128,7 +130,8 @@ private fun calculateNiceStep(range: Double, targetSteps: Int): Double {
         normalized < 7.5 -> 5.0
         else -> 10.0
     }
-    return niceFactor * magnitude
+    val step = niceFactor * magnitude
+    return if (step.isFinite() && step > 1e-12) step else 1.0
 }
 
 private fun formatAxisLabel(value: Double): String {
@@ -187,28 +190,30 @@ private fun evaluateFormulaAtX(
 ): Double? {
     if (!x.isFinite()) return null
     return try {
-        try {
-            License.iConfirmNonCommercialUse("limonatalp4")
-        } catch (_: Exception) {}
+        val sanitizedExpr = sanitizeForGraphParser(formula)
+        val y = synchronized(MxParserLock) {
+            try {
+                License.iConfirmNonCommercialUse("limonatalp4")
+            } catch (_: Exception) {}
 
-        if (angleMode == AngleMode.DEG) {
-            mXparser.setDegreesMode()
-        } else {
-            mXparser.setRadiansMode()
+            if (angleMode == AngleMode.DEG) {
+                mXparser.setDegreesMode()
+            } else {
+                mXparser.setRadiansMode()
+            }
+
+            val argX = Argument("x = 0")
+            argX.argumentValue = x
+            val expr = Expression(sanitizedExpr, argX)
+            expr.calculate()
         }
 
-        val sanitizedExpr = sanitizeForGraphParser(formula)
-        val argX = Argument("x = 0")
-        argX.argumentValue = x
-        val expr = Expression(sanitizedExpr, argX)
-        val y = expr.calculate()
-
-        if (y.isNaN() || y.isInfinite() || abs(y) > 1e8) {
+        if (!y.isFinite() || abs(y) > 1e8) {
             null
         } else {
             y
         }
-    } catch (_: Exception) {
+    } catch (_: Throwable) {
         null
     }
 }
@@ -283,38 +288,48 @@ fun FunctionGraphView(
 
     // Asynchronous background computation of curve points (Dispatchers.Default)
     LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
-        withContext(Dispatchers.Default) {
+        val computedPoints = withContext(Dispatchers.Default) {
             try {
-                License.iConfirmNonCommercialUse("limonatalp4")
-            } catch (_: Exception) {}
-
-            if (angleMode == AngleMode.DEG) {
-                mXparser.setDegreesMode()
-            } else {
-                mXparser.setRadiansMode()
-            }
-
-            val formulaString = resolveActiveFormula(selectedPreset, expression)
-            val sanitizedExpr = sanitizeForGraphParser(formulaString)
-            val steps = 360 // High quality, low CPU footprint
-            val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
-
-            val argX = Argument("x = 0")
-            val expr = Expression(sanitizedExpr, argX)
-
-            for (i in 0..steps) {
-                val t = i.toDouble() / steps
-                val x = xMin + t * (xMax - xMin)
-                argX.argumentValue = x
-                val y = expr.calculate()
-                if (!y.isNaN() && !y.isInfinite() && abs(y) <= 1e8) {
-                    calculatedList.add(Pair(x, y))
-                } else {
-                    calculatedList.add(Pair(x, Double.NaN))
+                if (!xMin.isFinite() || !xMax.isFinite() || xMax <= xMin) {
+                    return@withContext emptyList<Pair<Double, Double>>()
                 }
+                val formulaString = resolveActiveFormula(selectedPreset, expression)
+                val sanitizedExpr = sanitizeForGraphParser(formulaString)
+                val steps = 360 // High quality, low CPU footprint
+                val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
+
+                synchronized(MxParserLock) {
+                    try {
+                        License.iConfirmNonCommercialUse("limonatalp4")
+                    } catch (_: Exception) {}
+
+                    if (angleMode == AngleMode.DEG) {
+                        mXparser.setDegreesMode()
+                    } else {
+                        mXparser.setRadiansMode()
+                    }
+
+                    val argX = Argument("x = 0")
+                    val expr = Expression(sanitizedExpr, argX)
+
+                    for (i in 0..steps) {
+                        val t = i.toDouble() / steps
+                        val x = xMin + t * (xMax - xMin)
+                        argX.argumentValue = x
+                        val y = expr.calculate()
+                        if (y.isFinite() && abs(y) <= 1e8) {
+                            calculatedList.add(Pair(x, y))
+                        } else {
+                            calculatedList.add(Pair(x, Double.NaN))
+                        }
+                    }
+                }
+                calculatedList
+            } catch (_: Throwable) {
+                emptyList()
             }
-            cachedPoints = calculatedList
         }
+        cachedPoints = computedPoints
     }
 
     fun resetView() {
@@ -463,27 +478,29 @@ fun FunctionGraphView(
                             detectTransformGestures { _, pan, zoom, _ ->
                                 val width = size.width.toFloat()
                                 val height = size.height.toFloat()
-                                if (width > 0f && height > 0f) {
-                                    val xSpan = xMax - xMin
-                                    val ySpan = yMax - yMin
+                                if (width > 0f && height > 0f && pan.x.isFinite() && pan.y.isFinite()) {
+                                    val xSpan = (xMax - xMin).coerceIn(1e-4, 1e6)
+                                    val ySpan = (yMax - yMin).coerceIn(1e-4, 1e6)
 
                                     val dx = -(pan.x / width) * xSpan
                                     val dy = (pan.y / height) * ySpan
 
-                                    xMin += dx
-                                    xMax += dx
-                                    yMin += dy
-                                    yMax += dy
+                                    if (dx.isFinite() && dy.isFinite()) {
+                                        xMin = (xMin + dx).coerceIn(-1e7, 1e7)
+                                        xMax = (xMax + dx).coerceIn(-1e7, 1e7)
+                                        yMin = (yMin + dy).coerceIn(-1e7, 1e7)
+                                        yMax = (yMax + dy).coerceIn(-1e7, 1e7)
+                                    }
 
-                                    if (zoom != 1f && zoom > 0f) {
-                                        val xCenter = (xMin + xMax) / 2.0
-                                        val yCenter = (yMin + yMax) / 2.0
+                                    if (zoom.isFinite() && zoom != 1f && zoom > 0f) {
+                                        val xCenter = ((xMin + xMax) / 2.0).coerceIn(-1e7, 1e7)
+                                        val yCenter = ((yMin + yMax) / 2.0).coerceIn(-1e7, 1e7)
                                         val newXSpan = (xSpan / zoom).coerceIn(1e-4, 1e6)
                                         val newYSpan = (ySpan / zoom).coerceIn(1e-4, 1e6)
-                                        xMin = xCenter - newXSpan / 2.0
-                                        xMax = xCenter + newXSpan / 2.0
-                                        yMin = yCenter - newYSpan / 2.0
-                                        yMax = yCenter + newYSpan / 2.0
+                                        xMin = (xCenter - newXSpan / 2.0).coerceIn(-1e7, 1e7)
+                                        xMax = (xCenter + newXSpan / 2.0).coerceIn(-1e7, 1e7)
+                                        yMin = (yCenter - newYSpan / 2.0).coerceIn(-1e7, 1e7)
+                                        yMax = (yCenter + newYSpan / 2.0).coerceIn(-1e7, 1e7)
                                     }
 
                                     val now = System.currentTimeMillis()
@@ -506,13 +523,16 @@ fun FunctionGraphView(
                     val width = size.width
                     val height = size.height
                     if (width <= 0 || height <= 0) return@Canvas
+                    val xSpan = xMax - xMin
+                    val ySpan = yMax - yMin
+                    if (!xSpan.isFinite() || xSpan <= 1e-12 || !ySpan.isFinite() || ySpan <= 1e-12) return@Canvas
 
                     val strokeWidth = 2.5.dp.toPx()
                     val gridStrokeWidth = 1.dp.toPx()
                     val axisStrokeWidth = 1.8.dp.toPx()
 
-                    val zeroXpx = ((0.0 - xMin) / (xMax - xMin) * width).toFloat()
-                    val zeroYpx = (height - ((0.0 - yMin) / (yMax - yMin) * height)).toFloat()
+                    val zeroXpx = ((0.0 - xMin) / xSpan * width).toFloat()
+                    val zeroYpx = (height - ((0.0 - yMin) / ySpan * height)).toFloat()
 
                     val axisTextStyle = TextStyle(
                         fontSize = 9.sp,
@@ -528,12 +548,13 @@ fun FunctionGraphView(
                     )
 
                     // 1. DYNAMIC GRID LINES & AXIS LABELS
-                    val xStep = calculateNiceStep(xMax - xMin, targetSteps = 6)
+                    val xStep = calculateNiceStep(xSpan, targetSteps = 6)
                     val firstX = floor(xMin / xStep) * xStep
                     var currentX = firstX
-                    while (currentX <= xMax + xStep * 0.1) {
-                        val gx = ((currentX - xMin) / (xMax - xMin) * width).toFloat()
-                        if (gx in 0f..width) {
+                    var xGridCount = 0
+                    while (currentX <= xMax + xStep * 0.1 && xGridCount++ < 80) {
+                        val gx = ((currentX - xMin) / xSpan * width).toFloat()
+                        if (gx.isFinite() && gx in 0f..width) {
                             drawLine(
                                 color = gridColor,
                                 start = Offset(gx, 0f),
@@ -553,11 +574,11 @@ fun FunctionGraphView(
                             if (abs(currentX) > 1e-4) {
                                 val labelText = formatAxisLabel(currentX)
                                 val measured = textMeasurer.measure(labelText, style = axisTextStyle)
-                                val textX = (gx - measured.size.width / 2f).coerceIn(4f, width - measured.size.width - 4f)
+                                val textX = (gx - measured.size.width / 2f).coerceIn(4f, (width - measured.size.width - 4f).coerceAtLeast(4f))
                                 val textY = if (zeroYpx in 10f..(height - 24f)) {
                                     zeroYpx + 4.dp.toPx()
                                 } else {
-                                    height - measured.size.height - 4.dp.toPx()
+                                    (height - measured.size.height - 4.dp.toPx()).coerceAtLeast(0f)
                                 }
                                 drawText(
                                     textMeasurer = textMeasurer,
@@ -567,15 +588,18 @@ fun FunctionGraphView(
                                 )
                             }
                         }
-                        currentX += xStep
+                        val nextX = currentX + xStep
+                        if (!nextX.isFinite() || nextX <= currentX) break
+                        currentX = nextX
                     }
 
-                    val yStep = calculateNiceStep(yMax - yMin, targetSteps = 4)
+                    val yStep = calculateNiceStep(ySpan, targetSteps = 4)
                     val firstY = floor(yMin / yStep) * yStep
                     var currentY = firstY
-                    while (currentY <= yMax + yStep * 0.1) {
-                        val gy = (height - ((currentY - yMin) / (yMax - yMin) * height)).toFloat()
-                        if (gy in 0f..height) {
+                    var yGridCount = 0
+                    while (currentY <= yMax + yStep * 0.1 && yGridCount++ < 80) {
+                        val gy = (height - ((currentY - yMin) / ySpan * height)).toFloat()
+                        if (gy.isFinite() && gy in 0f..height) {
                             drawLine(
                                 color = gridColor,
                                 start = Offset(0f, gy),
@@ -584,7 +608,7 @@ fun FunctionGraphView(
                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 5f), 0f)
                             )
 
-                            val tickX = zeroXpx.coerceIn(16f, width - 16f)
+                            val tickX = zeroXpx.coerceIn(16f, (width - 16f).coerceAtLeast(16f))
                             drawLine(
                                 color = axisColor,
                                 start = Offset(tickX - 3.dp.toPx(), gy),
@@ -596,11 +620,11 @@ fun FunctionGraphView(
                                 val labelText = formatAxisLabel(currentY)
                                 val measured = textMeasurer.measure(labelText, style = axisTextStyle)
                                 val textX = if (zeroXpx in 24f..(width - 10f)) {
-                                    zeroXpx - measured.size.width - 4.dp.toPx()
+                                    (zeroXpx - measured.size.width - 4.dp.toPx()).coerceAtLeast(4f)
                                 } else {
                                     4.dp.toPx()
                                 }
-                                val textY = (gy - measured.size.height / 2f).coerceIn(4f, height - measured.size.height - 4f)
+                                val textY = (gy - measured.size.height / 2f).coerceIn(4f, (height - measured.size.height - 4f).coerceAtLeast(4f))
                                 drawText(
                                     textMeasurer = textMeasurer,
                                     text = labelText,
@@ -609,7 +633,9 @@ fun FunctionGraphView(
                                 )
                             }
                         }
-                        currentY += yStep
+                        val nextY = currentY + yStep
+                        if (!nextY.isFinite() || nextY <= currentY) break
+                        currentY = nextY
                     }
 
                     // 2. MAIN COORDINATE AXES (X = 0 & Y = 0)
@@ -661,12 +687,16 @@ fun FunctionGraphView(
 
                         for (i in 0 until count) {
                             val (x, y) = cachedPoints[i]
-                            if (y.isNaN()) {
+                            if (!x.isFinite() || !y.isFinite()) {
                                 isFirst = true
                                 continue
                             }
-                            val px = ((x - xMin) / (xMax - xMin) * width).toFloat()
-                            val py = (height - ((y - yMin) / (yMax - yMin) * height)).toFloat()
+                            val px = ((x - xMin) / xSpan * width).toFloat()
+                            val py = (height - ((y - yMin) / ySpan * height)).toFloat()
+                            if (!px.isFinite() || !py.isFinite()) {
+                                isFirst = true
+                                continue
+                            }
 
                             if (isFirst || abs(py - lastPy) > height * 0.75f) {
                                 path.moveTo(px, py)
@@ -686,8 +716,9 @@ fun FunctionGraphView(
 
                     // 4. POINT MARKER OVERLAY (Dynamically projected from mathematical (x, y) point)
                     inspectedPoint?.let { pt ->
-                        val px = ((pt.x - xMin) / (xMax - xMin) * width).toFloat()
-                        val py = (height - ((pt.y - yMin) / (yMax - yMin) * height)).toFloat()
+                        val px = ((pt.x - xMin) / xSpan * width).toFloat()
+                        val py = (height - ((pt.y - yMin) / ySpan * height)).toFloat()
+                        if (!px.isFinite() || !py.isFinite()) return@let
                         val markerPos = Offset(px, py)
                         val crosshairPathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
 
@@ -834,8 +865,10 @@ fun FunctionGraphView(
                     IconButton(
                         onClick = {
                             val shift = (xMax - xMin) * 0.25
-                            xMin -= shift
-                            xMax -= shift
+                            if (shift.isFinite()) {
+                                xMin = (xMin - shift).coerceIn(-1e7, 1e7)
+                                xMax = (xMax - shift).coerceIn(-1e7, 1e7)
+                            }
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)
@@ -852,8 +885,10 @@ fun FunctionGraphView(
                     IconButton(
                         onClick = {
                             val shift = (xMax - xMin) * 0.25
-                            xMin += shift
-                            xMax += shift
+                            if (shift.isFinite()) {
+                                xMin = (xMin + shift).coerceIn(-1e7, 1e7)
+                                xMax = (xMax + shift).coerceIn(-1e7, 1e7)
+                            }
                             triggerClickHaptic()
                         },
                         modifier = Modifier.size(28.dp)

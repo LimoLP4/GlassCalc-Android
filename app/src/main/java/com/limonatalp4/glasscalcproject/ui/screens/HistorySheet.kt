@@ -51,6 +51,7 @@ import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,11 +69,12 @@ fun HistorySheet(
     val colorScheme = MaterialTheme.colorScheme
     val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val context = LocalContext.current
     val view = LocalView.current
 
     fun triggerHaptic() {
-        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
     val glassProps = LocalGlassProperties.current

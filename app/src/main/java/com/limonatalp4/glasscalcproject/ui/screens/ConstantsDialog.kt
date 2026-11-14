@@ -37,6 +37,7 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 
 @Immutable
 data class MathConstant(
@@ -65,11 +66,12 @@ fun ConstantsDialog(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val context = LocalContext.current
     val view = LocalView.current
 
     fun triggerHaptic() {
-        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
     BasicAlertDialog(

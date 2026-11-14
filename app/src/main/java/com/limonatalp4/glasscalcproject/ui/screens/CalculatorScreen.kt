@@ -165,17 +165,20 @@ fun CalculatorScreen(
         LocalHapticIntensity provides hapticIntensity
     ) {
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(glassProps.backgroundBrush)
-                .then(
-                    if (glassState.quality != io.github.nadeemiqbal.liquidglass.LiquidGlassQuality.Fallback) {
-                        Modifier.liquidGlassSource(glassState)
-                    } else {
-                        Modifier
-                    }
-                )
+            modifier = modifier.fillMaxSize()
         ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(glassProps.backgroundBrush)
+                    .then(
+                        if (glassState.quality != io.github.nadeemiqbal.liquidglass.LiquidGlassQuality.Fallback) {
+                            Modifier.liquidGlassSource(glassState)
+                        } else {
+                            Modifier
+                        }
+                    )
+            )
             // Main Content
             Scaffold(
                 containerColor = Color.Transparent,
@@ -204,7 +207,7 @@ fun CalculatorScreen(
                                 val view = LocalView.current
                                 IconButton(
                                     onClick = {
-                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                         menuVisibleState.targetState = !menuVisibleState.targetState
                                     },
                                     modifier = Modifier
@@ -240,7 +243,7 @@ fun CalculatorScreen(
                             val view = LocalView.current
                             IconButton(
                                 onClick = {
-                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                     showHistorySheet = true
                                 },
                                 modifier = Modifier
@@ -396,7 +399,17 @@ fun CalculatorScreen(
 
                             DrawerFormulaSearch(
                                 query = formulaSearchQuery,
-                                onQueryChange = { formulaSearchQuery = it },
+                                onQueryChange = { newValue ->
+                                    if (newValue != formulaSearchQuery) {
+                                        HapticUtil.performAppHaptic(
+                                            context = context,
+                                            view = view,
+                                            enabled = hapticFeedbackEnabled,
+                                            intensityLevel = hapticIntensity
+                                        )
+                                    }
+                                    formulaSearchQuery = newValue
+                                },
                                 onClearClick = {
                                     HapticUtil.performAppHaptic(
                                         context = context,
@@ -454,7 +467,7 @@ fun CalculatorScreen(
                                             .clip(RoundedCornerShape(percent = 50))
                                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                             .clickable {
-                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled)
+                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                                 coroutineScope.launch {
                                                     menuVisibleState.targetState = false
                                                     snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
@@ -552,10 +565,7 @@ fun CalculatorScreen(
         if (showConverterDialog) {
             UnitConverterDialog(
                 onImportToCalculator = { value ->
-                    viewModel.onClearAll()
-                    for (ch in value) {
-                        viewModel.onCharacterInput(ch.toString())
-                    }
+                    viewModel.importConvertedValue(value)
                 },
                 onDismiss = { showConverterDialog = false }
             )
@@ -593,6 +603,7 @@ private fun PortraitCalculatorLayout(
     val localContext = LocalContext.current
     val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val expression by viewModel.expression.collectAsState()
     var scientificSubTab by remember { mutableIntStateOf(0) }
     val isGestureLocked by viewModel.isGraphLocked.collectAsState()
@@ -657,7 +668,7 @@ private fun PortraitCalculatorLayout(
                 ) {
                     IconButton(
                         onClick = {
-                            HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                            HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
                             viewModel.toggleAngleMode()
                         },
                         modifier = Modifier.size(width = 76.dp, height = 36.dp)
@@ -679,7 +690,7 @@ private fun PortraitCalculatorLayout(
                 ) {
                     IconButton(
                         onClick = {
-                            HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                            HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
                             viewModel.toggleScientificPanel()
                         },
                         modifier = Modifier
@@ -788,6 +799,7 @@ private fun LandscapeCalculatorLayout(
     val localContext = LocalContext.current
     val localView = LocalView.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
     val leftScrollState = rememberScrollState()
     val rightScrollState = rememberScrollState()
 
@@ -866,7 +878,7 @@ private fun LandscapeCalculatorLayout(
                         ) {
                             IconButton(
                                 onClick = {
-                                    HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled)
+                                    HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
                                     viewModel.toggleAngleMode()
                                 },
                                 modifier = Modifier.size(

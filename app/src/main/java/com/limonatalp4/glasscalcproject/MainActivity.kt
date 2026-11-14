@@ -40,37 +40,38 @@ fun GlassCalcAppRoot() {
     val currentTheme by viewModel.currentTheme.collectAsState()
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
     val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
+    val selectedLanguage by viewModel.language.collectAsState()
     val effectiveLanguage by viewModel.effectiveLanguage.collectAsState()
     val isLanguageLoaded by viewModel.isLanguageLoaded.collectAsState()
 
-    // Asynchrone und sichere Sprach-Initialisierung nach dem UI-Aufbau
-    LaunchedEffect(effectiveLanguage, isLanguageLoaded) {
+    // Sichere Sprach-Initialisierung ohne unnötige Cold-Start-Activity-Recreation
+    LaunchedEffect(selectedLanguage, effectiveLanguage, isLanguageLoaded) {
         if (!isLanguageLoaded) return@LaunchedEffect
         try {
             val currentLocales = AppCompatDelegate.getApplicationLocales()
-            val currentTag = if (currentLocales.isEmpty) "" else currentLocales.toLanguageTags()
-            val currentPrimaryTag = currentTag
-                .split(',')
-                .firstOrNull()
-                ?.trim()
-                ?.lowercase(java.util.Locale.ROOT)
-                ?.substringBefore('-')
-                .orEmpty()
+            val isSystemSelected = selectedLanguage.isBlank() || selectedLanguage.equals("SYSTEM", ignoreCase = true)
 
-            // Nur aktualisieren, wenn sich die effektive Sprache tatsächlich unterscheidet
-            if (currentPrimaryTag != effectiveLanguage) {
-                kotlinx.coroutines.delay(60)
-                val localeList = LocaleListCompat.forLanguageTags(effectiveLanguage)
-                AppCompatDelegate.setApplicationLocales(localeList)
+            if (isSystemSelected) {
+                // Systemsprache ist aktiv: manuelle Locales restlos auf System leeren
+                if (!currentLocales.isEmpty) {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+                }
+            } else {
+                val currentPrimaryTag = if (currentLocales.isEmpty) "" else currentLocales.toLanguageTags()
+                    .split(',')
+                    .firstOrNull()
+                    ?.trim()
+                    ?.lowercase(java.util.Locale.ROOT)
+                    ?.substringBefore('-')
+                    .orEmpty()
+
+                if (currentPrimaryTag != effectiveLanguage) {
+                    val localeList = LocaleListCompat.forLanguageTags(effectiveLanguage)
+                    AppCompatDelegate.setApplicationLocales(localeList)
+                }
             }
         } catch (e: Throwable) {
-            // Crash-Schutz: Bei Fehlern sicher auf Englisch zurückfallen
-            Log.e("GlassCalc", "Fehler bei Sprach-Initialisierung, Fallback auf Englisch", e)
-            runCatching {
-                AppCompatDelegate.setApplicationLocales(
-                    LocaleListCompat.forLanguageTags(CalculatorViewModel.FALLBACK_LANGUAGE_TAG)
-                )
-            }
+            Log.e("GlassCalc", "Fehler bei Sprach-Initialisierung", e)
         }
     }
 

@@ -106,7 +106,12 @@ class GlassCalcPreferences(private val context: Context) {
     }
 
     val languageFlow: Flow<String> = safeDataFlow.map { prefs ->
-        prefs[PreferencesKeys.LANGUAGE] ?: ""
+        val saved = prefs[PreferencesKeys.LANGUAGE]
+        if (saved == null || saved.isBlank() || saved.equals("SYSTEM", ignoreCase = true)) {
+            "SYSTEM"
+        } else {
+            saved
+        }
     }
 
     suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
@@ -142,7 +147,11 @@ class GlassCalcPreferences(private val context: Context) {
     suspend fun setLanguage(languageTag: String) {
         try {
             context.dataStore.edit { prefs ->
-                prefs[PreferencesKeys.LANGUAGE] = languageTag
+                if (languageTag.isBlank() || languageTag.equals("SYSTEM", ignoreCase = true)) {
+                    prefs[PreferencesKeys.LANGUAGE] = "SYSTEM"
+                } else {
+                    prefs[PreferencesKeys.LANGUAGE] = languageTag.trim()
+                }
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e

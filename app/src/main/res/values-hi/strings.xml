@@ -4,6 +4,7 @@
     <string name="app_version_tag">v%s • Android 8-17 Ready</string>
     <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
 
+    <!-- Navigation Drawer -->
     <string name="nav_open_menu">मेनू खोलें</string>
     <string name="nav_calculator">कैलकुलेटर</string>
     <string name="nav_history">इतिहास</string>
@@ -13,6 +14,36 @@
     <string name="nav_close">बंद करें</string>
     <string name="nav_history_show">इतिहास दिखाएं</string>
 
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">मानक</string>
+    <string name="mode_scientific">वैज्ञानिक</string>
+    <string name="btn_constants">स्थिरांक</string>
+    <string name="btn_constants_desc">भौतिक और गणितीय स्थिरांक</string>
+    <string name="btn_fraction_slash_desc">भिन्न स्लैश</string>
+    <string name="btn_euler_desc">यूलर संख्या e</string>
+    <string name="btn_power_xy_desc">घात x की घात y</string>
+    <string name="btn_nth_root_desc">n-वां मूल</string>
+    <string name="btn_integral_desc">समाकलन</string>
+    <string name="btn_var_x_desc">चर x</string>
+    <string name="btn_semicolon_desc">तर्क विभाजक</string>
+    <string name="btn_del_desc">हटाएं (लगातार हटाने के लिए दबाए रखें)</string>
+    <string name="btn_copy_clipboard">परिणाम क्लिपबोर्ड में कॉपी करें</string>
+    <string name="toast_copied">क्लिपबोर्ड में कॉपी किया गया: %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">0 से भाग संभव नहीं है</string>
+    <string name="error_syntax">सिंटैक्स त्रुटि</string>
+    <string name="error_not_defined">अपरिभाषित</string>
+    <string name="error_calculation">गणना त्रुटि</string>
+    <string name="error_invalid_expression">अमान्य व्यंजक</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">इतिहास (अंतिम 20)</string>
+    <string name="history_empty">अभी तक कोई गणना सहेजी नहीं गई है।</string>
+    <string name="btn_history_clear">साफ़ करें</string>
+    <string name="btn_history_clear_desc">इतिहास साफ़ करें</string>
+
+    <!-- Unit Converter Dialog -->
     <string name="title_converter">इकाई परिवर्तक</string>
     <string name="cat_length">लंबाई</string>
     <string name="cat_mass">द्रव्यमान</string>
@@ -26,6 +57,7 @@
     <string name="converter_result_label">परिणाम (%s):</string>
     <string name="converter_import">कैलकुलेटर में आयात करें</string>
 
+    <!-- Unit Pairs -->
     <string name="unit_m_ft">मीटर ↔ फीट (m ↔ ft)</string>
     <string name="unit_cm_in">सेंटीमीटर ↔ इंच (cm ↔ in)</string>
     <string name="unit_km_mi">किलोमीटर ↔ मील (km ↔ mi)</string>
@@ -41,6 +73,7 @@
     <string name="unit_h_min">घंटे ↔ मिनट (h ↔ min)</string>
     <string name="unit_d_h">दिन ↔ घंटे (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">मीटर</string>
     <string name="unit_name_feet">फीट</string>
     <string name="unit_name_centimeter">सेंटीमीटर</string>
@@ -64,10 +97,114 @@
     <string name="unit_name_hours">घंटे</string>
     <string name="unit_name_days">दिन</string>
 
-    <string name="converter_search_placeholder">इकाइयां खोजें...</string>
-    <string name="converter_search_clear">खोज साफ़ करें</string>
-    <string name="converter_search_empty">कोई मिलती-जुलती इकाई नहीं मिली</string>
+    <!-- Constants Dialog -->
+    <string name="title_constants">वैज्ञानिक स्थिरांक</string>
+    <string name="cat_constants_math">गणित</string>
+    <string name="cat_constants_physics">भौतिकी</string>
+    <string name="cat_constants_astro">खगोल विज्ञान</string>
+    <string name="constants_apply_hint">वर्तमान गणना में सीधे मान दर्ज करने के लिए स्पर्श करें।</string>
+    <string name="constants_select_heading">एक भौतिक या गणितीय स्थिरांक चुनें:</string>
+    <string name="const_pi">पाई (वृत्त स्थिरांक)</string>
+    <string name="const_e">यूलर संख्या</string>
+    <string name="const_c">प्रकाश की गति</string>
+    <string name="const_g">मानक गुरुत्वाकर्षण</string>
+    <string name="const_h">प्लैंक स्थिरांक</string>
+    <string name="const_G">गुरुत्वाकर्षण स्थिरांक</string>
+    <string name="const_na">अवोगाद्रो स्थिरांक</string>
+    <string name="const_k">बोल्ट्ज़मान स्थिरांक</string>
 
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">फलन आलेख</string>
+    <string name="graph_hint_expression">सूत्र दर्ज करें (उदा. sin(x), x^2, cos(x)*2):</string>
+    <string name="graph_gesture_locked">इशारे लॉक हैं</string>
+    <string name="graph_gesture_unlocked">इशारे सक्षम हैं</string>
+    <string name="graph_gesture_unlock">ग्राफ़ इशारे अनलॉक करें</string>
+    <string name="graph_gesture_lock">ग्राफ़ इशारे लॉक करें</string>
+    <string name="graph_hint_scan">बिंदु सेट करने के लिए टैप करें</string>
+    <string name="graph_pan_left">बाईं ओर खिसकाएं</string>
+    <string name="graph_pan_right">दाईं ओर खिसकाएं</string>
+    <string name="graph_zoom_in">ज़ूम इन</string>
+    <string name="graph_zoom_out">ज़ूम आउट</string>
+    <string name="graph_reset">रीसेट</string>
+    <string name="graph_btn_apply_to_calc">कैलकुलेटर में उपयोग करें</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">सेटिंग्स</string>
+    <string name="title_appearance">डिज़ाइन</string>
+    <string name="title_units">इकाइयाँ</string>
+    <string name="title_dev_options">डेवलपर</string>
+    <string name="title_info">जानकारी</string>
+    <string name="tab_language">भाषा</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">थीम चुनें:</string>
+    <string name="theme_material_you">Material You (गतिशील रंग)</string>
+    <string name="theme_automatic">स्वचालित (सिस्टम)</string>
+    <string name="theme_white_mode">लाइट मोड (सफेद)</string>
+    <string name="theme_standard_dark">डार्क मोड (मानक)</string>
+    <string name="theme_dark_mode">डार्क मोड (गहरा काला)</string>
+    <string name="theme_amoled_dark">AMOLED डार्क (शुद्ध काला)</string>
+    <string name="theme_material_you_unsupported">इस Android संस्करण के साथ संगत नहीं है (API 31+ आवश्यक, सक्रिय: API %d)</string>
+    <string name="theme_amoled_desc">अधिकतम OLED बैटरी बचत के लिए 10-15% सफेद ग्लास के साथ शुद्ध काला #000000</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड:</string>
+    <string name="angle_deg_label">डिग्री (DEG)</string>
+    <string name="angle_deg_desc">मानक वृत्त = 360°</string>
+    <string name="angle_rad_label">रेडियन (RAD)</string>
+    <string name="angle_rad_desc">पूर्ण वृत्त = 2π</string>
+    <string name="units_supported_systems">समर्थित रूपांतरण प्रणालियाँ:</string>
+    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• तापमान (°C ↔ °F)\n• आयतन (l ↔ gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
+    <string name="dev_resolution">रिज़ॉल्यूशन: %1$ddp x %2$ddp</string>
+    <string name="dev_simulated_api_title">नकली Android संस्करण</string>
+    <string name="dev_effective_ui_api">प्रभावी UI API: %d</string>
+    <string name="dev_simulate_api_switch">API स्तर का अनुकरण करें</string>
+    <string name="dev_api_level_slider">स्तर: API %d</string>
+    <string name="dev_api_feature_compatibility">API सुविधा अनुकूलता (डिवाइस सीमा: API %d):</string>
+    <string name="dev_feature_supported">समर्थित</string>
+    <string name="dev_feature_not_supported">असमर्थित</string>
+    <string name="dev_api_level_plus">API %d+</string>
+    <string name="dev_feature_vibration_effect">VibrationEffect</string>
+    <string name="dev_feature_edge_to_edge">Edge-to-Edge</string>
+    <string name="dev_feature_material_you">Material You</string>
+    <string name="dev_feature_blur_effect">ब्लर प्रभाव</string>
+    <string name="dev_feature_swipe_gestures">स्वाइप जेस्चर</string>
+    <string name="dev_haptic_title">हैप्टिक फ़ीडबैक</string>
+    <string name="dev_haptic_desc">बटन दबाने और स्विच करने पर कंपन</string>
+    <string name="dev_haptic_detected_motor">पहचाना गया मोटर</string>
+    <string name="dev_haptic_unsupported_device">यह डिवाइस हैप्टिक फ़ीडबैक का समर्थन नहीं करता है।</string>
+    <string name="dev_haptic_unsupported_api">सिम्युलेटेड API स्तर द्वारा समर्थित नहीं है।</string>
+    <string name="dev_haptic_lra_detected">हार्डवेयर: LRA लीनियर मोटर पहचानी गई (सटीक हैप्टिक पल्स सक्रिय)</string>
+    <string name="dev_haptic_erm_detected">हार्डवेयर: ERM रोटरी मोटर पहचानी गई (पल्स नियंत्रण सक्रिय)</string>
+    <string name="dev_haptic_intensity_label">तीव्रता</string>
+    <string name="dev_haptic_intensity_level">स्तर %1$d / 10</string>
+    <string name="dev_auto_result_title">स्वचालित परिणाम</string>
+    <string name="dev_auto_result_desc">टाइप करते समय रीयल-टाइम में परिणाम की गणना करें</string>
+    <string name="dev_lifecycle_title">स्थिति संरक्षण और जीवन चक्र</string>
+    <string name="dev_btn_background">पृष्ठभूमि</string>
+    <string name="dev_btn_crash_test">क्रैश-टेस्ट</string>
+    <string name="dev_reset_storage_title">ऐप स्टोरेज रीसेट करें</string>
+    <string name="dev_reset_storage_desc">सभी इतिहास, सहेजे गए व्यंजक हटाता है और सभी सेटिंग्स को डिफ़ॉल्ट पर रीसेट करता है।</string>
+    <string name="dev_btn_reset_storage">सेटिंग्स रीसेट करें</string>
+    <string name="dev_clear_cache_title">कैश साफ़ करें</string>
+    <string name="dev_clear_cache_desc">आपकी सेटिंग्स या इतिहास को बदले बिना अस्थायी मेमोरी खाली करता है।</string>
+    <string name="dev_btn_clear_cache">कैश साफ़ करें</string>
+    <string name="toast_cache_cleared">कैश सफलतापूर्वक साफ़ किया गया</string>
+    <string name="toast_cache_error">कैश पूरी तरह साफ़ नहीं किया जा सका</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">GitHub रिपॉजिटरी</string>
+    <string name="info_github_open">GitHub पर खोलें</string>
+    <string name="info_oss_licenses">तृतीय-पक्ष लाइसेंस</string>
+    <string name="info_oss_licenses_desc">उपयोग किए गए सभी ओपन-सोर्स लाइब्रेरी और उनके लाइसेंस का पूरा अवलोकन।</string>
+    <string name="info_btn_oss_licenses">ओपन सोर्स लाइसेंस दिखाएं</string>
+    <string name="info_used_libraries">प्रयुक्त लाइब्रेरीज़</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3: आधुनिक UI फ्रेमवर्क\n• LiquidGlass (nadeemiqbal): फ्लूइड ब्लर और ग्लास शेडर\n• mXparser: गणित सूत्र मूल्यांकन, कलन और ग्राफ़\n• DataStore Preferences: अतुल्यकालिक, मजबूत डेटा संग्रहण\n• Play Services OSS Licenses: स्वचालित लाइसेंस प्रबंधन</string>
+
+    <!-- Settings: Language Tab -->
     <string name="language_select_heading">भाषा चुनें:</string>
     <string name="language_system">सिस्टम भाषा (डिफ़ॉल्ट)</string>
     <string name="language_german">जर्मन (Deutsch)</string>
@@ -80,4 +217,67 @@
     <string name="language_russian">रूसी (Russian)</string>
     <string name="language_portuguese">पुर्तगाली (Portuguese)</string>
     <string name="language_hindi">हिन्दी</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">क्या आप वाकई ऐप रीसेट करना चाहते हैं?</string>
+    <string name="dialog_reset_text">सभी DataStore सेटिंग्स, सहेजी गई गणनाएँ और पूरा इतिहास स्थायी रूप से हटा दिया जाएगा।</string>
+    <string name="dialog_reset_confirm">रीसेट करें</string>
+    <string name="dialog_reset_cancel">रद्द करें</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">सूत्र खोजें...</string>
+    <string name="formula_search_clear">खोज साफ़ करें</string>
+    <string name="formula_search_empty">कोई मेल खाता सूत्र नहीं मिला</string>
+    <string name="formula_circle_area">वृत्त का क्षेत्रफल</string>
+    <string name="formula_circle_circumference">वृत्त की परिधि</string>
+    <string name="formula_pythagoras">पाइथागोरस प्रमेय</string>
+    <string name="formula_compound_interest">चक्रवृद्धि ब्याज</string>
+    <string name="formula_sphere_volume">गोले का आयतन</string>
+    <string name="formula_sphere_surface">गोले का पृष्ठीय क्षेत्रफल</string>
+    <string name="formula_cylinder_volume">बेलन का आयतन</string>
+    <string name="formula_triangle_area">त्रिभुज का क्षेत्रफल</string>
+    <string name="formula_quadratic">द्विघात समीकरण (x₁)</string>
+    <string name="formula_percentage">प्रतिशत मान</string>
+    <string name="formula_integral_example">निश्चित समाकलन</string>
+    <string name="formula_derivative_example">अवकलज (d/dx)</string>
+    <string name="formula_circle_area_keywords">वृत्त,क्षेत्रफल,त्रिज्या,पाई,r^2</string>
+    <string name="formula_circle_circumference_keywords">वृत्त,परिधि,व्यास,त्रिज्या,पाई</string>
+    <string name="formula_pythagoras_keywords">पाइथागोरस,प्रमेय,त्रिभुज,कर्ण,समकोण</string>
+    <string name="formula_compound_interest_keywords">चक्रवृद्धि,ब्याज,मूलधन,दर,पूंजी,प्रतिशत</string>
+    <string name="formula_sphere_volume_keywords">गोला,आयतन,त्रिज्या,पाई,r^3</string>
+    <string name="formula_sphere_surface_keywords">गोला,सतह,क्षेत्रफल,त्रिज्या,पाई</string>
+    <string name="formula_cylinder_volume_keywords">बेलन,आयतन,ऊंचाई,त्रिज्या,पाई</string>
+    <string name="formula_triangle_area_keywords">त्रिभुज,क्षेत्रफल,आधार,ऊंचाई</string>
+    <string name="formula_quadratic_keywords">द्विघात,समीकरण,मूल,परवलय</string>
+    <string name="formula_percentage_keywords">प्रतिशत,छूट,दर,%</string>
+    <string name="formula_integral_example_keywords">समाकलन,निश्चित,क्षेत्रफल,कलन</string>
+    <string name="formula_derivative_example_keywords">अवकलज,ढलान,अवकलन,स्पर्शरेखा,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">सेटिंग्स खोजें...</string>
+    <string name="settings_search_clear">खोज साफ़ करें</string>
+    <string name="settings_search_empty">कोई मेल खाती सेटिंग्स नहीं मिली</string>
+    <string name="settings_keywords_appearance">डिज़ाइन,थीम,रंग,लाइट,डार्क,amoled,मोड</string>
+    <string name="settings_keywords_units">इकाइयाँ,कोण,त्रिकोणमिति,डिग्री,रेडियन,रूपांतरण</string>
+    <string name="settings_keywords_dev_screen">डेवलपर,स्क्रीन,रिज़ॉल्यूशन,स्केलिंग,आकार</string>
+    <string name="settings_keywords_dev_api">डेवलपर,api,android,संस्करण,सिमुलेशन,ब्लर</string>
+    <string name="settings_keywords_dev_haptic">डेवलपर,हैप्टिक,कंपन,तीव्रता,मोटर,lra,erm</string>
+    <string name="settings_keywords_dev_auto_result">डेवलपर,परिणाम,स्वचालित,ऑटो,लाइव,गणना</string>
+    <string name="settings_keywords_dev_lifecycle">डेवलपर,जीवन चक्र,स्थिति,पृष्ठभूमि,क्रैश,परीक्षण</string>
+    <string name="settings_keywords_dev_cache">डेवलपर,कैश,स्टोरेज,अस्थायी,साफ़,हटाएं</string>
+    <string name="settings_keywords_dev_reset">डेवलपर,स्टोरेज,रीसेट,इतिहास,डेटा,हटाएं,डिफ़ॉल्ट</string>
+    <string name="settings_keywords_info_version">संस्करण,ऐप,बिल्ड,कॉपीराइट,android</string>
+    <string name="settings_keywords_info_license">लाइसेंस,apache,ओपन-सोर्स,कॉपीराइट</string>
+    <string name="settings_keywords_language">भाषा,सिस्टम,लोकेल,अनुवाद</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">इकाइयां खोजें...</string>
+    <string name="converter_search_clear">खोज साफ़ करें</string>
+    <string name="converter_search_empty">कोई मिलती-जुलती इकाई नहीं मिली</string>
+    <string name="converter_keywords_length">लंबाई,दूरी,मीटर,फीट,सेंटीमीटर,इंच,किलोमीटर,मील</string>
+    <string name="converter_keywords_mass">द्रव्यमान,वजन,किलोग्राम,पाउंड</string>
+    <string name="converter_keywords_temp">तापमान,डिग्री,सेल्सियस,फ़ारेनहाइट</string>
+    <string name="converter_keywords_volume">आयतन,क्षमता,लीटर,गैलन</string>
+    <string name="converter_keywords_data">डेटा,स्टोरेज,मेमोरी,बाइट,किलोबाइट,मेगाबाइट,गीगाबाइट,टेराबाइट</string>
+    <string name="converter_keywords_time">समय,अवधि,सेकंड,मिलीसेकंड,मिनट,घंटे,दिन</string>
 </resources>

@@ -333,6 +333,14 @@ class ExampleUnitTest {
         assertEquals("es", resolve("es", java.util.Locale("ko", "KR")))
         assertEquals("fr", resolve("fr", java.util.Locale("ru", "RU")))
         assertEquals("en", resolve("invalid", java.util.Locale("de", "DE")))
+
+        // "SYSTEM" tag behaves identical to blank/system reset
+        assertEquals("de", resolve("SYSTEM", java.util.Locale("de", "DE")))
+        assertEquals("de", resolve("system", java.util.Locale("de", "DE")))
+        assertEquals("ru", resolve("SYSTEM", java.util.Locale("ru", "RU")))
+        assertEquals("pt", resolve("SYSTEM", java.util.Locale("pt", "BR")))
+        assertEquals("hi", resolve("SYSTEM", java.util.Locale("hi", "IN")))
+        assertEquals("en", resolve("SYSTEM", java.util.Locale("tr", "TR")))
     }
 
     @Test
@@ -592,5 +600,30 @@ class ExampleUnitTest {
         assertTrue(octResults.isNotEmpty())
         assertTrue(octResults.any { it.localizedName == "Octet" })
         assertTrue(octResults.any { it.localizedName == "Gigaoctet" })
+    }
+
+    @Test
+    fun testDeeplyNestedIntegralAndExtremeConverterValuesDoNotCrash() {
+        // Build nested integral deeper than MAX_RECURSION_DEPTH (16)
+        var nested = "x"
+        repeat(20) {
+            nested = "∫($nested; 0; 1)"
+        }
+        val nestedRes = evaluator.evaluate(nested, AngleMode.RAD)
+        assertTrue(nestedRes is EvaluationResult.Error)
+
+        // Non-finite and extreme inputs in UnitConverter
+        val mToFt = UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }
+        assertEquals("—", UnitConverter.convert(Double.NaN, mToFt, forward = true))
+        assertEquals("—", UnitConverter.convert(Double.POSITIVE_INFINITY, mToFt, forward = true))
+        assertEquals("—", UnitConverter.convert(Double.NEGATIVE_INFINITY, mToFt, forward = true))
+        assertEquals("—", UnitConverter.convert(Double.MAX_VALUE, mToFt, forward = true))
+        val largeButFinite = UnitConverter.convert(1e15, mToFt, forward = true)
+        assertTrue(largeButFinite.contains("E"))
+
+        // System locale support helper
+        assertTrue(com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel.isSystemLocaleSupported(java.util.Locale("de", "DE")))
+        assertTrue(com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel.isSystemLocaleSupported(java.util.Locale("hi", "IN")))
+        assertTrue(!com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel.isSystemLocaleSupported(java.util.Locale("tr", "TR")))
     }
 }

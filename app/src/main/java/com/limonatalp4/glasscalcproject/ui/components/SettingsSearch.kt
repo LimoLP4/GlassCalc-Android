@@ -198,6 +198,11 @@ fun rememberSettingsSearchVisibility(
         trimmed,
         stringResource(R.string.dev_simulated_api_title),
         stringResource(R.string.dev_simulate_api_switch),
+        stringResource(R.string.dev_feature_vibration_effect),
+        stringResource(R.string.dev_feature_edge_to_edge),
+        stringResource(R.string.dev_feature_material_you),
+        stringResource(R.string.dev_feature_blur_effect),
+        stringResource(R.string.dev_feature_swipe_gestures),
         devTabTitle,
         stringResource(R.string.settings_keywords_dev_api)
     )

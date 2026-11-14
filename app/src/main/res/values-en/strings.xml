@@ -166,6 +166,12 @@
     <string name="dev_api_feature_compatibility">API feature compatibility (Device limit: API %d):</string>
     <string name="dev_feature_supported">Supported</string>
     <string name="dev_feature_not_supported">Not supported</string>
+    <string name="dev_api_level_plus">API %d+</string>
+    <string name="dev_feature_vibration_effect">VibrationEffect</string>
+    <string name="dev_feature_edge_to_edge">Edge-to-Edge</string>
+    <string name="dev_feature_material_you">Material You</string>
+    <string name="dev_feature_blur_effect">Blur Effect</string>
+    <string name="dev_feature_swipe_gestures">Swipe Gestures</string>
     <string name="dev_haptic_title">Haptic Feedback</string>
     <string name="dev_haptic_desc">Vibration on key presses and switches</string>
     <string name="dev_haptic_detected_motor">Detected motor</string>

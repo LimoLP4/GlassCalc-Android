@@ -4,6 +4,7 @@
     <string name="app_version_tag">v%s • Android 8-17 Ready</string>
     <string name="copyright_notice">Copyright © 2026 limonatalp4</string>
 
+    <!-- Navigation Drawer -->
     <string name="nav_open_menu">Abrir menu</string>
     <string name="nav_calculator">Calculadora</string>
     <string name="nav_history">Histórico</string>
@@ -13,6 +14,36 @@
     <string name="nav_close">Fechar</string>
     <string name="nav_history_show">Mostrar histórico</string>
 
+    <!-- Main Screen & Keypad -->
+    <string name="mode_standard">Padrão</string>
+    <string name="mode_scientific">Científico</string>
+    <string name="btn_constants">Const.</string>
+    <string name="btn_constants_desc">Constantes físicas e matemáticas</string>
+    <string name="btn_fraction_slash_desc">Barra de fração</string>
+    <string name="btn_euler_desc">Número de Euler e</string>
+    <string name="btn_power_xy_desc">Potência x elevado a y</string>
+    <string name="btn_nth_root_desc">Raiz enésima</string>
+    <string name="btn_integral_desc">Integral</string>
+    <string name="btn_var_x_desc">Variável x</string>
+    <string name="btn_semicolon_desc">Separador de argumentos</string>
+    <string name="btn_del_desc">Apagar (Segure para apagar continuamente)</string>
+    <string name="btn_copy_clipboard">Copiar resultado para a área de transferência</string>
+    <string name="toast_copied">Copiado para a área de transferência: %s</string>
+
+    <!-- Calculation Errors -->
+    <string name="error_division_by_zero">Divisão por 0 não permitida</string>
+    <string name="error_syntax">Erro de sintaxe</string>
+    <string name="error_not_defined">Não definido</string>
+    <string name="error_calculation">Erro de cálculo</string>
+    <string name="error_invalid_expression">Expressão inválida</string>
+
+    <!-- History Sheet -->
+    <string name="title_history">Histórico (Últimos 20)</string>
+    <string name="history_empty">Nenhum cálculo salvo ainda.</string>
+    <string name="btn_history_clear">Limpar</string>
+    <string name="btn_history_clear_desc">Limpar histórico</string>
+
+    <!-- Unit Converter Dialog -->
     <string name="title_converter">Conversor de Unidades</string>
     <string name="cat_length">Comprimento</string>
     <string name="cat_mass">Massa</string>
@@ -26,6 +57,7 @@
     <string name="converter_result_label">Resultado (%s):</string>
     <string name="converter_import">Importar para a calculadora</string>
 
+    <!-- Unit Pairs -->
     <string name="unit_m_ft">Metros ↔ Pés (m ↔ ft)</string>
     <string name="unit_cm_in">Centímetros ↔ Polegadas (cm ↔ in)</string>
     <string name="unit_km_mi">Quilômetros ↔ Milhas (km ↔ mi)</string>
@@ -41,6 +73,7 @@
     <string name="unit_h_min">Horas ↔ Minutos (h ↔ min)</string>
     <string name="unit_d_h">Dias ↔ Horas (d ↔ h)</string>
 
+    <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">Metro</string>
     <string name="unit_name_feet">Pés</string>
     <string name="unit_name_centimeter">Centímetro</string>
@@ -64,10 +97,114 @@
     <string name="unit_name_hours">Horas</string>
     <string name="unit_name_days">Dias</string>
 
-    <string name="converter_search_placeholder">Pesquisar unidades...</string>
-    <string name="converter_search_clear">Limpar pesquisa</string>
-    <string name="converter_search_empty">Nenhuma unidade encontrada</string>
+    <!-- Constants Dialog -->
+    <string name="title_constants">Constantes Científicas</string>
+    <string name="cat_constants_math">Matemática</string>
+    <string name="cat_constants_physics">Física</string>
+    <string name="cat_constants_astro">Astronomia</string>
+    <string name="constants_apply_hint">Toque para inserir o valor diretamente no cálculo atual.</string>
+    <string name="constants_select_heading">Escolha uma constante física ou matemática:</string>
+    <string name="const_pi">Pi (Constante do círculo)</string>
+    <string name="const_e">Número de Euler</string>
+    <string name="const_c">Velocidade da luz</string>
+    <string name="const_g">Gravidade padrão</string>
+    <string name="const_h">Constante de Planck</string>
+    <string name="const_G">Constante gravitacional</string>
+    <string name="const_na">Constante de Avogadro</string>
+    <string name="const_k">Constante de Boltzmann</string>
 
+    <!-- Graph Dialog & Controls -->
+    <string name="title_graph">Gráfico de Funções</string>
+    <string name="graph_hint_expression">Insira uma fórmula (ex: sin(x), x^2, cos(x)*2):</string>
+    <string name="graph_gesture_locked">Gestos bloqueados</string>
+    <string name="graph_gesture_unlocked">Gestos ativados</string>
+    <string name="graph_gesture_unlock">Desbloquear gestos do gráfico</string>
+    <string name="graph_gesture_lock">Bloquear gestos do gráfico</string>
+    <string name="graph_hint_scan">Toque para definir ponto</string>
+    <string name="graph_pan_left">Mover para a esquerda</string>
+    <string name="graph_pan_right">Mover para a direita</string>
+    <string name="graph_zoom_in">Aproximar</string>
+    <string name="graph_zoom_out">Afastar</string>
+    <string name="graph_reset">Redefinir</string>
+    <string name="graph_btn_apply_to_calc">Usar na calculadora</string>
+
+    <!-- Settings Dialog Titles & Tabs -->
+    <string name="title_settings">Configurações</string>
+    <string name="title_appearance">Aparência</string>
+    <string name="title_units">Unidades</string>
+    <string name="title_dev_options">Desenvolvedor</string>
+    <string name="title_info">Sobre</string>
+    <string name="tab_language">Idioma</string>
+
+    <!-- Settings: Appearance Tab -->
+    <string name="theme_select_heading">Selecionar tema:</string>
+    <string name="theme_material_you">Material You (Cores dinâmicas)</string>
+    <string name="theme_automatic">Automático (Sistema)</string>
+    <string name="theme_white_mode">Modo Claro (Branco)</string>
+    <string name="theme_standard_dark">Modo Escuro (Padrão)</string>
+    <string name="theme_dark_mode">Modo Escuro (Preto profundo)</string>
+    <string name="theme_amoled_dark">AMOLED Dark (Preto puro)</string>
+    <string name="theme_material_you_unsupported">Incompatível com esta versão do Android (requer API 31+, ativo: API %d)</string>
+    <string name="theme_amoled_desc">Preto puro #000000 com 10-15% de vidro branco para máxima economia de bateria OLED</string>
+
+    <!-- Settings: Units Tab -->
+    <string name="units_angle_heading">Modo angular padrão para trigonometria:</string>
+    <string name="angle_deg_label">Graus (DEG)</string>
+    <string name="angle_deg_desc">Círculo padrão = 360°</string>
+    <string name="angle_rad_label">Radianos (RAD)</string>
+    <string name="angle_rad_desc">Círculo completo = 2π</string>
+    <string name="units_supported_systems">Sistemas de conversão suportados:</string>
+    <string name="units_systems_detail">• Métrico ↔ Imperial/US (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperatura (°C ↔ °F)\n• Volume (l ↔ gal)\n• Armazenamento de dados (B, KB, MB, GB, TB)\n• Tempo (ms, s, min, h, d)</string>
+
+    <!-- Settings: Developer Tab -->
+    <string name="dev_screen_scaling">Tamanho da Tela e Escala</string>
+    <string name="dev_resolution">Resolução: %1$ddp x %2$ddp</string>
+    <string name="dev_simulated_api_title">Versão Simulada do Android</string>
+    <string name="dev_effective_ui_api">API de UI Efetiva: %d</string>
+    <string name="dev_simulate_api_switch">Simular nível de API</string>
+    <string name="dev_api_level_slider">Nível: API %d</string>
+    <string name="dev_api_feature_compatibility">Compatibilidade de recursos da API (Limite do aparelho: API %d):</string>
+    <string name="dev_feature_supported">Suportado</string>
+    <string name="dev_feature_not_supported">Não suportado</string>
+    <string name="dev_api_level_plus">API %d+</string>
+    <string name="dev_feature_vibration_effect">VibrationEffect</string>
+    <string name="dev_feature_edge_to_edge">Edge-to-Edge</string>
+    <string name="dev_feature_material_you">Material You</string>
+    <string name="dev_feature_blur_effect">Efeito de desfoque</string>
+    <string name="dev_feature_swipe_gestures">Gestos de deslize</string>
+    <string name="dev_haptic_title">Feedback Háptico</string>
+    <string name="dev_haptic_desc">Vibração ao pressionar botões e seletores</string>
+    <string name="dev_haptic_detected_motor">Motor detectado</string>
+    <string name="dev_haptic_unsupported_device">Este dispositivo não suporta feedback háptico.</string>
+    <string name="dev_haptic_unsupported_api">Não suportado pelo nível de API simulado.</string>
+    <string name="dev_haptic_lra_detected">Hardware: Motor linear LRA detectado (pulsos táteis precisos ativos)</string>
+    <string name="dev_haptic_erm_detected">Hardware: Motor rotativo ERM detectado (controle de pulso ativo)</string>
+    <string name="dev_haptic_intensity_label">Intensidade</string>
+    <string name="dev_haptic_intensity_level">Nível %1$d / 10</string>
+    <string name="dev_auto_result_title">Resultado Automático</string>
+    <string name="dev_auto_result_desc">Calcular resultado em tempo real durante a digitação</string>
+    <string name="dev_lifecycle_title">Preservação de Estado e Ciclo de Vida</string>
+    <string name="dev_btn_background">Plano de Fundo</string>
+    <string name="dev_btn_crash_test">Teste de Falha</string>
+    <string name="dev_reset_storage_title">Redefinir Armazenamento do App</string>
+    <string name="dev_reset_storage_desc">Exclui todo o histórico, expressões salvas e restaura todas as configurações padrão.</string>
+    <string name="dev_btn_reset_storage">Redefinir Configurações</string>
+    <string name="dev_clear_cache_title">Limpar Cache</string>
+    <string name="dev_clear_cache_desc">Libera espaço temporário sem alterar suas configurações ou histórico.</string>
+    <string name="dev_btn_clear_cache">Limpar Cache</string>
+    <string name="toast_cache_cleared">Cache limpo com sucesso</string>
+    <string name="toast_cache_error">Não foi possível limpar o cache completamente</string>
+
+    <!-- Settings: Info Tab -->
+    <string name="info_github_repo">Repositório GitHub</string>
+    <string name="info_github_open">Abrir no GitHub</string>
+    <string name="info_oss_licenses">Licenças de Terceiros</string>
+    <string name="info_oss_licenses_desc">Visão geral completa de todas as bibliotecas de código aberto usadas e suas licenças.</string>
+    <string name="info_btn_oss_licenses">Mostrar Licenças de Código Aberto</string>
+    <string name="info_used_libraries">Bibliotecas Utilizadas</string>
+    <string name="info_libraries_detail">• Jetpack Compose &amp; Material 3: Framework moderno de UI\n• LiquidGlass (nadeemiqbal): Desfoque fluido e shader de vidro\n• mXparser: Avaliação matemática, cálculo e gráficos\n• DataStore Preferences: Armazenamento assíncrono e confiável\n• Play Services OSS Licenses: Gerenciamento automatizado de licenças</string>
+
+    <!-- Settings: Language Tab -->
     <string name="language_select_heading">Selecionar idioma:</string>
     <string name="language_system">Idioma do sistema (Padrão)</string>
     <string name="language_german">Deutsch (Alemão)</string>
@@ -80,4 +217,67 @@
     <string name="language_russian">Русский (Russo)</string>
     <string name="language_portuguese">Português</string>
     <string name="language_hindi">हिन्दी (Hindi)</string>
+
+    <!-- Reset Dialog -->
+    <string name="dialog_reset_title">Realmente redefinir o app?</string>
+    <string name="dialog_reset_text">Todas as configurações do DataStore, cálculos salvos e todo o histórico serão excluídos permanentemente.</string>
+    <string name="dialog_reset_confirm">Redefinir</string>
+    <string name="dialog_reset_cancel">Cancelar</string>
+
+    <!-- Drawer Formula Search -->
+    <string name="formula_search_placeholder">Pesquisar fórmula...</string>
+    <string name="formula_search_clear">Limpar pesquisa</string>
+    <string name="formula_search_empty">Nenhuma fórmula correspondente encontrada</string>
+    <string name="formula_circle_area">Área do Círculo</string>
+    <string name="formula_circle_circumference">Circunferência do Círculo</string>
+    <string name="formula_pythagoras">Teorema de Pitágoras</string>
+    <string name="formula_compound_interest">Juros Compostos</string>
+    <string name="formula_sphere_volume">Volume da Esfera</string>
+    <string name="formula_sphere_surface">Superfície da Esfera</string>
+    <string name="formula_cylinder_volume">Volume do Cilindro</string>
+    <string name="formula_triangle_area">Área do Triângulo</string>
+    <string name="formula_quadratic">Equação Quadrática (x₁)</string>
+    <string name="formula_percentage">Valor Percentual</string>
+    <string name="formula_integral_example">Integral Definida</string>
+    <string name="formula_derivative_example">Derivada (d/dx)</string>
+    <string name="formula_circle_area_keywords">círculo,área,raio,pi,r^2,circunferência</string>
+    <string name="formula_circle_circumference_keywords">círculo,circunferência,perímetro,diâmetro,raio,pi</string>
+    <string name="formula_pythagoras_keywords">pitágoras,teorema,triângulo,hipotenusa,cateto</string>
+    <string name="formula_compound_interest_keywords">compostos,juros,capital,taxa,percentual,investimento</string>
+    <string name="formula_sphere_volume_keywords">esfera,bola,volume,raio,pi,r^3</string>
+    <string name="formula_sphere_surface_keywords">esfera,superfície,área,raio,pi</string>
+    <string name="formula_cylinder_volume_keywords">cilindro,volume,altura,raio,pi</string>
+    <string name="formula_triangle_area_keywords">triângulo,área,base,altura</string>
+    <string name="formula_quadratic_keywords">quadrática,equação,raízes,parábola,discriminante,baskara</string>
+    <string name="formula_percentage_keywords">porcentagem,percentual,desconto,taxa,%</string>
+    <string name="formula_integral_example_keywords">integral,definida,área,cálculo</string>
+    <string name="formula_derivative_example_keywords">derivada,inclinação,diferencial,tangente,cálculo,d/dx</string>
+
+    <!-- Settings Search -->
+    <string name="settings_search_placeholder">Pesquisar configurações...</string>
+    <string name="settings_search_clear">Limpar pesquisa</string>
+    <string name="settings_search_empty">Nenhuma configuração encontrada</string>
+    <string name="settings_keywords_appearance">aparência,design,tema,cor,cores,claro,escuro,amoled,modo</string>
+    <string name="settings_keywords_units">unidades,ângulo,trigonometria,graus,radianos,conversão</string>
+    <string name="settings_keywords_dev_screen">desenvolvedor,tela,resolução,escala,tamanho</string>
+    <string name="settings_keywords_dev_api">desenvolvedor,api,android,versão,simulação,material you,desfoque</string>
+    <string name="settings_keywords_dev_haptic">desenvolvedor,háptico,vibração,vibrar,intensidade,nível,motor,lra,erm</string>
+    <string name="settings_keywords_dev_auto_result">desenvolvedor,resultado,automático,auto,cálculo,ao vivo</string>
+    <string name="settings_keywords_dev_lifecycle">desenvolvedor,ciclo de vida,estado,segundo plano,falha,teste</string>
+    <string name="settings_keywords_dev_cache">desenvolvedor,cache,armazenamento,temporário,limpar,apagar</string>
+    <string name="settings_keywords_dev_reset">desenvolvedor,armazenamento,redefinir,histórico,dados,apagar,padrão</string>
+    <string name="settings_keywords_info_version">versão,app,build,direitos autorais,android</string>
+    <string name="settings_keywords_info_license">licença,licenças,apache,código aberto,open source</string>
+    <string name="settings_keywords_language">idioma,idiomas,sistema,local,tradução,localização</string>
+
+    <!-- Unit Converter Search -->
+    <string name="converter_search_placeholder">Pesquisar unidades...</string>
+    <string name="converter_search_clear">Limpar pesquisa</string>
+    <string name="converter_search_empty">Nenhuma unidade encontrada</string>
+    <string name="converter_keywords_length">comprimento,distância,metros,pés,centímetros,polegadas,quilômetros,milhas</string>
+    <string name="converter_keywords_mass">massa,peso,quilogramas,libras</string>
+    <string name="converter_keywords_temp">temperatura,graus,celsius,fahrenheit</string>
+    <string name="converter_keywords_volume">volume,capacidade,litros,galões</string>
+    <string name="converter_keywords_data">dados,armazenamento,memória,byte,kilobyte,megabyte,gigabyte,terabyte</string>
+    <string name="converter_keywords_time">tempo,duração,segundos,milissegundos,minutos,horas,dias</string>
 </resources>

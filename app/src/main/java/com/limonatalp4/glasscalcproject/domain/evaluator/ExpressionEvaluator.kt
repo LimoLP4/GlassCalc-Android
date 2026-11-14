@@ -18,9 +18,13 @@ sealed class EvaluationResult {
 
 private class EvalStepException(val messageResId: Int) : RuntimeException()
 
+object MxParserLock
+
 class ExpressionEvaluator {
 
     companion object {
+        private const val MAX_RECURSION_DEPTH = 16
+
         init {
             try {
                 License.iConfirmNonCommercialUse("limonatalp4")
@@ -33,21 +37,22 @@ class ExpressionEvaluator {
         private val SCIENTIFIC_FORMAT = DecimalFormat("0.######E0", DecimalFormatSymbols(Locale.US))
     }
 
-    fun evaluate(expression: String, angleMode: AngleMode = AngleMode.DEG): EvaluationResult {
+    fun evaluate(
+        expression: String,
+        angleMode: AngleMode = AngleMode.DEG,
+        depth: Int = 0
+    ): EvaluationResult {
+        if (depth > MAX_RECURSION_DEPTH) {
+            return EvaluationResult.Error(R.string.error_syntax)
+        }
         if (expression.isBlank()) {
             return EvaluationResult.Success(0.0, "0")
         }
 
         try {
-            if (angleMode == AngleMode.DEG) {
-                mXparser.setDegreesMode()
-            } else {
-                mXparser.setRadiansMode()
-            }
-
             // Preprocess integrals (Simpson's rule), derivatives, and n-th roots
-            val resolvedIntegrals = resolveIntegrals(expression, angleMode)
-            val resolvedDerivatives = resolveDerivatives(resolvedIntegrals, angleMode)
+            val resolvedIntegrals = resolveIntegrals(expression, angleMode, depth)
+            val resolvedDerivatives = resolveDerivatives(resolvedIntegrals, angleMode, depth)
             val resolvedNthRoots = resolveNthRoots(resolvedDerivatives)
 
             // Quick check for division by zero pattern after sanitizing
@@ -58,15 +63,25 @@ class ExpressionEvaluator {
                 return EvaluationResult.Error(R.string.error_division_by_zero)
             }
 
-            val e = Expression(sanitized)
-            val result = e.calculate()
+            var errorMsg: String? = null
+            val result = synchronized(MxParserLock) {
+                if (angleMode == AngleMode.DEG) {
+                    mXparser.setDegreesMode()
+                } else {
+                    mXparser.setRadiansMode()
+                }
+                val e = Expression(sanitized)
+                val value = e.calculate()
+                errorMsg = e.errorMessage
+                value
+            }
 
             if (result.isInfinite()) {
                 return EvaluationResult.Error(R.string.error_division_by_zero)
             }
 
             if (result.isNaN()) {
-                val err = e.errorMessage
+                val err = errorMsg
                 val userResId = if (!err.isNullOrBlank() && !err.contains("no errors", ignoreCase = true)) {
                     R.string.error_syntax
                 } else {
@@ -83,6 +98,8 @@ class ExpressionEvaluator {
             return EvaluationResult.Error(R.string.error_calculation)
         } catch (_: IllegalArgumentException) {
             return EvaluationResult.Error(R.string.error_syntax)
+        } catch (_: StackOverflowError) {
+            return EvaluationResult.Error(R.string.error_syntax)
         } catch (_: Exception) {
             return EvaluationResult.Error(R.string.error_invalid_expression)
         }
@@ -94,7 +111,8 @@ class ExpressionEvaluator {
      * - ∫(f(t); t; a; b) or int(f(t); t; a; b) -> custom variable
      * - ∫(f(x)) or int(f(x)) -> definite integral over [0, 1]
      */
-    private fun resolveIntegrals(expr: String, angleMode: AngleMode): String {
+    private fun resolveIntegrals(expr: String, angleMode: AngleMode, depth: Int): String {
+        if (depth > MAX_RECURSION_DEPTH) throw EvalStepException(R.string.error_syntax)
         val sb = StringBuilder()
         var i = 0
         while (i < expr.length) {
@@ -127,17 +145,17 @@ class ExpressionEvaluator {
                     throw EvalStepException(R.string.error_syntax)
                 }
 
-                val lowerVal = when (val lowerEval = evaluate(lowerRaw, angleMode)) {
+                val lowerVal = when (val lowerEval = evaluate(lowerRaw, angleMode, depth + 1)) {
                     is EvaluationResult.Success -> lowerEval.value
                     is EvaluationResult.Error -> throw EvalStepException(lowerEval.messageResId)
                 }
-                val upperVal = when (val upperEval = evaluate(upperRaw, angleMode)) {
+                val upperVal = when (val upperEval = evaluate(upperRaw, angleMode, depth + 1)) {
                     is EvaluationResult.Success -> upperEval.value
                     is EvaluationResult.Error -> throw EvalStepException(upperEval.messageResId)
                 }
 
-                val resolvedInnerIntegrals = resolveIntegrals(integrandRaw, angleMode)
-                val resolvedInnerDerivatives = resolveDerivatives(resolvedInnerIntegrals, angleMode)
+                val resolvedInnerIntegrals = resolveIntegrals(integrandRaw, angleMode, depth + 1)
+                val resolvedInnerDerivatives = resolveDerivatives(resolvedInnerIntegrals, angleMode, depth + 1)
                 val resolvedInnerRoots = resolveNthRoots(resolvedInnerDerivatives)
 
                 val integralValue = simpsonIntegrate(
@@ -175,38 +193,40 @@ class ExpressionEvaluator {
         val n = 1000 // Even number of subintervals for Simpson's rule
         val h = (upper - lower) / n
 
-        if (angleMode == AngleMode.DEG) {
-            mXparser.setDegreesMode()
-        } else {
-            mXparser.setRadiansMode()
-        }
-
-        val arg = Argument("$varName = 0")
-        val expression = Expression(integrandSanitized, arg)
-
-        fun evalAt(t: Double): Double {
-            arg.argumentValue = t
-            val v = expression.calculate()
-            if (v.isNaN() || v.isInfinite()) {
-                val err = expression.errorMessage
-                val resId = if (!err.isNullOrBlank() && !err.contains("no errors", ignoreCase = true)) {
-                    R.string.error_syntax
-                } else {
-                    R.string.error_not_defined
-                }
-                throw EvalStepException(resId)
+        val result = synchronized(MxParserLock) {
+            if (angleMode == AngleMode.DEG) {
+                mXparser.setDegreesMode()
+            } else {
+                mXparser.setRadiansMode()
             }
-            return v
-        }
 
-        var sum = evalAt(lower) + evalAt(upper)
-        for (k in 1 until n) {
-            val xVal = lower + k * h
-            val coeff = if (k % 2 == 0) 2.0 else 4.0
-            sum += coeff * evalAt(xVal)
-        }
+            val arg = Argument("$varName = 0")
+            val expression = Expression(integrandSanitized, arg)
 
-        val result = sign * (h / 3.0) * sum
+            fun evalAt(t: Double): Double {
+                arg.argumentValue = t
+                val v = expression.calculate()
+                if (v.isNaN() || v.isInfinite()) {
+                    val err = expression.errorMessage
+                    val resId = if (!err.isNullOrBlank() && !err.contains("no errors", ignoreCase = true)) {
+                        R.string.error_syntax
+                    } else {
+                        R.string.error_not_defined
+                    }
+                    throw EvalStepException(resId)
+                }
+                return v
+            }
+
+            var sum = evalAt(lower) + evalAt(upper)
+            for (k in 1 until n) {
+                val xVal = lower + k * h
+                val coeff = if (k % 2 == 0) 2.0 else 4.0
+                sum += coeff * evalAt(xVal)
+            }
+
+            sign * (h / 3.0) * sum
+        }
         return if (abs(result) < 1e-12) 0.0 else result
     }
 
@@ -215,7 +235,8 @@ class ExpressionEvaluator {
      * - der(f(x); x0) / d/dx(f(x); x0)
      * - der(f(t); t; x0) / d/dx(f(t); t; x0)
      */
-    private fun resolveDerivatives(expr: String, angleMode: AngleMode): String {
+    private fun resolveDerivatives(expr: String, angleMode: AngleMode, depth: Int): String {
+        if (depth > MAX_RECURSION_DEPTH) throw EvalStepException(R.string.error_syntax)
         val sb = StringBuilder()
         var i = 0
         while (i < expr.length) {
@@ -244,28 +265,31 @@ class ExpressionEvaluator {
                     throw EvalStepException(R.string.error_syntax)
                 }
 
-                val x0 = when (val ptEval = evaluate(pointRaw, angleMode)) {
+                val x0 = when (val ptEval = evaluate(pointRaw, angleMode, depth + 1)) {
                     is EvaluationResult.Success -> ptEval.value
                     is EvaluationResult.Error -> throw EvalStepException(ptEval.messageResId)
                 }
 
-                val sanitizedFn = sanitizeExpression(resolveNthRoots(resolveDerivatives(fnRaw, angleMode)))
-                if (angleMode == AngleMode.DEG) mXparser.setDegreesMode() else mXparser.setRadiansMode()
+                val sanitizedFn = sanitizeExpression(resolveNthRoots(resolveDerivatives(fnRaw, angleMode, depth + 1)))
+                val (fPlus, fMinus) = synchronized(MxParserLock) {
+                    if (angleMode == AngleMode.DEG) mXparser.setDegreesMode() else mXparser.setRadiansMode()
 
-                val arg = Argument("$varName = 0")
-                val expression = Expression(sanitizedFn, arg)
-                val h = 1e-6
+                    val arg = Argument("$varName = 0")
+                    val expression = Expression(sanitizedFn, arg)
+                    val h = 1e-6
 
-                arg.argumentValue = x0 + h
-                val fPlus = expression.calculate()
-                arg.argumentValue = x0 - h
-                val fMinus = expression.calculate()
+                    arg.argumentValue = x0 + h
+                    val plusVal = expression.calculate()
+                    arg.argumentValue = x0 - h
+                    val minusVal = expression.calculate()
+                    plusVal to minusVal
+                }
 
                 if (fPlus.isNaN() || fPlus.isInfinite() || fMinus.isNaN() || fMinus.isInfinite()) {
                     throw EvalStepException(R.string.error_not_defined)
                 }
 
-                val deriv = (fPlus - fMinus) / (2.0 * h)
+                val deriv = (fPlus - fMinus) / (2.0 * 1e-6)
                 val cleanedDeriv = if (abs(deriv) < 1e-11) 0.0 else deriv
                 sb.append('(').append(cleanedDeriv).append(')')
                 i = closeParen + 1

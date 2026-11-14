@@ -153,8 +153,7 @@ fun SettingsDialog(
     val view = LocalView.current
 
     fun triggerHaptic() {
-        if (!hapticFeedbackEnabled) return
-        HapticUtil.performAppHaptic(context, view, true, hapticIntensity)
+        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
     var showResetConfirmDialog by remember { mutableStateOf(false) }
@@ -180,9 +179,11 @@ fun SettingsDialog(
     )
     val isSearchActive = searchQuery.trim().isNotEmpty()
     var preSearchTab by remember { mutableStateOf(0) }
+    var clearedByTabTap by remember { mutableStateOf(false) }
 
     LaunchedEffect(isSearchActive) {
         if (isSearchActive) {
+            clearedByTabTap = false
             preSearchTab = selectedTab
             when {
                 searchVisibility.hasAnyAppearanceMatch -> selectedTab = 0
@@ -192,7 +193,10 @@ fun SettingsDialog(
                 searchVisibility.hasAnyLanguageMatch -> selectedTab = 4
             }
         } else {
-            selectedTab = preSearchTab
+            if (!clearedByTabTap) {
+                selectedTab = preSearchTab
+            }
+            clearedByTabTap = false
         }
     }
 
@@ -433,6 +437,9 @@ fun SettingsDialog(
                                                 },
                                                 onTap = {
                                                     triggerHaptic()
+                                                    if (isSearchActive) {
+                                                        clearedByTabTap = true
+                                                    }
                                                     selectedTab = index
                                                     searchQuery = ""
                                                 }
@@ -1105,31 +1112,39 @@ private fun DeveloperOptionsSection(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
 
-                val apiFeatures = listOf(
-                    Triple("VibrationEffect", 26, "API 26+"),
-                    Triple("Edge-to-Edge", 29, "API 29+"),
-                    Triple("Material You", 31, "API 31+"),
-                    Triple("Blur-Effekt", 31, "API 31+"),
-                    Triple("Swipe-Gesten", 33, "API 33+")
-                )
+                val apiFeatures = remember {
+                    listOf(
+                        R.string.dev_feature_vibration_effect to 26,
+                        R.string.dev_feature_edge_to_edge to 29,
+                        R.string.dev_feature_material_you to 31,
+                        R.string.dev_feature_blur_effect to 31,
+                        R.string.dev_feature_swipe_gestures to 33
+                    )
+                }
 
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    apiFeatures.forEach { (name, minApi, suffix) ->
+                    apiFeatures.forEach { (nameResId, minApi) ->
                         val isAvailable = effectiveApi >= minApi
                         val pillBg = if (isAvailable) colorScheme.primaryContainer.copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         val textColor = if (isAvailable) colorScheme.onPrimaryContainer else colorScheme.onSurface.copy(alpha = 0.35f)
+                        val featureName = stringResource(nameResId)
+                        val apiSuffix = stringResource(R.string.dev_api_level_plus, minApi)
 
                         Box(
                             modifier = Modifier
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(14.dp))
                                 .background(pillBg)
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                modifier = Modifier.wrapContentWidth()
+                            ) {
                                 Icon(
                                     imageVector = if (isAvailable) Icons.Default.Check else Icons.Default.Close,
                                     contentDescription = null,
@@ -1137,10 +1152,12 @@ private fun DeveloperOptionsSection(
                                     modifier = Modifier.size(13.dp)
                                 )
                                 Text(
-                                    text = "$name ($suffix)",
+                                    text = "$featureName ($apiSuffix)",
                                     fontSize = 11.sp,
                                     fontWeight = if (isAvailable) FontWeight.Bold else FontWeight.Medium,
-                                    color = textColor
+                                    color = textColor,
+                                    softWrap = true,
+                                    lineHeight = 13.sp
                                 )
                             }
                         }
@@ -1285,7 +1302,7 @@ private fun DeveloperOptionsSection(
                             sliderIntensity = newLevel.toFloat()
                             if (newLevel != previousLevel) {
                                 onSetHapticIntensity(newLevel)
-                                HapticUtil.performAppHaptic(context, view, true, newLevel)
+                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, newLevel)
                             }
                         },
                         onValueChangeFinished = {
@@ -1478,8 +1495,12 @@ private fun InformationSection(
             Row(
                 modifier = Modifier.fillMaxWidth().clickable {
                     triggerHaptic()
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/releases/"))
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/releases/"))
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
+                    }
                 }.padding(18.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -1577,7 +1598,10 @@ private fun LanguageSection(
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         visibleLanguages.forEach { langOption ->
-            val isSelected = currentLanguage == langOption.localeTag
+            val isSelected = when (langOption) {
+                Language.SYSTEM -> currentLanguage.isBlank() || currentLanguage.equals("SYSTEM", ignoreCase = true)
+                else -> currentLanguage.equals(langOption.localeTag, ignoreCase = true)
+            }
             val cardBg = if (isSelected) colorScheme.primaryContainer else if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             val textColor = if (isAmoled || isTiefschwarz) Color.White else if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
 
@@ -1587,15 +1611,26 @@ private fun LanguageSection(
                     coroutineScope.launch {
                         onSetDismissing(true)
                         delay(200)
-                        onDismiss()
                         onSelectLanguage(langOption.localeTag)
+                        onDismiss()
                     }
                 }.testTag("radio_lang_${langOption.name}"),
                 shape = RoundedCornerShape(24.dp),
                 customBgColor = cardBg
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = isSelected, onClick = { triggerHaptic(); coroutineScope.launch { onSetDismissing(true); delay(200); onDismiss(); onSelectLanguage(langOption.localeTag) } })
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = {
+                            triggerHaptic()
+                            coroutineScope.launch {
+                                onSetDismissing(true)
+                                delay(200)
+                                onSelectLanguage(langOption.localeTag)
+                                onDismiss()
+                            }
+                        }
+                    )
                     Text(text = stringResource(langOption.stringResId), color = textColor, modifier = Modifier.padding(start = 12.dp))
                 }
             }

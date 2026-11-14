@@ -29,35 +29,35 @@ import io.github.nadeemiqbal.liquidglass.rememberLiquidGlassState
  * causing native SIGSEGV crashes in RenderThread (especially on emulators and Android 17 / Samsung S25).
  */
 fun isBlurHardwareSupported(): Boolean {
-    // 1. Must be at least Android 12 (API 31)
-    if (Build.VERSION.SDK_INT < 31) return false
-
-    // 2. Detect Android emulators / virtualized GPU environments.
-    // In emulators (emu64a, goldfish, ranchu), Skia RenderThread segfaults (SEGV_ACCERR)
-    // when using GraphicsLayer + AGSL RuntimeShader + RenderEffect.
-    val isEmulator = Build.FINGERPRINT.startsWith("generic") ||
-            Build.FINGERPRINT.startsWith("unknown") ||
-            Build.MODEL.contains("google_sdk") ||
-            Build.MODEL.contains("Emulator") ||
-            Build.MODEL.contains("Android SDK built for") ||
-            Build.MODEL.contains("sdk_gphone") ||
-            Build.HARDWARE.contains("goldfish") ||
-            Build.HARDWARE.contains("ranchu") ||
-            Build.PRODUCT.contains("sdk_gphone")
-
-    if (isEmulator) {
-        return false
-    }
-
-    // 3. Android 17 / API 36+ specific guard (as requested for Samsung S25 / Android 17)
-    if (Build.VERSION.SDK_INT >= 36) {
-        return false
-    }
-
     return try {
+        // 1. Must be at least Android 12 (API 31)
+        if (Build.VERSION.SDK_INT < 31) return false
+
+        // 2. Detect Android emulators / virtualized GPU environments.
+        // In emulators (emu64a, goldfish, ranchu), Skia RenderThread segfaults (SEGV_ACCERR)
+        // when using GraphicsLayer + AGSL RuntimeShader + RenderEffect.
+        val isEmulator = Build.FINGERPRINT.startsWith("generic") ||
+                Build.FINGERPRINT.startsWith("unknown") ||
+                Build.MODEL.contains("google_sdk") ||
+                Build.MODEL.contains("Emulator") ||
+                Build.MODEL.contains("Android SDK built for") ||
+                Build.MODEL.contains("sdk_gphone") ||
+                Build.HARDWARE.contains("goldfish") ||
+                Build.HARDWARE.contains("ranchu") ||
+                Build.PRODUCT.contains("sdk_gphone")
+
+        if (isEmulator) {
+            return false
+        }
+
+        // 3. Android 17 / API 36+ specific guard (as requested for Samsung S25 / Android 17)
+        if (Build.VERSION.SDK_INT >= 36) {
+            return false
+        }
+
         RenderEffect.createBlurEffect(10f, 10f, Shader.TileMode.CLAMP)
         true
-    } catch (t: Throwable) {
+    } catch (_: Throwable) {
         false
     }
 }
@@ -116,8 +116,8 @@ fun GlassSurface(
     )
     val effectiveBgColor = customBgColor ?: glassProps.cardBackground
 
-    val state = glassState ?: rememberAdaptiveGlassState(forceFallback = !glassProps.supportsBlur)
-    val isBlurActive = glassProps.supportsBlur && state.quality != LiquidGlassQuality.Fallback
+    val state = glassState ?: rememberAdaptiveGlassState(forceFallback = true)
+    val isBlurActive = glassState != null && glassProps.supportsBlur && state.quality != LiquidGlassQuality.Fallback
 
     Box(
         modifier = modifier
