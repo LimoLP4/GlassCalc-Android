@@ -37,6 +37,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
@@ -337,6 +344,11 @@ fun SettingsSearchBar(
         colorScheme.onSurfaceVariant
     }
 
+    val context = LocalContext.current
+    val view = LocalView.current
+    val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -344,6 +356,13 @@ fun SettingsSearchBar(
             .clip(shape)
             .background(searchBarBgColor)
             .border(searchBarBorder, shape = shape)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                    }
+                )
+            }
             .padding(
                 start = 14.dp,
                 end = if (query.isNotEmpty()) 4.dp else 14.dp
@@ -370,7 +389,7 @@ fun SettingsSearchBar(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 ),
-                cursorBrush = SolidColor(colorScheme.primary),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("settings_search_input"),

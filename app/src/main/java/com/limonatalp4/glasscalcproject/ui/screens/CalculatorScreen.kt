@@ -400,14 +400,6 @@ fun CalculatorScreen(
                             DrawerFormulaSearch(
                                 query = formulaSearchQuery,
                                 onQueryChange = { newValue ->
-                                    if (newValue != formulaSearchQuery) {
-                                        HapticUtil.performAppHaptic(
-                                            context = context,
-                                            view = view,
-                                            enabled = hapticFeedbackEnabled,
-                                            intensityLevel = hapticIntensity
-                                        )
-                                    }
                                     formulaSearchQuery = newValue
                                 },
                                 onClearClick = {

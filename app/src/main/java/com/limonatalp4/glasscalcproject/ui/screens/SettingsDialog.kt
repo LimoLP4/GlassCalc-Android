@@ -292,14 +292,6 @@ fun SettingsDialog(
                 SettingsSearchBar(
                     query = searchQuery,
                     onQueryChange = { newValue ->
-                        if (newValue != searchQuery) {
-                            HapticUtil.performAppHaptic(
-                                context = context,
-                                view = view,
-                                enabled = hapticFeedbackEnabled,
-                                intensityLevel = hapticIntensity
-                            )
-                        }
                         searchQuery = newValue
                     },
                     onClearClick = {

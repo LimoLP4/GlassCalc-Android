@@ -46,9 +46,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog
 import com.limonatalp4.glasscalcproject.domain.formulas.MathFormula
+import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
+import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 
 @Immutable
 internal data class LocalizedFormula(
@@ -85,6 +92,11 @@ fun DrawerFormulaSearch(
         )
     }
 
+    val context = LocalContext.current
+    val view = LocalView.current
+    val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
+    val hapticIntensity = LocalHapticIntensity.current
+
     val trimmedQuery = query.trim()
     val filteredFormulas = remember(trimmedQuery, localizedFormulas) {
         filterFormulas(trimmedQuery, localizedFormulas)
@@ -103,6 +115,13 @@ fun DrawerFormulaSearch(
                     color = colorScheme.outline.copy(alpha = 0.3f),
                     shape = searchBarShape
                 )
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                        }
+                    )
+                }
                 .padding(
                     start = 14.dp,
                     end = if (query.isNotEmpty()) 4.dp else 14.dp
@@ -129,7 +148,7 @@ fun DrawerFormulaSearch(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     ),
-                    cursorBrush = SolidColor(colorScheme.primary),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("drawer_formula_search_input"),
