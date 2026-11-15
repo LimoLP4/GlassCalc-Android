@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.2.8)
+### 🔄 Intermediate Updates (v1.2.0 - v1.2.9)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
@@ -31,7 +31,11 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Three New Search Bars (v1.2.8):** Added search functionality in Hamburger Menu (formulas), Settings, and Unit Converter with automatic tab synchronization.
 *   **New SCI Keys & Integral Fix (v1.2.8):** Added `10^x`, `2^x`, `log_n`, `Ans`, `EXP`, and fixed the numerical integration for `∫`.
 *   **Extended Unit Conversion (v1.2.8):** Added "Data" (Byte to TB) and "Time" (ms to Days) categories.
-*   **Advanced Haptics Integration (v1.2.8) (Latest):** Complex haptic logic fully integrated into search bars, avoiding double vibrations during typing.
+*   **Advanced Haptics Integration (v1.2.8):** Complex haptic logic fully integrated into search bars, avoiding double vibrations during typing.
+*   **System Keyboard Support (v1.2.9):** Added a new button in the main display to open the standard Android keyboard for direct formula entry, with smart filtering (`KeyboardType.Ascii` + Whitelist) to prevent crashes from foreign characters.
+*   **UI & Design Consistency (v1.2.9):** Liquid Glass close buttons (X) in all dialogs, dynamic cursor matching the search bars, and smoother animations.
+*   **Layout & Focus Fixes (v1.2.9):** Narrower dialogs, fixed keyboard overlap (IME Insets) in Settings/Unit Converter, and corrected focus management when opening the Hamburger menu.
+*   **Search Improvements (v1.2.9) (Latest):** Better keyword matching and relevance sorting in all three search bars.
 
 ## 🌍 Localization / Sprache
 
