@@ -115,13 +115,87 @@ enum class GraphPreset(val label: String, val formula: String) {
     LOG("log(x)", "log10(x)"),
     SQUARE("x²", "x^2"),
     SQRT("√x", "sqrt(x)"),
-    DERIV("d/dx", "der(sin(t), t, x)"),
+    DERIV("d/dx", "der(sin(x), x)"),
     INTEGRAL("∫", "int(sin(t), t, 0, x)"),
     CUSTOM("f(x)", "custom")
 }
 
 @Immutable
 data class GraphPoint(val x: Double, val y: Double)
+
+@Immutable
+data class GraphBounds(
+    val xMin: Double,
+    val xMax: Double,
+    val yMin: Double,
+    val yMax: Double
+)
+
+fun defaultBoundsForPreset(
+    preset: GraphPreset,
+    angleMode: AngleMode,
+    expression: String = ""
+): GraphBounds {
+    return when (preset) {
+        GraphPreset.SIN, GraphPreset.COS, GraphPreset.TAN -> {
+            if (angleMode == AngleMode.DEG) {
+                GraphBounds(-360.0, 360.0, -2.5, 2.5)
+            } else {
+                GraphBounds(-6.28, 6.28, -2.0, 2.0)
+            }
+        }
+        GraphPreset.ARCSIN, GraphPreset.ARCCOS -> {
+            GraphBounds(-1.5, 1.5, -2.0, 2.0)
+        }
+        GraphPreset.ARCTAN -> {
+            GraphBounds(-5.0, 5.0, -2.0, 2.0)
+        }
+        GraphPreset.SINH, GraphPreset.COSH, GraphPreset.TANH -> {
+            GraphBounds(-4.0, 4.0, -4.0, 4.0)
+        }
+        GraphPreset.ABS -> {
+            GraphBounds(-10.0, 10.0, -2.0, 10.0)
+        }
+        GraphPreset.LN, GraphPreset.LOG -> {
+            GraphBounds(0.01, 10.0, -4.0, 4.0)
+        }
+        GraphPreset.SQUARE -> {
+            GraphBounds(-10.0, 10.0, -5.0, 100.0)
+        }
+        GraphPreset.SQRT -> {
+            GraphBounds(-1.0, 16.0, -1.0, 5.0)
+        }
+        GraphPreset.DERIV -> {
+            val lower = expression.lowercase()
+            if (lower.contains("^2") || lower.contains("²") || lower.contains("x*x")) {
+                GraphBounds(-10.0, 10.0, -20.0, 20.0)
+            } else if (angleMode == AngleMode.DEG && (lower.contains("sin") || lower.contains("cos") || lower.contains("tan"))) {
+                GraphBounds(-360.0, 360.0, -2.0, 2.0)
+            } else {
+                GraphBounds(-6.28, 6.28, -2.0, 2.0)
+            }
+        }
+        GraphPreset.INTEGRAL -> {
+            if (angleMode == AngleMode.DEG) {
+                GraphBounds(-360.0, 360.0, -3.0, 3.0)
+            } else {
+                GraphBounds(-6.28, 6.28, -3.0, 3.0)
+            }
+        }
+        GraphPreset.CUSTOM -> {
+            val lower = expression.lowercase()
+            if (angleMode == AngleMode.DEG && (lower.contains("sin") || lower.contains("cos") || lower.contains("tan"))) {
+                GraphBounds(-360.0, 360.0, -2.5, 2.5)
+            } else if (lower.contains("^2") || lower.contains("²")) {
+                GraphBounds(-10.0, 10.0, -5.0, 50.0)
+            } else if (lower.contains("sqrt") || lower.contains("√")) {
+                GraphBounds(-1.0, 16.0, -1.0, 5.0)
+            } else {
+                GraphBounds(-10.0, 10.0, -10.0, 10.0)
+            }
+        }
+    }
+}
 
 private fun calculateNiceStep(range: Double, targetSteps: Int): Double {
     if (!range.isFinite() || range <= 1e-12) return 1.0
@@ -152,29 +226,54 @@ private fun formatAxisLabel(value: Double): String {
     }
 }
 
-private fun sanitizeForGraphParser(expr: String): String {
-    return expr
+internal fun sanitizeForGraphParser(expr: String): String {
+    var s = expr
         .replace("π", "pi")
         .replace("e", "e")
         .replace("−", "-")
         .replace("×", "*")
         .replace("÷", "/")
         .replace("⁄", "/")
-        .replace(",", ".")
         .replace("²", "^2")
         .replace("³", "^3")
+        .replace("⁴", "^4")
+        .replace("⁵", "^5")
+        .replace("⁶", "^6")
+        .replace("⁷", "^7")
+        .replace("⁸", "^8")
+        .replace("⁹", "^9")
+        .replace("⁰", "^0")
+        .replace("⁺", "+")
+        .replace("⁻", "-")
         .replace("√", "sqrt")
         .replace("³√", "cbrt")
         .replace("arcsin", "asin")
         .replace("arccos", "acos")
         .replace("arctan", "atan")
         .replace("ln", "ln")
-        .replace("log", "log10")
-        .replace("|", "abs")
+        .replace("log(", "log10(")
         .replace("mod", "#")
+        .replace("∫(", "int(")
+        .replace("d/dx(", "der(")
+
+    // Convert decimal comma between digits: e.g. "3,14" -> "3.14", "0,5" -> "0.5"
+    // Leaves argument separating commas intact in functions like der(sin(t), t, x)
+    s = s.replace(Regex("""(?<=\d),(?=\d)"""), ".")
+
+    // Semicolons used in GlassCalc parameter separators -> commas for mXparser
+    s = s.replace(";", ",")
+
+    // If der(...) or d/dx(...) was supplied with only 1 argument like der(x^2), expand to der(x^2, x)
+    val singleArgDerRegex = Regex("""der\(([^,)]+)\)""")
+    s = singleArgDerRegex.replace(s) { matchResult ->
+        val inner = matchResult.groupValues[1]
+        "der($inner, x)"
+    }
+
+    return s
 }
 
-private fun resolveActiveFormula(preset: GraphPreset, expression: String): String {
+internal fun resolveActiveFormula(preset: GraphPreset, expression: String): String {
     return when (preset) {
         GraphPreset.CUSTOM -> {
             if (expression.isNotBlank() && expression.contains("x", ignoreCase = true)) {
@@ -185,11 +284,34 @@ private fun resolveActiveFormula(preset: GraphPreset, expression: String): Strin
                 "sin(x)"
             }
         }
+        GraphPreset.DERIV -> {
+            if (expression.isNotBlank() && expression.contains("x", ignoreCase = true)) {
+                if (expression.contains("d/dx", ignoreCase = true) || expression.contains("der(", ignoreCase = true)) {
+                    expression
+                } else {
+                    "der($expression, x)"
+                }
+            } else {
+                "der(sin(x), x)"
+            }
+        }
+        GraphPreset.INTEGRAL -> {
+            if (expression.isNotBlank() && expression.contains("x", ignoreCase = true)) {
+                if (expression.contains("int(", ignoreCase = true) || expression.contains("∫", ignoreCase = true)) {
+                    expression
+                } else {
+                    "int($expression, x, 0, x)"
+                }
+            } else {
+                "int(sin(t), t, 0, x)"
+            }
+        }
+        GraphPreset.SQUARE -> "x^2"
         else -> preset.formula
     }
 }
 
-private fun evaluateFormulaAtX(
+internal fun evaluateFormulaAtX(
     formula: String,
     x: Double,
     angleMode: AngleMode
@@ -202,7 +324,9 @@ private fun evaluateFormulaAtX(
                 License.iConfirmNonCommercialUse("limonatalp4")
             } catch (_: Exception) {}
 
-            if (angleMode == AngleMode.DEG) {
+            val lower = sanitizedExpr.lowercase()
+            val hasTrig = lower.contains("sin") || lower.contains("cos") || lower.contains("tan")
+            if (angleMode == AngleMode.DEG && hasTrig && !sanitizedExpr.startsWith("der(")) {
                 mXparser.setDegreesMode()
             } else {
                 mXparser.setRadiansMode()
@@ -211,7 +335,28 @@ private fun evaluateFormulaAtX(
             val argX = Argument("x = 0")
             argX.argumentValue = x
             val expr = Expression(sanitizedExpr, argX)
-            expr.calculate()
+            var result = expr.calculate()
+
+            // Numerical central difference fallback if mXparser returned NaN for derivative
+            if ((!result.isFinite() || result.isNaN()) && sanitizedExpr.startsWith("der(")) {
+                val match = Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr)
+                if (match != null) {
+                    val fn = match.groupValues[1]
+                    val varName = match.groupValues[2]
+                    val h = 1e-5
+                    val subArg = Argument("$varName = 0")
+                    val subExpr = Expression(fn, subArg)
+                    subArg.argumentValue = x + h
+                    val yPlus = subExpr.calculate()
+                    subArg.argumentValue = x - h
+                    val yMinus = subExpr.calculate()
+                    if (yPlus.isFinite() && yMinus.isFinite()) {
+                        result = (yPlus - yMinus) / (2.0 * h)
+                    }
+                }
+            }
+
+            result
         }
 
         if (!y.isFinite() || abs(y) > 1e8) {
@@ -252,11 +397,12 @@ fun FunctionGraphView(
         isGraphLocked = isGestureLocked
     }
 
-    // Range bounds state
-    var xMin by remember { mutableDoubleStateOf(-6.28) }
-    var xMax by remember { mutableDoubleStateOf(6.28) }
-    var yMin by remember { mutableDoubleStateOf(-3.0) }
-    var yMax by remember { mutableDoubleStateOf(3.0) }
+    // Range bounds state - initialized based on default preset
+    val initialBounds = remember { defaultBoundsForPreset(GraphPreset.SIN, angleMode, expression) }
+    var xMin by remember { mutableDoubleStateOf(initialBounds.xMin) }
+    var xMax by remember { mutableDoubleStateOf(initialBounds.xMax) }
+    var yMin by remember { mutableDoubleStateOf(initialBounds.yMin) }
+    var yMax by remember { mutableDoubleStateOf(initialBounds.yMax) }
 
     // Cached curve evaluation points (normalized t from 0..1, y value)
     var cachedPoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
@@ -275,24 +421,13 @@ fun FunctionGraphView(
     val currentHapticEnabled by rememberUpdatedState(hapticEnabled)
     val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
 
-    // Auto-Zoom & Auto-Lock: Adjust range and re-lock when switching DEG/RAD
-    LaunchedEffect(angleMode) {
-        if (angleMode == AngleMode.DEG) {
-            xMin = -360.0
-            xMax = 360.0
-        } else {
-            xMin = -6.28
-            xMax = 6.28
-        }
-        yMin = -2.0
-        yMax = 2.0
-        point1 = null
-        point2 = null
-        nextPointIndex = 1
-    }
-
-    // Auto-reset inspected points on Preset change
-    LaunchedEffect(selectedPreset) {
+    // Auto-bounds and point reset on preset or angleMode change
+    LaunchedEffect(selectedPreset, angleMode) {
+        val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
+        xMin = bounds.xMin
+        xMax = bounds.xMax
+        yMin = bounds.yMin
+        yMax = bounds.yMax
         point1 = null
         point2 = null
         nextPointIndex = 1
@@ -307,7 +442,7 @@ fun FunctionGraphView(
                 }
                 val formulaString = resolveActiveFormula(selectedPreset, expression)
                 val sanitizedExpr = sanitizeForGraphParser(formulaString)
-                val steps = 360 // High quality, low CPU footprint
+                val steps = 400 // High quality, smooth curves
                 val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
 
                 synchronized(MxParserLock) {
@@ -315,7 +450,9 @@ fun FunctionGraphView(
                         License.iConfirmNonCommercialUse("limonatalp4")
                     } catch (_: Exception) {}
 
-                    if (angleMode == AngleMode.DEG) {
+                    val lower = sanitizedExpr.lowercase()
+                    val hasTrig = lower.contains("sin") || lower.contains("cos") || lower.contains("tan")
+                    if (angleMode == AngleMode.DEG && hasTrig && !sanitizedExpr.startsWith("der(")) {
                         mXparser.setDegreesMode()
                     } else {
                         mXparser.setRadiansMode()
@@ -324,11 +461,37 @@ fun FunctionGraphView(
                     val argX = Argument("x = 0")
                     val expr = Expression(sanitizedExpr, argX)
 
+                    val isDeriv = sanitizedExpr.startsWith("der(")
+                    val derivMatch = if (isDeriv) Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr) else null
+                    val subArg = derivMatch?.let { Argument("${it.groupValues[2]} = 0") }
+                    val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
+                    val h = 1e-5
+
+                    val lowerExpr = sanitizedExpr.lowercase()
+                    val needsPositiveX = lowerExpr.contains("log10") || lowerExpr.contains("log(") || lowerExpr.contains("ln(") || lowerExpr.contains("sqrt")
+
                     for (i in 0..steps) {
                         val t = i.toDouble() / steps
                         val x = xMin + t * (xMax - xMin)
+
+                        if (needsPositiveX && x <= 0.0) {
+                            calculatedList.add(Pair(x, Double.NaN))
+                            continue
+                        }
+
                         argX.argumentValue = x
-                        val y = expr.calculate()
+                        var y = expr.calculate()
+
+                        if ((!y.isFinite() || y.isNaN()) && subExpr != null && subArg != null) {
+                            subArg.argumentValue = x + h
+                            val yPlus = subExpr.calculate()
+                            subArg.argumentValue = x - h
+                            val yMinus = subExpr.calculate()
+                            if (yPlus.isFinite() && yMinus.isFinite()) {
+                                y = (yPlus - yMinus) / (2.0 * h)
+                            }
+                        }
+
                         if (y.isFinite() && abs(y) <= 1e8) {
                             calculatedList.add(Pair(x, y))
                         } else {
@@ -345,15 +508,11 @@ fun FunctionGraphView(
     }
 
     fun resetView() {
-        if (angleMode == AngleMode.DEG) {
-            xMin = -360.0
-            xMax = 360.0
-        } else {
-            xMin = -6.28
-            xMax = 6.28
-        }
-        yMin = -3.0
-        yMax = 3.0
+        val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
+        xMin = bounds.xMin
+        xMax = bounds.xMax
+        yMin = bounds.yMin
+        yMax = bounds.yMax
         point1 = null
         point2 = null
         nextPointIndex = 1
