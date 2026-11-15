@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">He\'rIn poSmoH</string>
     <string name="graph_gesture_lock">He\'rIn ngaQmoH</string>
     <string name="graph_hint_scan">yIHot, Daq wIvmeH</string>
+    <string name="graph_hint_second_point">yIHot, P2 wIvmeH</string>
+    <string name="graph_points_analysis">SIH m = %1$s  |  chuq d = %2$s</string>
     <string name="graph_pan_left">poSDaq yIvIHmoH</string>
     <string name="graph_pan_right">nIHqaqDaq yIvIHmoH</string>
     <string name="graph_zoom_in">tInmoH</string>

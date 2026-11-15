@@ -1,7 +1,9 @@
 package com.limonatalp4.glasscalcproject
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -11,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,12 +116,54 @@ class AppCrashRegressionTest {
         }
         composeTestRule.onNodeWithText("tan(x)").performScrollTo().performClick()
         composeTestRule.waitForIdle()
+        // Select sin(x) for clean finite points across the viewport
+        composeTestRule.onNodeWithText("sin(x)").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+
+        // Tap 1 -> sets P1
+        composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
+            click(Offset(80f, 100f))
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("graph_point_1_info").performScrollTo().assertIsDisplayed()
+
+        // Tap 2 -> sets P2 and displays slope & distance analysis
+        composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
+            click(Offset(200f, 100f))
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("graph_point_2_info").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("graph_points_analysis").performScrollTo().assertIsDisplayed()
+
+        // Tap 3 -> moves P1 while keeping P2
+        composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
+            click(Offset(40f, 100f))
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("graph_point_1_info").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("graph_point_2_info").performScrollTo().assertIsDisplayed()
+
+        // Clear points and verify lock blocks point placement
+        composeTestRule.onNodeWithTag("btn_clear_graph_points").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        assert(composeTestRule.onAllNodesWithTag("graph_trace_hud").fetchSemanticsNodes().isEmpty())
+
+        composeTestRule.onNodeWithTag("btn_lock_graph").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
+            click(Offset(120f, 100f))
+        }
+        composeTestRule.waitForIdle()
+        assert(composeTestRule.onAllNodesWithTag("graph_trace_hud").fetchSemanticsNodes().isEmpty())
+        composeTestRule.onNodeWithTag("btn_lock_graph").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+
         val zoomInDesc = composeTestRule.activity.getString(R.string.graph_zoom_in)
         val panLeftDesc = composeTestRule.activity.getString(R.string.graph_pan_left)
-        composeTestRule.onNodeWithContentDescription(zoomInDesc).performClick()
-        composeTestRule.onNodeWithContentDescription(panLeftDesc).performClick()
+        composeTestRule.onNodeWithContentDescription(zoomInDesc).performScrollTo().performClick()
+        composeTestRule.onNodeWithContentDescription(panLeftDesc).performScrollTo().performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("btn_close_graph_dialog").performClick()
+        composeTestRule.onNodeWithTag("btn_close_graph_dialog").performScrollTo().performClick()
         composeTestRule.waitForIdle()
 
         // Open Settings Dialog, Search, Tap Tab directly during search, Open Info -> Click GitHub without browser

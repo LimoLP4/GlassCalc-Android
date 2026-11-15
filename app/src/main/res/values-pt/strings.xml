@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">Desbloquear gestos do gráfico</string>
     <string name="graph_gesture_lock">Bloquear gestos do gráfico</string>
     <string name="graph_hint_scan">Toque para definir ponto</string>
+    <string name="graph_hint_second_point">Toque para P2</string>
+    <string name="graph_points_analysis">Inclinação m = %1$s  |  Distância d = %2$s</string>
     <string name="graph_pan_left">Mover para a esquerda</string>
     <string name="graph_pan_right">Mover para a direita</string>
     <string name="graph_zoom_in">Aproximar</string>

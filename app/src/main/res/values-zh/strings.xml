@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">解锁图像手势</string>
     <string name="graph_gesture_lock">锁定图像手势</string>
     <string name="graph_hint_scan">点击选取坐标点</string>
+    <string name="graph_hint_second_point">点击选取 P2</string>
+    <string name="graph_points_analysis">斜率 m = %1$s  |  距离 d = %2$s</string>
     <string name="graph_pan_left">向左平移</string>
     <string name="graph_pan_right">向右平移</string>
     <string name="graph_zoom_in">放大</string>

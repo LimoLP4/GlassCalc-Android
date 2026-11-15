@@ -49,6 +49,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -56,11 +57,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -90,6 +94,7 @@ import org.mariuszgromada.math.mxparser.mXparser
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.floor
+import kotlin.math.hypot
 import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.math.roundToLong
@@ -255,8 +260,10 @@ fun FunctionGraphView(
     // Cached curve evaluation points (normalized t from 0..1, y value)
     var cachedPoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
 
-    // Active inspected point state (single marker at mathematical (x, y))
-    var inspectedPoint by remember { mutableStateOf<GraphPoint?>(null) }
+    // Two manual inspected points (P1, P2) at mathematical (x, y)
+    var point1 by remember { mutableStateOf<GraphPoint?>(null) }
+    var point2 by remember { mutableStateOf<GraphPoint?>(null) }
+    var nextPointIndex by remember { mutableIntStateOf(1) }
     var lastHapticTime by remember { mutableStateOf(0L) }
 
     // Keep latest parameters accessible inside long-lived pointerInput blocks
@@ -278,12 +285,16 @@ fun FunctionGraphView(
         }
         yMin = -2.0
         yMax = 2.0
-        inspectedPoint = null
+        point1 = null
+        point2 = null
+        nextPointIndex = 1
     }
 
-    // Auto-reset inspected point on Preset change
+    // Auto-reset inspected points on Preset change
     LaunchedEffect(selectedPreset) {
-        inspectedPoint = null
+        point1 = null
+        point2 = null
+        nextPointIndex = 1
     }
 
     // Asynchronous background computation of curve points (Dispatchers.Default)
@@ -342,7 +353,9 @@ fun FunctionGraphView(
         }
         yMin = -3.0
         yMax = 3.0
-        inspectedPoint = null
+        point1 = null
+        point2 = null
+        nextPointIndex = 1
         triggerClickHaptic()
     }
 
@@ -357,7 +370,25 @@ fun FunctionGraphView(
         val evaluatedY = evaluateFormulaAtX(formula, tappedX, currentAngleMode)
 
         if (evaluatedY != null) {
-            inspectedPoint = GraphPoint(tappedX, evaluatedY)
+            val newPoint = GraphPoint(tappedX, evaluatedY)
+            when {
+                point1 == null -> {
+                    point1 = newPoint
+                    nextPointIndex = 2
+                }
+                point2 == null -> {
+                    point2 = newPoint
+                    nextPointIndex = 1
+                }
+                nextPointIndex == 1 -> {
+                    point1 = newPoint
+                    nextPointIndex = 2
+                }
+                else -> {
+                    point2 = newPoint
+                    nextPointIndex = 1
+                }
+            }
             HapticUtil.performAppHaptic(
                 localContext,
                 view,
@@ -368,6 +399,10 @@ fun FunctionGraphView(
     }
 
     val graphColor = colorScheme.primary
+    val point1Color = graphColor
+    val point1BadgeTextColor = colorScheme.onPrimary
+    val point2Color = colorScheme.tertiary
+    val point2BadgeTextColor = if (point2Color.luminance() > 0.5f) Color(0xFF1A1C1E) else Color.White
     val gridColor = colorScheme.onSurface.copy(alpha = 0.16f)
     val axisColor = colorScheme.onSurface.copy(alpha = 0.55f)
     val labelColor = colorScheme.onSurface.copy(alpha = 0.70f)
@@ -714,106 +749,139 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // 4. POINT MARKER OVERLAY (Dynamically projected from mathematical (x, y) point)
-                    inspectedPoint?.let { pt ->
-                        val px = ((pt.x - xMin) / xSpan * width).toFloat()
-                        val py = (height - ((pt.y - yMin) / ySpan * height)).toFloat()
-                        if (!px.isFinite() || !py.isFinite()) return@let
+                    // 4. TWO-POINT MARKER OVERLAY (P1, P2, Secant Line & Badges)
+                    fun drawPointMarker(
+                        point: GraphPoint,
+                        label: String,
+                        markerColor: Color,
+                        badgeTextColor: Color,
+                        preferBadgeBelow: Boolean = false
+                    ) {
+                        val px = ((point.x - xMin) / xSpan * width).toFloat()
+                        val py = (height - ((point.y - yMin) / ySpan * height)).toFloat()
+                        if (!px.isFinite() || !py.isFinite()) return
+
                         val markerPos = Offset(px, py)
                         val crosshairPathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
 
                         if (px in 0f..width) {
                             drawLine(
-                                color = graphColor.copy(alpha = 0.55f),
+                                color = markerColor.copy(alpha = 0.45f),
                                 start = Offset(px, 0f),
                                 end = Offset(px, height),
-                                strokeWidth = 1.3.dp.toPx(),
+                                strokeWidth = 1.2.dp.toPx(),
                                 pathEffect = crosshairPathEffect
                             )
                         }
 
                         if (py in 0f..height) {
                             drawLine(
-                                color = graphColor.copy(alpha = 0.55f),
+                                color = markerColor.copy(alpha = 0.45f),
                                 start = Offset(0f, py),
                                 end = Offset(width, py),
-                                strokeWidth = 1.3.dp.toPx(),
+                                strokeWidth = 1.2.dp.toPx(),
                                 pathEffect = crosshairPathEffect
                             )
                         }
 
                         if (px in -20f..(width + 20f) && py in -20f..(height + 20f)) {
                             drawCircle(
-                                color = graphColor.copy(alpha = 0.28f),
+                                color = markerColor.copy(alpha = 0.28f),
                                 radius = 11.dp.toPx(),
                                 center = markerPos
                             )
                             drawCircle(
-                                color = graphColor,
+                                color = markerColor,
                                 radius = 6.dp.toPx(),
                                 center = markerPos
                             )
                             drawCircle(
-                                color = colorScheme.onPrimary,
-                                radius = 2.6.dp.toPx(),
+                                color = badgeTextColor,
+                                radius = 2.4.dp.toPx(),
                                 center = markerPos
+                            )
+
+                            val badgeStyle = TextStyle(
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = badgeTextColor
+                            )
+                            val measuredBadge = textMeasurer.measure(label, style = badgeStyle)
+                            val padH = 5.dp.toPx()
+                            val padV = 2.dp.toPx()
+                            val badgeW = measuredBadge.size.width + padH * 2f
+                            val badgeH = measuredBadge.size.height + padV * 2f
+
+                            val rawX = if (px + 10.dp.toPx() + badgeW <= width - 4f) {
+                                px + 10.dp.toPx()
+                            } else {
+                                px - 10.dp.toPx() - badgeW
+                            }
+                            val rawY = if (!preferBadgeBelow && py - 8.dp.toPx() - badgeH >= 4f) {
+                                py - 8.dp.toPx() - badgeH
+                            } else if (py + 8.dp.toPx() + badgeH <= height - 4f) {
+                                py + 8.dp.toPx()
+                            } else {
+                                py - 8.dp.toPx() - badgeH
+                            }
+
+                            val badgeX = rawX.coerceIn(4f, (width - badgeW - 4f).coerceAtLeast(4f))
+                            val badgeY = rawY.coerceIn(4f, (height - badgeH - 4f).coerceAtLeast(4f))
+
+                            drawRoundRect(
+                                color = markerColor,
+                                topLeft = Offset(badgeX, badgeY),
+                                size = Size(badgeW, badgeH),
+                                cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
+                            )
+                            drawText(
+                                textMeasurer = textMeasurer,
+                                text = label,
+                                topLeft = Offset(badgeX + padH, badgeY + padV),
+                                style = badgeStyle
                             )
                         }
                     }
-                }
 
-                // Interactive Point HUD Tooltip
-                inspectedPoint?.let { pt ->
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.92f))
-                            .border(1.2.dp, graphColor.copy(alpha = 0.8f), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                            .testTag("graph_trace_hud")
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Column {
-                                val formulaText = selectedPreset.label
-                                Text(
-                                    text = "$formulaText @ [${angleMode.name}]",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = graphColor
-                                )
-                                Text(
-                                    text = String.format(Locale.US, "x: %.3f  |  y: %.4f", pt.x, pt.y),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = colorScheme.onSurface
-                                )
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    inspectedPoint = null
-                                    triggerClickHaptic()
-                                },
-                                modifier = Modifier.size(20.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = stringResource(R.string.nav_close),
-                                    tint = graphColor,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
+                    val p1 = point1
+                    val p2 = point2
+                    if (p1 != null && p2 != null) {
+                        val px1 = ((p1.x - xMin) / xSpan * width).toFloat()
+                        val py1 = (height - ((p1.y - yMin) / ySpan * height)).toFloat()
+                        val px2 = ((p2.x - xMin) / xSpan * width).toFloat()
+                        val py2 = (height - ((p2.y - yMin) / ySpan * height)).toFloat()
+                        if (px1.isFinite() && py1.isFinite() && px2.isFinite() && py2.isFinite()) {
+                            drawLine(
+                                color = colorScheme.secondary.copy(alpha = 0.80f),
+                                start = Offset(px1, py1),
+                                end = Offset(px2, py2),
+                                strokeWidth = 1.6.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
+                            )
                         }
+                    }
+
+                    p1?.let {
+                        drawPointMarker(
+                            point = it,
+                            label = "P1",
+                            markerColor = point1Color,
+                            badgeTextColor = point1BadgeTextColor
+                        )
+                    }
+                    p2?.let {
+                        drawPointMarker(
+                            point = it,
+                            label = "P2",
+                            markerColor = point2Color,
+                            badgeTextColor = point2BadgeTextColor,
+                            preferBadgeBelow = p1 != null && abs(p1.x - it.x) < xSpan * 0.12
+                        )
                     }
                 }
 
-                if (inspectedPoint == null) {
+                if (point1 == null || point2 == null) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -833,7 +901,9 @@ fun FunctionGraphView(
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
-                                text = stringResource(R.string.graph_hint_scan),
+                                text = stringResource(
+                                    if (point1 == null) R.string.graph_hint_scan else R.string.graph_hint_second_point
+                                ),
                                 fontSize = 9.sp,
                                 color = labelColor
                             )
@@ -962,10 +1032,134 @@ fun FunctionGraphView(
                 }
             }
 
+            if (point1 != null || point2 != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(colorScheme.surfaceContainerLow)
+                        .border(1.dp, gridColor, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                        .testTag("graph_trace_hud")
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${selectedPreset.label} @ [${angleMode.name}]",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = graphColor
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    point1 = null
+                                    point2 = null
+                                    nextPointIndex = 1
+                                    triggerClickHaptic()
+                                },
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .testTag("btn_clear_graph_points")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = stringResource(R.string.nav_close),
+                                    tint = colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+
+                        point1?.let { p1 ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.testTag("graph_point_1_info")
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(point1Color)
+                                )
+                                Text(
+                                    text = String.format(Locale.US, "P1:  x = %.3f  |  y = %.4f", p1.x, p1.y),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = colorScheme.onSurface
+                                )
+                            }
+                        }
+
+                        val p2 = point2
+                        if (p2 != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.testTag("graph_point_2_info")
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(point2Color)
+                                )
+                                Text(
+                                    text = String.format(Locale.US, "P2:  x = %.3f  |  y = %.4f", p2.x, p2.y),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = colorScheme.onSurface
+                                )
+                            }
+
+                            point1?.let { p1 ->
+                                val dx = p2.x - p1.x
+                                val dy = p2.y - p1.y
+                                val distance = hypot(dx, dy)
+                                val slopeText = if (abs(dx) > 1e-9) {
+                                    String.format(Locale.US, "%.4f", dy / dx)
+                                } else {
+                                    "∞"
+                                }
+                                val distanceText = String.format(Locale.US, "%.4f", distance)
+                                Text(
+                                    text = stringResource(R.string.graph_points_analysis, slopeText, distanceText),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = graphColor,
+                                    modifier = Modifier
+                                        .padding(top = 2.dp)
+                                        .testTag("graph_points_analysis")
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(R.string.graph_hint_second_point),
+                                fontSize = 10.sp,
+                                color = labelColor
+                            )
+                        }
+                    }
+                }
+            }
+
             if (onApplyPointToCalculator != null) {
                 Spacer(modifier = Modifier.height(10.dp))
 
-                val activePoint = inspectedPoint
+                val activePoint = if (nextPointIndex == 1 && point2 != null) point2 else point1 ?: point2
                 val hasActivePoint = activePoint != null
 
                 GlassSurface(

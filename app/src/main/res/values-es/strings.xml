@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">Desbloquear gestos del gráfico</string>
     <string name="graph_gesture_lock">Bloquear gestos del gráfico</string>
     <string name="graph_hint_scan">Toca para fijar punto</string>
+    <string name="graph_hint_second_point">Toca para P2</string>
+    <string name="graph_points_analysis">Pendiente m = %1$s  |  Distancia d = %2$s</string>
     <string name="graph_pan_left">Desplazar a la izquierda</string>
     <string name="graph_pan_right">Desplazar a la derecha</string>
     <string name="graph_zoom_in">Acercar</string>

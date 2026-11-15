@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">Déverrouiller les gestes du graphe</string>
     <string name="graph_gesture_lock">Verrouiller les gestes du graphe</string>
     <string name="graph_hint_scan">Appuyer pour placer un point</string>
+    <string name="graph_hint_second_point">Appuyer pour P2</string>
+    <string name="graph_points_analysis">Pente m = %1$s  |  Distance d = %2$s</string>
     <string name="graph_pan_left">Déplacer à gauche</string>
     <string name="graph_pan_right">Déplacer à droite</string>
     <string name="graph_zoom_in">Zoomer</string>

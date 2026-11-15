@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">グラフ操作のロック解除</string>
     <string name="graph_gesture_lock">グラフ操作をロック</string>
     <string name="graph_hint_scan">タップして点を設定</string>
+    <string name="graph_hint_second_point">タップしてP2を設定</string>
+    <string name="graph_points_analysis">傾き m = %1$s  |  距離 d = %2$s</string>
     <string name="graph_pan_left">左へ移動</string>
     <string name="graph_pan_right">右へ移動</string>
     <string name="graph_zoom_in">拡大</string>

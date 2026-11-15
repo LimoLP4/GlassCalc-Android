@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">Разблокировать жесты графика</string>
     <string name="graph_gesture_lock">Заблокировать жесты графика</string>
     <string name="graph_hint_scan">Нажмите для установки точки</string>
+    <string name="graph_hint_second_point">Нажмите для P2</string>
+    <string name="graph_points_analysis">Наклон m = %1$s  |  Расстояние d = %2$s</string>
     <string name="graph_pan_left">Сдвиг влево</string>
     <string name="graph_pan_right">Сдвиг вправо</string>
     <string name="graph_zoom_in">Приблизить</string>

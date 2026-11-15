@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">Graph-Gesten entsperren</string>
     <string name="graph_gesture_lock">Graph-Gesten sperren</string>
     <string name="graph_hint_scan">Tippen für Punkt</string>
+    <string name="graph_hint_second_point">Tippen für P2</string>
+    <string name="graph_points_analysis">Steigung m = %1$s  |  Abstand d = %2$s</string>
     <string name="graph_pan_left">Links schwenken</string>
     <string name="graph_pan_right">Rechts schwenken</string>
     <string name="graph_zoom_in">Vergrößern</string>

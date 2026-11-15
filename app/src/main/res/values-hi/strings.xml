@@ -122,6 +122,8 @@
     <string name="graph_gesture_unlock">ग्राफ़ इशारे अनलॉक करें</string>
     <string name="graph_gesture_lock">ग्राफ़ इशारे लॉक करें</string>
     <string name="graph_hint_scan">बिंदु सेट करने के लिए टैप करें</string>
+    <string name="graph_hint_second_point">P2 के लिए टैप करें</string>
+    <string name="graph_points_analysis">ढलान m = %1$s  |  दूरी d = %2$s</string>
     <string name="graph_pan_left">बाईं ओर खिसकाएं</string>
     <string name="graph_pan_right">दाईं ओर खिसकाएं</string>
     <string name="graph_zoom_in">ज़ूम इन</string>
