@@ -5,37 +5,40 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,22 +47,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.zIndex
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +91,38 @@ import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+
+private val ALLOWED_EXPRESSION_CHARS: Set<Char> = buildSet {
+    addAll('0'..'9')
+    // Erlaubte Operatoren, Klammern, Dezimaltrennzeichen & Parser-Symbole
+    addAll(listOf('+', '-', '*', '/', '(', ')', '.', ',', '^', '%', '!', ';', '|', ' '))
+    // Bestehende Taschenrechner-Operatoren & Konstanten
+    addAll(listOf('−', '×', '÷', '⁄', '√', '²', '³', 'ⁿ', '∫', 'π'))
+    // Buchstaben für mathematische Funktionen (sin, cos, tan, log, ln, sqrt, ...) & Variablen
+    addAll('a'..'z')
+    addAll('A'..'Z')
+}
+
+internal fun isAllowedCalculatorChar(ch: Char): Boolean = ch in ALLOWED_EXPRESSION_CHARS
+
+internal fun filterCalculatorExpression(
+    text: String,
+    cursorPosition: Int
+): Pair<String, Int> {
+    val clampedCursor = cursorPosition.coerceIn(0, text.length)
+    val sb = StringBuilder(text.length)
+    var newCursor = 0
+    text.forEachIndexed { index, ch ->
+        if (isAllowedCalculatorChar(ch)) {
+            sb.append(ch)
+            if (index < clampedCursor) {
+                newCursor++
+            }
+        }
+    }
+    return sb.toString() to newCursor
+}
 
 /**
  * Isolated GlassDisplay collecting from StateFlows directly.
@@ -86,6 +137,8 @@ fun GlassDisplay(
     isScientificExpanded: Boolean,
     errorMessageFlow: StateFlow<String?>,
     onCursorPositionChanged: (Int) -> Unit = {},
+    onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
+    onEvaluate: () -> Unit = {},
     isCompact: Boolean = false,
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
@@ -103,6 +156,8 @@ fun GlassDisplay(
         isScientificExpanded = isScientificExpanded,
         errorMessage = errorMessage,
         onCursorPositionChanged = onCursorPositionChanged,
+        onExpressionChange = onExpressionChange,
+        onEvaluate = onEvaluate,
         isCompact = isCompact,
         modifier = modifier,
         glassState = glassState
@@ -118,6 +173,8 @@ fun GlassDisplay(
     isScientificExpanded: Boolean,
     errorMessage: String? = null,
     onCursorPositionChanged: (Int) -> Unit = {},
+    onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
+    onEvaluate: () -> Unit = {},
     isCompact: Boolean = false,
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
@@ -130,12 +187,15 @@ fun GlassDisplay(
         isScientificExpanded = isScientificExpanded,
         errorMessage = errorMessage,
         onCursorPositionChanged = onCursorPositionChanged,
+        onExpressionChange = onExpressionChange,
+        onEvaluate = onEvaluate,
         isCompact = isCompact,
         modifier = modifier,
         glassState = glassState
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun GlassDisplayContent(
     expression: String,
@@ -145,6 +205,8 @@ private fun GlassDisplayContent(
     isScientificExpanded: Boolean,
     errorMessage: String? = null,
     onCursorPositionChanged: (Int) -> Unit = {},
+    onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
+    onEvaluate: () -> Unit = {},
     isCompact: Boolean = false,
     modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
@@ -154,8 +216,41 @@ private fun GlassDisplayContent(
     val glassProps = LocalGlassProperties.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
-    val exprScrollState = rememberScrollState()
     val density = LocalDensity.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    var isKeyboardActive by remember { mutableStateOf(false) }
+    val currentKeyboardActive by rememberUpdatedState(isKeyboardActive)
+    var isTextFieldFocused by remember { mutableStateOf(false) }
+    var keyboardRequestToken by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        runCatching { focusRequester.requestFocus() }
+    }
+
+    LaunchedEffect(keyboardRequestToken) {
+        if (keyboardRequestToken > 0) {
+            isKeyboardActive = true
+            withFrameNanos { }
+            runCatching { focusRequester.requestFocus() }
+            keyboardController?.show()
+        }
+    }
+
+    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+    var wasImeVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(isImeVisible) {
+        if (isImeVisible) {
+            wasImeVisible = true
+        } else if (wasImeVisible) {
+            wasImeVisible = false
+            isKeyboardActive = false
+            focusManager.clearFocus()
+        }
+    }
 
     var isCopyFlashed by remember { mutableStateOf(false) }
     val flashAlpha by animateFloatAsState(
@@ -164,13 +259,13 @@ private fun GlassDisplayContent(
         label = "display_copy_flash"
     )
 
-    // Soft, smooth cursor breathing animation (calmer 650ms half-cycle)
+    // Weiche, sanfte Cursor-Blink-Animation passend zu den Suchleisten (500ms Ein-/Ausblenden)
     val infiniteTransition = rememberInfiniteTransition(label = "cursor_blink")
     val cursorAlpha by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 650, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "cursor_alpha"
@@ -203,19 +298,6 @@ private fun GlassDisplayContent(
     }
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-
-    // Auto-scroll to keep cursor visible safely
-    LaunchedEffect(expression, cursorPosition, textLayoutResult) {
-        textLayoutResult?.let { layout ->
-            runCatching {
-                val maxLen = layout.layoutInput.text.length
-                val safePos = cursorPosition.coerceIn(0, maxLen)
-                val cursorX = layout.getCursorRect(safePos).left.toInt()
-                val targetScroll = (cursorX - 100).coerceAtLeast(0)
-                exprScrollState.animateScrollTo(targetScroll)
-            }
-        }
-    }
 
     val displayShape = RoundedCornerShape(if (isCompact) 20.dp else 28.dp)
 
@@ -309,12 +391,42 @@ private fun GlassDisplayContent(
                         )
                     }
 
+                    // Keyboard button in corner (Pill Glass Design - opens system keyboard only)
+                    GlassSurface(
+                        shape = RoundedCornerShape(50),
+                        customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                        glassState = glassState
+                    ) {
+                        IconButton(
+                            onClick = {
+                                HapticUtil.performAppHaptic(
+                                    context = context,
+                                    view = view,
+                                    enabled = hapticFeedbackEnabled,
+                                    intensityLevel = hapticIntensity
+                                )
+                                keyboardRequestToken++
+                            },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .padding(4.dp)
+                                .testTag("btn_open_keyboard")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Keyboard,
+                                contentDescription = stringResource(R.string.btn_open_keyboard),
+                                tint = colorScheme.onSurface,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
                     // Copy indicator button in corner (Pill Glass Design)
                     GlassSurface(
                         shape = RoundedCornerShape(50),
                         customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        customBorderColor = colorScheme.outline.copy(alpha = 0.3f),
-                        borderWidth = 1.dp,
+                        borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
                         glassState = glassState
                     ) {
                         IconButton(
@@ -343,72 +455,115 @@ private fun GlassDisplayContent(
                 }
             }
 
-            // Running expression input with Cursor (top)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = if (isCompact) 4.dp else 8.dp)
-                    .horizontalScroll(exprScrollState),
-                horizontalArrangement = Arrangement.End
+            // Einheitliches Hauptrechenfeld (exakt identische BasicTextField- & Cursor-Logik wie in den Suchleisten)
+            val safeSelection = cursorPosition.coerceIn(0, expression.length)
+            val exprFontSize = if (isCompact) 19.sp else 24.sp
+            val accentCursorColor = MaterialTheme.colorScheme.primary
+
+            InterceptPlatformTextInput(
+                interceptor = { request, nextHandler ->
+                    if (!currentKeyboardActive) {
+                        snapshotFlow { currentKeyboardActive }.first { it }
+                    }
+                    nextHandler.startInputMethod(request)
+                }
             ) {
-                Box(
-                    modifier = Modifier.pointerInput(expression) {
-                        detectTapGestures { tapOffset ->
-                            val layout = textLayoutResult
-                            if (layout != null && expression.isNotEmpty()) {
-                                runCatching {
-                                    val tappedPos = layout.getOffsetForPosition(tapOffset)
-                                    onCursorPositionChanged(tappedPos.coerceIn(0, expression.length))
-                                }.onFailure {
-                                    onCursorPositionChanged(expression.length)
+                BasicTextField(
+                    value = TextFieldValue(
+                        text = expression,
+                        selection = TextRange(safeSelection)
+                    ),
+                    onValueChange = { newValue ->
+                        val (filteredText, filteredCursor) = filterCalculatorExpression(
+                            text = newValue.text,
+                            cursorPosition = newValue.selection.start
+                        )
+                        if (filteredText != expression) {
+                            onExpressionChange(filteredText, filteredCursor)
+                        } else if (filteredCursor != cursorPosition) {
+                            onCursorPositionChanged(filteredCursor)
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Ascii,
+                        autoCorrectEnabled = false,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            onEvaluate()
+                        }
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = exprFontSize,
+                        fontWeight = FontWeight.Normal,
+                        color = exprColor,
+                        textAlign = TextAlign.End,
+                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                    ),
+                    cursorBrush = SolidColor(accentCursorColor),
+                    onTextLayout = { textLayoutResult = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = if (isCompact) 4.dp else 8.dp, end = 8.dp)
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState ->
+                            isTextFieldFocused = focusState.isFocused
+                        }
+                        .testTag("display_expression_text"),
+                    decorationBox = { innerTextField ->
+                        BoxWithConstraints(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            if (expression.isEmpty()) {
+                                Text(
+                                    text = "0",
+                                    fontSize = exprFontSize,
+                                    fontWeight = FontWeight.Normal,
+                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                                    textAlign = TextAlign.End,
+                                    style = TextStyle(
+                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    )
+                                )
+                            }
+                            innerTextField()
+                            if (!isTextFieldFocused) {
+                                val layout = textLayoutResult
+                                val distanceFromRight = if (expression.isEmpty() || layout == null) {
+                                    0.dp
+                                } else {
+                                    val safePos = cursorPosition.coerceIn(0, layout.layoutInput.text.length)
+                                    val rect = runCatching { layout.getCursorRect(safePos) }.getOrNull()
+                                    if (rect != null) {
+                                        with(density) {
+                                            (layout.size.width - rect.left).coerceAtLeast(0f).toDp()
+                                        }.coerceIn(0.dp, (maxWidth - 2.dp).coerceAtLeast(0.dp))
+                                    } else {
+                                        0.dp
+                                    }
                                 }
-                            } else {
-                                onCursorPositionChanged(0)
+                                val fallbackCursorHeight = layout?.let {
+                                    val safePos = cursorPosition.coerceIn(0, it.layoutInput.text.length)
+                                    runCatching { with(density) { it.getCursorRect(safePos).height.toDp() } }.getOrNull()
+                                }?.takeIf { it > 0.dp } ?: if (isCompact) 22.dp else 28.dp
+
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .offset(x = -distanceFromRight)
+                                        .width(2.dp)
+                                        .height(fallbackCursorHeight)
+                                        .background(
+                                            color = accentCursorColor.copy(alpha = cursorAlpha)
+                                        )
+                                )
                             }
                         }
                     }
-                ) {
-                    val textToShow = if (expression.isEmpty()) "0" else expression
-
-                    Text(
-                        text = textToShow,
-                        fontSize = if (isCompact) 19.sp else 24.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = exprColor,
-                        onTextLayout = { textLayoutResult = it },
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .testTag("display_expression_text")
-                    )
-
-                    // Blinking cursor bar with layout-bounds validation and Z-index overlay
-                    textLayoutResult?.let { layout ->
-                        val layoutTextLen = layout.layoutInput.text.length
-                        val safePos = cursorPosition.coerceIn(0, layoutTextLen)
-
-                        val cursorRect = runCatching {
-                            layout.getCursorRect(safePos)
-                        }.getOrNull()
-
-                        if (cursorRect != null) {
-                            val cursorX = with(density) { cursorRect.left.toDp() }
-                            val cursorY = with(density) { cursorRect.top.toDp() }
-                            val cursorH = with(density) { cursorRect.height.toDp() }
-
-                            Box(
-                                modifier = Modifier
-                                    .zIndex(2f)
-                                    .offset(x = cursorX, y = cursorY)
-                                    .width(2.5.dp)
-                                    .height(if (cursorH > 0.dp) cursorH else if (isCompact) 20.dp else 26.dp)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = cursorAlpha),
-                                        shape = RoundedCornerShape(1.dp)
-                                    )
-                            )
-                        }
-                    }
-                }
+                )
             }
 
             // Evaluated result (bottom, large & prominent with smooth animation)

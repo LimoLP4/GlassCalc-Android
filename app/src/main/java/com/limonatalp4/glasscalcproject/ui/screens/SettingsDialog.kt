@@ -42,10 +42,24 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import android.view.WindowManager
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.core.view.WindowCompat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -87,6 +101,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -102,6 +117,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.window.core.layout.WindowSizeClass
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
@@ -233,241 +250,200 @@ fun SettingsDialog(
     @Suppress("DEPRECATION")
     BasicAlertDialog(
         onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        ),
         modifier = Modifier.testTag("dialog_settings")
     ) {
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .alpha(alphaAnim),
-            shape = RoundedCornerShape(28.dp),
-            borderWidth = 1.2.dp,
-            customBgColor = when {
-                isAmoled -> Color.Black
-                isTiefschwarz -> Color(0xFF121212)
-                else -> colorScheme.surfaceContainerHigh
-            },
-            customBorderColor = when {
-                isAmoled -> Color.White.copy(alpha = 0.15f)
-                isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                else -> null
+        val dialogView = LocalView.current
+        SideEffect {
+            (dialogView.parent as? DialogWindowProvider)?.window?.let { dialogWindow ->
+                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+                dialogWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
             }
-        ) {
-            Column(
+        }
+
+        val imeDensity = LocalDensity.current
+        val isImeVisible = WindowInsets.ime.getBottom(imeDensity) > 0
+        val isLandscape = config.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val pinTabBar = !(isLandscape && isImeVisible)
+        val dialogTopPadding = if (isImeVisible) 8.dp else 16.dp
+        val dialogBottomPadding = if (isImeVisible) 8.dp else 16.dp
+        val dialogScrollState = rememberScrollState()
+
+        LaunchedEffect(selectedTab) {
+            dialogScrollState.scrollTo(0)
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Transparent outside-tap scrim to dismiss dialog
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.title_settings),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onDismiss()
+                    }
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(if (isImeVisible) Alignment.TopCenter else Alignment.Center)
+                    .windowInsetsPadding(
+                        WindowInsets.statusBars
+                            .union(WindowInsets.displayCutout)
+                            .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
                     )
-                    IconButton(
-                        onClick = {
-                            triggerHaptic()
-                            onDismiss()
-                        },
-                        modifier = Modifier.testTag("btn_close_settings")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.nav_close),
-                            tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Liquid-Glass Settings Search Bar (direkt unter Titel "Einstellungen" und über Pill-Leiste)
-                SettingsSearchBar(
-                    query = searchQuery,
-                    onQueryChange = { newValue ->
-                        searchQuery = newValue
-                    },
-                    onClearClick = {
-                        HapticUtil.performAppHaptic(
-                            context = context,
-                            view = view,
-                            enabled = hapticFeedbackEnabled,
-                            intensityLevel = hapticIntensity
-                        )
-                        searchQuery = ""
-                    },
-                    isAmoled = isAmoled,
-                    isTiefschwarz = isTiefschwarz
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // 5-Tab Segmented Control (Pill-Design)
-                val tabs = listOf(
-                    Triple(0, Icons.Default.Palette, stringResource(R.string.title_appearance)),
-                    Triple(1, Icons.Default.Straighten, stringResource(R.string.title_units)),
-                    Triple(2, Icons.Default.DeveloperMode, stringResource(R.string.title_dev_options)),
-                    Triple(3, Icons.Default.Info, stringResource(R.string.title_info)),
-                    Triple(4, Icons.Default.Language, stringResource(R.string.tab_language))
-                )
-
-                val tabScrollState = androidx.compose.foundation.rememberScrollState()
-                val density = LocalDensity.current
-                val tabWidths = remember { mutableStateMapOf<Int, androidx.compose.ui.unit.Dp>() }
-                var tabHeight by remember { mutableStateOf(0.dp) }
-                
-                val spacing = 4.dp
-                val targetPosition = remember(selectedTab, tabWidths.toMap()) {
-                    var pos = 0.dp
-                    for (i in 0 until selectedTab) {
-                        pos += (tabWidths[i] ?: 0.dp) + spacing
-                    }
-                    pos
-                }
-                val targetWidth = tabWidths[selectedTab] ?: 0.dp
-                
-                val indicatorOffset by animateDpAsState(
-                    targetValue = targetPosition,
-                    animationSpec = tween(durationMillis = 250),
-                    label = "tab_indicator_offset"
-                )
-                val indicatorWidth by animateDpAsState(
-                    targetValue = targetWidth,
-                    animationSpec = tween(durationMillis = 250),
-                    label = "tab_indicator_width"
-                )
-
-                Box(
+                    .windowInsetsPadding(
+                        WindowInsets.ime
+                            .union(WindowInsets.navigationBars)
+                            .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                    )
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = dialogTopPadding,
+                        bottom = dialogBottomPadding
+                    )
+            ) {
+                GlassSurface(
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .wrapContentWidth()
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(
-                            when {
-                                isAmoled -> Color.Black
-                                isTiefschwarz -> colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                                else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            }
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = when {
-                                isAmoled -> Color.White.copy(alpha = 0.15f)
-                                isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                                else -> colorScheme.outline.copy(alpha = 0.3f)
-                            },
-                            shape = RoundedCornerShape(50.dp)
-                        )
-                        .padding(4.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .horizontalScroll(tabScrollState)
-                    ) {
-                        // Sliding Highlight Pill INSIDE the scroll container
-                        if (targetWidth > 0.dp) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.CenterStart)
-                                    .offset(x = indicatorOffset)
-                                    .width(indicatorWidth)
-                                    .height(if (tabHeight > 0.dp) tabHeight else 36.dp)
-                                    .clip(RoundedCornerShape(50.dp))
-                                    .background(colorScheme.primaryContainer)
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.wrapContentWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(spacing),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            tabs.forEach { (index, icon, label) ->
-                                val isSelected = selectedTab == index
-                                var isPressed by remember { mutableStateOf(false) }
-                                val scale by animateFloatAsState(
-                                    targetValue = if (isPressed) 0.94f else 1.0f,
-                                    animationSpec = tween(durationMillis = 100),
-                                    label = "tab_scale"
-                                )
-                                val tabTint by animateColorAsState(
-                                    targetValue = if (isSelected) {
-                                        if (isAmoled || isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
-                                    } else {
-                                        if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
-                                    },
-                                    animationSpec = tween(durationMillis = 220),
-                                    label = "tab_${index}_tint"
-                                )
-
-                                Box(
-                                    modifier = Modifier
-                                        .onSizeChanged { size ->
-                                            val w = with(density) { size.width.toDp() }
-                                            val h = with(density) { size.height.toDp() }
-                                            tabWidths[index] = w
-                                            if (h > tabHeight) tabHeight = h
-                                        }
-                                        .graphicsLayer {
-                                            scaleX = scale
-                                            scaleY = scale
-                                        }
-                                        .clip(RoundedCornerShape(50.dp))
-                                        .pointerInput(Unit) {
-                                            detectTapGestures(
-                                                onPress = {
-                                                    isPressed = true
-                                                    try { awaitRelease() } finally { isPressed = false }
-                                                },
-                                                onTap = {
-                                                    triggerHaptic()
-                                                    if (isSearchActive) {
-                                                        clearedByTabTap = true
-                                                    }
-                                                    selectedTab = index
-                                                    searchQuery = ""
-                                                }
-                                            )
-                                        }
-                                        .padding(vertical = 8.dp, horizontal = 10.dp)
-                                        .testTag("tab_settings_$index"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            tint = tabTint,
-                                            modifier = Modifier.size(15.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            text = label,
-                                            fontSize = 12.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = tabTint,
-                                            maxLines = 1,
-                                            softWrap = false
-                                        )
-                                    }
+                        .fillMaxWidth(0.9f)
+                        .widthIn(max = 400.dp)
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    awaitPointerEvent()
                                 }
                             }
                         }
+                        .alpha(alphaAnim),
+                    shape = RoundedCornerShape(28.dp),
+                    borderWidth = 1.2.dp,
+                    customBgColor = when {
+                        isAmoled -> Color.Black
+                        isTiefschwarz -> Color(0xFF121212)
+                        else -> colorScheme.surfaceContainerHigh
+                    },
+                    customBorderColor = when {
+                        isAmoled -> Color.White.copy(alpha = 0.15f)
+                        isTiefschwarz -> Color.White.copy(alpha = 0.1f)
+                        else -> null
                     }
-                }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(if (isImeVisible) 14.dp else 20.dp)
+                    ) {
+                        // Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.title_settings),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                            )
+                            GlassSurface(
+                                shape = RoundedCornerShape(50),
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        triggerHaptic()
+                                        onDismiss()
+                                    },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .testTag("btn_close_settings")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = stringResource(R.string.nav_close),
+                                        tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(if (isImeVisible) 8.dp else 12.dp))
+
+                        // Liquid-Glass Settings Search Bar (direkt unter Titel "Einstellungen" und über Pill-Leiste)
+                        SettingsSearchBar(
+                            query = searchQuery,
+                            onQueryChange = { newValue ->
+                                searchQuery = newValue
+                            },
+                            onClearClick = {
+                                HapticUtil.performAppHaptic(
+                                    context = context,
+                                    view = view,
+                                    enabled = hapticFeedbackEnabled,
+                                    intensityLevel = hapticIntensity
+                                )
+                                searchQuery = ""
+                            },
+                            isAmoled = isAmoled,
+                            isTiefschwarz = isTiefschwarz
+                        )
+
+                        Spacer(modifier = Modifier.height(if (isImeVisible) 8.dp else 12.dp))
+
+                        val handleTabSelect: (Int) -> Unit = { index ->
+                            triggerHaptic()
+                            if (isSearchActive) {
+                                clearedByTabTap = true
+                            }
+                            selectedTab = index
+                            searchQuery = ""
+                        }
+
+                        if (pinTabBar) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                SettingsTabBar(
+                                    selectedTab = selectedTab,
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz,
+                                    colorScheme = colorScheme,
+                                    onSelectTab = handleTabSelect
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(if (isImeVisible) 10.dp else 16.dp))
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f, fill = false)
+                                .verticalScroll(dialogScrollState)
+                        ) {
+                            if (!pinTabBar) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    SettingsTabBar(
+                                        selectedTab = selectedTab,
+                                        isAmoled = isAmoled,
+                                        isTiefschwarz = isTiefschwarz,
+                                        colorScheme = colorScheme,
+                                        onSelectTab = handleTabSelect
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
 
                 if (isSearchActive && !searchVisibility.hasAnyMatch) {
                     SettingsSearchEmptyState(
@@ -574,10 +550,13 @@ fun SettingsDialog(
                                 )
                             }
                         }
+                        }
                     }
                 }
             }
         }
+    }
+    }
     }
 
     if (showResetConfirmDialog) {
@@ -1624,6 +1603,165 @@ private fun LanguageSection(
                         }
                     )
                     Text(text = stringResource(langOption.stringResId), color = textColor, modifier = Modifier.padding(start = 12.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsTabBar(
+    selectedTab: Int,
+    isAmoled: Boolean,
+    isTiefschwarz: Boolean,
+    colorScheme: androidx.compose.material3.ColorScheme,
+    onSelectTab: (Int) -> Unit
+) {
+    val tabs = listOf(
+        Triple(0, Icons.Default.Palette, stringResource(R.string.title_appearance)),
+        Triple(1, Icons.Default.Straighten, stringResource(R.string.title_units)),
+        Triple(2, Icons.Default.DeveloperMode, stringResource(R.string.title_dev_options)),
+        Triple(3, Icons.Default.Info, stringResource(R.string.title_info)),
+        Triple(4, Icons.Default.Language, stringResource(R.string.tab_language))
+    )
+
+    val tabScrollState = rememberScrollState()
+    val density = LocalDensity.current
+    val tabWidths = remember { mutableStateMapOf<Int, androidx.compose.ui.unit.Dp>() }
+    var tabHeight by remember { mutableStateOf(0.dp) }
+
+    val spacing = 4.dp
+    val targetPosition = remember(selectedTab, tabWidths.toMap()) {
+        var pos = 0.dp
+        for (i in 0 until selectedTab) {
+            pos += (tabWidths[i] ?: 0.dp) + spacing
+        }
+        pos
+    }
+    val targetWidth = tabWidths[selectedTab] ?: 0.dp
+
+    val indicatorOffset by animateDpAsState(
+        targetValue = targetPosition,
+        animationSpec = tween(durationMillis = 250),
+        label = "tab_indicator_offset"
+    )
+    val indicatorWidth by animateDpAsState(
+        targetValue = targetWidth,
+        animationSpec = tween(durationMillis = 250),
+        label = "tab_indicator_width"
+    )
+
+    Box(
+        modifier = Modifier
+            .wrapContentWidth()
+            .clip(RoundedCornerShape(50.dp))
+            .background(
+                when {
+                    isAmoled -> Color.Black
+                    isTiefschwarz -> colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                    else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                }
+            )
+            .border(
+                width = 1.dp,
+                color = when {
+                    isAmoled -> Color.White.copy(alpha = 0.15f)
+                    isTiefschwarz -> Color.White.copy(alpha = 0.1f)
+                    else -> colorScheme.outline.copy(alpha = 0.3f)
+                },
+                shape = RoundedCornerShape(50.dp)
+            )
+            .padding(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .wrapContentWidth()
+                .horizontalScroll(tabScrollState)
+        ) {
+            if (targetWidth > 0.dp) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset(x = indicatorOffset)
+                        .width(indicatorWidth)
+                        .height(if (tabHeight > 0.dp) tabHeight else 36.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(colorScheme.primaryContainer)
+                )
+            }
+
+            Row(
+                modifier = Modifier.wrapContentWidth(),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                tabs.forEach { (index, icon, label) ->
+                    val isSelected = selectedTab == index
+                    var isPressed by remember { mutableStateOf(false) }
+                    val scale by animateFloatAsState(
+                        targetValue = if (isPressed) 0.94f else 1.0f,
+                        animationSpec = tween(durationMillis = 100),
+                        label = "tab_scale"
+                    )
+                    val tabTint by animateColorAsState(
+                        targetValue = if (isSelected) {
+                            if (isAmoled || isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
+                        } else {
+                            if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                        },
+                        animationSpec = tween(durationMillis = 220),
+                        label = "tab_${index}_tint"
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .onSizeChanged { size ->
+                                val w = with(density) { size.width.toDp() }
+                                val h = with(density) { size.height.toDp() }
+                                tabWidths[index] = w
+                                if (h > tabHeight) tabHeight = h
+                            }
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .clip(RoundedCornerShape(50.dp))
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onPress = {
+                                        isPressed = true
+                                        try { awaitRelease() } finally { isPressed = false }
+                                    },
+                                    onTap = {
+                                        onSelectTab(index)
+                                    }
+                                )
+                            }
+                            .padding(vertical = 8.dp, horizontal = 10.dp)
+                            .testTag("tab_settings_$index"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = tabTint,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = label,
+                                fontSize = 12.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = tabTint,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
                 }
             }
         }

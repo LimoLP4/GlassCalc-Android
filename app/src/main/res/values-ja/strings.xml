@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">引数区切り</string>
     <string name="btn_del_desc">削除 (長押しで連続削除)</string>
     <string name="btn_copy_clipboard">結果をクリップボードにコピー</string>
+    <string name="btn_open_keyboard">数式入力用のキーボードを開く</string>
     <string name="toast_copied">クリップボードにコピーしました: %s</string>
 
     <!-- Calculation Errors -->

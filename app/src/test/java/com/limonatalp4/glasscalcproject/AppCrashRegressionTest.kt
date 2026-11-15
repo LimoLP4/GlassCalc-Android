@@ -37,6 +37,19 @@ class AppCrashRegressionTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("display_result_text").assertTextEquals("10")
 
+        // Open keyboard via pill button (opens only), type with blocked chars, evaluate
+        composeTestRule.onNodeWithTag("btn_open_keyboard").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_open_keyboard").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_clear").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("display_expression_text").performTextInput("2+3@äф")
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_equals").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("display_result_text").assertTextEquals("5")
+
         // Scientific panel & Constants dialog
         composeTestRule.onNodeWithTag("btn_toggle_scientific").performClick()
         composeTestRule.waitForIdle()

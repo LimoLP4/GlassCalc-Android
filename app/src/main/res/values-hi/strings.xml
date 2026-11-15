@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">तर्क विभाजक</string>
     <string name="btn_del_desc">हटाएं (लगातार हटाने के लिए दबाए रखें)</string>
     <string name="btn_copy_clipboard">परिणाम क्लिपबोर्ड में कॉपी करें</string>
+    <string name="btn_open_keyboard">फ़ॉर्मूला इनपुट के लिए कीबोर्ड खोलें</string>
     <string name="toast_copied">क्लिपबोर्ड में कॉपी किया गया: %s</string>
 
     <!-- Calculation Errors -->

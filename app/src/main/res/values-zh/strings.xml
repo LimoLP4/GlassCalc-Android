@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">参数分隔符</string>
     <string name="btn_del_desc">删除 (长按连续删除)</string>
     <string name="btn_copy_clipboard">复制结果到剪贴板</string>
+    <string name="btn_open_keyboard">打开键盘输入公式</string>
     <string name="toast_copied">已复制到剪贴板: %s</string>
 
     <!-- Calculation Errors -->

@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">Разделитель аргументов</string>
     <string name="btn_del_desc">Удалить (Удерживайте для непрерывного удаления)</string>
     <string name="btn_copy_clipboard">Скопировать результат в буфер обмена</string>
+    <string name="btn_open_keyboard">Открыть клавиатуру для ввода формулы</string>
     <string name="toast_copied">Скопировано в буфер обмена: %s</string>
 
     <!-- Calculation Errors -->

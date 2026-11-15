@@ -2,6 +2,7 @@ package com.limonatalp4.glasscalcproject.ui.screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,10 +18,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import android.view.WindowManager
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.core.view.WindowCompat
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.Close
@@ -50,6 +65,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +79,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.converter.ConversionPair
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
@@ -188,102 +206,174 @@ fun UnitConverterDialog(
     @Suppress("DEPRECATION")
     BasicAlertDialog(
         onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        ),
         modifier = Modifier.testTag("dialog_unit_converter")
     ) {
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(28.dp),
-            borderWidth = 1.2.dp,
-            customBgColor = when {
-                isAmoled -> Color.Black
-                isTiefschwarz -> Color(0xFF121212)
-                else -> dialogBgColor
-            },
-            customBorderColor = when {
-                isAmoled -> Color.White.copy(alpha = 0.15f)
-                isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                else -> null
+        val dialogView = LocalView.current
+        SideEffect {
+            (dialogView.parent as? DialogWindowProvider)?.window?.let { dialogWindow ->
+                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+                dialogWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
             }
-        ) {
-            Column(
+        }
+
+        val imeDensity = LocalDensity.current
+        val isImeVisible = WindowInsets.ime.getBottom(imeDensity) > 0
+        val dialogTopPadding = if (isImeVisible) 8.dp else 16.dp
+        val dialogBottomPadding = if (isImeVisible) 8.dp else 16.dp
+        val dialogScrollState = rememberScrollState()
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Transparent outside-tap scrim to dismiss dialog
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.title_converter),
-                        fontSize = 21.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
-                    )
-                    IconButton(
-                        onClick = {
-                            triggerHaptic()
-                            onDismiss()
-                        },
-                        modifier = Modifier.testTag("btn_close_converter")
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.nav_close),
-                            tint = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
-                        )
+                        onDismiss()
                     }
-                }
+            )
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Liquid-Glass Einheiten-Suchleiste (direkt unter Titel und über Kategorie-Pill-Leiste)
-                UnitConverterSearchBar(
-                    query = searchQuery,
-                    onQueryChange = { newValue ->
-                        searchQuery = newValue
-                    },
-                    onClearClick = {
-                        HapticUtil.performAppHaptic(
-                            context = context,
-                            view = view,
-                            enabled = hapticFeedbackEnabled,
-                            intensityLevel = hapticIntensity
-                        )
-                        searchQuery = ""
-                    },
-                    onSearchSubmit = {
-                        val firstMatch = filteredUnitSuggestions.firstOrNull()
-                        if (firstMatch != null) {
-                            selectUnitSuggestion(firstMatch)
-                        } else {
-                            triggerHaptic()
-                            searchQuery = ""
-                        }
-                    },
-                    isAmoled = isAmoled,
-                    isTiefschwarz = isTiefschwarz
-                )
-
-                // Dropdown-Vorschläge dezent direkt unter der Suchleiste
-                if (searchQuery.trim().isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    UnitSuggestionsDropdown(
-                        suggestions = filteredUnitSuggestions,
-                        onSelectSuggestion = { suggestion ->
-                            selectUnitSuggestion(suggestion)
-                        },
-                        isAmoled = isAmoled,
-                        isTiefschwarz = isTiefschwarz
+            Box(
+                modifier = Modifier
+                    .align(if (isImeVisible) Alignment.TopCenter else Alignment.Center)
+                    .windowInsetsPadding(
+                        WindowInsets.statusBars
+                            .union(WindowInsets.displayCutout)
+                            .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
                     )
-                }
+                    .windowInsetsPadding(
+                        WindowInsets.ime
+                            .union(WindowInsets.navigationBars)
+                            .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                    )
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = dialogTopPadding,
+                        bottom = dialogBottomPadding
+                    )
+            ) {
+                GlassSurface(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .widthIn(max = 400.dp)
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    awaitPointerEvent()
+                                }
+                            }
+                        },
+                    shape = RoundedCornerShape(28.dp),
+                    borderWidth = 1.2.dp,
+                    customBgColor = when {
+                        isAmoled -> Color.Black
+                        isTiefschwarz -> Color(0xFF121212)
+                        else -> dialogBgColor
+                    },
+                    customBorderColor = when {
+                        isAmoled -> Color.White.copy(alpha = 0.15f)
+                        isTiefschwarz -> Color.White.copy(alpha = 0.1f)
+                        else -> null
+                    }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(if (isImeVisible) 14.dp else 20.dp)
+                    ) {
+                        // Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.title_converter),
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
+                            )
+                            GlassSurface(
+                                shape = RoundedCornerShape(50),
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        triggerHaptic()
+                                        onDismiss()
+                                    },
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .testTag("btn_close_converter")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = stringResource(R.string.nav_close),
+                                        tint = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(if (isImeVisible) 8.dp else 12.dp))
+
+                        // Liquid-Glass Einheiten-Suchleiste (direkt unter Titel und über Kategorie-Pill-Leiste)
+                        UnitConverterSearchBar(
+                            query = searchQuery,
+                            onQueryChange = { newValue ->
+                                searchQuery = newValue
+                            },
+                            onClearClick = {
+                                HapticUtil.performAppHaptic(
+                                    context = context,
+                                    view = view,
+                                    enabled = hapticFeedbackEnabled,
+                                    intensityLevel = hapticIntensity
+                                )
+                                searchQuery = ""
+                            },
+                            onSearchSubmit = {
+                                val firstMatch = filteredUnitSuggestions.firstOrNull()
+                                if (firstMatch != null) {
+                                    selectUnitSuggestion(firstMatch)
+                                } else {
+                                    triggerHaptic()
+                                    searchQuery = ""
+                                }
+                            },
+                            isAmoled = isAmoled,
+                            isTiefschwarz = isTiefschwarz
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f, fill = false)
+                                .verticalScroll(dialogScrollState)
+                        ) {
+                            // Dropdown-Vorschläge dezent direkt unter der Suchleiste
+                            if (searchQuery.trim().isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                UnitSuggestionsDropdown(
+                                    suggestions = filteredUnitSuggestions,
+                                    onSelectSuggestion = { suggestion ->
+                                        selectUnitSuggestion(suggestion)
+                                    },
+                                    isAmoled = isAmoled,
+                                    isTiefschwarz = isTiefschwarz
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
 
                 // Horizontally Scrollable Pill-Design Segmented Control for Categories
                 val categoryTabs = listOf(
@@ -632,8 +722,11 @@ fun UnitConverterDialog(
                 ) {
                     Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                     Text(stringResource(R.string.converter_import), fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
             }
         }
+    }
     }
 }

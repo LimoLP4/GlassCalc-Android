@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">Argument separator</string>
     <string name="btn_del_desc">Delete (Hold to delete continuously)</string>
     <string name="btn_copy_clipboard">Copy result to clipboard</string>
+    <string name="btn_open_keyboard">Open keyboard for formula input</string>
     <string name="toast_copied">Copied to clipboard: %s</string>
 
     <!-- Calculation Errors -->

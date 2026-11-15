@@ -48,14 +48,26 @@ import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import kotlinx.coroutines.delay
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
@@ -174,6 +186,7 @@ fun UnitConverterSearchBar(
 
     val context = LocalContext.current
     val view = LocalView.current
+    val density = LocalDensity.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
     val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
@@ -182,6 +195,16 @@ fun UnitConverterSearchBar(
     val focusRequester = remember { FocusRequester() }
     val pillInteractionSource = remember { MutableInteractionSource() }
     val textFieldInteractionSource = remember { MutableInteractionSource() }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+
+    LaunchedEffect(isSearchFocused, imeBottomPx) {
+        if (isSearchFocused) {
+            delay(80)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
 
     LaunchedEffect(textFieldInteractionSource) {
         textFieldInteractionSource.interactions.collect { interaction ->
@@ -200,6 +223,7 @@ fun UnitConverterSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
+            .bringIntoViewRequester(bringIntoViewRequester)
             .clip(shape)
             .background(searchBarBgColor)
             .border(searchBarBorder, shape = shape)
@@ -252,6 +276,9 @@ fun UnitConverterSearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        isSearchFocused = focusState.isFocused
+                    }
                     .testTag("converter_search_input"),
                 decorationBox = { innerTextField ->
                     Box(
@@ -299,6 +326,8 @@ fun UnitSuggestionsDropdown(
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val density = LocalDensity.current
+    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
     val textColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
     val dividerColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.08f) else colorScheme.outline.copy(alpha = 0.12f)
 
@@ -322,6 +351,8 @@ fun UnitSuggestionsDropdown(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(max = if (isImeVisible) 150.dp else 220.dp)
+                .verticalScroll(rememberScrollState())
                 .padding(vertical = 4.dp)
         ) {
             if (suggestions.isEmpty()) {

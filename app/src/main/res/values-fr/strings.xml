@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">Séparateur d\'arguments</string>
     <string name="btn_del_desc">Effacer (Maintenir pour effacer en continu)</string>
     <string name="btn_copy_clipboard">Copier le résultat dans le presse-papiers</string>
+    <string name="btn_open_keyboard">Ouvrir le clavier pour saisir une formule</string>
     <string name="toast_copied">Copié dans le presse-papiers : %s</string>
 
     <!-- Calculation Errors -->

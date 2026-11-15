@@ -1,5 +1,6 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -21,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -32,6 +35,7 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.ui.components.FunctionGraphView
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
@@ -44,6 +48,9 @@ fun GraphDialog(
     angleMode: AngleMode,
     onDismiss: () -> Unit
 ) {
+    val glassProps = LocalGlassProperties.current
+    val isAmoled = glassProps.isAmoled
+    val isTiefschwarz = glassProps.isTiefschwarz
     val colorScheme = MaterialTheme.colorScheme
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
@@ -85,18 +92,27 @@ fun GraphDialog(
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
-                    IconButton(
-                        onClick = {
-                            triggerHaptic()
-                            onDismiss()
-                        },
-                        modifier = Modifier.testTag("btn_close_graph_dialog")
+                    GlassSurface(
+                        shape = RoundedCornerShape(50),
+                        customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.nav_close),
-                            tint = colorScheme.onSurface
-                        )
+                        IconButton(
+                            onClick = {
+                                triggerHaptic()
+                                onDismiss()
+                            },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("btn_close_graph_dialog")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.nav_close),
+                                tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
 

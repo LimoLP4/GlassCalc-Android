@@ -40,14 +40,23 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import kotlinx.coroutines.delay
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
@@ -353,6 +362,7 @@ fun SettingsSearchBar(
 
     val context = LocalContext.current
     val view = LocalView.current
+    val density = LocalDensity.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
     val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
@@ -361,6 +371,16 @@ fun SettingsSearchBar(
     val focusRequester = remember { FocusRequester() }
     val pillInteractionSource = remember { MutableInteractionSource() }
     val textFieldInteractionSource = remember { MutableInteractionSource() }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    var isSearchFocused by remember { mutableStateOf(false) }
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+
+    LaunchedEffect(isSearchFocused, imeBottomPx) {
+        if (isSearchFocused) {
+            delay(80)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
 
     LaunchedEffect(textFieldInteractionSource) {
         textFieldInteractionSource.interactions.collect { interaction ->
@@ -379,6 +399,7 @@ fun SettingsSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
+            .bringIntoViewRequester(bringIntoViewRequester)
             .clip(shape)
             .background(searchBarBgColor)
             .border(searchBarBorder, shape = shape)
@@ -425,6 +446,9 @@ fun SettingsSearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        isSearchFocused = focusState.isFocused
+                    }
                     .testTag("settings_search_input"),
                 decorationBox = { innerTextField ->
                     Box(

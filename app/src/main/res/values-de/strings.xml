@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">Argument-Trennzeichen</string>
     <string name="btn_del_desc">Löschen (Gedrückt halten zum kontinuierlichen Löschen)</string>
     <string name="btn_copy_clipboard">Ergebnis in Zwischenablage kopieren</string>
+    <string name="btn_open_keyboard">Tastatur für Formeleingabe öffnen</string>
     <string name="toast_copied">In Zwischenablage kopiert: %s</string>
 
     <!-- Calculation Errors -->

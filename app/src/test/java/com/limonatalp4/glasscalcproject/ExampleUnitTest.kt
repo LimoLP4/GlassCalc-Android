@@ -626,4 +626,32 @@ class ExampleUnitTest {
         assertTrue(com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel.isSystemLocaleSupported(java.util.Locale("hi", "IN")))
         assertTrue(!com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel.isSystemLocaleSupported(java.util.Locale("tr", "TR")))
     }
+
+    @Test
+    fun testDisplayWhitelistFilter() {
+        // Allowed digits, operators, constants, and math functions
+        val (validExpr, validCursor) = com.limonatalp4.glasscalcproject.ui.components.filterCalculatorExpression(
+            text = "2+sin(π/2)^3-4,5*10%+e",
+            cursorPosition = 22
+        )
+        assertEquals("2+sin(π/2)^3-4,5*10%+e", validExpr)
+        assertEquals(22, validCursor)
+
+        // Blocks Cyrillic, umlauts, emojis, and unsafe symbols while keeping cursor position accurate
+        val sampleInput = "12@äф😀+3#4"
+        val (filtered, cursor) = com.limonatalp4.glasscalcproject.ui.components.filterCalculatorExpression(
+            text = sampleInput,
+            cursorPosition = sampleInput.indexOf('+') + 1
+        )
+        assertEquals("12+34", filtered)
+        assertEquals(3, cursor) // "12+"
+
+        // Preserves calculator unicode operators during soft-keyboard editing
+        val (unicodeKept, unicodeCursor) = com.limonatalp4.glasscalcproject.ui.components.filterCalculatorExpression(
+            text = "√(9)×2÷1−3",
+            cursorPosition = 10
+        )
+        assertEquals("√(9)×2÷1−3", unicodeKept)
+        assertEquals(10, unicodeCursor)
+    }
 }

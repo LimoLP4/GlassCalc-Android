@@ -651,6 +651,8 @@ private fun PortraitCalculatorLayout(
                 angleMode = angleMode,
                 isScientificExpanded = isScientificExpanded,
                 onCursorPositionChanged = { viewModel.setCursorPosition(it) },
+                onExpressionChange = { expr, cursor -> viewModel.onDirectExpressionChange(expr, cursor) },
+                onEvaluate = { viewModel.onEquals() },
                 isCompact = false,
                 glassState = glassState
             )
@@ -876,6 +878,8 @@ private fun LandscapeCalculatorLayout(
                         angleMode = angleMode,
                         isScientificExpanded = true,
                         onCursorPositionChanged = { viewModel.setCursorPosition(it) },
+                        onExpressionChange = { expr, cursor -> viewModel.onDirectExpressionChange(expr, cursor) },
+                        onEvaluate = { viewModel.onEquals() },
                         isCompact = false,
                         glassState = glassState,
                         modifier = Modifier.fillMaxWidth()

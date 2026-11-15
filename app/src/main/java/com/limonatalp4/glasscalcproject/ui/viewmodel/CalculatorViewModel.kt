@@ -57,6 +57,18 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         _cursorPosition.value = position.coerceIn(0, maxLen)
     }
 
+    fun onDirectExpressionChange(newExpression: String, newCursorPosition: Int) {
+        _errorMessage.value = null
+        justCalculated = false
+        _expression.value = newExpression
+        _cursorPosition.value = if (newExpression.isEmpty()) {
+            1
+        } else {
+            newCursorPosition.coerceIn(0, newExpression.length)
+        }
+        tryLivePreview()
+    }
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 

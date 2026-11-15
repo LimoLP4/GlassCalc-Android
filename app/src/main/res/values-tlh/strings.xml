@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">gherwI\' chev</string>
     <string name="btn_del_desc">teq (yI\'uchtaH)</string>
     <string name="btn_copy_clipboard">qonwI\'Daq ngaSmoH</string>
+    <string name="btn_open_keyboard">De\'wI\' ghItlhmeH raS poSmoH</string>
     <string name="toast_copied">ngaSmoHpu\': %s</string>
 
     <!-- Calculation Errors -->

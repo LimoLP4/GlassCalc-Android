@@ -28,6 +28,7 @@
     <string name="btn_semicolon_desc">Separador de argumentos</string>
     <string name="btn_del_desc">Borrar (Mantener pulsado para borrado continuo)</string>
     <string name="btn_copy_clipboard">Copiar resultado al portapapeles</string>
+    <string name="btn_open_keyboard">Abrir teclado para introducir fórmula</string>
     <string name="toast_copied">Copiado al portapapeles: %s</string>
 
     <!-- Calculation Errors -->
