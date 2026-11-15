@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -131,6 +130,43 @@ data class GraphBounds(
     val yMax: Double
 )
 
+/**
+ * 1. CLEAR COORDINATE TRANSFORMATION FUNCTIONS (Screen to Math & Math to Screen)
+ */
+fun screenToMath(
+    offsetX: Float,
+    offsetY: Float,
+    width: Float,
+    height: Float,
+    xMin: Double,
+    xMax: Double,
+    yMin: Double,
+    yMax: Double
+): GraphPoint {
+    val xSpan = xMax - xMin
+    val ySpan = yMax - yMin
+    val mathX = if (width > 0f) xMin + (offsetX / width) * xSpan else xMin
+    val mathY = if (height > 0f) yMin + ((height - offsetY) / height) * ySpan else yMin
+    return GraphPoint(mathX, mathY)
+}
+
+fun mathToScreen(
+    x: Double,
+    y: Double,
+    width: Float,
+    height: Float,
+    xMin: Double,
+    xMax: Double,
+    yMin: Double,
+    yMax: Double
+): Offset {
+    val xSpan = xMax - xMin
+    val ySpan = yMax - yMin
+    val px = if (xSpan > 1e-12) ((x - xMin) / xSpan * width).toFloat() else 0f
+    val py = if (ySpan > 1e-12) (height - ((y - yMin) / ySpan * height)).toFloat() else 0f
+    return Offset(px, py)
+}
+
 fun defaultBoundsForPreset(
     preset: GraphPreset,
     angleMode: AngleMode,
@@ -163,7 +199,7 @@ fun defaultBoundsForPreset(
             GraphBounds(-10.0, 10.0, -5.0, 100.0)
         }
         GraphPreset.SQRT -> {
-            GraphBounds(-1.0, 16.0, -1.0, 5.0)
+            GraphBounds(0.0, 16.0, -1.0, 5.0)
         }
         GraphPreset.DERIV -> {
             val lower = expression.lowercase()
@@ -187,9 +223,11 @@ fun defaultBoundsForPreset(
             if (angleMode == AngleMode.DEG && (lower.contains("sin") || lower.contains("cos") || lower.contains("tan"))) {
                 GraphBounds(-360.0, 360.0, -2.5, 2.5)
             } else if (lower.contains("^2") || lower.contains("²")) {
-                GraphBounds(-10.0, 10.0, -5.0, 50.0)
+                GraphBounds(-10.0, 10.0, -5.0, 100.0)
             } else if (lower.contains("sqrt") || lower.contains("√")) {
-                GraphBounds(-1.0, 16.0, -1.0, 5.0)
+                GraphBounds(0.0, 16.0, -1.0, 5.0)
+            } else if (lower.contains("log") || lower.contains("ln")) {
+                GraphBounds(0.01, 10.0, -4.0, 4.0)
             } else {
                 GraphBounds(-10.0, 10.0, -10.0, 10.0)
             }
@@ -256,14 +294,9 @@ internal fun sanitizeForGraphParser(expr: String): String {
         .replace("∫(", "int(")
         .replace("d/dx(", "der(")
 
-    // Convert decimal comma between digits: e.g. "3,14" -> "3.14", "0,5" -> "0.5"
-    // Leaves argument separating commas intact in functions like der(sin(t), t, x)
     s = s.replace(Regex("""(?<=\d),(?=\d)"""), ".")
-
-    // Semicolons used in GlassCalc parameter separators -> commas for mXparser
     s = s.replace(";", ",")
 
-    // If der(...) or d/dx(...) was supplied with only 1 argument like der(x^2), expand to der(x^2, x)
     val singleArgDerRegex = Regex("""der\(([^,)]+)\)""")
     s = singleArgDerRegex.replace(s) { matchResult ->
         val inner = matchResult.groupValues[1]
@@ -404,7 +437,7 @@ fun FunctionGraphView(
     var yMin by remember { mutableDoubleStateOf(initialBounds.yMin) }
     var yMax by remember { mutableDoubleStateOf(initialBounds.yMax) }
 
-    // Cached curve evaluation points (normalized t from 0..1, y value)
+    // Cached curve evaluation points
     var cachedPoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
 
     // Two manual inspected points (P1, P2) at mathematical (x, y)
@@ -413,7 +446,6 @@ fun FunctionGraphView(
     var nextPointIndex by remember { mutableIntStateOf(1) }
     var lastHapticTime by remember { mutableStateOf(0L) }
 
-    // Keep latest parameters accessible inside long-lived pointerInput blocks
     val currentPreset by rememberUpdatedState(selectedPreset)
     val currentExpression by rememberUpdatedState(expression)
     val currentAngleMode by rememberUpdatedState(angleMode)
@@ -433,7 +465,7 @@ fun FunctionGraphView(
         nextPointIndex = 1
     }
 
-    // Asynchronous background computation of curve points (Dispatchers.Default)
+    // 4. CURVE DRAWING: Path calculation over visible X range with small step size (0.1 or step resolution)
     LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
         val computedPoints = withContext(Dispatchers.Default) {
             try {
@@ -442,7 +474,10 @@ fun FunctionGraphView(
                 }
                 val formulaString = resolveActiveFormula(selectedPreset, expression)
                 val sanitizedExpr = sanitizeForGraphParser(formulaString)
-                val steps = 400 // High quality, smooth curves
+                
+                // High density steps across xMin..xMax (e.g. step size ~ 0.05 - 0.1)
+                val xSpan = xMax - xMin
+                val steps = (xSpan * 40).toInt().coerceIn(200, 1000)
                 val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
 
                 synchronized(MxParserLock) {
@@ -472,8 +507,9 @@ fun FunctionGraphView(
 
                     for (i in 0..steps) {
                         val t = i.toDouble() / steps
-                        val x = xMin + t * (xMax - xMin)
+                        val x = xMin + t * xSpan
 
+                        // Skip out of domain values for log, ln, sqrt
                         if (needsPositiveX && x <= 0.0) {
                             calculatedList.add(Pair(x, Double.NaN))
                             continue
@@ -519,17 +555,27 @@ fun FunctionGraphView(
         triggerClickHaptic()
     }
 
-    fun tryPlacePointAtTap(tapOffset: Offset, canvasWidth: Float) {
-        if (currentIsGraphLocked || canvasWidth <= 0f) return
-        val xSpan = xMax - xMin
-        if (xSpan <= 0.0) return
-
-        val fraction = (tapOffset.x / canvasWidth).coerceIn(0f, 1f).toDouble()
-        val tappedX = xMin + fraction * xSpan
+    // 2. CORRECT CALCULATION OF POINTS (P1/P2): X from tap using screenToMath, Y strictly from function evaluation
+    fun tryPlacePointAtTap(tapOffset: Offset, canvasWidth: Float, canvasHeight: Float) {
+        if (currentIsGraphLocked || canvasWidth <= 0f || canvasHeight <= 0f) return
+        
+        // Use screenToMath to get exact math coordinates from tap
+        val mathPoint = screenToMath(
+            offsetX = tapOffset.x,
+            offsetY = tapOffset.y,
+            width = canvasWidth,
+            height = canvasHeight,
+            xMin = xMin,
+            xMax = xMax,
+            yMin = yMin,
+            yMax = yMax
+        )
+        
+        val tappedX = mathPoint.x
         val formula = resolveActiveFormula(currentPreset, currentExpression)
         val evaluatedY = evaluateFormulaAtX(formula, tappedX, currentAngleMode)
 
-        if (evaluatedY != null) {
+        if (evaluatedY != null && evaluatedY.isFinite()) {
             val newPoint = GraphPoint(tappedX, evaluatedY)
             when {
                 point1 == null -> {
@@ -626,7 +672,6 @@ fun FunctionGraphView(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // LOCK BUTTON (Locks graph 2D panning/zooming gesture on canvas)
                 val lockBtnInteraction = remember { MutableInteractionSource() }
                 IconButton(
                     onClick = {
@@ -651,7 +696,7 @@ fun FunctionGraphView(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Main Canvas Plot Area with 2D Panning & Throttled Haptics
+            // Main Canvas Plot Area with 2D Panning & Zooming
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -663,10 +708,10 @@ fun FunctionGraphView(
                         if (!isGraphLocked) {
                             detectTapGestures(
                                 onTap = { offset ->
-                                    tryPlacePointAtTap(offset, size.width.toFloat())
+                                    tryPlacePointAtTap(offset, size.width.toFloat(), size.height.toFloat())
                                 },
                                 onLongPress = { offset ->
-                                    tryPlacePointAtTap(offset, size.width.toFloat())
+                                    tryPlacePointAtTap(offset, size.width.toFloat(), size.height.toFloat())
                                 }
                             )
                         }
@@ -729,8 +774,10 @@ fun FunctionGraphView(
                     val gridStrokeWidth = 1.dp.toPx()
                     val axisStrokeWidth = 1.8.dp.toPx()
 
-                    val zeroXpx = ((0.0 - xMin) / xSpan * width).toFloat()
-                    val zeroYpx = (height - ((0.0 - yMin) / ySpan * height)).toFloat()
+                    // Use mathToScreen for origin axes
+                    val originOffset = mathToScreen(0.0, 0.0, width, height, xMin, xMax, yMin, yMax)
+                    val zeroXpx = originOffset.x
+                    val zeroYpx = originOffset.y
 
                     val axisTextStyle = TextStyle(
                         fontSize = 9.sp,
@@ -751,7 +798,8 @@ fun FunctionGraphView(
                     var currentX = firstX
                     var xGridCount = 0
                     while (currentX <= xMax + xStep * 0.1 && xGridCount++ < 80) {
-                        val gx = ((currentX - xMin) / xSpan * width).toFloat()
+                        val screenPt = mathToScreen(currentX, 0.0, width, height, xMin, xMax, yMin, yMax)
+                        val gx = screenPt.x
                         if (gx.isFinite() && gx in 0f..width) {
                             drawLine(
                                 color = gridColor,
@@ -796,7 +844,8 @@ fun FunctionGraphView(
                     var currentY = firstY
                     var yGridCount = 0
                     while (currentY <= yMax + yStep * 0.1 && yGridCount++ < 80) {
-                        val gy = (height - ((currentY - yMin) / ySpan * height)).toFloat()
+                        val screenPt = mathToScreen(0.0, currentY, width, height, xMin, xMax, yMin, yMax)
+                        val gy = screenPt.y
                         if (gy.isFinite() && gy in 0f..height) {
                             drawLine(
                                 color = gridColor,
@@ -876,7 +925,7 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // 3. CURVE DRAWING (Instantly rendered from cached list with zero allocation in draw pass)
+                    // 3. CURVE DRAWING using mathToScreen
                     if (cachedPoints.isNotEmpty()) {
                         val path = Path()
                         var isFirst = true
@@ -889,8 +938,9 @@ fun FunctionGraphView(
                                 isFirst = true
                                 continue
                             }
-                            val px = ((x - xMin) / xSpan * width).toFloat()
-                            val py = (height - ((y - yMin) / ySpan * height)).toFloat()
+                            val screenPt = mathToScreen(x, y, width, height, xMin, xMax, yMin, yMax)
+                            val px = screenPt.x
+                            val py = screenPt.y
                             if (!px.isFinite() || !py.isFinite()) {
                                 isFirst = true
                                 continue
@@ -912,7 +962,7 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // 4. TWO-POINT MARKER OVERLAY (P1, P2, Secant Line & Badges)
+                    // 4. TWO-POINT MARKER OVERLAY (P1, P2 using mathToScreen)
                     fun drawPointMarker(
                         point: GraphPoint,
                         label: String,
@@ -920,8 +970,9 @@ fun FunctionGraphView(
                         badgeTextColor: Color,
                         preferBadgeBelow: Boolean = false
                     ) {
-                        val px = ((point.x - xMin) / xSpan * width).toFloat()
-                        val py = (height - ((point.y - yMin) / ySpan * height)).toFloat()
+                        val screenPt = mathToScreen(point.x, point.y, width, height, xMin, xMax, yMin, yMax)
+                        val px = screenPt.x
+                        val py = screenPt.y
                         if (!px.isFinite() || !py.isFinite()) return
 
                         val markerPos = Offset(px, py)
@@ -1010,15 +1061,13 @@ fun FunctionGraphView(
                     val p1 = point1
                     val p2 = point2
                     if (p1 != null && p2 != null) {
-                        val px1 = ((p1.x - xMin) / xSpan * width).toFloat()
-                        val py1 = (height - ((p1.y - yMin) / ySpan * height)).toFloat()
-                        val px2 = ((p2.x - xMin) / xSpan * width).toFloat()
-                        val py2 = (height - ((p2.y - yMin) / ySpan * height)).toFloat()
-                        if (px1.isFinite() && py1.isFinite() && px2.isFinite() && py2.isFinite()) {
+                        val pt1 = mathToScreen(p1.x, p1.y, width, height, xMin, xMax, yMin, yMax)
+                        val pt2 = mathToScreen(p2.x, p2.y, width, height, xMin, xMax, yMin, yMax)
+                        if (pt1.x.isFinite() && pt1.y.isFinite() && pt2.x.isFinite() && pt2.y.isFinite()) {
                             drawLine(
                                 color = colorScheme.secondary.copy(alpha = 0.80f),
-                                start = Offset(px1, py1),
-                                end = Offset(px2, py2),
+                                start = pt1,
+                                end = pt2,
                                 strokeWidth = 1.6.dp.toPx(),
                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
                             )
