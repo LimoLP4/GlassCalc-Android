@@ -71,6 +71,7 @@ import kotlinx.coroutines.delay
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
+import java.util.Locale
 
 @Immutable
 data class UnitItem(
@@ -78,44 +79,45 @@ data class UnitItem(
     val symbol: String,
     val category: UnitCategory,
     val nameResId: Int,
-    val defaultPair: ConversionPair
+    val defaultPair: ConversionPair,
+    val keywordsResId: Int
 )
 
 val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
     listOf(
         // Length
-        UnitItem("meter", "m", UnitCategory.LENGTH, R.string.unit_name_meter, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }),
-        UnitItem("feet", "ft", UnitCategory.LENGTH, R.string.unit_name_feet, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }),
-        UnitItem("centimeter", "cm", UnitCategory.LENGTH, R.string.unit_name_centimeter, UnitConverter.CONVERSIONS.first { it.unitFrom == "cm" && it.unitTo == "in" }),
-        UnitItem("inch", "in", UnitCategory.LENGTH, R.string.unit_name_inch, UnitConverter.CONVERSIONS.first { it.unitFrom == "cm" && it.unitTo == "in" }),
-        UnitItem("kilometer", "km", UnitCategory.LENGTH, R.string.unit_name_kilometer, UnitConverter.CONVERSIONS.first { it.unitFrom == "km" && it.unitTo == "mi" }),
-        UnitItem("mile", "mi", UnitCategory.LENGTH, R.string.unit_name_mile, UnitConverter.CONVERSIONS.first { it.unitFrom == "km" && it.unitTo == "mi" }),
+        UnitItem("meter", "m", UnitCategory.LENGTH, R.string.unit_name_meter, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }, R.string.unit_keywords_meter),
+        UnitItem("feet", "ft", UnitCategory.LENGTH, R.string.unit_name_feet, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }, R.string.unit_keywords_feet),
+        UnitItem("centimeter", "cm", UnitCategory.LENGTH, R.string.unit_name_centimeter, UnitConverter.CONVERSIONS.first { it.unitFrom == "cm" && it.unitTo == "in" }, R.string.unit_keywords_centimeter),
+        UnitItem("inch", "in", UnitCategory.LENGTH, R.string.unit_name_inch, UnitConverter.CONVERSIONS.first { it.unitFrom == "cm" && it.unitTo == "in" }, R.string.unit_keywords_inch),
+        UnitItem("kilometer", "km", UnitCategory.LENGTH, R.string.unit_name_kilometer, UnitConverter.CONVERSIONS.first { it.unitFrom == "km" && it.unitTo == "mi" }, R.string.unit_keywords_kilometer),
+        UnitItem("mile", "mi", UnitCategory.LENGTH, R.string.unit_name_mile, UnitConverter.CONVERSIONS.first { it.unitFrom == "km" && it.unitTo == "mi" }, R.string.unit_keywords_mile),
 
         // Mass
-        UnitItem("kilogram", "kg", UnitCategory.MASS, R.string.unit_name_kilogram, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "lb" }),
-        UnitItem("pound", "lb", UnitCategory.MASS, R.string.unit_name_pound, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "lb" }),
+        UnitItem("kilogram", "kg", UnitCategory.MASS, R.string.unit_name_kilogram, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "lb" }, R.string.unit_keywords_kilogram),
+        UnitItem("pound", "lb", UnitCategory.MASS, R.string.unit_name_pound, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "lb" }, R.string.unit_keywords_pound),
 
         // Temperature
-        UnitItem("celsius", "°C", UnitCategory.TEMPERATURE, R.string.unit_name_celsius, UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }),
-        UnitItem("fahrenheit", "°F", UnitCategory.TEMPERATURE, R.string.unit_name_fahrenheit, UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }),
+        UnitItem("celsius", "°C", UnitCategory.TEMPERATURE, R.string.unit_name_celsius, UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }, R.string.unit_keywords_celsius),
+        UnitItem("fahrenheit", "°F", UnitCategory.TEMPERATURE, R.string.unit_name_fahrenheit, UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }, R.string.unit_keywords_fahrenheit),
 
         // Volume
-        UnitItem("liter", "l", UnitCategory.VOLUME, R.string.unit_name_liter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }),
-        UnitItem("gallon", "gal", UnitCategory.VOLUME, R.string.unit_name_gallon, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }),
+        UnitItem("liter", "l", UnitCategory.VOLUME, R.string.unit_name_liter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }, R.string.unit_keywords_liter),
+        UnitItem("gallon", "gal", UnitCategory.VOLUME, R.string.unit_name_gallon, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }, R.string.unit_keywords_gallon),
 
         // Data
-        UnitItem("byte", "B", UnitCategory.DATA, R.string.unit_name_byte, UnitConverter.CONVERSIONS.first { it.unitFrom == "B" && it.unitTo == "KB" }),
-        UnitItem("kilobyte", "KB", UnitCategory.DATA, R.string.unit_name_kilobyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "KB" && it.unitTo == "MB" }),
-        UnitItem("megabyte", "MB", UnitCategory.DATA, R.string.unit_name_megabyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "MB" && it.unitTo == "GB" }),
-        UnitItem("gigabyte", "GB", UnitCategory.DATA, R.string.unit_name_gigabyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "GB" && it.unitTo == "TB" }),
-        UnitItem("terabyte", "TB", UnitCategory.DATA, R.string.unit_name_terabyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "GB" && it.unitTo == "TB" }),
+        UnitItem("byte", "B", UnitCategory.DATA, R.string.unit_name_byte, UnitConverter.CONVERSIONS.first { it.unitFrom == "B" && it.unitTo == "KB" }, R.string.unit_keywords_byte),
+        UnitItem("kilobyte", "KB", UnitCategory.DATA, R.string.unit_name_kilobyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "KB" && it.unitTo == "MB" }, R.string.unit_keywords_kilobyte),
+        UnitItem("megabyte", "MB", UnitCategory.DATA, R.string.unit_name_megabyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "MB" && it.unitTo == "GB" }, R.string.unit_keywords_megabyte),
+        UnitItem("gigabyte", "GB", UnitCategory.DATA, R.string.unit_name_gigabyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "GB" && it.unitTo == "TB" }, R.string.unit_keywords_gigabyte),
+        UnitItem("terabyte", "TB", UnitCategory.DATA, R.string.unit_name_terabyte, UnitConverter.CONVERSIONS.first { it.unitFrom == "GB" && it.unitTo == "TB" }, R.string.unit_keywords_terabyte),
 
         // Time
-        UnitItem("second", "s", UnitCategory.TIME, R.string.unit_name_seconds, UnitConverter.CONVERSIONS.first { it.unitFrom == "s" && it.unitTo == "ms" }),
-        UnitItem("millisecond", "ms", UnitCategory.TIME, R.string.unit_name_milliseconds, UnitConverter.CONVERSIONS.first { it.unitFrom == "s" && it.unitTo == "ms" }),
-        UnitItem("minute", "min", UnitCategory.TIME, R.string.unit_name_minutes, UnitConverter.CONVERSIONS.first { it.unitFrom == "min" && it.unitTo == "s" }),
-        UnitItem("hour", "h", UnitCategory.TIME, R.string.unit_name_hours, UnitConverter.CONVERSIONS.first { it.unitFrom == "h" && it.unitTo == "min" }),
-        UnitItem("day", "d", UnitCategory.TIME, R.string.unit_name_days, UnitConverter.CONVERSIONS.first { it.unitFrom == "d" && it.unitTo == "h" })
+        UnitItem("second", "s", UnitCategory.TIME, R.string.unit_name_seconds, UnitConverter.CONVERSIONS.first { it.unitFrom == "s" && it.unitTo == "ms" }, R.string.unit_keywords_second),
+        UnitItem("millisecond", "ms", UnitCategory.TIME, R.string.unit_name_milliseconds, UnitConverter.CONVERSIONS.first { it.unitFrom == "s" && it.unitTo == "ms" }, R.string.unit_keywords_millisecond),
+        UnitItem("minute", "min", UnitCategory.TIME, R.string.unit_name_minutes, UnitConverter.CONVERSIONS.first { it.unitFrom == "min" && it.unitTo == "s" }, R.string.unit_keywords_minute),
+        UnitItem("hour", "h", UnitCategory.TIME, R.string.unit_name_hours, UnitConverter.CONVERSIONS.first { it.unitFrom == "h" && it.unitTo == "min" }, R.string.unit_keywords_hour),
+        UnitItem("day", "d", UnitCategory.TIME, R.string.unit_name_days, UnitConverter.CONVERSIONS.first { it.unitFrom == "d" && it.unitTo == "h" }, R.string.unit_keywords_day)
     )
 }
 
@@ -123,35 +125,29 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
 data class LocalizedUnitSuggestion(
     val item: UnitItem,
     val localizedName: String,
-    val symbol: String
+    val symbol: String,
+    val localizedKeywords: List<String> = emptyList()
 )
 
 fun filterUnitSuggestions(
     query: String,
     suggestions: List<LocalizedUnitSuggestion>
 ): List<LocalizedUnitSuggestion> {
-    val trimmed = query.trim()
-    if (trimmed.isEmpty()) return emptyList()
+    val tokens = tokenizeSearchQuery(query)
+    if (tokens.isEmpty()) return emptyList()
 
     return suggestions.mapNotNull { suggestion ->
-        val nameMatch = suggestion.localizedName.contains(trimmed, ignoreCase = true)
-        val symbolMatch = suggestion.symbol.contains(trimmed, ignoreCase = true)
-        val idMatch = suggestion.item.id.contains(trimmed, ignoreCase = true)
-
-        if (!nameMatch && !symbolMatch && !idMatch) {
-            null
-        } else {
-            val priority = when {
-                suggestion.localizedName.equals(trimmed, ignoreCase = true) ||
-                    suggestion.symbol.equals(trimmed, ignoreCase = true) -> 0
-                suggestion.localizedName.startsWith(trimmed, ignoreCase = true) ||
-                    suggestion.symbol.startsWith(trimmed, ignoreCase = true) -> 1
-                else -> 2
-            }
-            suggestion to priority
-        }
+        val score = computeMatchScore(
+            tokens = tokens,
+            primaryNames = listOf(suggestion.localizedName, suggestion.symbol),
+            keywords = suggestion.localizedKeywords
+        ) ?: return@mapNotNull null
+        suggestion to score
     }
-    .sortedWith(compareBy({ it.second }, { it.first.localizedName }))
+    .sortedWith(
+        compareBy<Pair<LocalizedUnitSuggestion, Int>> { it.second }
+            .thenBy { it.first.localizedName.lowercase(Locale.ROOT) }
+    )
     .map { it.first }
 }
 
@@ -373,7 +369,7 @@ fun UnitSuggestionsDropdown(
                     )
                 }
             } else {
-                suggestions.take(6).forEachIndexed { index, suggestion ->
+                suggestions.take(8).forEachIndexed { index, suggestion ->
                     if (index > 0) {
                         HorizontalDivider(
                             thickness = 0.5.dp,
@@ -426,39 +422,22 @@ fun filterConversionPairs(
     query: String,
     localizedPairs: List<LocalizedConversionPair>
 ): List<ConversionPair> {
-    val trimmed = query.trim()
-    if (trimmed.isEmpty()) return emptyList()
-
-    val tokens = trimmed.split(Regex("\\s+")).filter { it.isNotEmpty() }
+    val tokens = tokenizeSearchQuery(query)
     if (tokens.isEmpty()) return emptyList()
 
     return localizedPairs
         .mapNotNull { entry ->
-            val candidates = buildList {
-                add(entry.pair.unitFrom)
-                add(entry.pair.unitTo)
-                add(entry.localizedLabel)
-                add(entry.localizedCategoryName)
-                addAll(entry.localizedCategoryKeywords)
-            }
-            val matchesAllTokens = tokens.all { token ->
-                candidates.any { candidate -> candidate.contains(token, ignoreCase = true) }
-            }
-            if (!matchesAllTokens) {
-                null
-            } else {
-                val exactUnitMatch = entry.pair.unitFrom.equals(trimmed, ignoreCase = true) ||
-                    entry.pair.unitTo.equals(trimmed, ignoreCase = true)
-                val prefixUnitMatch = entry.pair.unitFrom.startsWith(trimmed, ignoreCase = true) ||
-                    entry.pair.unitTo.startsWith(trimmed, ignoreCase = true) ||
-                    entry.localizedLabel.startsWith(trimmed, ignoreCase = true)
-                val priority = when {
-                    exactUnitMatch -> 0
-                    prefixUnitMatch -> 1
-                    else -> 2
-                }
-                entry.pair to priority
-            }
+            val score = computeMatchScore(
+                tokens = tokens,
+                primaryNames = listOf(
+                    entry.pair.unitFrom,
+                    entry.pair.unitTo,
+                    entry.localizedLabel
+                ),
+                secondaryNames = listOf(entry.localizedCategoryName),
+                keywords = entry.localizedCategoryKeywords
+            ) ?: return@mapNotNull null
+            entry.pair to score
         }
         .sortedBy { it.second }
         .map { it.first }

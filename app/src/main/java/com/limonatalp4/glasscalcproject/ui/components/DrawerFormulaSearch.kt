@@ -70,6 +70,7 @@ import com.limonatalp4.glasscalcproject.domain.formulas.MathFormula
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
+import java.util.Locale
 
 @Immutable
 internal data class LocalizedFormula(
@@ -94,10 +95,7 @@ fun DrawerFormulaSearch(
     val localizedFormulas = FormulaCatalog.FORMULAS.map { item ->
         val name = stringResource(item.nameResId)
         val keywords = item.keywordsResIds.flatMap { resId ->
-            stringResource(resId)
-                .split(',', ';')
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
+            splitSearchKeywords(stringResource(resId))
         }
         LocalizedFormula(
             formula = item,
@@ -323,11 +321,22 @@ internal fun filterFormulas(
     query: String,
     localizedFormulas: List<LocalizedFormula>
 ): List<LocalizedFormula> {
-    val trimmed = query.trim()
-    if (trimmed.isEmpty()) return emptyList()
-    return localizedFormulas.filter { entry ->
-        entry.localizedName.contains(trimmed, ignoreCase = true) ||
-            entry.formula.formula.contains(trimmed, ignoreCase = true) ||
-            entry.localizedKeywords.any { keyword -> keyword.contains(trimmed, ignoreCase = true) }
-    }
+    val tokens = tokenizeSearchQuery(query)
+    if (tokens.isEmpty()) return emptyList()
+    return localizedFormulas
+        .mapNotNull { entry ->
+            val score = computeMatchScore(
+                tokens = tokens,
+                primaryNames = listOf(entry.localizedName),
+                secondaryNames = listOf(entry.formula.formula),
+                keywords = entry.localizedKeywords
+            ) ?: return@mapNotNull null
+            entry to score
+        }
+        .sortedWith(
+            compareBy<Pair<LocalizedFormula, Int>> { it.second }
+                .thenBy { it.first.localizedName.lowercase(Locale.ROOT) }
+        )
+        .map { it.first }
 }
+

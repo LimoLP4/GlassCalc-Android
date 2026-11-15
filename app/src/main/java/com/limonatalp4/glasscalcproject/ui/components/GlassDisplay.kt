@@ -531,6 +531,9 @@ private fun GlassDisplayContent(
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
+                            isKeyboardActive = false
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
                             onEvaluate()
                         }
                     ),
@@ -549,6 +552,9 @@ private fun GlassDisplayContent(
                         .focusRequester(focusRequester)
                         .onFocusChanged { focusState ->
                             isTextFieldFocused = focusState.isFocused
+                            if (!focusState.isFocused) {
+                                isKeyboardActive = false
+                            }
                         }
                         .testTag("display_expression_text"),
                     decorationBox = { innerTextField ->

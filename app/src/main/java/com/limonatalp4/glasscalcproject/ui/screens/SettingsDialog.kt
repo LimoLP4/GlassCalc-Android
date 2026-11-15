@@ -132,9 +132,12 @@ import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.SettingsDevCard
+import com.limonatalp4.glasscalcproject.ui.components.SettingsInfoCard
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchBar
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchEmptyState
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchVisibility
+import com.limonatalp4.glasscalcproject.ui.components.SettingsUnitCard
 import com.limonatalp4.glasscalcproject.ui.components.pressScale
 import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.components.rememberSettingsSearchVisibility
@@ -204,46 +207,23 @@ fun SettingsDialog(
     )
     val isSearchActive = searchQuery.trim().isNotEmpty()
     var preSearchTab by remember { mutableStateOf(0) }
+    var wasSearchActive by remember { mutableStateOf(false) }
     var clearedByTabTap by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isSearchActive) {
+    LaunchedEffect(searchQuery, searchVisibility.bestTabIndex) {
         if (isSearchActive) {
-            clearedByTabTap = false
-            preSearchTab = selectedTab
-            when {
-                searchVisibility.hasAnyAppearanceMatch -> selectedTab = 0
-                searchVisibility.hasAnyUnitsMatch -> selectedTab = 1
-                searchVisibility.hasAnyDeveloperMatch -> selectedTab = 2
-                searchVisibility.hasAnyInfoMatch -> selectedTab = 3
-                searchVisibility.hasAnyLanguageMatch -> selectedTab = 4
+            if (!wasSearchActive) {
+                clearedByTabTap = false
+                preSearchTab = selectedTab
+                wasSearchActive = true
             }
-        } else {
+            searchVisibility.bestTabIndex?.let { selectedTab = it }
+        } else if (wasSearchActive) {
+            wasSearchActive = false
             if (!clearedByTabTap) {
                 selectedTab = preSearchTab
             }
             clearedByTabTap = false
-        }
-    }
-
-    LaunchedEffect(searchQuery) {
-        if (isSearchActive && searchVisibility.hasAnyMatch) {
-            val hasMatchInCurrent = when (selectedTab) {
-                0 -> searchVisibility.hasAnyAppearanceMatch
-                1 -> searchVisibility.hasAnyUnitsMatch
-                2 -> searchVisibility.hasAnyDeveloperMatch
-                3 -> searchVisibility.hasAnyInfoMatch
-                4 -> searchVisibility.hasAnyLanguageMatch
-                else -> false
-            }
-            if (!hasMatchInCurrent) {
-                when {
-                    searchVisibility.hasAnyAppearanceMatch -> selectedTab = 0
-                    searchVisibility.hasAnyUnitsMatch -> selectedTab = 1
-                    searchVisibility.hasAnyDeveloperMatch -> selectedTab = 2
-                    searchVisibility.hasAnyInfoMatch -> selectedTab = 3
-                    searchVisibility.hasAnyLanguageMatch -> selectedTab = 4
-                }
-            }
         }
     }
 
@@ -497,9 +477,7 @@ fun SettingsDialog(
                                     glassProps = glassProps,
                                     onSelectAngleMode = onSelectAngleMode,
                                     triggerHaptic = ::triggerHaptic,
-                                    showDegCard = searchVisibility.showDegCard,
-                                    showRadCard = searchVisibility.showRadCard,
-                                    showSystemsCard = searchVisibility.showUnitsSystemsCard,
+                                    orderedCards = searchVisibility.orderedUnitCards,
                                     showHeading = !isSearchActive
                                 )
                                 2 -> DeveloperOptionsSection(
@@ -734,9 +712,7 @@ private fun UnitsSection(
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     onSelectAngleMode: (AngleMode) -> Unit,
     triggerHaptic: () -> Unit,
-    showDegCard: Boolean = true,
-    showRadCard: Boolean = true,
-    showSystemsCard: Boolean = true,
+    orderedCards: List<SettingsUnitCard> = SettingsUnitCard.entries,
     showHeading: Boolean = true
 ) {
     if (showHeading) {
@@ -750,156 +726,149 @@ private fun UnitsSection(
         Spacer(modifier = Modifier.height(10.dp))
     }
 
-    if (showDegCard || showRadCard) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        if (showDegCard) {
-        // Option 1: DEG
-        val isDeg = currentAngleMode == AngleMode.DEG
-        val degBg = if (isDeg) {
-            if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
-        } else {
-            if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        }
-        
-        val degBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
-        val degTextColor = if (isAmoled || isTiefschwarz) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+        orderedCards.forEach { card ->
+            when (card) {
+                SettingsUnitCard.DEG -> {
+                    val isDeg = currentAngleMode == AngleMode.DEG
+                    val degBg = if (isDeg) {
+                        if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                    } else {
+                        if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    }
 
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    triggerHaptic()
-                    onSelectAngleMode(AngleMode.DEG)
+                    val degBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
+                    val degTextColor = if (isAmoled || isTiefschwarz) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+
+                    GlassSurface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                triggerHaptic()
+                                onSelectAngleMode(AngleMode.DEG)
+                            }
+                            .testTag("radio_angle_deg"),
+                        shape = RoundedCornerShape(24.dp),
+                        borderWidth = if (isDeg) 1.5.dp else 1.dp,
+                        customBorderColor = degBorder,
+                        customBgColor = degBg
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = isDeg,
+                                onClick = {
+                                    triggerHaptic()
+                                    onSelectAngleMode(AngleMode.DEG)
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = colorScheme.primary,
+                                    unselectedColor = colorScheme.onSurfaceVariant
+                                )
+                            )
+                            Column(modifier = Modifier.padding(start = 12.dp)) {
+                                Text(
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_label),
+                                    fontSize = 15.sp,
+                                    fontWeight = if (isDeg) FontWeight.Bold else FontWeight.Medium,
+                                    color = degTextColor
+                                )
+                                Text(
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_desc),
+                                    fontSize = 12.sp,
+                                    color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
+                                )
+                            }
+                        }
+                    }
                 }
-                .testTag("radio_angle_deg"),
-            shape = RoundedCornerShape(24.dp),
-            borderWidth = if (isDeg) 1.5.dp else 1.dp,
-            customBorderColor = degBorder,
-            customBgColor = degBg
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = isDeg,
-                    onClick = {
-                        triggerHaptic()
-                        onSelectAngleMode(AngleMode.DEG)
-                    },
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = colorScheme.primary,
-                        unselectedColor = colorScheme.onSurfaceVariant
-                    )
-                )
-                Column(modifier = Modifier.padding(start = 12.dp)) {
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_label),
-                        fontSize = 15.sp,
-                        fontWeight = if (isDeg) FontWeight.Bold else FontWeight.Medium,
-                        color = degTextColor
-                    )
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_desc),
-                        fontSize = 12.sp,
-                        color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
-                    )
+                SettingsUnitCard.RAD -> {
+                    val isRad = currentAngleMode == AngleMode.RAD
+                    val radBg = if (isRad) {
+                        if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                    } else {
+                        if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    }
+                    val radBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
+                    val radTextColor = if (isAmoled || isTiefschwarz) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+
+                    GlassSurface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                triggerHaptic()
+                                onSelectAngleMode(AngleMode.RAD)
+                            }
+                            .testTag("radio_angle_rad"),
+                        shape = RoundedCornerShape(24.dp),
+                        borderWidth = if (isRad) 1.5.dp else 1.dp,
+                        customBorderColor = radBorder,
+                        customBgColor = radBg
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = isRad,
+                                onClick = {
+                                    triggerHaptic()
+                                    onSelectAngleMode(AngleMode.RAD)
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = colorScheme.primary,
+                                    unselectedColor = colorScheme.onSurfaceVariant
+                                )
+                            )
+                            Column(modifier = Modifier.padding(start = 12.dp)) {
+                                Text(
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_label),
+                                    fontSize = 15.sp,
+                                    fontWeight = if (isRad) FontWeight.Bold else FontWeight.Medium,
+                                    color = radTextColor
+                                )
+                                Text(
+                                    text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_desc),
+                                    fontSize = 12.sp,
+                                    color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
+                                )
+                            }
+                        }
+                    }
                 }
-            }
-        }
-        }
-
-        if (showRadCard) {
-        // Option 2: RAD
-        val isRad = currentAngleMode == AngleMode.RAD
-        val radBg = if (isRad) {
-            if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
-        } else {
-            if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        }
-        val radBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
-        val radTextColor = if (isAmoled || isTiefschwarz) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
-
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    triggerHaptic()
-                    onSelectAngleMode(AngleMode.RAD)
+                SettingsUnitCard.SYSTEMS -> {
+                    GlassSurface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        borderWidth = 1.dp,
+                        customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(id = R.string.units_supported_systems),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(id = R.string.units_systems_detail),
+                                fontSize = 13.sp,
+                                color = colorScheme.onSurface.copy(alpha = 0.75f)
+                            )
+                        }
+                    }
                 }
-                .testTag("radio_angle_rad"),
-            shape = RoundedCornerShape(24.dp),
-            borderWidth = if (isRad) 1.5.dp else 1.dp,
-            customBorderColor = radBorder,
-            customBgColor = radBg
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = isRad,
-                    onClick = {
-                        triggerHaptic()
-                        onSelectAngleMode(AngleMode.RAD)
-                    },
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = colorScheme.primary,
-                        unselectedColor = colorScheme.onSurfaceVariant
-                    )
-                )
-                Column(modifier = Modifier.padding(start = 12.dp)) {
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_label),
-                        fontSize = 15.sp,
-                        fontWeight = if (isRad) FontWeight.Bold else FontWeight.Medium,
-                        color = radTextColor
-                    )
-                    Text(
-                        text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_desc),
-                        fontSize = 12.sp,
-                    color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
-                    )
-                }
-            }
-        }
-        }
-    }
-    }
-
-    if (showSystemsCard) {
-        if (showDegCard || showRadCard) {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Supported Systems Card
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            borderWidth = 1.dp,
-            customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-            customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
-        ) {
-            Column(modifier = Modifier.padding(14.dp)) {
-                Text(
-                    text = androidx.compose.ui.res.stringResource(id = R.string.units_supported_systems),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = androidx.compose.ui.res.stringResource(id = R.string.units_systems_detail),
-                    fontSize = 13.sp,
-                    color = colorScheme.onSurface.copy(alpha = 0.75f)
-                )
             }
         }
     }
@@ -937,11 +906,15 @@ private fun DeveloperOptionsSection(
 ) {
     val view = LocalView.current
 
+    val orderedDevCards = searchVisibility?.orderedDevCards ?: SettingsDevCard.entries
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        if (searchVisibility?.showDevScreenCard != false) {
+        orderedDevCards.forEach { devCard ->
+            when (devCard) {
+                SettingsDevCard.SCREEN -> {
         // Card 1: Screen & WindowSizeClass
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -973,9 +946,8 @@ private fun DeveloperOptionsSection(
                 )
             }
         }
-        }
-
-        if (searchVisibility?.showDevApiCard != false) {
+                }
+                SettingsDevCard.API -> {
         // Card 2: Simulated API Level
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1147,9 +1119,8 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
-        }
-
-        if (searchVisibility?.showDevHapticCard != false) {
+                }
+                SettingsDevCard.HAPTIC -> {
         // Card 3: Haptic Feedback with hardware motor detection
         val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
         val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
@@ -1328,9 +1299,8 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
-        }
-
-        if (searchVisibility?.showDevAutoResultCard != false) {
+                }
+                SettingsDevCard.AUTO_RESULT -> {
         // Card 4: Auto Result Switch
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1346,9 +1316,8 @@ private fun DeveloperOptionsSection(
                 Switch(checked = autoResultEnabled, onCheckedChange = { triggerHaptic(); onToggleAutoResult(it) }, modifier = Modifier.testTag("switch_auto_result"))
             }
         }
-        }
-
-        if (searchVisibility?.showDevLifecycleCard != false) {
+                }
+                SettingsDevCard.LIFECYCLE -> {
         // Card 5: Lifecycle & State
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1369,9 +1338,8 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
-        }
-
-        if (searchVisibility?.showDevClearCacheCard != false) {
+                }
+                SettingsDevCard.CLEAR_CACHE -> {
         // Card 6: Cache leeren (Eigene Karte)
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1410,9 +1378,8 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
-        }
-
-        if (searchVisibility?.showDevResetStorageCard != false) {
+                }
+                SettingsDevCard.RESET_STORAGE -> {
         // Card 7: App-Speicher zurücksetzen
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1428,6 +1395,8 @@ private fun DeveloperOptionsSection(
                 }
             }
         }
+                }
+            }
         }
     }
 }
@@ -1446,11 +1415,15 @@ private fun InformationSection(
     context: android.content.Context,
     searchVisibility: SettingsSearchVisibility? = null
 ) {
+    val orderedInfoCards = searchVisibility?.orderedInfoCards ?: SettingsInfoCard.entries
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        if (searchVisibility?.showInfoVersionCard != false) {
+        orderedInfoCards.forEach { infoCard ->
+            when (infoCard) {
+                SettingsInfoCard.VERSION -> {
         // App Version Card
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1464,9 +1437,8 @@ private fun InformationSection(
                 Text(text = stringResource(R.string.copyright_notice), fontSize = 11.sp, color = colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
             }
         }
-        }
-
-        if (searchVisibility?.showInfoGitHubCard != false) {
+                }
+                SettingsInfoCard.GITHUB -> {
         // GitHub Repository Card
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1494,9 +1466,8 @@ private fun InformationSection(
                 Icon(imageVector = Icons.Default.OpenInBrowser, contentDescription = null, tint = colorScheme.primary)
             }
         }
-        }
-
-        if (searchVisibility?.showInfoOssCard != false) {
+                }
+                SettingsInfoCard.OSS -> {
         // Third-Party OSS Licenses Button
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1524,9 +1495,8 @@ private fun InformationSection(
                 }
             }
         }
-        }
-
-        if (searchVisibility?.showInfoApacheCard != false) {
+                }
+                SettingsInfoCard.APACHE -> {
         // Accordion 1: Apache
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
@@ -1550,6 +1520,8 @@ private fun InformationSection(
                 }
             }
         }
+                }
+            }
         }
     }
 }

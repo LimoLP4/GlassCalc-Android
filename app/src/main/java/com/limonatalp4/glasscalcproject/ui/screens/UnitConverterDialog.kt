@@ -98,6 +98,7 @@ import com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs
 import com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions
 import com.limonatalp4.glasscalcproject.ui.components.pressScale
 import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
+import com.limonatalp4.glasscalcproject.ui.components.splitSearchKeywords
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
@@ -155,7 +156,8 @@ fun UnitConverterDialog(
         LocalizedUnitSuggestion(
             item = item,
             localizedName = stringResource(item.nameResId),
-            symbol = item.symbol
+            symbol = item.symbol,
+            localizedKeywords = splitSearchKeywords(stringResource(item.keywordsResId))
         )
     }
 
@@ -170,6 +172,9 @@ fun UnitConverterDialog(
         conversionsInCategory.firstOrNull() ?: selectedPair
     }
 
+    var isForward by remember { mutableStateOf(true) }
+    var inputValue by remember { mutableStateOf("1") }
+
     fun selectUnitSuggestion(suggestion: LocalizedUnitSuggestion) {
         triggerHaptic()
         val targetCatIndex = categories.indexOf(suggestion.item.category)
@@ -177,6 +182,7 @@ fun UnitConverterDialog(
             selectedCategoryIndex = targetCatIndex
         }
         selectedPair = suggestion.item.defaultPair
+        isForward = suggestion.item.symbol == suggestion.item.defaultPair.unitFrom
         searchQuery = ""
     }
 
@@ -189,9 +195,6 @@ fun UnitConverterDialog(
         }
         searchQuery = ""
     }
-
-    var isForward by remember { mutableStateOf(true) }
-    var inputValue by remember { mutableStateOf("1") }
 
     val fromUnit = if (isForward) currentPair.unitFrom else currentPair.unitTo
     val toUnit = if (isForward) currentPair.unitTo else currentPair.unitFrom

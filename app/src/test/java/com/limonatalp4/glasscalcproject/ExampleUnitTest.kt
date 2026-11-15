@@ -654,4 +654,231 @@ class ExampleUnitTest {
         assertEquals("√(9)×2÷1−3", unicodeKept)
         assertEquals(10, unicodeCursor)
     }
+
+    @Test
+    fun testComprehensiveSearchMatchingAndFaultTolerance() {
+        // 1. Substring matching: "hapt" finds "Haptisches Feedback", "gig" finds "Gigabyte"
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "hapt",
+                "Haptisches Feedback",
+                "Vibration bei Tastendruck",
+                "haptik,vibration"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "gig",
+                "Gigabyte",
+                "daten,speicher,gb"
+            )
+        )
+
+        // 2. Synonyms & Keywords from strings.xml:
+        // "Vibration" finds "Haptisches Feedback"
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Vibration",
+                "Haptisches Feedback",
+                "Vibration bei Tastendruck",
+                "entwickler,haptik,haptisches,feedback,vibration,vibrieren,intensität,motor,lra,erm,taktil,haptics"
+            )
+        )
+        // "Language" finds German "Sprache"
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Language",
+                "Sprache",
+                "sprache,sprachen,systemsprache,übersetzung,lokalisierung,language,languages"
+            )
+        )
+        // "Sprache" finds English "Language"
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Sprache",
+                "Language",
+                "language,languages,system,locale,translation,localization,sprache"
+            )
+        )
+
+        // 3. Fault tolerance: Case-insensitivity, leading/trailing whitespace, CJK space, diacritic folding
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "   hApT   ",
+                "Haptisches Feedback",
+                "haptik"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "\u3000hapt\u3000",
+                "Haptisches Feedback",
+                "haptik"
+            )
+        )
+        // "Area" finds "Área" (Latin diacritic folding)
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "area",
+                "Área del círculo",
+                "círculo,área,radio"
+            )
+        )
+        // "Fuss" finds "Fuß"
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "fuss",
+                "Fuß",
+                "fuß,ft,imperial"
+            )
+        )
+        // Cyrillic ё / е normalization
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "объём",
+                "Объем цилиндра",
+                "цилиндр,объем"
+            )
+        )
+
+        // 4. Relevance ranking in DrawerFormulaSearch: Exact and prefix matches rank higher
+        val dummyCatalog = listOf(
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                formula = com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog.FORMULAS.first(),
+                localizedName = "Kreisfläche",
+                localizedKeywords = listOf("kreis", "fläche", "radius", "pi")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                formula = com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog.FORMULAS[1],
+                localizedName = "Kreisumfang",
+                localizedKeywords = listOf("kreis", "umfang", "durchmesser")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                formula = com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog.FORMULAS[7],
+                localizedName = "Dreiecksfläche",
+                localizedKeywords = listOf("dreieck", "fläche", "höhe")
+            )
+        )
+        // "Kreis" matches Kreisfläche & Kreisumfang (prefix match) ahead of Dreiecksfläche (no match)
+        val kreisMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Kreis", dummyCatalog)
+        assertEquals(2, kreisMatches.size)
+        assertEquals(listOf("circle_area", "circle_circumference"), kreisMatches.map { it.formula.id })
+
+        // "Fläche" finds both Kreisfläche and Dreiecksfläche via substring or keywords
+        val flaecheMatches = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Fläche", dummyCatalog)
+        assertEquals(2, flaecheMatches.size)
+        assertTrue(flaecheMatches.any { it.formula.id == "circle_area" })
+        assertTrue(flaecheMatches.any { it.formula.id == "triangle_area" })
+
+        // 5. Unit suggestions relevance: "Meter" puts "Meter" first, "m" puts "m" (Meter) first
+        val unitItems = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
+            val name = when (item.id) {
+                "meter" -> "Meter"
+                "centimeter" -> "Zentimeter"
+                "kilometer" -> "Kilometer"
+                "feet" -> "Fuß"
+                "gigabyte" -> "Gigabyte"
+                else -> item.id
+            }
+            val kw = when (item.id) {
+                "meter" -> listOf("meter", "m", "länge")
+                "centimeter" -> listOf("zentimeter", "cm", "länge")
+                "kilometer" -> listOf("kilometer", "km", "länge")
+                "feet" -> listOf("fuß", "ft", "foot")
+                "gigabyte" -> listOf("gigabyte", "gb", "daten")
+                else -> emptyList()
+            }
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = item,
+                localizedName = name,
+                symbol = item.symbol,
+                localizedKeywords = kw
+            )
+        }
+        val meterSearch = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Meter", unitItems)
+        assertEquals("Meter", meterSearch.first().localizedName)
+
+        val gbSearch = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("GB", unitItems)
+        assertEquals("Gigabyte", gbSearch.first().localizedName)
+
+        val ftSearch = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Fuß", unitItems)
+        assertEquals("Fuß", ftSearch.first().localizedName)
+
+        val fussSearch = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("fuss", unitItems)
+        assertEquals("Fuß", fussSearch.first().localizedName)
+
+        // 6. Spanish formula search examples from user prompt:
+        // "Área" -> finds "Círculo", "Teorema" -> finds "Pitágoras"
+        val spanishFormulas = listOf(
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                formula = com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog.FORMULAS.first(),
+                localizedName = "Área del Círculo",
+                localizedKeywords = com.limonatalp4.glasscalcproject.ui.components.splitSearchKeywords("círculo,área,superficie,radio,pi,π,r^2,geometría")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedFormula(
+                formula = com.limonatalp4.glasscalcproject.domain.formulas.FormulaCatalog.FORMULAS[2],
+                localizedName = "Teorema de Pitágoras",
+                localizedKeywords = com.limonatalp4.glasscalcproject.ui.components.splitSearchKeywords("pitágoras,teorema,triángulo,rectángulo,hipotenusa,cateto,a^2+b^2")
+            )
+        )
+        val areaMatch = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Área", spanishFormulas)
+        assertEquals("circle_area", areaMatch.first().formula.id)
+
+        // Diacritic tolerance: "area" without accent still matches "Área del Círculo"
+        val areaNoAccentMatch = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("area", spanishFormulas)
+        assertEquals("circle_area", areaNoAccentMatch.first().formula.id)
+
+        val teoremaMatch = com.limonatalp4.glasscalcproject.ui.components.filterFormulas("Teorema", spanishFormulas)
+        assertEquals("pythagoras", teoremaMatch.first().formula.id)
+
+        // 7. English settings search examples:
+        // "Vibration" -> finds "Haptics", "Language" -> finds "Sprache"
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Vibration",
+                "Haptic Feedback",
+                "developer,haptic,haptics,feedback,vibration,vibrate,intensity,strength,level,motor,lra,erm,tactile"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Language",
+                "Language",
+                "language,languages,system,locale,translation,localization,sprache"
+            )
+        )
+        assertTrue(
+            com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
+                "Sprache",
+                "Language",
+                "language,languages,system,locale,translation,localization,sprache"
+            )
+        )
+
+        // 8. Spanish unit search: "pie" finds Feet (ft)
+        val spanishUnits = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
+            val name = when (item.id) {
+                "feet" -> "Pies"
+                "meter" -> "Metros"
+                "gigabyte" -> "Gigabyte"
+                else -> item.id
+            }
+            val kw = when (item.id) {
+                "feet" -> listOf("pie", "pies", "ft", "imperial", "longitud")
+                "meter" -> listOf("metro", "metros", "m", "longitud", "distancia", "métrico")
+                "gigabyte" -> listOf("gigabyte", "gb", "datos")
+                else -> emptyList()
+            }
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = item,
+                localizedName = name,
+                symbol = item.symbol,
+                localizedKeywords = kw
+            )
+        }
+        val pieSearch = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("pie", spanishUnits)
+        assertEquals("Pies", pieSearch.first().localizedName)
+        assertEquals("ft", pieSearch.first().symbol)
+    }
 }
+

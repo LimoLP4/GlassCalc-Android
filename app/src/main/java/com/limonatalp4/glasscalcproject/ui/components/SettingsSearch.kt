@@ -65,6 +65,12 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
 
+enum class SettingsUnitCard { DEG, RAD, SYSTEMS }
+
+enum class SettingsDevCard { SCREEN, API, HAPTIC, AUTO_RESULT, LIFECYCLE, CLEAR_CACHE, RESET_STORAGE }
+
+enum class SettingsInfoCard { VERSION, GITHUB, OSS, APACHE }
+
 @Immutable
 data class SettingsSearchVisibility(
     val matchingThemes: List<AppTheme>,
@@ -82,7 +88,11 @@ data class SettingsSearchVisibility(
     val showInfoGitHubCard: Boolean,
     val showInfoOssCard: Boolean,
     val showInfoApacheCard: Boolean,
-    val matchingLanguages: List<Language>
+    val matchingLanguages: List<Language>,
+    val orderedUnitCards: List<SettingsUnitCard> = SettingsUnitCard.entries,
+    val orderedDevCards: List<SettingsDevCard> = SettingsDevCard.entries,
+    val orderedInfoCards: List<SettingsInfoCard> = SettingsInfoCard.entries,
+    val bestTabIndex: Int? = null
 ) {
     val hasAnyAppearanceMatch: Boolean
         get() = matchingThemes.isNotEmpty()
@@ -117,21 +127,31 @@ fun matchesSettingsSearch(
     query: String,
     vararg searchableTexts: String
 ): Boolean {
-    val trimmed = query.trim()
-    if (trimmed.isEmpty()) return true
-    val tokens = trimmed.split(Regex("\\s+")).filter { it.isNotEmpty() }
+    val tokens = tokenizeSearchQuery(query)
     if (tokens.isEmpty()) return true
+    val expanded = searchableTexts.flatMap { splitSearchKeywords(it) }
+    if (expanded.isEmpty()) return false
 
-    val candidates = searchableTexts.flatMap { text ->
-        text.split(',', ';')
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-    }
-    if (candidates.isEmpty()) return false
+    return computeMatchScore(
+        tokens = tokens,
+        primaryNames = listOf(expanded.first()),
+        secondaryNames = expanded.drop(1)
+    ) != null
+}
 
-    return tokens.all { token ->
-        candidates.any { candidate -> candidate.contains(token, ignoreCase = true) }
-    }
+private fun scoreSettingsEntry(
+    tokens: List<String>,
+    primaryNames: List<String>,
+    secondaryTexts: List<String> = emptyList(),
+    keywordStrings: List<String> = emptyList()
+): Int? {
+    val keywords = keywordStrings.flatMap(::splitSearchKeywords)
+    return computeMatchScore(
+        tokens = tokens,
+        primaryNames = primaryNames,
+        secondaryNames = secondaryTexts,
+        keywords = keywords
+    )
 }
 
 @Composable
@@ -139,8 +159,8 @@ fun rememberSettingsSearchVisibility(
     query: String,
     effectiveApiLevel: Int
 ): SettingsSearchVisibility {
-    val trimmed = query.trim()
-    if (trimmed.isEmpty()) {
+    val tokens = tokenizeSearchQuery(query)
+    if (tokens.isEmpty()) {
         return SettingsSearchVisibility(
             matchingThemes = AppTheme.entries,
             showDegCard = true,
@@ -157,7 +177,11 @@ fun rememberSettingsSearchVisibility(
             showInfoGitHubCard = true,
             showInfoOssCard = true,
             showInfoApacheCard = true,
-            matchingLanguages = Language.entries
+            matchingLanguages = Language.entries,
+            orderedUnitCards = SettingsUnitCard.entries,
+            orderedDevCards = SettingsDevCard.entries,
+            orderedInfoCards = SettingsInfoCard.entries,
+            bestTabIndex = null
         )
     }
 
@@ -166,169 +190,251 @@ fun rememberSettingsSearchVisibility(
     val amoledDesc = stringResource(R.string.theme_amoled_desc)
     val materialYouUnsupported = stringResource(R.string.theme_material_you_unsupported, effectiveApiLevel)
 
-    val matchingThemes = AppTheme.entries.filter { theme ->
+    val themeKwMaterialYou = stringResource(R.string.settings_keywords_theme_material_you)
+    val themeKwAutomatic = stringResource(R.string.settings_keywords_theme_automatic)
+    val themeKwWhite = stringResource(R.string.settings_keywords_theme_white)
+    val themeKwStandardDark = stringResource(R.string.settings_keywords_theme_standard_dark)
+    val themeKwDark = stringResource(R.string.settings_keywords_theme_dark)
+    val themeKwAmoled = stringResource(R.string.settings_keywords_theme_amoled)
+
+    val scoredThemes = AppTheme.entries.mapIndexedNotNull { index, theme ->
         val label = stringResource(theme.stringResId)
         val extra = when (theme) {
-            AppTheme.AMOLED_DARK -> amoledDesc
-            AppTheme.MATERIAL_YOU -> materialYouUnsupported
-            else -> ""
+            AppTheme.AMOLED_DARK -> listOf(amoledDesc)
+            AppTheme.MATERIAL_YOU -> listOf(materialYouUnsupported)
+            else -> emptyList()
         }
-        matchesSettingsSearch(
-            trimmed,
-            label,
-            extra,
-            appearanceTabTitle,
-            appearanceKeywords
-        )
-    }
+        val themeKw = when (theme) {
+            AppTheme.MATERIAL_YOU -> themeKwMaterialYou
+            AppTheme.AUTOMATIC -> themeKwAutomatic
+            AppTheme.WHITE_MODE -> themeKwWhite
+            AppTheme.STANDARD_DARK -> themeKwStandardDark
+            AppTheme.DARK_MODE -> themeKwDark
+            AppTheme.AMOLED_DARK -> themeKwAmoled
+        }
+        val score = scoreSettingsEntry(
+            tokens = tokens,
+            primaryNames = listOf(label),
+            secondaryTexts = extra + listOf(appearanceTabTitle),
+            keywordStrings = listOf(themeKw, appearanceKeywords)
+        ) ?: return@mapIndexedNotNull null
+        Triple(theme, score, index)
+    }.sortedWith(compareBy<Triple<AppTheme, Int, Int>> { it.second }.thenBy { it.third })
+    val matchingThemes = scoredThemes.map { it.first }
+    val bestAppearanceScore = scoredThemes.minOfOrNull { it.second }
 
     val unitsTabTitle = stringResource(R.string.title_units)
     val unitsHeading = stringResource(R.string.units_angle_heading)
     val unitsKeywords = stringResource(R.string.settings_keywords_units)
-    val showDegCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.angle_deg_label),
-        stringResource(R.string.angle_deg_desc),
-        unitsHeading,
-        unitsTabTitle,
-        unitsKeywords
+
+    val degScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.angle_deg_label)),
+        secondaryTexts = listOf(stringResource(R.string.angle_deg_desc), unitsHeading, unitsTabTitle),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_angle_deg), unitsKeywords)
     )
-    val showRadCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.angle_rad_label),
-        stringResource(R.string.angle_rad_desc),
-        unitsHeading,
-        unitsTabTitle,
-        unitsKeywords
+    val radScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.angle_rad_label)),
+        secondaryTexts = listOf(stringResource(R.string.angle_rad_desc), unitsHeading, unitsTabTitle),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_angle_rad), unitsKeywords)
     )
-    val showUnitsSystemsCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.units_supported_systems),
-        stringResource(R.string.units_systems_detail),
-        unitsTabTitle,
-        unitsKeywords
+    val systemsScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.units_supported_systems)),
+        secondaryTexts = listOf(stringResource(R.string.units_systems_detail), unitsTabTitle),
+        keywordStrings = listOf(unitsKeywords)
     )
+    val scoredUnitCards = listOfNotNull(
+        degScore?.let { Triple(SettingsUnitCard.DEG, it, 0) },
+        radScore?.let { Triple(SettingsUnitCard.RAD, it, 1) },
+        systemsScore?.let { Triple(SettingsUnitCard.SYSTEMS, it, 2) }
+    ).sortedWith(compareBy<Triple<SettingsUnitCard, Int, Int>> { it.second }.thenBy { it.third })
+    val orderedUnitCards = scoredUnitCards.map { it.first }
+    val bestUnitsScore = scoredUnitCards.minOfOrNull { it.second }
 
     val devTabTitle = stringResource(R.string.title_dev_options)
-    val showDevScreenCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_screen_scaling),
-        "WindowSizeClass",
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_screen)
+    val devScreenScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_screen_scaling)),
+        secondaryTexts = listOf("WindowSizeClass", devTabTitle),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_screen))
     )
-    val showDevApiCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_simulated_api_title),
-        stringResource(R.string.dev_simulate_api_switch),
-        stringResource(R.string.dev_feature_vibration_effect),
-        stringResource(R.string.dev_feature_edge_to_edge),
-        stringResource(R.string.dev_feature_material_you),
-        stringResource(R.string.dev_feature_blur_effect),
-        stringResource(R.string.dev_feature_swipe_gestures),
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_api)
+    val devApiScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_simulated_api_title)),
+        secondaryTexts = listOf(
+            stringResource(R.string.dev_simulate_api_switch),
+            stringResource(R.string.dev_feature_vibration_effect),
+            stringResource(R.string.dev_feature_edge_to_edge),
+            stringResource(R.string.dev_feature_material_you),
+            stringResource(R.string.dev_feature_blur_effect),
+            stringResource(R.string.dev_feature_swipe_gestures),
+            devTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_api))
     )
-    val showDevHapticCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_haptic_title),
-        stringResource(R.string.dev_haptic_desc),
-        stringResource(R.string.dev_haptic_detected_motor),
-        stringResource(R.string.dev_haptic_intensity_label),
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_haptic)
+    val devHapticScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_haptic_title)),
+        secondaryTexts = listOf(
+            stringResource(R.string.dev_haptic_desc),
+            stringResource(R.string.dev_haptic_detected_motor),
+            stringResource(R.string.dev_haptic_intensity_label),
+            devTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_haptic))
     )
-    val showDevAutoResultCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_auto_result_title),
-        stringResource(R.string.dev_auto_result_desc),
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_auto_result)
+    val devAutoResultScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_auto_result_title)),
+        secondaryTexts = listOf(stringResource(R.string.dev_auto_result_desc), devTabTitle),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_auto_result))
     )
-    val showDevLifecycleCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_lifecycle_title),
-        stringResource(R.string.dev_btn_background),
-        stringResource(R.string.dev_btn_crash_test),
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_lifecycle)
+    val devLifecycleScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_lifecycle_title)),
+        secondaryTexts = listOf(
+            stringResource(R.string.dev_btn_background),
+            stringResource(R.string.dev_btn_crash_test),
+            devTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_lifecycle))
     )
-    val showDevClearCacheCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_clear_cache_title),
-        stringResource(R.string.dev_clear_cache_desc),
-        stringResource(R.string.dev_btn_clear_cache),
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_cache)
+    val devClearCacheScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_clear_cache_title)),
+        secondaryTexts = listOf(
+            stringResource(R.string.dev_clear_cache_desc),
+            stringResource(R.string.dev_btn_clear_cache),
+            devTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_cache))
     )
-    val showDevResetStorageCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.dev_reset_storage_title),
-        stringResource(R.string.dev_reset_storage_desc),
-        stringResource(R.string.dev_btn_reset_storage),
-        devTabTitle,
-        stringResource(R.string.settings_keywords_dev_reset)
+    val devResetStorageScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.dev_reset_storage_title)),
+        secondaryTexts = listOf(
+            stringResource(R.string.dev_reset_storage_desc),
+            stringResource(R.string.dev_btn_reset_storage),
+            devTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_reset))
     )
+    val scoredDevCards = listOfNotNull(
+        devScreenScore?.let { Triple(SettingsDevCard.SCREEN, it, 0) },
+        devApiScore?.let { Triple(SettingsDevCard.API, it, 1) },
+        devHapticScore?.let { Triple(SettingsDevCard.HAPTIC, it, 2) },
+        devAutoResultScore?.let { Triple(SettingsDevCard.AUTO_RESULT, it, 3) },
+        devLifecycleScore?.let { Triple(SettingsDevCard.LIFECYCLE, it, 4) },
+        devClearCacheScore?.let { Triple(SettingsDevCard.CLEAR_CACHE, it, 5) },
+        devResetStorageScore?.let { Triple(SettingsDevCard.RESET_STORAGE, it, 6) }
+    ).sortedWith(compareBy<Triple<SettingsDevCard, Int, Int>> { it.second }.thenBy { it.third })
+    val orderedDevCards = scoredDevCards.map { it.first }
+    val bestDevScore = scoredDevCards.minOfOrNull { it.second }
 
     val infoTabTitle = stringResource(R.string.title_info)
-    val showInfoVersionCard = matchesSettingsSearch(
-        trimmed,
-        "GlassCalc v${BuildConfig.VERSION_NAME}",
-        stringResource(R.string.app_version_subtitle),
-        stringResource(R.string.copyright_notice),
-        infoTabTitle,
-        stringResource(R.string.settings_keywords_info_version)
+    val infoVersionScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf("GlassCalc v${BuildConfig.VERSION_NAME}"),
+        secondaryTexts = listOf(
+            stringResource(R.string.app_version_subtitle),
+            stringResource(R.string.copyright_notice),
+            infoTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_info_version))
     )
-    val showInfoGitHubCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.info_github_repo),
-        "GitHub",
-        "LimoLP4/GlassCalc-Android",
-        infoTabTitle
+    val infoGitHubScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.info_github_repo), "GitHub"),
+        secondaryTexts = listOf("LimoLP4/GlassCalc-Android", infoTabTitle),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_info_github))
     )
-    val showInfoOssCard = matchesSettingsSearch(
-        trimmed,
-        stringResource(R.string.info_oss_licenses),
-        stringResource(R.string.info_oss_licenses_desc),
-        stringResource(R.string.info_btn_oss_licenses),
-        infoTabTitle
+    val infoOssScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.info_oss_licenses)),
+        secondaryTexts = listOf(
+            stringResource(R.string.info_oss_licenses_desc),
+            stringResource(R.string.info_btn_oss_licenses),
+            infoTabTitle
+        ),
+        keywordStrings = listOf(
+            stringResource(R.string.settings_keywords_info_oss),
+            stringResource(R.string.settings_keywords_info_license)
+        )
     )
-    val showInfoApacheCard = matchesSettingsSearch(
-        trimmed,
-        "Apache License 2.0",
-        infoTabTitle,
-        stringResource(R.string.settings_keywords_info_license)
+    val infoApacheScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf("Apache License 2.0"),
+        secondaryTexts = listOf(infoTabTitle),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_info_license))
     )
+    val scoredInfoCards = listOfNotNull(
+        infoVersionScore?.let { Triple(SettingsInfoCard.VERSION, it, 0) },
+        infoGitHubScore?.let { Triple(SettingsInfoCard.GITHUB, it, 1) },
+        infoOssScore?.let { Triple(SettingsInfoCard.OSS, it, 2) },
+        infoApacheScore?.let { Triple(SettingsInfoCard.APACHE, it, 3) }
+    ).sortedWith(compareBy<Triple<SettingsInfoCard, Int, Int>> { it.second }.thenBy { it.third })
+    val orderedInfoCards = scoredInfoCards.map { it.first }
+    val bestInfoScore = scoredInfoCards.minOfOrNull { it.second }
 
     val languageTabTitle = stringResource(R.string.tab_language)
     val languageKeywords = stringResource(R.string.settings_keywords_language)
-    val matchingLanguages = Language.entries.filter { lang ->
+    val scoredLanguages = Language.entries.mapIndexedNotNull { index, lang ->
         val label = stringResource(lang.stringResId)
-        matchesSettingsSearch(
-            trimmed,
-            label,
-            languageTabTitle,
-            languageKeywords
-        )
-    }
+        val nativeTokens = when (lang) {
+            Language.SYSTEM -> "system,default"
+            Language.GERMAN -> "deutsch,de"
+            Language.ENGLISH -> "english,en"
+            Language.SPANISH -> "español,es"
+            Language.FRENCH -> "français,fr"
+            Language.JAPANESE -> "日本語,ja"
+            Language.CHINESE -> "中文,zh"
+            Language.KLINGON -> "tlhIngan Hol,klingon,tlh"
+            Language.RUSSIAN -> "русский,ru"
+            Language.PORTUGUESE -> "português,pt"
+            Language.HINDI -> "हिन्दी,hi"
+        }
+        val score = scoreSettingsEntry(
+            tokens = tokens,
+            primaryNames = listOf(label),
+            secondaryTexts = listOf(languageTabTitle),
+            keywordStrings = listOf(nativeTokens, languageKeywords)
+        ) ?: return@mapIndexedNotNull null
+        Triple(lang, score, index)
+    }.sortedWith(compareBy<Triple<Language, Int, Int>> { it.second }.thenBy { it.third })
+    val matchingLanguages = scoredLanguages.map { it.first }
+    val bestLanguageScore = scoredLanguages.minOfOrNull { it.second }
+
+    val bestTabIndex = listOfNotNull(
+        bestAppearanceScore?.let { 0 to it },
+        bestUnitsScore?.let { 1 to it },
+        bestDevScore?.let { 2 to it },
+        bestInfoScore?.let { 3 to it },
+        bestLanguageScore?.let { 4 to it }
+    ).minByOrNull { it.second }?.first
 
     return SettingsSearchVisibility(
         matchingThemes = matchingThemes,
-        showDegCard = showDegCard,
-        showRadCard = showRadCard,
-        showUnitsSystemsCard = showUnitsSystemsCard,
-        showDevScreenCard = showDevScreenCard,
-        showDevApiCard = showDevApiCard,
-        showDevHapticCard = showDevHapticCard,
-        showDevAutoResultCard = showDevAutoResultCard,
-        showDevLifecycleCard = showDevLifecycleCard,
-        showDevClearCacheCard = showDevClearCacheCard,
-        showDevResetStorageCard = showDevResetStorageCard,
-        showInfoVersionCard = showInfoVersionCard,
-        showInfoGitHubCard = showInfoGitHubCard,
-        showInfoOssCard = showInfoOssCard,
-        showInfoApacheCard = showInfoApacheCard,
-        matchingLanguages = matchingLanguages
+        showDegCard = degScore != null,
+        showRadCard = radScore != null,
+        showUnitsSystemsCard = systemsScore != null,
+        showDevScreenCard = devScreenScore != null,
+        showDevApiCard = devApiScore != null,
+        showDevHapticCard = devHapticScore != null,
+        showDevAutoResultCard = devAutoResultScore != null,
+        showDevLifecycleCard = devLifecycleScore != null,
+        showDevClearCacheCard = devClearCacheScore != null,
+        showDevResetStorageCard = devResetStorageScore != null,
+        showInfoVersionCard = infoVersionScore != null,
+        showInfoGitHubCard = infoGitHubScore != null,
+        showInfoOssCard = infoOssScore != null,
+        showInfoApacheCard = infoApacheScore != null,
+        matchingLanguages = matchingLanguages,
+        orderedUnitCards = orderedUnitCards,
+        orderedDevCards = orderedDevCards,
+        orderedInfoCards = orderedInfoCards,
+        bestTabIndex = bestTabIndex
     )
 }
 

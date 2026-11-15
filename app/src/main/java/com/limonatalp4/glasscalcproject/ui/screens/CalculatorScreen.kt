@@ -87,6 +87,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -131,6 +133,8 @@ fun CalculatorScreen(
     val isDualPane = isTablet || isLandscape
 
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val appIconBitmap = remember(context) {
         runCatching {
             val drawable = context.packageManager.getApplicationIcon(context.packageName)
@@ -163,6 +167,8 @@ fun CalculatorScreen(
     var formulaSearchQuery by remember { mutableStateOf("") }
 
     androidx.compose.runtime.LaunchedEffect(menuVisibleState.targetState) {
+        focusManager.clearFocus()
+        keyboardController?.hide()
         if (!menuVisibleState.targetState) {
             formulaSearchQuery = ""
         }
@@ -204,9 +210,19 @@ fun CalculatorScreen(
                     ) {
                         // Floating Pill (Menu + App Name)
                         val menuBtnInteraction = remember { MutableInteractionSource() }
+                        val view = LocalView.current
                         GlassSurface(
                             modifier = Modifier
                                 .pressScale(menuBtnInteraction)
+                                .clickable(
+                                    interactionSource = menuBtnInteraction,
+                                    indication = null
+                                ) {
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                                    menuVisibleState.targetState = !menuVisibleState.targetState
+                                }
                                 .testTag("header_pill"),
                             shape = RoundedCornerShape(50),
                             customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -217,9 +233,10 @@ fun CalculatorScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
                             ) {
-                                val view = LocalView.current
                                 IconButton(
                                     onClick = {
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
                                         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                         menuVisibleState.targetState = !menuVisibleState.targetState
                                     },
@@ -260,6 +277,8 @@ fun CalculatorScreen(
                             val view = LocalView.current
                             IconButton(
                                 onClick = {
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                     showHistorySheet = true
                                 },
@@ -309,6 +328,8 @@ fun CalculatorScreen(
             // In-window Floating Navigation Menu (avoids Android PopupWindow BLASTBufferQueue dtor leaks)
             if (menuVisibleState.targetState || menuVisibleState.currentState) {
                 BackHandler(enabled = menuVisibleState.targetState) {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     menuVisibleState.targetState = false
                 }
 
@@ -325,6 +346,8 @@ fun CalculatorScreen(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
                                 menuVisibleState.targetState = false
                             }
                     )
@@ -449,6 +472,8 @@ fun CalculatorScreen(
                                     formulaSearchQuery = ""
                                 },
                                 onFormulaSelected = { formula ->
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
                                     HapticUtil.performAppHaptic(
                                         context = context,
                                         view = view,
@@ -501,6 +526,8 @@ fun CalculatorScreen(
                                                 interactionSource = menuItemInteraction,
                                                 indication = androidx.compose.material3.ripple()
                                             ) {
+                                                focusManager.clearFocus()
+                                                keyboardController?.hide()
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                                 coroutineScope.launch {
                                                     menuVisibleState.targetState = false
@@ -563,7 +590,11 @@ fun CalculatorScreen(
                 currentTheme = currentTheme,
                 onSelect = { item -> viewModel.restoreHistoryItem(item) },
                 onClear = { viewModel.clearHistory() },
-                onDismiss = { showHistorySheet = false }
+                onDismiss = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    showHistorySheet = false
+                }
             )
         }
 
@@ -591,7 +622,11 @@ fun CalculatorScreen(
                 onSimulateBackground = { viewModel.simulateBackgroundSave() },
                 onTestCrashProtection = { viewModel.testCrashProtection() },
                 onResetApp = { viewModel.resetApp() },
-                onDismiss = { showSettingsDialog = false },
+                onDismiss = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    showSettingsDialog = false
+                },
                 autoResultEnabled = autoResultEnabled
             )
         }
@@ -601,7 +636,11 @@ fun CalculatorScreen(
                 onImportToCalculator = { value ->
                     viewModel.importConvertedValue(value)
                 },
-                onDismiss = { showConverterDialog = false }
+                onDismiss = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    showConverterDialog = false
+                }
             )
         }
 
@@ -610,7 +649,11 @@ fun CalculatorScreen(
                 onSelectConstant = { constantValue ->
                     viewModel.onConstant(constantValue)
                 },
-                onDismiss = { showConstantsDialog = false }
+                onDismiss = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    showConstantsDialog = false
+                }
             )
         }
 
@@ -618,7 +661,11 @@ fun CalculatorScreen(
             GraphDialog(
                 viewModel = viewModel,
                 angleMode = angleMode,
-                onDismiss = { showGraphDialog = false }
+                onDismiss = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    showGraphDialog = false
+                }
             )
         }
     }
