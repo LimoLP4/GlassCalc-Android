@@ -180,8 +180,11 @@ fun defaultBoundsForPreset(
                 GraphBounds(-6.28, 6.28, -2.0, 2.0)
             }
         }
-        GraphPreset.ARCSIN, GraphPreset.ARCCOS -> {
-            GraphBounds(-1.5, 1.5, -2.0, 2.0)
+        GraphPreset.ARCSIN -> {
+            GraphBounds(-1.2, 1.2, -2.0, 2.0)
+        }
+        GraphPreset.ARCCOS -> {
+            GraphBounds(-1.2, 1.2, -0.5, 3.5)
         }
         GraphPreset.ARCTAN -> {
             GraphBounds(-5.0, 5.0, -2.0, 2.0)
@@ -344,14 +347,29 @@ internal fun resolveActiveFormula(preset: GraphPreset, expression: String): Stri
     }
 }
 
+internal fun isWithinDomain(sanitizedExpr: String, x: Double): Boolean {
+    val lower = sanitizedExpr.lowercase()
+    if (lower.contains("asin") || lower.contains("acos") || lower.contains("arcsin") || lower.contains("arccos")) {
+        if (x < -1.0 || x > 1.0) return false
+    }
+    if (lower.contains("log10") || lower.contains("log(") || lower.contains("ln(")) {
+        if (x <= 0.0) return false
+    }
+    if (lower.contains("sqrt") || lower.contains("√")) {
+        if (x < 0.0) return false
+    }
+    return true
+}
+
 internal fun evaluateFormulaAtX(
     formula: String,
     x: Double,
     angleMode: AngleMode
 ): Double? {
     if (!x.isFinite()) return null
+    val sanitizedExpr = sanitizeForGraphParser(formula)
+    if (!isWithinDomain(sanitizedExpr, x)) return null
     return try {
-        val sanitizedExpr = sanitizeForGraphParser(formula)
         val y = synchronized(MxParserLock) {
             try {
                 License.iConfirmNonCommercialUse("limonatalp4")
@@ -502,15 +520,12 @@ fun FunctionGraphView(
                     val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
                     val h = 1e-5
 
-                    val lowerExpr = sanitizedExpr.lowercase()
-                    val needsPositiveX = lowerExpr.contains("log10") || lowerExpr.contains("log(") || lowerExpr.contains("ln(") || lowerExpr.contains("sqrt")
-
                     for (i in 0..steps) {
                         val t = i.toDouble() / steps
                         val x = xMin + t * xSpan
 
-                        // Skip out of domain values for log, ln, sqrt
-                        if (needsPositiveX && x <= 0.0) {
+                        // Skip out of domain values
+                        if (!isWithinDomain(sanitizedExpr, x)) {
                             calculatedList.add(Pair(x, Double.NaN))
                             continue
                         }
