@@ -5,6 +5,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -14,11 +18,14 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -308,11 +315,15 @@ private fun GlassDisplayContent(
     val errorTextColor = colorScheme.error
     val copyIconColor = colorScheme.primary.copy(alpha = 0.75f)
 
-    val exprColor = if (expression.isEmpty()) {
-        colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-    } else {
-        colorScheme.onSurfaceVariant
-    }
+    val exprColor by animateColorAsState(
+        targetValue = if (expression.isEmpty()) {
+            colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+        } else {
+            colorScheme.onSurfaceVariant
+        },
+        animationSpec = tween(durationMillis = 150, easing = FastOutSlowInEasing),
+        label = "display_expr_color"
+    )
 
     val resultColor = colorScheme.onSurface
 
@@ -354,18 +365,36 @@ private fun GlassDisplayContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = angleMode.name,
-                        fontSize = if (isCompact) 10.sp else 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = badgeAngleColor,
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                            .testTag("badge_angle_mode")
-                    )
+                    AnimatedContent(
+                        targetState = angleMode.name,
+                        transitionSpec = {
+                            (fadeIn(tween(150, easing = FastOutSlowInEasing)) +
+                                slideInVertically(tween(150, easing = FastOutSlowInEasing)) { it / 3 })
+                                .togetherWith(
+                                    fadeOut(tween(100, easing = FastOutLinearInEasing)) +
+                                        slideOutVertically(tween(100, easing = FastOutLinearInEasing)) { -it / 3 }
+                                )
+                                .using(SizeTransform(clip = false))
+                        },
+                        label = "angle_mode_badge"
+                    ) { modeName ->
+                        Text(
+                            text = modeName,
+                            fontSize = if (isCompact) 10.sp else 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = badgeAngleColor,
+                            fontFamily = FontFamily.Monospace,
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp, vertical = 2.dp)
+                                .testTag("badge_angle_mode")
+                        )
+                    }
 
-                    if (isScientificExpanded) {
+                    AnimatedVisibility(
+                        visible = isScientificExpanded,
+                        enter = fadeIn(tween(160)) + scaleIn(initialScale = 0.92f, animationSpec = tween(160)),
+                        exit = fadeOut(tween(110)) + scaleOut(targetScale = 0.92f, animationSpec = tween(110))
+                    ) {
                         Text(
                             text = "SCI",
                             fontSize = if (isCompact) 10.sp else 11.sp,
@@ -381,9 +410,13 @@ private fun GlassDisplayContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (errorMessage != null) {
+                    AnimatedVisibility(
+                        visible = errorMessage != null,
+                        enter = fadeIn(tween(150)) + scaleIn(initialScale = 0.92f, animationSpec = tween(150)),
+                        exit = fadeOut(tween(110)) + scaleOut(targetScale = 0.92f, animationSpec = tween(110))
+                    ) {
                         Text(
-                            text = errorMessage,
+                            text = errorMessage ?: "",
                             fontSize = if (isCompact) 11.sp else 12.sp,
                             fontWeight = FontWeight.Medium,
                             color = errorTextColor,
@@ -392,11 +425,13 @@ private fun GlassDisplayContent(
                     }
 
                     // Keyboard button in corner (Pill Glass Design - opens system keyboard only)
+                    val keyboardBtnInteraction = remember { MutableInteractionSource() }
                     GlassSurface(
                         shape = RoundedCornerShape(50),
                         customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
-                        glassState = glassState
+                        glassState = glassState,
+                        modifier = Modifier.pressScale(keyboardBtnInteraction)
                     ) {
                         IconButton(
                             onClick = {
@@ -408,6 +443,7 @@ private fun GlassDisplayContent(
                                 )
                                 keyboardRequestToken++
                             },
+                            interactionSource = keyboardBtnInteraction,
                             modifier = Modifier
                                 .size(32.dp)
                                 .padding(4.dp)
@@ -423,11 +459,13 @@ private fun GlassDisplayContent(
                     }
 
                     // Copy indicator button in corner (Pill Glass Design)
+                    val copyBtnInteraction = remember { MutableInteractionSource() }
                     GlassSurface(
                         shape = RoundedCornerShape(50),
                         customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
-                        glassState = glassState
+                        glassState = glassState,
+                        modifier = Modifier.pressScale(copyBtnInteraction)
                     ) {
                         IconButton(
                             onClick = {
@@ -439,6 +477,7 @@ private fun GlassDisplayContent(
                                 )
                                 performCopy()
                             },
+                            interactionSource = copyBtnInteraction,
                             modifier = Modifier
                                 .size(32.dp)
                                 .padding(4.dp)
@@ -517,7 +556,11 @@ private fun GlassDisplayContent(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            if (expression.isEmpty()) {
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = expression.isEmpty(),
+                                enter = fadeIn(tween(120, easing = FastOutSlowInEasing)),
+                                exit = fadeOut(tween(90, easing = FastOutLinearInEasing))
+                            ) {
                                 Text(
                                     text = "0",
                                     fontSize = exprFontSize,
@@ -566,12 +609,18 @@ private fun GlassDisplayContent(
                 )
             }
 
-            // Evaluated result (bottom, large & prominent with smooth animation)
+            // Evaluated result (bottom, large & prominent with smooth crossfade & slide)
             AnimatedContent(
                 targetState = result,
                 transitionSpec = {
-                    (fadeIn(animationSpec = tween(160)) + slideInVertically(animationSpec = tween(160)) { height -> height / 3 })
-                        .togetherWith(fadeOut(animationSpec = tween(160)) + slideOutVertically(animationSpec = tween(160)) { height -> -height / 3 })
+                    (fadeIn(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)) +
+                        slideInVertically(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)) { height -> height / 4 } +
+                        scaleIn(initialScale = 0.97f, animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing)))
+                        .togetherWith(
+                            fadeOut(animationSpec = tween(durationMillis = 100, easing = FastOutLinearInEasing)) +
+                                slideOutVertically(animationSpec = tween(durationMillis = 100, easing = FastOutLinearInEasing)) { height -> -height / 4 }
+                        )
+                        .using(SizeTransform(clip = false))
                 },
                 label = "result_text_anim",
                 modifier = Modifier

@@ -1,6 +1,7 @@
 package com.limonatalp4.glasscalcproject.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -23,9 +24,9 @@ import androidx.compose.foundation.indication
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -89,7 +90,8 @@ fun GlassCalculatorButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed || isLongPressTriggered) 0.90f else 1.0f,
+        targetValue = if (isPressed || isLongPressTriggered) 0.95f else 1.0f,
+        animationSpec = tween(durationMillis = 80, easing = FastOutSlowInEasing),
         label = "button_scale"
     )
 
@@ -182,23 +184,39 @@ fun GlassCalculatorButton(
                 }
         }
         onLongClick != null -> {
-            Modifier.pointerInput(onLongClick, onClick, isHapticActive) {
-                detectTapGestures(
-                    onTap = {
-                        triggerHapticTap()
-                        onClick()
-                    },
-                    onLongPress = {
-                        isLongPressTriggered = true
-                        triggerHapticLongPress()
-                        coroutineScope.launch {
-                            delay(250)
-                            isLongPressTriggered = false
+            Modifier
+                .indication(interactionSource, ripple(bounded = true, radius = 48.dp, color = textColor))
+                .pointerInput(onLongClick, onClick, isHapticActive) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            val press = PressInteraction.Press(offset)
+                            interactionSource.emit(press)
+                            val released = try {
+                                awaitRelease()
+                                true
+                            } catch (_: Exception) {
+                                false
+                            }
+                            interactionSource.emit(
+                                if (released) PressInteraction.Release(press)
+                                else PressInteraction.Cancel(press)
+                            )
+                        },
+                        onTap = {
+                            triggerHapticTap()
+                            onClick()
+                        },
+                        onLongPress = {
+                            isLongPressTriggered = true
+                            triggerHapticLongPress()
+                            coroutineScope.launch {
+                                delay(250)
+                                isLongPressTriggered = false
+                            }
+                            onLongClick()
                         }
-                        onLongClick()
-                    }
-                )
-            }
+                    )
+                }
         }
         else -> {
             Modifier.clickable(
@@ -215,7 +233,10 @@ fun GlassCalculatorButton(
     BoxWithConstraints(
         modifier = modifier
             .aspectRatio(1f)
-            .scale(scale)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clip(CircleShape)
             .safeLiquidGlass(
                 state = if (type != ButtonType.EQUALS && type != ButtonType.ACTION_CLEAR) glassState else null,

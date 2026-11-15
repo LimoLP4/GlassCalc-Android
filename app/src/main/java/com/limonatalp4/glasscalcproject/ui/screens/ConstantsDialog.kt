@@ -1,6 +1,7 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,20 +22,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.pressScale
+import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
@@ -74,91 +80,103 @@ fun ConstantsDialog(
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
+    val dialogTransition = rememberDialogTransitionController(onDismiss)
+
     BasicAlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = dialogTransition.dismiss,
         modifier = Modifier.testTag("dialog_constants")
     ) {
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(28.dp),
-            borderWidth = 1.2.dp,
-            customBgColor = colorScheme.surfaceContainerHigh
-        ) {
-            Column(
+        DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
+            GlassSurface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState())
+                    .padding(8.dp),
+                shape = RoundedCornerShape(28.dp),
+                borderWidth = 1.2.dp,
+                customBgColor = colorScheme.surfaceContainerHigh
             ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Functions,
-                            contentDescription = null,
-                            tint = colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.title_constants),
-                            fontSize = 21.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            triggerHaptic()
-                            onDismiss()
-                        },
-                        modifier = Modifier.testTag("btn_close_constants")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.nav_close),
-                            tint = colorScheme.onSurface
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Text(
-                    text = stringResource(R.string.constants_select_heading),
-                    fontSize = 13.sp,
-                    color = colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    MATH_CONSTANTS.forEach { constant ->
-                        GlassSurface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    triggerHaptic()
-                                    onSelectConstant(constant.value)
-                                    onDismiss()
-                                }
-                                .testTag("constant_${constant.symbol}"),
-                            shape = RoundedCornerShape(20.dp),
-                            borderWidth = 1.dp,
-                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Functions,
+                                contentDescription = null,
+                                tint = colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.title_constants),
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.onSurface
+                            )
+                        }
+
+                        val closeBtnInteraction = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = {
+                                triggerHaptic()
+                                dialogTransition.dismiss()
+                            },
+                            interactionSource = closeBtnInteraction,
+                            modifier = Modifier
+                                .pressScale(closeBtnInteraction)
+                                .testTag("btn_close_constants")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.nav_close),
+                                tint = colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = stringResource(R.string.constants_select_heading),
+                        fontSize = 13.sp,
+                        color = colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        MATH_CONSTANTS.forEach { constant ->
+                            val cardInteraction = remember { MutableInteractionSource() }
+                            GlassSurface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .pressScale(cardInteraction)
+                                    .clickable(
+                                        interactionSource = cardInteraction,
+                                        indication = ripple()
+                                    ) {
+                                        triggerHaptic()
+                                        onSelectConstant(constant.value)
+                                        dialogTransition.dismiss()
+                                    }
+                                    .testTag("constant_${constant.symbol}"),
+                                shape = RoundedCornerShape(20.dp),
+                                borderWidth = 1.dp,
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -205,13 +223,14 @@ fun ConstantsDialog(
                                     }
                                 }
 
-                                Text(
-                                    text = constant.value,
-                                    fontSize = 12.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    color = colorScheme.primary,
-                                    fontWeight = FontWeight.Medium
-                                )
+                                    Text(
+                                        text = constant.value,
+                                        fontSize = 12.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = colorScheme.primary,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
                         }
                     }
@@ -220,3 +239,4 @@ fun ConstantsDialog(
         }
     }
 }
+

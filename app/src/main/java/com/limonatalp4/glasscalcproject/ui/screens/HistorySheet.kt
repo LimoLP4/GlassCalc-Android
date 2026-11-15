@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,9 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +51,7 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.pressScale
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
@@ -157,18 +161,22 @@ fun HistorySheet(
                 }
 
                 if (history.isNotEmpty()) {
+                    val clearHistoryInteraction = remember { MutableInteractionSource() }
                     OutlinedButton(
                         onClick = {
                             triggerHaptic()
                             onClear()
                         },
+                        interactionSource = clearHistoryInteraction,
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = colorScheme.error
                         ),
                         shape = RoundedCornerShape(50.dp),
                         border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.5f)),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                        modifier = Modifier.testTag("btn_clear_history")
+                        modifier = Modifier
+                            .pressScale(clearHistoryInteraction)
+                            .testTag("btn_clear_history")
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -212,10 +220,15 @@ fun HistorySheet(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(history, key = { it.id }) { item ->
+                        val itemInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
+                                .pressScale(itemInteraction)
+                                .clickable(
+                                    interactionSource = itemInteraction,
+                                    indication = ripple()
+                                ) {
                                     triggerHaptic()
                                     onSelect(item)
                                     onDismiss()

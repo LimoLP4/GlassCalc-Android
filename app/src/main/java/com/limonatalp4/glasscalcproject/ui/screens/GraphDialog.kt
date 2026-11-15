@@ -1,6 +1,7 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,8 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
 import com.limonatalp4.glasscalcproject.ui.components.FunctionGraphView
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.pressScale
+import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
@@ -65,73 +70,80 @@ fun GraphDialog(
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
+    val dialogTransition = rememberDialogTransitionController(onDismiss)
+
     BasicAlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = dialogTransition.dismiss,
         modifier = Modifier.testTag("dialog_graph")
     ) {
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(28.dp),
-            borderWidth = 1.2.dp,
-            customBgColor = colorScheme.surfaceContainerHigh
-        ) {
-            Column(
+        DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
+            GlassSurface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp)
+                    .padding(8.dp),
+                shape = RoundedCornerShape(28.dp),
+                borderWidth = 1.2.dp,
+                customBgColor = colorScheme.surfaceContainerHigh
             ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.title_graph),
-                        fontSize = 21.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.onSurface
-                    )
-                    GlassSurface(
-                        shape = RoundedCornerShape(50),
-                        customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
-                            onClick = {
-                                triggerHaptic()
-                                onDismiss()
-                            },
-                            modifier = Modifier
-                                .size(36.dp)
-                                .testTag("btn_close_graph_dialog")
+                        Text(
+                            text = stringResource(R.string.title_graph),
+                            fontSize = 21.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.onSurface
+                        )
+                        val closeBtnInteraction = remember { MutableInteractionSource() }
+                        GlassSurface(
+                            shape = RoundedCornerShape(50),
+                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                            modifier = Modifier.pressScale(closeBtnInteraction)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.nav_close),
-                                tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
-                                modifier = Modifier.size(18.dp)
-                            )
+                            IconButton(
+                                onClick = {
+                                    triggerHaptic()
+                                    dialogTransition.dismiss()
+                                },
+                                interactionSource = closeBtnInteraction,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .testTag("btn_close_graph_dialog")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.nav_close),
+                                    tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    FunctionGraphView(
+                        expression = expression,
+                        angleMode = angleMode,
+                        isGestureLocked = isGestureLocked,
+                        onGestureLockChange = { viewModel.setGraphLocked(it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        onApplyPointToCalculator = { x, y ->
+                            viewModel.applyGraphPointToCalculator(x, y)
+                            dialogTransition.dismiss()
+                        }
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                FunctionGraphView(
-                    expression = expression,
-                    angleMode = angleMode,
-                    isGestureLocked = isGestureLocked,
-                    onGestureLockChange = { viewModel.setGraphLocked(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    onApplyPointToCalculator = { x, y ->
-                        viewModel.applyGraphPointToCalculator(x, y)
-                        onDismiss()
-                    }
-                )
             }
         }
     }

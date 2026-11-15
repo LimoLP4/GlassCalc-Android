@@ -87,6 +87,7 @@ import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS
 import com.limonatalp4.glasscalcproject.ui.components.ConverterSearchEmptyState
+import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair
 import com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion
@@ -95,13 +96,20 @@ import com.limonatalp4.glasscalcproject.ui.components.UnitSuggestionsDropdown
 import com.limonatalp4.glasscalcproject.ui.components.categoryKeywordsResId
 import com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs
 import com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions
+import com.limonatalp4.glasscalcproject.ui.components.pressScale
+import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -109,10 +117,12 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -203,9 +213,11 @@ fun UnitConverterDialog(
     val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
 
+    val dialogTransition = rememberDialogTransitionController(onDismiss)
+
     @Suppress("DEPRECATION")
     BasicAlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = dialogTransition.dismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             decorFitsSystemWindows = false
@@ -235,7 +247,7 @@ fun UnitConverterDialog(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        onDismiss()
+                        dialogTransition.dismiss()
                     }
             )
 
@@ -259,30 +271,31 @@ fun UnitConverterDialog(
                         bottom = dialogBottomPadding
                     )
             ) {
-                GlassSurface(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .widthIn(max = 400.dp)
-                        .pointerInput(Unit) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    awaitPointerEvent()
+                DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
+                    GlassSurface(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .widthIn(max = 400.dp)
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        awaitPointerEvent()
+                                    }
                                 }
-                            }
+                            },
+                        shape = RoundedCornerShape(28.dp),
+                        borderWidth = 1.2.dp,
+                        customBgColor = when {
+                            isAmoled -> Color.Black
+                            isTiefschwarz -> Color(0xFF121212)
+                            else -> dialogBgColor
                         },
-                    shape = RoundedCornerShape(28.dp),
-                    borderWidth = 1.2.dp,
-                    customBgColor = when {
-                        isAmoled -> Color.Black
-                        isTiefschwarz -> Color(0xFF121212)
-                        else -> dialogBgColor
-                    },
-                    customBorderColor = when {
-                        isAmoled -> Color.White.copy(alpha = 0.15f)
-                        isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                        else -> null
-                    }
-                ) {
+                        customBorderColor = when {
+                            isAmoled -> Color.White.copy(alpha = 0.15f)
+                            isTiefschwarz -> Color.White.copy(alpha = 0.1f)
+                            else -> null
+                        }
+                    ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -300,16 +313,19 @@ fun UnitConverterDialog(
                                 fontWeight = FontWeight.Bold,
                                 color = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
                             )
+                            val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
                                 shape = RoundedCornerShape(50),
                                 customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                modifier = Modifier.pressScale(closeBtnInteraction)
                             ) {
                                 IconButton(
                                     onClick = {
                                         triggerHaptic()
-                                        onDismiss()
+                                        dialogTransition.dismiss()
                                     },
+                                    interactionSource = closeBtnInteraction,
                                     modifier = Modifier
                                         .size(36.dp)
                                         .testTag("btn_close_converter")
@@ -402,13 +418,24 @@ fun UnitConverterDialog(
 
                 val indicatorOffset by animateDpAsState(
                     targetValue = targetPosition,
-                    animationSpec = tween(durationMillis = 250),
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
                     label = "cat_indicator_offset"
                 )
                 val indicatorWidth by animateDpAsState(
                     targetValue = targetWidth,
-                    animationSpec = tween(durationMillis = 250),
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
                     label = "cat_indicator_width"
+                )
+                val activeCatPillColor by animateColorAsState(
+                    targetValue = primaryContainerColor,
+                    animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                    label = "cat_active_pill_bg"
                 )
 
                 LaunchedEffect(selectedCategoryIndex, targetPosition) {
@@ -449,11 +476,11 @@ fun UnitConverterDialog(
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.CenterStart)
-                                    .offset(x = indicatorOffset)
+                                    .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                                     .width(indicatorWidth)
                                     .height(if (tabHeight > 0.dp) tabHeight else 40.dp)
                                     .clip(RoundedCornerShape(50.dp))
-                                    .background(primaryContainerColor)
+                                    .background(activeCatPillColor)
                             )
                         }
 
@@ -466,8 +493,8 @@ fun UnitConverterDialog(
                                 val isSelected = selectedCategoryIndex == index
                                 var isPressed by remember { mutableStateOf(false) }
                                 val scale by animateFloatAsState(
-                                    targetValue = if (isPressed) 0.94f else 1.0f,
-                                    animationSpec = tween(durationMillis = 100),
+                                    targetValue = if (isPressed) 0.95f else 1.0f,
+                                    animationSpec = tween(durationMillis = 80, easing = FastOutSlowInEasing),
                                     label = "cat_tab_scale_$index"
                                 )
                                 val tabTint by animateColorAsState(
@@ -476,7 +503,7 @@ fun UnitConverterDialog(
                                     } else {
                                         if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
                                     },
-                                    animationSpec = tween(durationMillis = 220),
+                                    animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                                     label = "cat_tab_tint_$index"
                                 )
 
@@ -544,12 +571,16 @@ fun UnitConverterDialog(
                         targetState = selectedCategoryIndex,
                         transitionSpec = {
                             if (targetState > initialState) {
-                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                                    slideOutHorizontally { width -> -width } + fadeOut())
+                                (slideInHorizontally(tween(200, easing = FastOutSlowInEasing)) { width -> width / 4 } +
+                                    fadeIn(tween(200, easing = FastOutSlowInEasing))).togetherWith(
+                                    slideOutHorizontally(tween(150, easing = FastOutLinearInEasing)) { width -> -width / 4 } +
+                                        fadeOut(tween(150, easing = FastOutLinearInEasing)))
                             } else {
-                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                                    slideOutHorizontally { width -> width } + fadeOut())
-                            }
+                                (slideInHorizontally(tween(200, easing = FastOutSlowInEasing)) { width -> -width / 4 } +
+                                    fadeIn(tween(200, easing = FastOutSlowInEasing))).togetherWith(
+                                    slideOutHorizontally(tween(150, easing = FastOutLinearInEasing)) { width -> width / 4 } +
+                                        fadeOut(tween(150, easing = FastOutLinearInEasing)))
+                            }.using(SizeTransform(clip = false))
                         },
                         label = "cat_transition"
                     ) { targetIndex ->
@@ -575,16 +606,22 @@ fun UnitConverterDialog(
                                     } else {
                                         if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                     },
+                                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                     label = "pair_bg_$idx"
                                 )
                                 val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
                                 val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+                                val pairInteraction = remember { MutableInteractionSource() }
 
                                 GlassSurface(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp)
-                                        .clickable {
+                                        .pressScale(pairInteraction)
+                                        .clickable(
+                                            interactionSource = pairInteraction,
+                                            indication = ripple()
+                                        ) {
                                             triggerHaptic()
                                             selectedPair = pair
                                         }
@@ -637,12 +674,16 @@ fun UnitConverterDialog(
                                 color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                             )
 
+                            val swapInteraction = remember { MutableInteractionSource() }
                             IconButton(
                                 onClick = {
                                     triggerHaptic()
                                     isForward = !isForward
                                 },
-                                modifier = Modifier.testTag("btn_swap_units")
+                                interactionSource = swapInteraction,
+                                modifier = Modifier
+                                    .pressScale(swapInteraction)
+                                    .testTag("btn_swap_units")
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.SwapHoriz,
@@ -705,17 +746,20 @@ fun UnitConverterDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Button to import converted value into calculator
+                val importInteraction = remember { MutableInteractionSource() }
                 Button(
                     onClick = {
                         triggerHaptic()
                         val cleaned = convertedResult.replace(",", ".").replace(" ", "")
                         if (cleaned != "—") {
                             onImportToCalculator(cleaned)
-                            onDismiss()
+                            dialogTransition.dismiss()
                         }
                     },
+                    interactionSource = importInteraction,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .pressScale(importInteraction)
                         .testTag("btn_import_converter"),
                     colors = ButtonDefaults.buttonColors(containerColor = primaryColor, contentColor = colorScheme.onPrimary),
                     shape = RoundedCornerShape(16.dp)
@@ -724,6 +768,7 @@ fun UnitConverterDialog(
                     Text(stringResource(R.string.converter_import), fontWeight = FontWeight.Bold)
                         }
                     }
+                }
                 }
             }
         }

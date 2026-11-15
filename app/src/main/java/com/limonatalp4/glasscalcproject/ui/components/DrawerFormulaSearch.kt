@@ -230,10 +230,13 @@ fun DrawerFormulaSearch(
                 )
             }
             if (query.isNotEmpty()) {
+                val clearInteraction = remember { MutableInteractionSource() }
                 IconButton(
                     onClick = onClearClick,
+                    interactionSource = clearInteraction,
                     modifier = Modifier
                         .size(48.dp)
+                        .pressScale(clearInteraction)
                         .testTag("btn_clear_formula_search")
                 ) {
                     Icon(

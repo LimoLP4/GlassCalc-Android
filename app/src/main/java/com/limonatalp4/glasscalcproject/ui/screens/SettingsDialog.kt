@@ -7,6 +7,10 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.expandVertically
@@ -24,6 +28,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -125,10 +130,13 @@ import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchBar
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchEmptyState
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchVisibility
+import com.limonatalp4.glasscalcproject.ui.components.pressScale
+import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.components.rememberSettingsSearchVisibility
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticMotorType
@@ -239,17 +247,12 @@ fun SettingsDialog(
         }
     }
 
+    val dialogTransition = rememberDialogTransitionController(onDismiss)
     val coroutineScope = rememberCoroutineScope()
-    var isDismissing by remember { mutableStateOf(false) }
-    val alphaAnim by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (isDismissing) 0f else 1f,
-        animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
-        label = "dialog_fade_anim"
-    )
 
     @Suppress("DEPRECATION")
     BasicAlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = dialogTransition.dismiss,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
             decorFitsSystemWindows = false
@@ -285,7 +288,7 @@ fun SettingsDialog(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        onDismiss()
+                        dialogTransition.dismiss()
                     }
             )
 
@@ -309,31 +312,31 @@ fun SettingsDialog(
                         bottom = dialogBottomPadding
                     )
             ) {
-                GlassSurface(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .widthIn(max = 400.dp)
-                        .pointerInput(Unit) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    awaitPointerEvent()
+                DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
+                    GlassSurface(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .widthIn(max = 400.dp)
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        awaitPointerEvent()
+                                    }
                                 }
-                            }
+                            },
+                        shape = RoundedCornerShape(28.dp),
+                        borderWidth = 1.2.dp,
+                        customBgColor = when {
+                            isAmoled -> Color.Black
+                            isTiefschwarz -> Color(0xFF121212)
+                            else -> colorScheme.surfaceContainerHigh
+                        },
+                        customBorderColor = when {
+                            isAmoled -> Color.White.copy(alpha = 0.15f)
+                            isTiefschwarz -> Color.White.copy(alpha = 0.1f)
+                            else -> null
                         }
-                        .alpha(alphaAnim),
-                    shape = RoundedCornerShape(28.dp),
-                    borderWidth = 1.2.dp,
-                    customBgColor = when {
-                        isAmoled -> Color.Black
-                        isTiefschwarz -> Color(0xFF121212)
-                        else -> colorScheme.surfaceContainerHigh
-                    },
-                    customBorderColor = when {
-                        isAmoled -> Color.White.copy(alpha = 0.15f)
-                        isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                        else -> null
-                    }
-                ) {
+                    ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -351,16 +354,19 @@ fun SettingsDialog(
                                 fontWeight = FontWeight.Bold,
                                 color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
                             )
+                            val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
                                 shape = RoundedCornerShape(50),
                                 customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                modifier = Modifier.pressScale(closeBtnInteraction)
                             ) {
                                 IconButton(
                                     onClick = {
                                         triggerHaptic()
-                                        onDismiss()
+                                        dialogTransition.dismiss()
                                     },
+                                    interactionSource = closeBtnInteraction,
                                     modifier = Modifier
                                         .size(36.dp)
                                         .testTag("btn_close_settings")
@@ -455,11 +461,15 @@ fun SettingsDialog(
                         targetState = selectedTab,
                         transitionSpec = {
                             if (targetState > initialState) {
-                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                                    slideOutHorizontally { width -> -width } + fadeOut())
+                                (slideInHorizontally(tween(200, easing = FastOutSlowInEasing)) { width -> width / 4 } +
+                                    fadeIn(tween(200, easing = FastOutSlowInEasing))).togetherWith(
+                                    slideOutHorizontally(tween(150, easing = FastOutLinearInEasing)) { width -> -width / 4 } +
+                                        fadeOut(tween(150, easing = FastOutLinearInEasing)))
                             } else {
-                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                                    slideOutHorizontally { width -> width } + fadeOut())
+                                (slideInHorizontally(tween(200, easing = FastOutSlowInEasing)) { width -> -width / 4 } +
+                                    fadeIn(tween(200, easing = FastOutSlowInEasing))).togetherWith(
+                                    slideOutHorizontally(tween(150, easing = FastOutLinearInEasing)) { width -> width / 4 } +
+                                        fadeOut(tween(150, easing = FastOutLinearInEasing)))
                             }.using(SizeTransform(clip = false))
                         },
                         label = "tab_transition",
@@ -541,10 +551,10 @@ fun SettingsDialog(
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
                                     onSelectLanguage = onSelectLanguage,
-                                    onDismiss = onDismiss,
+                                    onDismiss = dialogTransition.dismiss,
                                     triggerHaptic = ::triggerHaptic,
                                     coroutineScope = coroutineScope,
-                                    onSetDismissing = { isDismissing = it },
+                                    onSetDismissing = { if (it) dialogTransition.dismiss() },
                                     visibleLanguages = searchVisibility.matchingLanguages,
                                     showHeading = !isSearchActive
                                 )
@@ -555,6 +565,7 @@ fun SettingsDialog(
                 }
             }
         }
+    }
     }
     }
     }
@@ -571,7 +582,7 @@ fun SettingsDialog(
                         triggerHaptic()
                         showResetConfirmDialog = false
                         onResetApp()
-                        onDismiss()
+                        dialogTransition.dismiss()
                     },
                     modifier = Modifier.testTag("btn_confirm_reset")
                 ) {
@@ -1576,16 +1587,20 @@ private fun LanguageSection(
             val cardBg = if (isSelected) colorScheme.primaryContainer else if (isAmoled) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             val textColor = if (isAmoled || isTiefschwarz) Color.White else if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
 
+            val langInteraction = remember { MutableInteractionSource() }
             GlassSurface(
-                modifier = Modifier.fillMaxWidth().clickable {
-                    triggerHaptic()
-                    coroutineScope.launch {
-                        onSetDismissing(true)
-                        delay(200)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pressScale(langInteraction)
+                    .clickable(
+                        interactionSource = langInteraction,
+                        indication = androidx.compose.material3.ripple()
+                    ) {
+                        triggerHaptic()
                         onSelectLanguage(langOption.localeTag)
                         onDismiss()
                     }
-                }.testTag("radio_lang_${langOption.name}"),
+                    .testTag("radio_lang_${langOption.name}"),
                 shape = RoundedCornerShape(24.dp),
                 customBgColor = cardBg
             ) {
@@ -1594,12 +1609,8 @@ private fun LanguageSection(
                         selected = isSelected,
                         onClick = {
                             triggerHaptic()
-                            coroutineScope.launch {
-                                onSetDismissing(true)
-                                delay(200)
-                                onSelectLanguage(langOption.localeTag)
-                                onDismiss()
-                            }
+                            onSelectLanguage(langOption.localeTag)
+                            onDismiss()
                         }
                     )
                     Text(text = stringResource(langOption.stringResId), color = textColor, modifier = Modifier.padding(start = 12.dp))
@@ -1642,14 +1653,33 @@ private fun SettingsTabBar(
 
     val indicatorOffset by animateDpAsState(
         targetValue = targetPosition,
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
         label = "tab_indicator_offset"
     )
     val indicatorWidth by animateDpAsState(
         targetValue = targetWidth,
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
         label = "tab_indicator_width"
     )
+    val activePillBgColor by animateColorAsState(
+        targetValue = colorScheme.primaryContainer,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "tab_active_pill_bg"
+    )
+
+    LaunchedEffect(selectedTab, targetPosition) {
+        if (targetWidth > 0.dp) {
+            val targetPx = with(density) { targetPosition.roundToPx() }
+            val offsetPaddingPx = with(density) { 28.dp.roundToPx() }
+            tabScrollState.animateScrollTo((targetPx - offsetPaddingPx).coerceAtLeast(0))
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -1682,11 +1712,11 @@ private fun SettingsTabBar(
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .offset(x = indicatorOffset)
+                        .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                         .width(indicatorWidth)
                         .height(if (tabHeight > 0.dp) tabHeight else 36.dp)
                         .clip(RoundedCornerShape(50.dp))
-                        .background(colorScheme.primaryContainer)
+                        .background(activePillBgColor)
                 )
             }
 
@@ -1699,8 +1729,8 @@ private fun SettingsTabBar(
                     val isSelected = selectedTab == index
                     var isPressed by remember { mutableStateOf(false) }
                     val scale by animateFloatAsState(
-                        targetValue = if (isPressed) 0.94f else 1.0f,
-                        animationSpec = tween(durationMillis = 100),
+                        targetValue = if (isPressed) 0.95f else 1.0f,
+                        animationSpec = tween(durationMillis = 80, easing = FastOutSlowInEasing),
                         label = "tab_scale"
                     )
                     val tabTint by animateColorAsState(
@@ -1709,7 +1739,7 @@ private fun SettingsTabBar(
                         } else {
                             if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
                         },
-                        animationSpec = tween(durationMillis = 220),
+                        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                         label = "tab_${index}_tint"
                     )
 

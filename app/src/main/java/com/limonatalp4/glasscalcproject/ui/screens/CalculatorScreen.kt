@@ -106,6 +106,7 @@ import com.limonatalp4.glasscalcproject.ui.components.DrawerFormulaSearch
 import com.limonatalp4.glasscalcproject.ui.components.GlassCalculatorButton
 import com.limonatalp4.glasscalcproject.ui.components.GlassDisplay
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
+import com.limonatalp4.glasscalcproject.ui.components.pressScale
 import com.limonatalp4.glasscalcproject.ui.components.rememberAdaptiveGlassState
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
@@ -202,8 +203,11 @@ fun CalculatorScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Floating Pill (Menu + App Name)
+                        val menuBtnInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
-                            modifier = Modifier.testTag("header_pill"),
+                            modifier = Modifier
+                                .pressScale(menuBtnInteraction)
+                                .testTag("header_pill"),
                             shape = RoundedCornerShape(50),
                             customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             borderWidth = 1.2.dp,
@@ -219,6 +223,7 @@ fun CalculatorScreen(
                                         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                         menuVisibleState.targetState = !menuVisibleState.targetState
                                     },
+                                    interactionSource = menuBtnInteraction,
                                     modifier = Modifier
                                         .size(36.dp)
                                         .testTag("btn_hamburger_menu")
@@ -242,8 +247,11 @@ fun CalculatorScreen(
                         }
 
                         // History Pill (Right)
+                        val historyBtnInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
-                            modifier = Modifier.testTag("history_pill"),
+                            modifier = Modifier
+                                .pressScale(historyBtnInteraction)
+                                .testTag("history_pill"),
                             shape = RoundedCornerShape(50),
                             customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             borderWidth = 1.2.dp,
@@ -255,6 +263,7 @@ fun CalculatorScreen(
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                     showHistorySheet = true
                                 },
+                                interactionSource = historyBtnInteraction,
                                 modifier = Modifier
                                     .size(36.dp)
                                     .padding(4.dp)
@@ -478,15 +487,20 @@ fun CalculatorScreen(
                             ) {
                                 menuItems.forEach { (icon, labelRes, tag) ->
                                     val isSelected = tag == "nav_item_calculator"
-                                    
+                                    val menuItemInteraction = remember { MutableInteractionSource() }
+
                                     Box(
                                         modifier = Modifier
                                             .padding(horizontal = 4.dp, vertical = 2.dp)
                                             .fillMaxWidth()
                                             .defaultMinSize(minHeight = 48.dp)
+                                            .pressScale(menuItemInteraction)
                                             .clip(RoundedCornerShape(percent = 50))
                                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                                            .clickable {
+                                            .clickable(
+                                                interactionSource = menuItemInteraction,
+                                                indication = androidx.compose.material3.ripple()
+                                            ) {
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
                                                 coroutineScope.launch {
                                                     menuVisibleState.targetState = false
@@ -683,8 +697,11 @@ private fun PortraitCalculatorLayout(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // DEG/RAD Toggle
+                val angleBtnInteraction = remember { MutableInteractionSource() }
                 GlassSurface(
-                    modifier = Modifier.testTag("btn_toggle_angle_mode"),
+                    modifier = Modifier
+                        .pressScale(angleBtnInteraction)
+                        .testTag("btn_toggle_angle_mode"),
                     shape = CircleShape,
                     borderStroke = angleButtonBorder
                 ) {
@@ -693,6 +710,7 @@ private fun PortraitCalculatorLayout(
                             HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
                             viewModel.toggleAngleMode()
                         },
+                        interactionSource = angleBtnInteraction,
                         modifier = Modifier.size(width = 76.dp, height = 36.dp)
                     ) {
                         Text(
@@ -705,8 +723,11 @@ private fun PortraitCalculatorLayout(
                 }
 
                 // Scientific Expand / Collapse Button
+                val sciBtnInteraction = remember { MutableInteractionSource() }
                 GlassSurface(
-                    modifier = Modifier.testTag("btn_toggle_scientific"),
+                    modifier = Modifier
+                        .pressScale(sciBtnInteraction)
+                        .testTag("btn_toggle_scientific"),
                     shape = CircleShape,
                     borderStroke = scientificButtonBorder
                 ) {
@@ -715,6 +736,7 @@ private fun PortraitCalculatorLayout(
                             HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
                             viewModel.toggleScientificPanel()
                         },
+                        interactionSource = sciBtnInteraction,
                         modifier = Modifier
                             .wrapContentWidth()
                             .widthIn(min = 108.dp)
@@ -895,16 +917,20 @@ private fun LandscapeCalculatorLayout(
                         }
                     )
                     Box(modifier = Modifier.fillMaxWidth()) {
+                        val landscapeAngleInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
                             shape = CircleShape,
                             borderStroke = landscapeAngleBorder,
-                            modifier = Modifier.align(Alignment.CenterEnd)
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .pressScale(landscapeAngleInteraction)
                         ) {
                             IconButton(
                                 onClick = {
                                     HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
                                     viewModel.toggleAngleMode()
                                 },
+                                interactionSource = landscapeAngleInteraction,
                                 modifier = Modifier.size(
                                     width = (buttonSize * 1.8f).coerceIn(68.dp, 96.dp),
                                     height = (buttonSize * 0.75f).coerceIn(28.dp, 38.dp)

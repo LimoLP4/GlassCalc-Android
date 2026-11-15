@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -467,14 +468,17 @@ fun FunctionGraphView(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 // LOCK BUTTON (Locks graph 2D panning/zooming gesture on canvas)
+                val lockBtnInteraction = remember { MutableInteractionSource() }
                 IconButton(
                     onClick = {
                         isGraphLocked = !isGraphLocked
                         onGestureLockChange(isGraphLocked)
                         triggerClickHaptic()
                     },
+                    interactionSource = lockBtnInteraction,
                     modifier = Modifier
                         .size(32.dp)
+                        .pressScale(lockBtnInteraction)
                         .testTag("btn_lock_graph")
                 ) {
                     Icon(
@@ -932,6 +936,7 @@ fun FunctionGraphView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Pan Left (◀)
+                    val panLeftInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
                             val shift = (xMax - xMin) * 0.25
@@ -941,7 +946,10 @@ fun FunctionGraphView(
                             }
                             triggerClickHaptic()
                         },
-                        modifier = Modifier.size(28.dp)
+                        interactionSource = panLeftInteraction,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .pressScale(panLeftInteraction)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -952,6 +960,7 @@ fun FunctionGraphView(
                     }
 
                     // Pan Right (▶)
+                    val panRightInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
                             val shift = (xMax - xMin) * 0.25
@@ -961,7 +970,10 @@ fun FunctionGraphView(
                             }
                             triggerClickHaptic()
                         },
-                        modifier = Modifier.size(28.dp)
+                        interactionSource = panRightInteraction,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .pressScale(panRightInteraction)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
@@ -972,6 +984,7 @@ fun FunctionGraphView(
                     }
 
                     // Zoom In (+)
+                    val zoomInInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
                             val xRange = ((xMax - xMin) * 0.75).coerceIn(1e-4, 1e6)
@@ -984,7 +997,10 @@ fun FunctionGraphView(
                             yMax = yCenter + yRange / 2
                             triggerClickHaptic()
                         },
-                        modifier = Modifier.size(28.dp)
+                        interactionSource = zoomInInteraction,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .pressScale(zoomInInteraction)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -995,6 +1011,7 @@ fun FunctionGraphView(
                     }
 
                     // Zoom Out (-)
+                    val zoomOutInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
                             val xRange = ((xMax - xMin) * 1.35).coerceIn(1e-4, 1e6)
@@ -1007,7 +1024,10 @@ fun FunctionGraphView(
                             yMax = yCenter + yRange / 2
                             triggerClickHaptic()
                         },
-                        modifier = Modifier.size(28.dp)
+                        interactionSource = zoomOutInteraction,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .pressScale(zoomOutInteraction)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Remove,
@@ -1018,9 +1038,13 @@ fun FunctionGraphView(
                     }
 
                     // Reset View (↺)
+                    val resetInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = { resetView() },
-                        modifier = Modifier.size(28.dp)
+                        interactionSource = resetInteraction,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .pressScale(resetInteraction)
                     ) {
                         Icon(
                             imageVector = Icons.Default.RestartAlt,
@@ -1060,6 +1084,7 @@ fun FunctionGraphView(
                                 color = graphColor
                             )
 
+                            val clearPointsInteraction = remember { MutableInteractionSource() }
                             IconButton(
                                 onClick = {
                                     point1 = null
@@ -1067,8 +1092,10 @@ fun FunctionGraphView(
                                     nextPointIndex = 1
                                     triggerClickHaptic()
                                 },
+                                interactionSource = clearPointsInteraction,
                                 modifier = Modifier
                                     .size(24.dp)
+                                    .pressScale(clearPointsInteraction)
                                     .testTag("btn_clear_graph_points")
                             ) {
                                 Icon(
@@ -1162,12 +1189,16 @@ fun FunctionGraphView(
                 val activePoint = if (nextPointIndex == 1 && point2 != null) point2 else point1 ?: point2
                 val hasActivePoint = activePoint != null
 
+                val applyInteraction = remember { MutableInteractionSource() }
                 GlassSurface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 48.dp)
+                        .pressScale(applyInteraction, enabled = hasActivePoint)
                         .clip(RoundedCornerShape(50))
                         .clickable(
+                            interactionSource = applyInteraction,
+                            indication = androidx.compose.material3.ripple(),
                             enabled = hasActivePoint,
                             role = Role.Button
                         ) {
