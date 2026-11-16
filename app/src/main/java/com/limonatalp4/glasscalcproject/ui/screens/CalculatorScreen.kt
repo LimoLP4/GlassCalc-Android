@@ -224,7 +224,12 @@ fun CalculatorScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .statusBarsPadding()
+                            .windowInsetsPadding(
+                                WindowInsets.statusBars
+                                    .union(WindowInsets.navigationBars)
+                                    .union(WindowInsets.displayCutout)
+                                    .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                            )
                             .padding(horizontal = 16.dp, vertical = topBarVerticalPadding),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
@@ -327,6 +332,7 @@ fun CalculatorScreen(
                         .windowInsetsPadding(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
+                                .union(WindowInsets.displayCutout)
                                 .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
                         ),
                     contentAlignment = Alignment.TopCenter
