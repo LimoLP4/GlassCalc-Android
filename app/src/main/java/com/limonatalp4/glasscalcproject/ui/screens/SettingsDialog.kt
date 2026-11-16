@@ -1440,30 +1440,80 @@ private fun InformationSection(
                 }
                 SettingsInfoCard.GITHUB -> {
         // GitHub Repository Card
+        val githubCardInteraction = remember { MutableInteractionSource() }
+        val githubCardBg = when {
+            isAmoled -> Color(0xFF0A0A0A)
+            isTiefschwarz -> Color(0xFF121212)
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        }
+        val githubCardBorder = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
+
         GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .pressScale(githubCardInteraction)
+                .testTag("card_github_repo"),
             shape = RoundedCornerShape(20.dp),
-            customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else glassProps.buttonBorderColor
+            customBgColor = githubCardBg,
+            borderStroke = githubCardBorder
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().clickable {
-                    triggerHaptic()
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/releases/"))
-                        context.startActivity(intent)
-                    } catch (_: Exception) {
-                        Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = githubCardInteraction,
+                        indication = androidx.compose.material3.ripple()
+                    ) {
+                        triggerHaptic()
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LimoLP4/GlassCalc-Android/releases/"))
+                            context.startActivity(intent)
+                        } catch (_: Exception) {
+                            Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }.padding(18.dp),
+                    .padding(18.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = stringResource(R.string.info_github_repo), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                    Text(text = "LimoLP4/GlassCalc-Android", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.info_github_repo),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                    Text(
+                        text = "LimoLP4/GlassCalc-Android",
+                        fontSize = 12.sp,
+                        color = colorScheme.onSurfaceVariant
+                    )
                 }
-                Icon(imageVector = Icons.Default.OpenInBrowser, contentDescription = null, tint = colorScheme.primary)
+                GlassSurface(
+                    shape = CircleShape,
+                    customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                    modifier = Modifier.testTag("github_repo_icon_pill")
+                ) {
+                    Box(
+                        modifier = Modifier.padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.OpenInBrowser,
+                            contentDescription = stringResource(R.string.info_github_repo),
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
         }
                 }
@@ -1544,7 +1594,7 @@ private fun InformationSection(
                         text = "Apache License 2.0",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 12.dp)
