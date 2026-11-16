@@ -61,7 +61,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -112,25 +111,11 @@ fun HistorySheet(
     }
 
     val glassProps = LocalGlassProperties.current
-    val isAmoled = glassProps.isAmoled
-    val isTiefschwarz = glassProps.isTiefschwarz
     val pillShape = RoundedCornerShape(32.dp)
-    val pillBackgroundColor = if (isAmoled) {
-        Color(0xFF0A0A0A).copy(alpha = 0.85f)
-    } else {
-        colorScheme.surfaceVariant.copy(alpha = 0.8f)
-    }
+    val pillBackgroundColor = colorScheme.surfaceVariant.copy(alpha = 0.8f)
     val pillBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
-    val titleBadgeBackground = if (isAmoled) {
-        Color(0xFF141414).copy(alpha = 0.8f)
-    } else {
-        colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    }
-    val itemCardBackground = if (isAmoled) {
-        Color(0xFF141414).copy(alpha = 0.8f)
-    } else {
-        colorScheme.surface.copy(alpha = 0.6f)
-    }
+    val titleBadgeBackground = colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    val itemCardBackground = colorScheme.surface.copy(alpha = 0.6f)
     val itemCardBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.25f))
 
     val transitionController = rememberDialogTransitionController(onDismiss)
@@ -158,7 +143,7 @@ fun HistorySheet(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = scrimAlpha))
+                .background(colorScheme.scrim.copy(alpha = scrimAlpha))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
@@ -272,7 +257,7 @@ fun HistorySheet(
                                         text = stringResource(R.string.title_history),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorScheme.primary,
+                                        color = colorScheme.onSurface,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -331,7 +316,12 @@ fun HistorySheet(
                                 ) {
                                     IconButton(
                                         onClick = {
-                                            triggerHaptic()
+                                            HapticUtil.performAppHaptic(
+                                                context = context,
+                                                view = view,
+                                                enabled = hapticFeedbackEnabled,
+                                                intensityLevel = hapticIntensity
+                                            )
                                             transitionController.dismiss()
                                         },
                                         interactionSource = closeBtnInteraction,
@@ -342,7 +332,7 @@ fun HistorySheet(
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = stringResource(R.string.nav_close),
-                                            tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                            tint = colorScheme.onSurface,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }
