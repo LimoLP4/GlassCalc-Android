@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -602,46 +605,54 @@ fun UnitConverterDialog(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            pairs.forEachIndexed { idx, pair ->
-                                val isSelected = pair == currentPair && targetIndex == selectedCategoryIndex
-                                val pairBg by animateColorAsState(
-                                    targetValue = if (isSelected) {
-                                        if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
-                                    } else {
-                                        if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                    },
-                                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-                                    label = "pair_bg_$idx"
-                                )
-                                val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
-                                val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
-                                val pairInteraction = remember { MutableInteractionSource() }
-
-                                GlassSurface(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp)
-                                        .pressScale(pairInteraction)
-                                        .clickable(
-                                            interactionSource = pairInteraction,
-                                            indication = ripple()
-                                        ) {
-                                            triggerHaptic()
-                                            selectedPair = pair
-                                        }
-                                        .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
-                                    shape = RoundedCornerShape(50.dp),
-                                    borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                                    customBorderColor = pairBorder,
-                                    customBgColor = pairBg
-                                ) {
-                                    Text(
-                                        text = stringResource(pair.labelResId),
-                                        fontSize = 14.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = pairTextCol,
-                                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 240.dp)
+                            ) {
+                                items(pairs, key = { "${it.unitFrom}_${it.unitTo}" }) { pair ->
+                                    val idx = pairs.indexOf(pair)
+                                    val isSelected = pair == currentPair && targetIndex == selectedCategoryIndex
+                                    val pairBg by animateColorAsState(
+                                        targetValue = if (isSelected) {
+                                            if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                                        } else {
+                                            if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                        },
+                                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                                        label = "pair_bg_$idx"
                                     )
+                                    val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                                    val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+                                    val pairInteraction = remember { MutableInteractionSource() }
+
+                                    GlassSurface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 2.dp)
+                                            .pressScale(pairInteraction)
+                                            .clickable(
+                                                interactionSource = pairInteraction,
+                                                indication = ripple()
+                                            ) {
+                                                triggerHaptic()
+                                                selectedPair = pair
+                                            }
+                                            .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
+                                        shape = RoundedCornerShape(50.dp),
+                                        borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                                        customBorderColor = pairBorder,
+                                        customBgColor = pairBg
+                                    ) {
+                                        Text(
+                                            text = stringResource(pair.labelResId),
+                                            fontSize = 14.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = pairTextCol,
+                                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

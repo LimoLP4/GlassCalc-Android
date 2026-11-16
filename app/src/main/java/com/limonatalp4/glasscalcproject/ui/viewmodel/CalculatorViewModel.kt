@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -588,7 +589,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                 )
                 isHistoryCleared = false
                 _history.value = (listOf(historyItem) + _history.value).take(20)
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.Default) {
                     preferences.addHistoryItem(historyItem)
                     preferences.saveCalculationState(expr, formatted)
                 }
