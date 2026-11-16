@@ -61,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -111,11 +112,24 @@ fun HistorySheet(
     }
 
     val glassProps = LocalGlassProperties.current
+    val isAmoled = glassProps.isAmoled
     val pillShape = RoundedCornerShape(32.dp)
-    val pillBackgroundColor = colorScheme.surfaceVariant.copy(alpha = 0.8f)
-    val pillBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
-    val titleBadgeBackground = colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val itemCardBackground = colorScheme.surface.copy(alpha = 0.6f)
+    val pillBackgroundColor = if (isAmoled) {
+        Color(0xFF0A0A0A).copy(alpha = 0.95f)
+    } else {
+        colorScheme.surface.copy(alpha = 0.92f)
+    }
+    val pillBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.30f))
+    val titleBadgeBackground = if (isAmoled) {
+        Color(0xFF141414).copy(alpha = 0.85f)
+    } else {
+        colorScheme.surfaceVariant.copy(alpha = 0.70f)
+    }
+    val itemCardBackground = if (isAmoled) {
+        Color(0xFF141414).copy(alpha = 0.90f)
+    } else {
+        colorScheme.surfaceVariant.copy(alpha = 0.65f)
+    }
     val itemCardBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.25f))
 
     val transitionController = rememberDialogTransitionController(onDismiss)
@@ -139,7 +153,7 @@ fun HistorySheet(
             .fillMaxSize()
             .zIndex(15f)
     ) {
-        // Non-dismissing dimmed scrim (absorbs background taps; close only via X-button)
+        // Dimmed outside-tap scrim (dismisses on outside click)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -147,7 +161,9 @@ fun HistorySheet(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
-                ) { }
+                ) {
+                    transitionController.dismiss()
+                }
         )
 
         BoxWithConstraints(
@@ -257,7 +273,7 @@ fun HistorySheet(
                                         text = stringResource(R.string.title_history),
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorScheme.onSurface,
+                                        color = colorScheme.primary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
