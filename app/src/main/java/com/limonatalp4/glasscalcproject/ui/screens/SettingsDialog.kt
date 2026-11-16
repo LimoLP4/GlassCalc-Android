@@ -103,6 +103,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -172,8 +173,8 @@ fun SettingsDialog(
     onResetApp: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    var searchQuery by remember { mutableStateOf("") }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
     val config = LocalConfiguration.current
@@ -184,7 +185,7 @@ fun SettingsDialog(
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
     }
 
-    var showResetConfirmDialog by remember { mutableStateOf(false) }
+    var showResetConfirmDialog by rememberSaveable { mutableStateOf(false) }
     val realDeviceApi = Build.VERSION.SDK_INT
     val sliderMin = 26f
     val sliderMax = realDeviceApi.toFloat().coerceAtLeast(sliderMin)
@@ -195,8 +196,8 @@ fun SettingsDialog(
     }
 
     // Accordion expansion states for Info tab
-    var apacheAccordionOpen by remember { mutableStateOf(false) }
-    var mxparserAccordionOpen by remember { mutableStateOf(false) }
+    var apacheAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var mxparserAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
     val isAmoled = glassProps.isAmoled

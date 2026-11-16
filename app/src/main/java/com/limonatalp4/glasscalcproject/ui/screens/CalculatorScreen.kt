@@ -68,6 +68,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -147,7 +148,8 @@ fun CalculatorScreen(
         }.getOrNull()
     }
     val coroutineScope = rememberCoroutineScope()
-    val menuVisibleState = remember { androidx.compose.animation.core.MutableTransitionState(false) }
+    var isDrawerOpen by rememberSaveable { mutableStateOf(false) }
+    val menuVisibleState = remember { androidx.compose.animation.core.MutableTransitionState(isDrawerOpen) }
 
     val isScientificExpanded by viewModel.isScientificExpanded.collectAsState()
     val angleMode by viewModel.angleMode.collectAsState()
@@ -164,17 +166,18 @@ fun CalculatorScreen(
         HapticUtil.currentIntensityLevel = hapticIntensity
     }
 
-    var showHistorySheet by remember { mutableStateOf(false) }
-    var showSettingsDialog by remember { mutableStateOf(false) }
-    var showConverterDialog by remember { mutableStateOf(false) }
-    var showConstantsDialog by remember { mutableStateOf(false) }
-    var showGraphDialog by remember { mutableStateOf(false) }
-    var formulaSearchQuery by remember { mutableStateOf("") }
+    var isHistoryOpen by rememberSaveable { mutableStateOf(false) }
+    var isSettingsOpen by rememberSaveable { mutableStateOf(false) }
+    var isUnitConverterOpen by rememberSaveable { mutableStateOf(false) }
+    var showConstantsDialog by rememberSaveable { mutableStateOf(false) }
+    var isGraphOpen by rememberSaveable { mutableStateOf(false) }
+    var formulaSearchQuery by rememberSaveable { mutableStateOf("") }
 
-    androidx.compose.runtime.LaunchedEffect(menuVisibleState.targetState) {
+    androidx.compose.runtime.LaunchedEffect(isDrawerOpen) {
+        menuVisibleState.targetState = isDrawerOpen
         focusManager.clearFocus()
         keyboardController?.hide()
-        if (!menuVisibleState.targetState) {
+        if (!isDrawerOpen) {
             formulaSearchQuery = ""
         }
     }
@@ -247,7 +250,7 @@ fun CalculatorScreen(
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                    menuVisibleState.targetState = !menuVisibleState.targetState
+                                    isDrawerOpen = !isDrawerOpen
                                 }
                                 .testTag("header_pill"),
                             shape = RoundedCornerShape(50),
@@ -264,7 +267,7 @@ fun CalculatorScreen(
                                         focusManager.clearFocus()
                                         keyboardController?.hide()
                                         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                        menuVisibleState.targetState = !menuVisibleState.targetState
+                                        isDrawerOpen = !isDrawerOpen
                                     },
                                     interactionSource = menuBtnInteraction,
                                     modifier = Modifier
@@ -306,7 +309,7 @@ fun CalculatorScreen(
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
                                     HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                    showHistorySheet = true
+                                    isHistoryOpen = true
                                 },
                                 interactionSource = historyBtnInteraction,
                                 modifier = Modifier
@@ -357,11 +360,11 @@ fun CalculatorScreen(
             }
             
             // In-window Floating Navigation Menu (avoids Android PopupWindow BLASTBufferQueue dtor leaks)
-            if (menuVisibleState.targetState || menuVisibleState.currentState) {
-                BackHandler(enabled = menuVisibleState.targetState) {
+            if (isDrawerOpen || menuVisibleState.targetState || menuVisibleState.currentState) {
+                BackHandler(enabled = isDrawerOpen) {
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                    menuVisibleState.targetState = false
+                    isDrawerOpen = false
                 }
 
                 Box(
@@ -379,7 +382,7 @@ fun CalculatorScreen(
                             ) {
                                 focusManager.clearFocus()
                                 keyboardController?.hide()
-                                menuVisibleState.targetState = false
+                                isDrawerOpen = false
                             }
                     )
 
@@ -513,7 +516,7 @@ fun CalculatorScreen(
                                     )
                                     viewModel.insertFormula(formula.insertExpression)
                                     formulaSearchQuery = ""
-                                    menuVisibleState.targetState = false
+                                    isDrawerOpen = false
                                 }
                             )
 
@@ -560,15 +563,16 @@ fun CalculatorScreen(
                                                 focusManager.clearFocus()
                                                 keyboardController?.hide()
                                                 HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                                                isDrawerOpen = false
+                                                menuVisibleState.targetState = false
                                                 coroutineScope.launch {
-                                                    menuVisibleState.targetState = false
                                                     snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
                                                         .first { it }
                                                     when (tag) {
-                                                        "nav_item_history" -> showHistorySheet = true
-                                                        "nav_item_converter" -> showConverterDialog = true
-                                                        "nav_item_graph" -> showGraphDialog = true
-                                                        "nav_item_settings" -> showSettingsDialog = true
+                                                        "nav_item_history" -> isHistoryOpen = true
+                                                        "nav_item_converter" -> isUnitConverterOpen = true
+                                                        "nav_item_graph" -> isGraphOpen = true
+                                                        "nav_item_settings" -> isSettingsOpen = true
                                                     }
                                                 }
                                             }
@@ -615,7 +619,7 @@ fun CalculatorScreen(
 
 
         // Dialogs & Sheets
-        if (showHistorySheet) {
+        if (isHistoryOpen) {
             HistorySheet(
                 history = history,
                 currentTheme = currentTheme,
@@ -625,12 +629,12 @@ fun CalculatorScreen(
                 onDismiss = {
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                    showHistorySheet = false
+                    isHistoryOpen = false
                 }
             )
         }
 
-        if (showSettingsDialog) {
+        if (isSettingsOpen) {
             SettingsDialog(
                 currentTheme = currentTheme,
                 currentLanguage = viewModel.language.collectAsState().value,
@@ -657,13 +661,13 @@ fun CalculatorScreen(
                 onDismiss = {
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                    showSettingsDialog = false
+                    isSettingsOpen = false
                 },
                 autoResultEnabled = autoResultEnabled
             )
         }
 
-        if (showConverterDialog) {
+        if (isUnitConverterOpen) {
             UnitConverterDialog(
                 onImportToCalculator = { value ->
                     viewModel.importConvertedValue(value)
@@ -671,7 +675,7 @@ fun CalculatorScreen(
                 onDismiss = {
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                    showConverterDialog = false
+                    isUnitConverterOpen = false
                 }
             )
         }
@@ -689,14 +693,14 @@ fun CalculatorScreen(
             )
         }
 
-        if (showGraphDialog) {
+        if (isGraphOpen) {
             GraphDialog(
                 viewModel = viewModel,
                 angleMode = angleMode,
                 onDismiss = {
                     focusManager.clearFocus()
                     keyboardController?.hide()
-                    showGraphDialog = false
+                    isGraphOpen = false
                 }
             )
         }
