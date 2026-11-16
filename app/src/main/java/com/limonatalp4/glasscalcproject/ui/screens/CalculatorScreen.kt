@@ -619,6 +619,7 @@ fun CalculatorScreen(
             HistorySheet(
                 history = history,
                 currentTheme = currentTheme,
+                glassState = glassState,
                 onSelect = { item -> viewModel.restoreHistoryItem(item) },
                 onClear = { viewModel.clearHistory() },
                 onDismiss = {
