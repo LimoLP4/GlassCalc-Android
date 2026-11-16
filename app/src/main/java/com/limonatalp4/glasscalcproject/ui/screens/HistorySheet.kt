@@ -17,7 +17,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,49 +34,44 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -95,7 +89,6 @@ import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.roundToInt
 
 @Composable
 fun HistorySheet(
@@ -113,7 +106,6 @@ fun HistorySheet(
     val context = LocalContext.current
     val view = LocalView.current
     val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
 
     fun triggerHaptic() {
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
@@ -121,6 +113,7 @@ fun HistorySheet(
 
     val glassProps = LocalGlassProperties.current
     val isAmoled = glassProps.isAmoled
+    val isTiefschwarz = glassProps.isTiefschwarz
     val pillShape = RoundedCornerShape(32.dp)
     val pillBackgroundColor = if (isAmoled) {
         Color(0xFF0A0A0A).copy(alpha = 0.85f)
@@ -141,13 +134,6 @@ fun HistorySheet(
     val itemCardBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.25f))
 
     val transitionController = rememberDialogTransitionController(onDismiss)
-    var dragOffsetPx by remember { mutableFloatStateOf(0f) }
-    val animatedDragOffsetPx by animateFloatAsState(
-        targetValue = dragOffsetPx,
-        animationSpec = tween(durationMillis = 150, easing = FastOutSlowInEasing),
-        label = "history_pill_drag_offset"
-    )
-    val dismissThresholdPx = with(density) { 72.dp.toPx() }
 
     val scrimAlpha by animateFloatAsState(
         targetValue = if (transitionController.visibleState.targetState) {
@@ -168,7 +154,7 @@ fun HistorySheet(
             .fillMaxSize()
             .zIndex(15f)
     ) {
-        // Dimmed outside-tap scrim
+        // Non-dismissing dimmed scrim (absorbs background taps; close only via X-button)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -176,9 +162,7 @@ fun HistorySheet(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
-                ) {
-                    transitionController.dismiss()
-                }
+                ) { }
         )
 
         BoxWithConstraints(
@@ -229,12 +213,10 @@ fun HistorySheet(
                         .fillMaxWidth()
                         .widthIn(max = 500.dp)
                         .then(panelHeightModifier)
-                        .offset { IntOffset(0, animatedDragOffsetPx.roundToInt()) }
                         .animateContentSize(
                             animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
                         )
                         .pointerInput(Unit) {
-                            // Block taps inside the floating pill from triggering the outside scrim
                             awaitPointerEventScope {
                                 while (true) {
                                     awaitPointerEvent()
@@ -252,43 +234,15 @@ fun HistorySheet(
                             .then(
                                 if (isCompactLandscape) Modifier else Modifier.fillMaxHeight()
                             )
-                            .padding(horizontal = 20.dp)
-                            .padding(bottom = if (isCompactLandscape) 16.dp else 20.dp)
+                            .padding(
+                                start = 20.dp,
+                                end = 20.dp,
+                                top = if (isCompactLandscape) 16.dp else 20.dp,
+                                bottom = if (isCompactLandscape) 16.dp else 20.dp
+                            )
                             .testTag("history_sheet")
                     ) {
-                        // Top Drag Pill Handle (swipe down to dismiss)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .pointerInput(Unit) {
-                                    detectVerticalDragGestures(
-                                        onDragEnd = {
-                                            if (dragOffsetPx >= dismissThresholdPx) {
-                                                transitionController.dismiss()
-                                            }
-                                            dragOffsetPx = 0f
-                                        },
-                                        onDragCancel = {
-                                            dragOffsetPx = 0f
-                                        },
-                                        onVerticalDrag = { _, dragAmount ->
-                                            dragOffsetPx = (dragOffsetPx + dragAmount).coerceAtLeast(0f)
-                                        }
-                                    )
-                                }
-                                .padding(vertical = if (isCompactLandscape) 10.dp else 14.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(42.dp)
-                                    .height(5.dp)
-                                    .clip(CircleShape)
-                                    .background(colorScheme.onSurfaceVariant.copy(alpha = 0.45f))
-                            )
-                        }
-
-                        // Header Bar
+                        // Header Bar (Title on left, optional Clear + X Close Pill on right)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -296,6 +250,9 @@ fun HistorySheet(
                         ) {
                             // Pill Badge Title
                             GlassSurface(
+                                modifier = Modifier
+                                    .weight(1f, fill = false)
+                                    .padding(end = 8.dp),
                                 shape = RoundedCornerShape(50),
                                 customBgColor = titleBadgeBackground,
                                 borderStroke = pillBorder
@@ -303,55 +260,90 @@ fun HistorySheet(
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.History,
                                         contentDescription = null,
                                         tint = colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(18.dp)
                                     )
                                     Text(
                                         text = stringResource(R.string.title_history),
-                                        fontSize = 17.sp,
+                                        fontSize = 15.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorScheme.primary
+                                        color = colorScheme.primary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
 
-                            if (history.isNotEmpty()) {
-                                val clearHistoryInteraction = remember { MutableInteractionSource() }
-                                OutlinedButton(
-                                    onClick = {
-                                        triggerHaptic()
-                                        onClear()
-                                    },
-                                    interactionSource = clearHistoryInteraction,
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = colorScheme.error
-                                    ),
-                                    shape = RoundedCornerShape(50.dp),
-                                    border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.5f)),
-                                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                                    modifier = Modifier
-                                        .pressScale(clearHistoryInteraction)
-                                        .testTag("btn_clear_history")
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (history.isNotEmpty()) {
+                                    val clearHistoryInteraction = remember { MutableInteractionSource() }
+                                    OutlinedButton(
+                                        onClick = {
+                                            triggerHaptic()
+                                            onClear()
+                                        },
+                                        interactionSource = clearHistoryInteraction,
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = colorScheme.error
+                                        ),
+                                        shape = RoundedCornerShape(50.dp),
+                                        border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.5f)),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                        modifier = Modifier
+                                            .pressScale(clearHistoryInteraction)
+                                            .testTag("btn_clear_history")
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = stringResource(R.string.btn_history_clear_desc),
+                                                tint = colorScheme.error,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.btn_history_clear),
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Liquid-Glass Pill Close Button ("X")
+                                val closeBtnInteraction = remember { MutableInteractionSource() }
+                                GlassSurface(
+                                    shape = RoundedCornerShape(50),
+                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    borderStroke = pillBorder,
+                                    modifier = Modifier.pressScale(closeBtnInteraction)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    IconButton(
+                                        onClick = {
+                                            triggerHaptic()
+                                            transitionController.dismiss()
+                                        },
+                                        interactionSource = closeBtnInteraction,
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .testTag("btn_close_history")
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = stringResource(R.string.btn_history_clear_desc),
-                                            tint = colorScheme.error,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.btn_history_clear),
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.SemiBold
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.nav_close),
+                                            tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                            modifier = Modifier.size(18.dp)
                                         )
                                     }
                                 }
