@@ -85,7 +85,9 @@ import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.mariuszgromada.math.mxparser.Argument
 import org.mariuszgromada.math.mxparser.Expression
@@ -521,6 +523,7 @@ fun FunctionGraphView(
 
     // Cached curve evaluation points
     var cachedPoints by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
+    var lastCurveSource by remember { mutableStateOf<Triple<GraphPreset, String, AngleMode>?>(null) }
 
     // Two manual inspected points (P1, P2) at mathematical (x, y)
     var point1 by remember { mutableStateOf<GraphPoint?>(null) }
@@ -549,6 +552,12 @@ fun FunctionGraphView(
 
     // 4. CURVE DRAWING: Path calculation over visible X range with small step size (0.1 or step resolution)
     LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
+        val curveSource = Triple(selectedPreset, expression, angleMode)
+        // Wenn das Schloss aktiv ist, bleibt die bereits gezeichnete Kurve eingefroren (keine Neuberechnung)
+        if (currentIsGraphLocked && cachedPoints.isNotEmpty() && lastCurveSource == curveSource) {
+            return@LaunchedEffect
+        }
+
         val computedPoints = withContext(Dispatchers.Default) {
             try {
                 if (!xMin.isFinite() || !xMax.isFinite() || xMax <= xMin) {
@@ -575,64 +584,78 @@ fun FunctionGraphView(
                 xSamples.sort()
 
                 val calculatedList = ArrayList<Pair<Double, Double>>(xSamples.size)
+                val isDeriv = sanitizedExpr.startsWith("der(")
+                val derivMatch = if (isDeriv) Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr) else null
+                val hasTrig = lowerSanitized.contains("sin") || lowerSanitized.contains("cos") || lowerSanitized.contains("tan")
+                val h = 1e-5
+                val batchSize = 30
 
-                synchronized(MxParserLock) {
-                    try {
-                        License.iConfirmNonCommercialUse("limonatalp4")
-                    } catch (_: Exception) {}
-
-                    val hasTrig = lowerSanitized.contains("sin") || lowerSanitized.contains("cos") || lowerSanitized.contains("tan")
-                    if (angleMode == AngleMode.DEG && hasTrig && !sanitizedExpr.startsWith("der(")) {
-                        mXparser.setDegreesMode()
-                    } else {
-                        mXparser.setRadiansMode()
+                for (startIdx in xSamples.indices step batchSize) {
+                    if (!isActive || (currentIsGraphLocked && cachedPoints.isNotEmpty() && lastCurveSource == curveSource)) {
+                        break
                     }
+                    val endIdx = minOf(startIdx + batchSize, xSamples.size)
+                    synchronized(MxParserLock) {
+                        try {
+                            License.iConfirmNonCommercialUse("limonatalp4")
+                        } catch (_: Exception) {}
 
-                    val argX = Argument("x = 0")
-                    val expr = Expression(sanitizedExpr, argX)
-
-                    val isDeriv = sanitizedExpr.startsWith("der(")
-                    val derivMatch = if (isDeriv) Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr) else null
-                    val subArg = derivMatch?.let { Argument("${it.groupValues[2]} = 0") }
-                    val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
-                    val h = 1e-5
-
-                    for (x in xSamples) {
-                        // Skip out of domain values
-                        if (!isWithinDomain(sanitizedExpr, x)) {
-                            calculatedList.add(Pair(x, Double.NaN))
-                            continue
-                        }
-
-                        argX.argumentValue = x
-                        var y = expr.calculate()
-
-                        if ((!y.isFinite() || y.isNaN()) && subExpr != null && subArg != null) {
-                            subArg.argumentValue = x + h
-                            val yPlus = subExpr.calculate()
-                            subArg.argumentValue = x - h
-                            val yMinus = subExpr.calculate()
-                            if (yPlus.isFinite() && yMinus.isFinite()) {
-                                y = (yPlus - yMinus) / (2.0 * h)
-                            }
-                        }
-
-                        if (y.isFinite() && abs(y) <= 1e8) {
-                            calculatedList.add(Pair(x, y))
+                        if (angleMode == AngleMode.DEG && hasTrig && !isDeriv) {
+                            mXparser.setDegreesMode()
                         } else {
-                            calculatedList.add(Pair(x, Double.NaN))
+                            mXparser.setRadiansMode()
+                        }
+
+                        val argX = Argument("x = 0")
+                        val expr = Expression(sanitizedExpr, argX)
+                        val subArg = derivMatch?.let { Argument("${it.groupValues[2]} = 0") }
+                        val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
+
+                        for (idx in startIdx until endIdx) {
+                            if (!isActive) break
+                            val x = xSamples[idx]
+                            // Skip out of domain values
+                            if (!isWithinDomain(sanitizedExpr, x)) {
+                                calculatedList.add(Pair(x, Double.NaN))
+                                continue
+                            }
+
+                            argX.argumentValue = x
+                            var y = expr.calculate()
+
+                            if ((!y.isFinite() || y.isNaN()) && subExpr != null && subArg != null) {
+                                subArg.argumentValue = x + h
+                                val yPlus = subExpr.calculate()
+                                subArg.argumentValue = x - h
+                                val yMinus = subExpr.calculate()
+                                if (yPlus.isFinite() && yMinus.isFinite()) {
+                                    y = (yPlus - yMinus) / (2.0 * h)
+                                }
+                            }
+
+                            if (y.isFinite() && abs(y) <= 1e8) {
+                                calculatedList.add(Pair(x, y))
+                            } else {
+                                calculatedList.add(Pair(x, Double.NaN))
+                            }
                         }
                     }
                 }
                 calculatedList
+            } catch (ce: CancellationException) {
+                throw ce
             } catch (_: Throwable) {
                 emptyList()
             }
         }
-        cachedPoints = computedPoints
+        if (!currentIsGraphLocked || cachedPoints.isEmpty() || lastCurveSource != curveSource) {
+            cachedPoints = computedPoints
+            lastCurveSource = curveSource
+        }
     }
 
     fun resetView() {
+        if (currentIsGraphLocked) return
         val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
         xMin = bounds.xMin
         xMax = bounds.xMax
@@ -646,50 +669,54 @@ fun FunctionGraphView(
 
     // 2. CORRECT CALCULATION OF POINTS (P1/P2): X from tap using screenToMath, Y strictly from function evaluation
     fun tryPlacePointAtTap(tapOffset: Offset, canvasWidth: Float, canvasHeight: Float) {
-        if (currentIsGraphLocked || canvasWidth <= 0f || canvasHeight <= 0f) return
-        
-        // Use screenToMath to get exact math coordinates from tap
-        val mathPoint = screenToMath(
-            offsetX = tapOffset.x,
-            offsetY = tapOffset.y,
-            width = canvasWidth,
-            height = canvasHeight,
-            xMin = xMin,
-            xMax = xMax,
-            yMin = yMin,
-            yMax = yMax
-        )
-        
-        val tappedX = mathPoint.x
-        val formula = resolveActiveFormula(currentPreset, currentExpression)
-        val evaluatedY = evaluateFormulaAtX(formula, tappedX, currentAngleMode)
+        try {
+            if (currentIsGraphLocked || canvasWidth <= 0f || canvasHeight <= 0f) return
 
-        if (evaluatedY != null && evaluatedY.isFinite()) {
-            val newPoint = GraphPoint(tappedX, evaluatedY)
-            when {
-                point1 == null -> {
-                    point1 = newPoint
-                    nextPointIndex = 2
-                }
-                point2 == null -> {
-                    point2 = newPoint
-                    nextPointIndex = 1
-                }
-                nextPointIndex == 1 -> {
-                    point1 = newPoint
-                    nextPointIndex = 2
-                }
-                else -> {
-                    point2 = newPoint
-                    nextPointIndex = 1
-                }
-            }
-            HapticUtil.performAppHaptic(
-                localContext,
-                view,
-                currentHapticEnabled,
-                currentHapticIntensity
+            // Use screenToMath to get exact math coordinates from tap
+            val mathPoint = screenToMath(
+                offsetX = tapOffset.x,
+                offsetY = tapOffset.y,
+                width = canvasWidth,
+                height = canvasHeight,
+                xMin = xMin,
+                xMax = xMax,
+                yMin = yMin,
+                yMax = yMax
             )
+
+            val tappedX = mathPoint.x
+            val formula = resolveActiveFormula(currentPreset, currentExpression)
+            val evaluatedY = evaluateFormulaAtX(formula, tappedX, currentAngleMode)
+
+            if (evaluatedY != null && evaluatedY.isFinite()) {
+                val newPoint = GraphPoint(tappedX, evaluatedY)
+                when {
+                    point1 == null -> {
+                        point1 = newPoint
+                        nextPointIndex = 2
+                    }
+                    point2 == null -> {
+                        point2 = newPoint
+                        nextPointIndex = 1
+                    }
+                    nextPointIndex == 1 -> {
+                        point1 = newPoint
+                        nextPointIndex = 2
+                    }
+                    else -> {
+                        point2 = newPoint
+                        nextPointIndex = 1
+                    }
+                }
+                HapticUtil.performAppHaptic(
+                    localContext,
+                    view,
+                    currentHapticEnabled,
+                    currentHapticIntensity
+                )
+            }
+        } catch (_: Throwable) {
+            // Schutz gegen unerwartete Rechen- oder Zustandsfehler beim Punktsetzen
         }
     }
 
@@ -764,9 +791,14 @@ fun FunctionGraphView(
                 val lockBtnInteraction = remember { MutableInteractionSource() }
                 IconButton(
                     onClick = {
-                        isGraphLocked = !isGraphLocked
-                        onGestureLockChange(isGraphLocked)
-                        triggerClickHaptic()
+                        try {
+                            val nextLocked = !isGraphLocked
+                            isGraphLocked = nextLocked
+                            onGestureLockChange(nextLocked)
+                            triggerClickHaptic()
+                        } catch (_: Throwable) {
+                            // Schutz gegen Abstürze oder Blockaden beim Umschalten des Schlosses
+                        }
                     },
                     interactionSource = lockBtnInteraction,
                     modifier = Modifier
@@ -785,29 +817,32 @@ fun FunctionGraphView(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Main Canvas Plot Area with 2D Panning & Zooming
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(230.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(colorScheme.surfaceContainerLow)
-                    .border(1.dp, gridColor, RoundedCornerShape(16.dp))
-                    .pointerInput(isGraphLocked) {
-                        if (!isGraphLocked) {
+            // Main Canvas Plot Area with 2D Panning & Zooming (komplett deaktiviert wenn gesperrt)
+            val gestureModifier = if (!isGraphLocked) {
+                Modifier
+                    .pointerInput(Unit) {
+                        try {
                             detectTapGestures(
                                 onTap = { offset ->
-                                    tryPlacePointAtTap(offset, size.width.toFloat(), size.height.toFloat())
+                                    if (!currentIsGraphLocked) {
+                                        tryPlacePointAtTap(offset, size.width.toFloat(), size.height.toFloat())
+                                    }
                                 },
                                 onLongPress = { offset ->
-                                    tryPlacePointAtTap(offset, size.width.toFloat(), size.height.toFloat())
+                                    if (!currentIsGraphLocked) {
+                                        tryPlacePointAtTap(offset, size.width.toFloat(), size.height.toFloat())
+                                    }
                                 }
                             )
+                        } catch (ce: CancellationException) {
+                            throw ce
+                        } catch (_: Throwable) {
                         }
                     }
-                    .pointerInput(isGraphLocked) {
-                        if (!isGraphLocked) {
+                    .pointerInput(Unit) {
+                        try {
                             detectTransformGestures { _, pan, zoom, _ ->
+                                if (currentIsGraphLocked) return@detectTransformGestures
                                 val width = size.width.toFloat()
                                 val height = size.height.toFloat()
                                 if (width > 0f && height > 0f && pan.x.isFinite() && pan.y.isFinite()) {
@@ -847,8 +882,23 @@ fun FunctionGraphView(
                                     }
                                 }
                             }
+                        } catch (ce: CancellationException) {
+                            throw ce
+                        } catch (_: Throwable) {
                         }
                     }
+            } else {
+                Modifier
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(230.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colorScheme.surfaceContainerLow)
+                    .border(1.dp, gridColor, RoundedCornerShape(16.dp))
+                    .then(gestureModifier)
                     .testTag("graph_canvas_container")
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
@@ -1228,6 +1278,7 @@ fun FunctionGraphView(
                     color = labelColor
                 )
 
+                val controlTint = if (isGraphLocked) graphColor.copy(alpha = 0.30f) else graphColor
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -1236,6 +1287,7 @@ fun FunctionGraphView(
                     val panLeftInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
+                            if (currentIsGraphLocked) return@IconButton
                             val shift = (xMax - xMin) * 0.25
                             if (shift.isFinite()) {
                                 xMin = (xMin - shift).coerceIn(-1e7, 1e7)
@@ -1243,15 +1295,16 @@ fun FunctionGraphView(
                             }
                             triggerClickHaptic()
                         },
+                        enabled = !isGraphLocked,
                         interactionSource = panLeftInteraction,
                         modifier = Modifier
                             .size(28.dp)
-                            .pressScale(panLeftInteraction)
+                            .pressScale(panLeftInteraction, enabled = !isGraphLocked)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.graph_pan_left),
-                            tint = graphColor,
+                            tint = controlTint,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -1260,6 +1313,7 @@ fun FunctionGraphView(
                     val panRightInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
+                            if (currentIsGraphLocked) return@IconButton
                             val shift = (xMax - xMin) * 0.25
                             if (shift.isFinite()) {
                                 xMin = (xMin + shift).coerceIn(-1e7, 1e7)
@@ -1267,15 +1321,16 @@ fun FunctionGraphView(
                             }
                             triggerClickHaptic()
                         },
+                        enabled = !isGraphLocked,
                         interactionSource = panRightInteraction,
                         modifier = Modifier
                             .size(28.dp)
-                            .pressScale(panRightInteraction)
+                            .pressScale(panRightInteraction, enabled = !isGraphLocked)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = stringResource(R.string.graph_pan_right),
-                            tint = graphColor,
+                            tint = controlTint,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -1284,6 +1339,7 @@ fun FunctionGraphView(
                     val zoomInInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
+                            if (currentIsGraphLocked) return@IconButton
                             val xRange = ((xMax - xMin) * 0.75).coerceIn(1e-4, 1e6)
                             val xCenter = (xMin + xMax) / 2
                             xMin = xCenter - xRange / 2
@@ -1294,15 +1350,16 @@ fun FunctionGraphView(
                             yMax = yCenter + yRange / 2
                             triggerClickHaptic()
                         },
+                        enabled = !isGraphLocked,
                         interactionSource = zoomInInteraction,
                         modifier = Modifier
                             .size(28.dp)
-                            .pressScale(zoomInInteraction)
+                            .pressScale(zoomInInteraction, enabled = !isGraphLocked)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = stringResource(R.string.graph_zoom_in),
-                            tint = graphColor,
+                            tint = controlTint,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -1311,6 +1368,7 @@ fun FunctionGraphView(
                     val zoomOutInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = {
+                            if (currentIsGraphLocked) return@IconButton
                             val xRange = ((xMax - xMin) * 1.35).coerceIn(1e-4, 1e6)
                             val xCenter = (xMin + xMax) / 2
                             xMin = xCenter - xRange / 2
@@ -1321,15 +1379,16 @@ fun FunctionGraphView(
                             yMax = yCenter + yRange / 2
                             triggerClickHaptic()
                         },
+                        enabled = !isGraphLocked,
                         interactionSource = zoomOutInteraction,
                         modifier = Modifier
                             .size(28.dp)
-                            .pressScale(zoomOutInteraction)
+                            .pressScale(zoomOutInteraction, enabled = !isGraphLocked)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Remove,
                             contentDescription = stringResource(R.string.graph_zoom_out),
-                            tint = graphColor,
+                            tint = controlTint,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -1338,15 +1397,16 @@ fun FunctionGraphView(
                     val resetInteraction = remember { MutableInteractionSource() }
                     IconButton(
                         onClick = { resetView() },
+                        enabled = !isGraphLocked,
                         interactionSource = resetInteraction,
                         modifier = Modifier
                             .size(28.dp)
-                            .pressScale(resetInteraction)
+                            .pressScale(resetInteraction, enabled = !isGraphLocked)
                     ) {
                         Icon(
                             imageVector = Icons.Default.RestartAlt,
                             contentDescription = stringResource(R.string.graph_reset),
-                            tint = colorScheme.onSurface.copy(alpha = 0.70f),
+                            tint = colorScheme.onSurface.copy(alpha = if (isGraphLocked) 0.25f else 0.70f),
                             modifier = Modifier.size(16.dp)
                         )
                     }

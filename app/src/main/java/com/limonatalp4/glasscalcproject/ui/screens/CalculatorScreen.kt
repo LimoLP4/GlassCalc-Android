@@ -73,6 +73,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -86,6 +88,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -213,7 +216,11 @@ fun CalculatorScreen(
                 topBar = {
                     val density = LocalDensity.current
                     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
-                    val topBarVerticalPadding = if (isLandscape && isImeVisible) 4.dp else 12.dp
+                    val topBarVerticalPadding by animateDpAsState(
+                        targetValue = if (isLandscape && isImeVisible) 4.dp else 12.dp,
+                        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                        label = "topbar_vertical_padding"
+                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -705,7 +712,6 @@ private fun PortraitCalculatorLayout(
     val hapticIntensity = LocalHapticIntensity.current
     val expression by viewModel.expression.collectAsState()
     var scientificSubTab by remember { mutableIntStateOf(0) }
-    val isGestureLocked by viewModel.isGraphLocked.collectAsState()
     val scrollState = rememberScrollState()
 
     val scrollbarColor = colorScheme.primary.copy(alpha = 0.45f)
@@ -917,20 +923,37 @@ private fun LandscapeCalculatorLayout(
     val rightScrollState = rememberScrollState()
     val density = LocalDensity.current
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+    val animatedOuterVerticalPadding by animateDpAsState(
+        targetValue = if (isImeVisible) 2.dp else 6.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "landscape_outer_v_pad"
+    )
+    val animatedDisplaySpacing by animateDpAsState(
+        targetValue = if (isImeVisible) 4.dp else 8.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "landscape_display_spacing"
+    )
+    var leftContentHeightPx by remember { mutableIntStateOf(0) }
 
     androidx.compose.runtime.LaunchedEffect(isImeVisible) {
         if (isImeVisible) {
-            leftScrollState.scrollTo(0)
+            leftScrollState.animateScrollTo(0)
         }
     }
 
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 14.dp, vertical = if (isImeVisible) 2.dp else 6.dp)
+            .padding(horizontal = 14.dp, vertical = animatedOuterVerticalPadding)
     ) {
         val availableWidth = maxWidth
         val availableHeight = maxHeight
+
+        // Stabile Basis-Höhe für Tasten, damit die Tastenfelder während der IME-Animation nicht springen
+        var stableKeypadHeight by remember(availableWidth) { mutableStateOf(availableHeight) }
+        if (!isImeVisible && availableHeight > 0.dp) {
+            stableKeypadHeight = availableHeight
+        }
 
         // In the right half (~50% width), we have:
         // Scientific Keyboard (5 columns) + Main Keyboard (4 columns) side-by-side = 9 columns total.
@@ -943,30 +966,48 @@ private fun LandscapeCalculatorLayout(
         val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.dp * 7)) / 9.2f)
 
         // For vertical height: 6 rows in scientific grid and 5 rows in main grid.
-        // 6 * buttonSize + 5 * spacing <= availableHeight
-        val maxButtonHeight = ((availableHeight - 14.dp) / 6.3f)
+        // 6 * buttonSize + 5 * spacing <= stableKeypadHeight
+        val maxButtonHeight = ((stableKeypadHeight - 14.dp) / 6.3f)
 
-        // Button size fits both dimensions perfectly
+        // Button size fits both dimensions perfectly without IME frame jitter
         val buttonSize = minOf(maxButtonWidth, maxButtonHeight).coerceIn(28.dp, 62.dp)
         val spacing = (buttonSize * 0.08f).coerceIn(2.5.dp, 6.dp)
+
+        val leftContentHeightDp = with(density) { leftContentHeightPx.toDp() }
+        val targetLeftTopPadding = if (isImeVisible || leftContentHeightDp <= 0.dp) {
+            0.dp
+        } else {
+            ((availableHeight - leftContentHeightDp) / 2f).coerceAtLeast(0.dp)
+        }
+        val animatedLeftTopPadding by animateDpAsState(
+            targetValue = targetLeftTopPadding,
+            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+            label = "landscape_left_top_padding"
+        )
 
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = if (isImeVisible) Alignment.Top else Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
-            // LINKS (ca. 50% der Breite): Display + DEG/RAD-Button rechtsbündig darunter
+            // LINKS (ca. 50% der Breite): Display + DEG/RAD-Button mit flüssiger Größen- & Positionsanimation
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(leftScrollState),
-                verticalArrangement = if (isImeVisible) Arrangement.Top else Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(if (isImeVisible) 4.dp else 8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = animatedLeftTopPadding)
+                        .onSizeChanged { leftContentHeightPx = it.height }
+                        .animateContentSize(
+                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(animatedDisplaySpacing),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     GlassDisplay(

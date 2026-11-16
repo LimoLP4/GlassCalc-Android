@@ -8,9 +8,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -305,7 +307,43 @@ private fun GlassDisplayContent(
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    val displayShape = RoundedCornerShape(if (isCompact) 20.dp else 28.dp)
+    val animatedCornerRadius by animateDpAsState(
+        targetValue = if (isCompact) 20.dp else 28.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_corner_radius"
+    )
+    val animatedHorizontalPadding by animateDpAsState(
+        targetValue = if (isCompact) 14.dp else 20.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_h_padding"
+    )
+    val animatedVerticalPadding by animateDpAsState(
+        targetValue = if (isCompact) 8.dp else 16.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_v_padding"
+    )
+    val animatedExprTopPadding by animateDpAsState(
+        targetValue = if (isCompact) 4.dp else 8.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_expr_top_padding"
+    )
+    val animatedResultTopPadding by animateDpAsState(
+        targetValue = if (isCompact) 2.dp else 4.dp,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_result_top_padding"
+    )
+    val animatedExprFontSp by animateFloatAsState(
+        targetValue = if (isCompact) 19f else 24f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_expr_font_size"
+    )
+    val animatedResultFontSp by animateFloatAsState(
+        targetValue = if (isCompact) 26f else 42f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "display_result_font_size"
+    )
+
+    val displayShape = RoundedCornerShape(animatedCornerRadius)
 
     val colorScheme = MaterialTheme.colorScheme
     val flashColor = colorScheme.primary
@@ -338,6 +376,9 @@ private fun GlassDisplayContent(
     GlassSurface(
         modifier = modifier
             .fillMaxWidth()
+            .animateContentSize(
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+            )
             .testTag("calculator_display"),
         glassState = glassState,
         shape = displayShape,
@@ -349,8 +390,8 @@ private fun GlassDisplayContent(
                 .fillMaxWidth()
                 .background(flashColor.copy(alpha = flashAlpha), displayShape)
                 .padding(
-                    horizontal = if (isCompact) 14.dp else 20.dp,
-                    vertical = if (isCompact) 8.dp else 16.dp
+                    horizontal = animatedHorizontalPadding,
+                    vertical = animatedVerticalPadding
                 ),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -514,7 +555,7 @@ private fun GlassDisplayContent(
 
             // Einheitliches Hauptrechenfeld (exakt identische BasicTextField- & Cursor-Logik wie in den Suchleisten)
             val safeSelection = cursorPosition.coerceIn(0, expression.length)
-            val exprFontSize = if (isCompact) 19.sp else 24.sp
+            val exprFontSize = animatedExprFontSp.sp
             val accentCursorColor = MaterialTheme.colorScheme.primary
 
             InterceptPlatformTextInput(
@@ -566,7 +607,7 @@ private fun GlassDisplayContent(
                     onTextLayout = { textLayoutResult = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = if (isCompact) 4.dp else 8.dp, end = 8.dp)
+                        .padding(top = animatedExprTopPadding, end = 8.dp)
                         .focusRequester(focusRequester)
                         .onFocusChanged { focusState ->
                             isTextFieldFocused = focusState.isFocused
@@ -649,11 +690,11 @@ private fun GlassDisplayContent(
                 label = "result_text_anim",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (isCompact) 2.dp else 4.dp)
+                    .padding(top = animatedResultTopPadding)
             ) { targetResult ->
                 Text(
                     text = targetResult,
-                    fontSize = if (isCompact) 26.sp else 42.sp,
+                    fontSize = animatedResultFontSp.sp,
                     fontWeight = FontWeight.Bold,
                     color = resultColor,
                     textAlign = TextAlign.End,
