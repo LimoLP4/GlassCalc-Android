@@ -135,7 +135,7 @@ fun GlassCalcTheme(
 
     // 2. Fully resolve AUTOMATIC to a concrete theme
     val resolvedTheme = if (themeAfterFallback == AppTheme.AUTOMATIC) {
-        if (systemDark) AppTheme.DARK_MODE else AppTheme.WHITE_MODE
+        if (systemDark) AppTheme.STANDARD_DARK else AppTheme.WHITE_MODE
     } else {
         themeAfterFallback
     }
