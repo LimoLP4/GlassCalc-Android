@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Remove
@@ -181,56 +181,87 @@ fun defaultBoundsForPreset(
             }
         }
         GraphPreset.ARCSIN -> {
-            GraphBounds(-1.2, 1.2, -2.0, 2.0)
+            if (angleMode == AngleMode.DEG) {
+                GraphBounds(-1.2, 1.2, -100.0, 100.0)
+            } else {
+                GraphBounds(-1.2, 1.2, -2.0, 2.0)
+            }
         }
         GraphPreset.ARCCOS -> {
-            GraphBounds(-1.2, 1.2, -0.5, 3.5)
+            if (angleMode == AngleMode.DEG) {
+                GraphBounds(-1.2, 1.2, -15.0, 195.0)
+            } else {
+                GraphBounds(-1.2, 1.2, -0.5, 3.5)
+            }
         }
         GraphPreset.ARCTAN -> {
-            GraphBounds(-5.0, 5.0, -2.0, 2.0)
+            if (angleMode == AngleMode.DEG) {
+                GraphBounds(-5.0, 5.0, -100.0, 100.0)
+            } else {
+                GraphBounds(-5.0, 5.0, -2.0, 2.0)
+            }
         }
-        GraphPreset.SINH, GraphPreset.COSH, GraphPreset.TANH -> {
-            GraphBounds(-4.0, 4.0, -4.0, 4.0)
+        GraphPreset.SINH, GraphPreset.COSH -> {
+            GraphBounds(-3.5, 3.5, -5.0, 5.0)
+        }
+        GraphPreset.TANH -> {
+            GraphBounds(-4.0, 4.0, -2.0, 2.0)
         }
         GraphPreset.ABS -> {
             GraphBounds(-10.0, 10.0, -2.0, 10.0)
         }
-        GraphPreset.LN, GraphPreset.LOG -> {
-            GraphBounds(0.01, 10.0, -4.0, 4.0)
+        GraphPreset.LN -> {
+            GraphBounds(-0.5, 10.0, -4.0, 4.0)
+        }
+        GraphPreset.LOG -> {
+            GraphBounds(-0.5, 10.0, -3.0, 2.0)
         }
         GraphPreset.SQUARE -> {
             GraphBounds(-10.0, 10.0, -5.0, 100.0)
         }
         GraphPreset.SQRT -> {
-            GraphBounds(0.0, 16.0, -1.0, 5.0)
+            GraphBounds(-0.5, 16.0, -1.0, 5.0)
         }
         GraphPreset.DERIV -> {
             val lower = expression.lowercase()
             if (lower.contains("^2") || lower.contains("²") || lower.contains("x*x")) {
                 GraphBounds(-10.0, 10.0, -20.0, 20.0)
-            } else if (angleMode == AngleMode.DEG && (lower.contains("sin") || lower.contains("cos") || lower.contains("tan"))) {
-                GraphBounds(-360.0, 360.0, -2.0, 2.0)
             } else {
                 GraphBounds(-6.28, 6.28, -2.0, 2.0)
             }
         }
         GraphPreset.INTEGRAL -> {
             if (angleMode == AngleMode.DEG) {
-                GraphBounds(-360.0, 360.0, -3.0, 3.0)
+                GraphBounds(-360.0, 360.0, -10.0, 130.0)
             } else {
                 GraphBounds(-6.28, 6.28, -3.0, 3.0)
             }
         }
         GraphPreset.CUSTOM -> {
             val lower = expression.lowercase()
-            if (angleMode == AngleMode.DEG && (lower.contains("sin") || lower.contains("cos") || lower.contains("tan"))) {
+            if (lower.contains("arccos") || lower.contains("acos")) {
+                if (angleMode == AngleMode.DEG) GraphBounds(-1.2, 1.2, -15.0, 195.0)
+                else GraphBounds(-1.2, 1.2, -0.5, 3.5)
+            } else if (lower.contains("arcsin") || lower.contains("asin")) {
+                if (angleMode == AngleMode.DEG) GraphBounds(-1.2, 1.2, -100.0, 100.0)
+                else GraphBounds(-1.2, 1.2, -2.0, 2.0)
+            } else if (lower.contains("arctan") || lower.contains("atan")) {
+                if (angleMode == AngleMode.DEG) GraphBounds(-5.0, 5.0, -100.0, 100.0)
+                else GraphBounds(-5.0, 5.0, -2.0, 2.0)
+            } else if (lower.contains("sinh") || lower.contains("cosh")) {
+                GraphBounds(-3.5, 3.5, -5.0, 5.0)
+            } else if (lower.contains("tanh")) {
+                GraphBounds(-4.0, 4.0, -2.0, 2.0)
+            } else if (angleMode == AngleMode.DEG && (lower.contains("sin") || lower.contains("cos") || lower.contains("tan"))) {
                 GraphBounds(-360.0, 360.0, -2.5, 2.5)
             } else if (lower.contains("^2") || lower.contains("²")) {
                 GraphBounds(-10.0, 10.0, -5.0, 100.0)
             } else if (lower.contains("sqrt") || lower.contains("√")) {
-                GraphBounds(0.0, 16.0, -1.0, 5.0)
-            } else if (lower.contains("log") || lower.contains("ln")) {
-                GraphBounds(0.01, 10.0, -4.0, 4.0)
+                GraphBounds(-0.5, 16.0, -1.0, 5.0)
+            } else if (lower.contains("log")) {
+                GraphBounds(-0.5, 10.0, -3.0, 2.0)
+            } else if (lower.contains("ln")) {
+                GraphBounds(-0.5, 10.0, -4.0, 4.0)
             } else {
                 GraphBounds(-10.0, 10.0, -10.0, 10.0)
             }
@@ -275,6 +306,9 @@ internal fun sanitizeForGraphParser(expr: String): String {
         .replace("×", "*")
         .replace("÷", "/")
         .replace("⁄", "/")
+        .replace("³√(", "root(3, ")
+        .replace(Regex("""³√([a-zA-Z0-9_.]+)"""), "root(3, $1)")
+        .replace("√", "sqrt")
         .replace("²", "^2")
         .replace("³", "^3")
         .replace("⁴", "^4")
@@ -286,13 +320,12 @@ internal fun sanitizeForGraphParser(expr: String): String {
         .replace("⁰", "^0")
         .replace("⁺", "+")
         .replace("⁻", "-")
-        .replace("√", "sqrt")
-        .replace("³√", "cbrt")
         .replace("arcsin", "asin")
         .replace("arccos", "acos")
         .replace("arctan", "atan")
         .replace("ln", "ln")
-        .replace("log(", "log10(")
+        .replace(Regex("""(?<![a-zA-Z0-9_])log\("""), "log10(")
+        .replace(Regex("""\|([^|]+)\|"""), "abs($1)")
         .replace("mod", "#")
         .replace("∫(", "int(")
         .replace("d/dx(", "der(")
@@ -300,13 +333,44 @@ internal fun sanitizeForGraphParser(expr: String): String {
     s = s.replace(Regex("""(?<=\d),(?=\d)"""), ".")
     s = s.replace(";", ",")
 
-    val singleArgDerRegex = Regex("""der\(([^,)]+)\)""")
-    s = singleArgDerRegex.replace(s) { matchResult ->
-        val inner = matchResult.groupValues[1]
-        "der($inner, x)"
-    }
+    s = expandSingleArgDerivatives(s)
 
     return s
+}
+
+private fun expandSingleArgDerivatives(input: String): String {
+    val sb = StringBuilder(input.length)
+    var i = 0
+    while (i < input.length) {
+        if (input.startsWith("der(", i) && (i == 0 || !input[i - 1].isLetterOrDigit())) {
+            val openParen = i + 3
+            var depth = 1
+            var j = openParen + 1
+            var hasTopLevelComma = false
+            while (j < input.length && depth > 0) {
+                when (input[j]) {
+                    '(' -> depth++
+                    ')' -> depth--
+                    ',' -> if (depth == 1) hasTopLevelComma = true
+                }
+                if (depth > 0) j++
+            }
+            if (depth == 0) {
+                val inner = input.substring(openParen + 1, j)
+                val expandedInner = expandSingleArgDerivatives(inner)
+                if (hasTopLevelComma) {
+                    sb.append("der(").append(expandedInner).append(')')
+                } else {
+                    sb.append("der(").append(expandedInner).append(", x)")
+                }
+                i = j + 1
+                continue
+            }
+        }
+        sb.append(input[i])
+        i++
+    }
+    return sb.toString()
 }
 
 internal fun resolveActiveFormula(preset: GraphPreset, expression: String): String {
@@ -493,18 +557,31 @@ fun FunctionGraphView(
                 val formulaString = resolveActiveFormula(selectedPreset, expression)
                 val sanitizedExpr = sanitizeForGraphParser(formulaString)
                 
-                // High density steps across xMin..xMax (e.g. step size ~ 0.05 - 0.1)
+                // High density steps across xMin..xMax plus exact domain boundary points
                 val xSpan = xMax - xMin
-                val steps = (xSpan * 40).toInt().coerceIn(200, 1000)
-                val calculatedList = ArrayList<Pair<Double, Double>>(steps + 1)
+                val steps = (xSpan * 50).toInt().coerceIn(300, 1200)
+                val xSamples = ArrayList<Double>(steps + 5)
+                for (i in 0..steps) {
+                    xSamples.add(xMin + (i.toDouble() / steps) * xSpan)
+                }
+                val lowerSanitized = sanitizedExpr.lowercase()
+                if (lowerSanitized.contains("asin") || lowerSanitized.contains("acos")) {
+                    if (-1.0 in xMin..xMax) xSamples.add(-1.0)
+                    if (1.0 in xMin..xMax) xSamples.add(1.0)
+                }
+                if (lowerSanitized.contains("sqrt") && 0.0 in xMin..xMax) {
+                    xSamples.add(0.0)
+                }
+                xSamples.sort()
+
+                val calculatedList = ArrayList<Pair<Double, Double>>(xSamples.size)
 
                 synchronized(MxParserLock) {
                     try {
                         License.iConfirmNonCommercialUse("limonatalp4")
                     } catch (_: Exception) {}
 
-                    val lower = sanitizedExpr.lowercase()
-                    val hasTrig = lower.contains("sin") || lower.contains("cos") || lower.contains("tan")
+                    val hasTrig = lowerSanitized.contains("sin") || lowerSanitized.contains("cos") || lowerSanitized.contains("tan")
                     if (angleMode == AngleMode.DEG && hasTrig && !sanitizedExpr.startsWith("der(")) {
                         mXparser.setDegreesMode()
                     } else {
@@ -520,10 +597,7 @@ fun FunctionGraphView(
                     val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
                     val h = 1e-5
 
-                    for (i in 0..steps) {
-                        val t = i.toDouble() / steps
-                        val x = xMin + t * xSpan
-
+                    for (x in xSamples) {
                         // Skip out of domain values
                         if (!isWithinDomain(sanitizedExpr, x)) {
                             calculatedList.add(Pair(x, Double.NaN))
@@ -961,7 +1035,7 @@ fun FunctionGraphView(
                                 continue
                             }
 
-                            if (isFirst || abs(py - lastPy) > height * 0.75f) {
+                            if (isFirst || abs(py - lastPy) > height * 0.45f) {
                                 path.moveTo(px, py)
                                 isFirst = false
                             } else {
@@ -1282,17 +1356,19 @@ fun FunctionGraphView(
             if (point1 != null || point2 != null) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Box(
+                GlassSurface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(colorScheme.surfaceContainerLow)
-                        .border(1.dp, gridColor, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 8.dp)
-                        .testTag("graph_trace_hud")
+                        .testTag("graph_trace_hud"),
+                    glassState = glassState,
+                    shape = RoundedCornerShape(24.dp),
+                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Row(
@@ -1308,25 +1384,32 @@ fun FunctionGraphView(
                             )
 
                             val clearPointsInteraction = remember { MutableInteractionSource() }
-                            IconButton(
-                                onClick = {
-                                    point1 = null
-                                    point2 = null
-                                    nextPointIndex = 1
-                                    triggerClickHaptic()
-                                },
-                                interactionSource = clearPointsInteraction,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .pressScale(clearPointsInteraction)
-                                    .testTag("btn_clear_graph_points")
+                            GlassSurface(
+                                shape = RoundedCornerShape(50),
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                glassState = glassState,
+                                modifier = Modifier.pressScale(clearPointsInteraction)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = stringResource(R.string.nav_close),
-                                    tint = colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(14.dp)
-                                )
+                                IconButton(
+                                    onClick = {
+                                        point1 = null
+                                        point2 = null
+                                        nextPointIndex = 1
+                                        triggerClickHaptic()
+                                    },
+                                    interactionSource = clearPointsInteraction,
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .testTag("btn_clear_graph_points")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = stringResource(R.string.nav_close),
+                                        tint = colorScheme.onSurface,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                }
                             }
                         }
 

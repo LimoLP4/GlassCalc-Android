@@ -6,6 +6,7 @@ import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import com.limonatalp4.glasscalcproject.domain.evaluator.EvaluationResult
 import com.limonatalp4.glasscalcproject.domain.evaluator.ExpressionEvaluator
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -880,5 +881,72 @@ class ExampleUnitTest {
         assertEquals("Pies", pieSearch.first().localizedName)
         assertEquals("ft", pieSearch.first().symbol)
     }
+
+    @Test
+    fun testGraphDomainsBoundsAndCoordinates() {
+        // 1. screenToMath & mathToScreen origin round-trip
+        val originScreen = com.limonatalp4.glasscalcproject.ui.components.mathToScreen(
+            x = 0.0, y = 0.0, width = 400f, height = 200f,
+            xMin = -10.0, xMax = 10.0, yMin = -5.0, yMax = 5.0
+        )
+        assertEquals(200f, originScreen.x, 1e-3f)
+        assertEquals(100f, originScreen.y, 1e-3f)
+        val originMath = com.limonatalp4.glasscalcproject.ui.components.screenToMath(
+            offsetX = originScreen.x, offsetY = originScreen.y, width = 400f, height = 200f,
+            xMin = -10.0, xMax = 10.0, yMin = -5.0, yMax = 5.0
+        )
+        assertEquals(0.0, originMath.x, 1e-6)
+        assertEquals(0.0, originMath.y, 1e-6)
+
+        // 2. arccos & arcsin DEG vs RAD bounds
+        val arccosDeg = com.limonatalp4.glasscalcproject.ui.components.defaultBoundsForPreset(
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.ARCCOS,
+            AngleMode.DEG
+        )
+        assertEquals(-15.0, arccosDeg.yMin, 1e-6)
+        assertEquals(195.0, arccosDeg.yMax, 1e-6)
+
+        val arccosRad = com.limonatalp4.glasscalcproject.ui.components.defaultBoundsForPreset(
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.ARCCOS,
+            AngleMode.RAD
+        )
+        assertEquals(-0.5, arccosRad.yMin, 1e-6)
+        assertEquals(3.5, arccosRad.yMax, 1e-6)
+
+        val customArccosDeg = com.limonatalp4.glasscalcproject.ui.components.defaultBoundsForPreset(
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.CUSTOM,
+            AngleMode.DEG,
+            "arccos(x)"
+        )
+        assertEquals(195.0, customArccosDeg.yMax, 1e-6)
+
+        // 3. Domain checks: arccos/arcsin only in [-1, 1], ln/log only > 0, sqrt only >= 0
+        assertEquals(180.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("acos(x)", -1.0, AngleMode.DEG)!!, 1e-4)
+        assertEquals(90.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("acos(x)", 0.0, AngleMode.DEG)!!, 1e-4)
+        assertEquals(0.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("acos(x)", 1.0, AngleMode.DEG)!!, 1e-4)
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("acos(x)", -1.05, AngleMode.DEG))
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("acos(x)", 1.2, AngleMode.DEG))
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("asin(x)", 1.5, AngleMode.RAD))
+
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("ln(x)", 0.0, AngleMode.RAD))
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("ln(x)", -2.0, AngleMode.RAD))
+        assertEquals(0.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("ln(x)", 1.0, AngleMode.RAD)!!, 1e-6)
+
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("log10(x)", -1.0, AngleMode.RAD))
+        assertEquals(1.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("log(x)", 10.0, AngleMode.RAD)!!, 1e-6)
+
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("sqrt(x)", -0.1, AngleMode.RAD))
+        assertEquals(0.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("sqrt(x)", 0.0, AngleMode.RAD)!!, 1e-6)
+        assertEquals(3.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("√(x)", 9.0, AngleMode.RAD)!!, 1e-6)
+
+        // 4. All other formulas evaluate accurately
+        assertEquals(16.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("x²", -4.0, AngleMode.RAD)!!, 1e-6)
+        assertEquals(2.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("³√(x)", 8.0, AngleMode.RAD)!!, 1e-6)
+        assertEquals(5.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("|x|", -5.0, AngleMode.RAD)!!, 1e-6)
+        assertEquals(45.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("atan(x)", 1.0, AngleMode.DEG)!!, 1e-4)
+        assertEquals(1.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("der(sin(x), x)", 0.0, AngleMode.RAD)!!, 1e-4)
+        assertEquals(1.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("d/dx(sin(x))", 0.0, AngleMode.RAD)!!, 1e-4)
+    }
 }
+
 

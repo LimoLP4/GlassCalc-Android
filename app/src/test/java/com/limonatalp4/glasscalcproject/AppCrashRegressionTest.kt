@@ -40,7 +40,9 @@ class AppCrashRegressionTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("display_result_text").assertTextEquals("10")
 
-        // Open keyboard via pill button (opens only), type with blocked chars, evaluate
+        // Toggle keyboard via pill button (open -> close -> open), type with blocked chars, evaluate
+        composeTestRule.onNodeWithTag("btn_open_keyboard").performClick()
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("btn_open_keyboard").performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("btn_open_keyboard").performClick()

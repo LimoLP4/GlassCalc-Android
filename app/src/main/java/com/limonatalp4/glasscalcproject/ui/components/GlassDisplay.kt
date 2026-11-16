@@ -239,8 +239,7 @@ private fun GlassDisplayContent(
     }
 
     LaunchedEffect(keyboardRequestToken) {
-        if (keyboardRequestToken > 0) {
-            isKeyboardActive = true
+        if (keyboardRequestToken > 0 && isKeyboardActive) {
             withFrameNanos { }
             runCatching { focusRequester.requestFocus() }
             keyboardController?.show()
@@ -351,7 +350,7 @@ private fun GlassDisplayContent(
                 .background(flashColor.copy(alpha = flashAlpha), displayShape)
                 .padding(
                     horizontal = if (isCompact) 14.dp else 20.dp,
-                    vertical = if (isCompact) 10.dp else 16.dp
+                    vertical = if (isCompact) 8.dp else 16.dp
                 ),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -424,12 +423,24 @@ private fun GlassDisplayContent(
                         )
                     }
 
-                    // Keyboard button in corner (Pill Glass Design - opens system keyboard only)
+                    // Keyboard button in corner (Pill Glass Design - toggles system keyboard open/closed)
+                    val isKeyboardOpen = isKeyboardActive || isImeVisible
                     val keyboardBtnInteraction = remember { MutableInteractionSource() }
                     GlassSurface(
                         shape = RoundedCornerShape(50),
-                        customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                        customBgColor = if (isKeyboardOpen) {
+                            colorScheme.primary.copy(alpha = 0.22f)
+                        } else {
+                            colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        },
+                        borderStroke = BorderStroke(
+                            width = 1.dp,
+                            color = if (isKeyboardOpen) {
+                                colorScheme.primary.copy(alpha = 0.6f)
+                            } else {
+                                colorScheme.outline.copy(alpha = 0.3f)
+                            }
+                        ),
                         glassState = glassState,
                         modifier = Modifier.pressScale(keyboardBtnInteraction)
                     ) {
@@ -441,7 +452,14 @@ private fun GlassDisplayContent(
                                     enabled = hapticFeedbackEnabled,
                                     intensityLevel = hapticIntensity
                                 )
-                                keyboardRequestToken++
+                                if (isKeyboardOpen) {
+                                    isKeyboardActive = false
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                } else {
+                                    isKeyboardActive = true
+                                    keyboardRequestToken++
+                                }
                             },
                             interactionSource = keyboardBtnInteraction,
                             modifier = Modifier
@@ -452,7 +470,7 @@ private fun GlassDisplayContent(
                             Icon(
                                 imageVector = Icons.Default.Keyboard,
                                 contentDescription = stringResource(R.string.btn_open_keyboard),
-                                tint = colorScheme.onSurface,
+                                tint = if (isKeyboardOpen) colorScheme.primary else colorScheme.onSurface,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -635,7 +653,7 @@ private fun GlassDisplayContent(
             ) { targetResult ->
                 Text(
                     text = targetResult,
-                    fontSize = if (isCompact) 32.sp else 42.sp,
+                    fontSize = if (isCompact) 26.sp else 42.sp,
                     fontWeight = FontWeight.Bold,
                     color = resultColor,
                     textAlign = TextAlign.End,

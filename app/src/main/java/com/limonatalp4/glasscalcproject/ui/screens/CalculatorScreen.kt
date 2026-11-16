@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -84,6 +85,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -181,7 +183,16 @@ fun CalculatorScreen(
         LocalHapticIntensity provides hapticIntensity
     ) {
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }
+                    )
+                }
         ) {
             Box(
                 modifier = Modifier
@@ -200,11 +211,14 @@ fun CalculatorScreen(
                 containerColor = Color.Transparent,
                 contentWindowInsets = WindowInsets(0, 0, 0, 0),
                 topBar = {
+                    val density = LocalDensity.current
+                    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+                    val topBarVerticalPadding = if (isLandscape && isImeVisible) 4.dp else 12.dp
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .statusBarsPadding()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                            .padding(horizontal = 16.dp, vertical = topBarVerticalPadding),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -303,7 +317,11 @@ fun CalculatorScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .navigationBarsPadding(),
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime)
+                                .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                        ),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (isDualPane) {
@@ -692,6 +710,10 @@ private fun PortraitCalculatorLayout(
 
     val scrollbarColor = colorScheme.primary.copy(alpha = 0.45f)
 
+    val density = LocalDensity.current
+    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+    val isCompactPortrait = isImeVisible && LocalConfiguration.current.screenHeightDp < 640
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -714,7 +736,7 @@ private fun PortraitCalculatorLayout(
                 onCursorPositionChanged = { viewModel.setCursorPosition(it) },
                 onExpressionChange = { expr, cursor -> viewModel.onDirectExpressionChange(expr, cursor) },
                 onEvaluate = { viewModel.onEquals() },
-                isCompact = false,
+                isCompact = isCompactPortrait,
                 glassState = glassState
             )
 
@@ -893,11 +915,19 @@ private fun LandscapeCalculatorLayout(
     val hapticIntensity = LocalHapticIntensity.current
     val leftScrollState = rememberScrollState()
     val rightScrollState = rememberScrollState()
+    val density = LocalDensity.current
+    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+
+    androidx.compose.runtime.LaunchedEffect(isImeVisible) {
+        if (isImeVisible) {
+            leftScrollState.scrollTo(0)
+        }
+    }
 
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .padding(horizontal = 14.dp, vertical = if (isImeVisible) 2.dp else 6.dp)
     ) {
         val availableWidth = maxWidth
         val availableHeight = maxHeight
@@ -923,7 +953,7 @@ private fun LandscapeCalculatorLayout(
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = if (isImeVisible) Alignment.Top else Alignment.CenterVertically
         ) {
             // LINKS (ca. 50% der Breite): Display + DEG/RAD-Button rechtsbündig darunter
             Column(
@@ -931,12 +961,12 @@ private fun LandscapeCalculatorLayout(
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(leftScrollState),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = if (isImeVisible) Arrangement.Top else Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (isImeVisible) 4.dp else 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     GlassDisplay(
@@ -949,7 +979,7 @@ private fun LandscapeCalculatorLayout(
                         onCursorPositionChanged = { viewModel.setCursorPosition(it) },
                         onExpressionChange = { expr, cursor -> viewModel.onDirectExpressionChange(expr, cursor) },
                         onEvaluate = { viewModel.onEquals() },
-                        isCompact = false,
+                        isCompact = isImeVisible || availableHeight < 250.dp,
                         glassState = glassState,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -1001,7 +1031,7 @@ private fun LandscapeCalculatorLayout(
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(rightScrollState),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = if (isImeVisible) Arrangement.Top else Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
