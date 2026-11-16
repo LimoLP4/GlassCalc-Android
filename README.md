@@ -35,7 +35,10 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **System Keyboard Support (v1.2.9):** Added a new button in the main display to open the standard Android keyboard for direct formula entry, with smart filtering (`KeyboardType.Ascii` + Whitelist) to prevent crashes from foreign characters.
 *   **UI & Design Consistency (v1.2.9):** Liquid Glass close buttons (X) in all dialogs, dynamic cursor matching the search bars, and smoother animations.
 *   **Layout & Focus Fixes (v1.2.9):** Narrower dialogs, fixed keyboard overlap (IME Insets) in Settings/Unit Converter, and corrected focus management when opening the Hamburger menu.
-*   **Search Improvements (v1.2.9) (Latest):** Better keyword matching and relevance sorting in all three search bars.
+*   **Search Improvements (v1.2.9):** Better keyword matching and relevance sorting in all three search bars.
+*   **Graph System Overhaul (v1.3.0):** Completely rewrote the screen-to-math coordinate transformation for accurate point placement (P1/P2) and strict domain enforcement.
+*   **Keyboard Toggle & Landscape Fix (v1.3.0):** The keyboard button now opens and closes the keyboard. Fixed landscape layout where the keyboard covered the display.
+*   **UI Polish (v1.3.0) (Latest):** Applied Liquid Glass pill styling to the graph's P1/P2 info panel, GitHub logo, and Apache License card.
 
 ## 🌍 Localization / Sprache
 
