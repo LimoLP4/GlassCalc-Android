@@ -1498,18 +1498,91 @@ private fun InformationSection(
                 }
                 SettingsInfoCard.APACHE -> {
         // Accordion 1: Apache
+        val apacheCardBg = when {
+            isAmoled -> Color(0xFF0A0A0A)
+            isTiefschwarz -> Color(0xFF121212)
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        }
+        val apacheCardBorder = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
+        val apacheChevronRotation by animateFloatAsState(
+            targetValue = if (apacheAccordionOpen) 180f else 0f,
+            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+            label = "apache_chevron_rotation"
+        )
+        val apacheCardInteraction = remember { MutableInteractionSource() }
+        val apachePillInteraction = remember { MutableInteractionSource() }
+
         GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("card_apache_license"),
             shape = RoundedCornerShape(18.dp),
-            customBgColor = if (isAmoled) Color.Black else if (isTiefschwarz) Color(0xFF121212) else colorScheme.surfaceVariant,
-            customBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else null
+            customBgColor = apacheCardBg,
+            borderStroke = apacheCardBorder
         ) {
-            Column(modifier = Modifier.fillMaxWidth().clickable { triggerHaptic(); onToggleApache() }.padding(14.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Apache License 2.0", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colorScheme.onSurface)
-                    Icon(imageVector = if (apacheAccordionOpen) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = apacheCardInteraction,
+                        indication = androidx.compose.material3.ripple()
+                    ) {
+                        triggerHaptic()
+                        onToggleApache()
+                    }
+                    .padding(14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Apache License 2.0",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp)
+                    )
+                    GlassSurface(
+                        shape = CircleShape,
+                        customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                        modifier = Modifier
+                            .size(36.dp)
+                            .pressScale(apachePillInteraction)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                triggerHaptic()
+                                onToggleApache()
+                            },
+                            interactionSource = apachePillInteraction,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .testTag("btn_toggle_apache_license")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ExpandMore,
+                                contentDescription = "Apache License 2.0",
+                                tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .graphicsLayer { rotationZ = apacheChevronRotation }
+                            )
+                        }
+                    }
                 }
-                AnimatedVisibility(visible = apacheAccordionOpen, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
+                AnimatedVisibility(
+                    visible = apacheAccordionOpen,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
                     Text(
                         text = "Copyright 2026 limonatalp4\n\nLicensed under the Apache License, Version 2.0 (the \"License\"); you may not use this file except in compliance with the License. You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software distributed under the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.",
                         fontSize = 11.sp,
