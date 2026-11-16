@@ -71,12 +71,33 @@ private val AmoledColorScheme = darkColorScheme(
     tertiary = DarkTertiaryBlue,
     error = DarkErrorRed,
     background = AmoledBackground,
-    surface = Color(0xFF0D0D0D),
+    surface = Color(0xFF000000),
+    surfaceContainer = Color(0xFF000000),
+    surfaceContainerHigh = Color(0xFF000000),
     onBackground = Color.White,
     onSurface = Color.White,
-    surfaceVariant = Color(0xFF181F2B),
+    surfaceVariant = Color(0xFF141414),
     onSurfaceVariant = Color(0xFFBCC2CD),
     outline = Color(0xFF8A909A)
+)
+
+private val TiefschwarzColorScheme = darkColorScheme(
+    primary = DarkPrimaryBlue,
+    onPrimary = Color(0xFF003258),
+    primaryContainer = Color(0xFF00497D),
+    onPrimaryContainer = Color(0xFFD1E4FF),
+    secondary = DarkSecondaryBlue,
+    tertiary = DarkTertiaryBlue,
+    error = DarkErrorRed,
+    background = Color(0xFF000000),
+    surface = Color(0xFF000000),
+    surfaceContainer = Color(0xFF000000),
+    surfaceContainerHigh = Color(0xFF000000),
+    onBackground = Color(0xFFF0F4F8),
+    onSurface = Color(0xFFF0F4F8),
+    surfaceVariant = Color(0xFF141414),
+    onSurfaceVariant = Color(0xFFC2C7D0),
+    outline = Color(0xFF8C9199)
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -148,6 +169,7 @@ fun GlassCalcTheme(
             }
         }
         isAmoled -> AmoledColorScheme
+        isTiefschwarz -> TiefschwarzColorScheme
         resolvedTheme == AppTheme.STANDARD_DARK -> DarkColorScheme.copy(
             background = Color(0xFF1A1C1E),
             surface = Color(0xFF1C1B1F),
@@ -190,6 +212,16 @@ fun GlassCalcTheme(
                 )
             )
         }
+        isTiefschwarz -> {
+            // Tiefschwarz: Pure deep black
+            Brush.verticalGradient(
+                listOf(
+                    Color(0xFF000000),
+                    Color(0xFF050505),
+                    Color(0xFF000000)
+                )
+            )
+        }
         resolvedTheme == AppTheme.STANDARD_DARK -> {
             // Standard Dark: Material 3 typical charcoal gray gradient
             Brush.verticalGradient(
@@ -228,6 +260,7 @@ fun GlassCalcTheme(
     val buttonAlpha = when {
         isMaterialYou -> if (isDark) 0.35f else 0.65f
         isAmoled -> 0.14f
+        isTiefschwarz -> 0.12f
         resolvedTheme == AppTheme.STANDARD_DARK -> 0.12f
         isDark -> 0.08f
         else -> 0.65f
@@ -236,13 +269,14 @@ fun GlassCalcTheme(
     val buttonBorderColor = when {
         isMaterialYou -> colorScheme.outline.copy(alpha = if (isDark) 0.30f else 0.20f)
         isAmoled -> Color.White.copy(alpha = 0.28f)
+        isTiefschwarz -> Color.White.copy(alpha = 0.20f)
         isDark -> Color.White.copy(alpha = 0.18f)
         else -> Color.Black.copy(alpha = 0.08f)
     }
 
     val cardBackground = when {
         isMaterialYou -> colorScheme.surfaceVariant.copy(alpha = if (isDark) 0.35f else 0.60f)
-        isAmoled -> Color.White.copy(alpha = 0.09f)
+        isAmoled || isTiefschwarz -> Color.Black
         isDark -> Color.White.copy(alpha = 0.06f)
         else -> Color.White.copy(alpha = 0.75f)
     }

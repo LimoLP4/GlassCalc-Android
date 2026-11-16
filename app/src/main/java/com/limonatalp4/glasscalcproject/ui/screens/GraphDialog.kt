@@ -83,7 +83,8 @@ fun GraphDialog(
                     .padding(8.dp),
                 shape = RoundedCornerShape(28.dp),
                 borderWidth = 1.2.dp,
-                customBgColor = colorScheme.surfaceContainerHigh
+                customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
+                borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
             ) {
                 Column(
                     modifier = Modifier
@@ -101,13 +102,13 @@ fun GraphDialog(
                             text = stringResource(R.string.title_graph),
                             fontSize = 21.sp,
                             fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface
+                            color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
                         )
                         val closeBtnInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
                             shape = RoundedCornerShape(50),
-                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                            customBgColor = if (isAmoled || isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
                             modifier = Modifier.pressScale(closeBtnInteraction)
                         ) {
                             IconButton(
