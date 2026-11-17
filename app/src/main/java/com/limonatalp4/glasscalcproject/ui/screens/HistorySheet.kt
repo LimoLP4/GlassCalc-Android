@@ -112,7 +112,7 @@ fun HistorySheet(
     }
 
     val glassProps = LocalGlassProperties.current
-    val isPureBlack = glassProps.isAmoled || glassProps.isTiefschwarz
+    val isPureBlack = glassProps.isTiefschwarz
     val pillShape = RoundedCornerShape(32.dp)
     val pillBackgroundColor = if (isPureBlack) {
         Color.Black.copy(alpha = 0.95f)

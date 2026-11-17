@@ -466,7 +466,7 @@ fun CalculatorScreen(
                             animationSpec = tween(durationMillis = 200)
                         )
                     ) {
-                        val isPureBlack = glassProps.isAmoled || glassProps.isTiefschwarz
+                        val isPureBlack = glassProps.isTiefschwarz
                         val drawerBgColor = colorScheme.surfaceContainerHigh
                         val primaryTint = colorScheme.primary
                         val onSurfaceColor = colorScheme.onSurface

@@ -889,7 +889,6 @@ fun FunctionGraphView(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val glassProps = LocalGlassProperties.current
-    val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
     val localContext = LocalContext.current
     val view = LocalView.current
@@ -1266,10 +1265,10 @@ fun FunctionGraphView(
                     .fillMaxWidth()
                     .height(230.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceContainerLow)
+                    .background(if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerLow)
                     .border(
                         1.dp,
-                        if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else gridColor,
+                        if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else gridColor,
                         RoundedCornerShape(16.dp)
                     )
                     .then(gestureModifier)
@@ -1832,8 +1831,8 @@ fun FunctionGraphView(
                         .testTag("graph_trace_hud"),
                     glassState = glassState,
                     shape = RoundedCornerShape(24.dp),
-                    customBgColor = if (isAmoled || isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                    customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
                 ) {
                     Column(
                         modifier = Modifier
@@ -1856,8 +1855,8 @@ fun FunctionGraphView(
                             val clearPointsInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
                                 shape = RoundedCornerShape(50),
-                                customBgColor = if (isAmoled || isTiefschwarz) Color(0xFF1C1C1E).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                customBgColor = if (isTiefschwarz) Color(0xFF1C1C1E).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
                                 glassState = glassState,
                                 modifier = Modifier.pressScale(clearPointsInteraction)
                             ) {

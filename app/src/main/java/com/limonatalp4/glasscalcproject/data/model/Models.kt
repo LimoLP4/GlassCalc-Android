@@ -8,8 +8,7 @@ enum class AppTheme(val stringResId: Int, val requiresMinApi: Int = 0) {
     AUTOMATIC(R.string.theme_automatic, requiresMinApi = 0),
     WHITE_MODE(R.string.theme_white_mode, requiresMinApi = 0),
     STANDARD_DARK(R.string.theme_standard_dark, requiresMinApi = 0),
-    DARK_MODE(R.string.theme_dark_mode, requiresMinApi = 0),
-    AMOLED_DARK(R.string.theme_amoled_dark, requiresMinApi = 0)
+    DARK_MODE(R.string.theme_dark_mode, requiresMinApi = 0)
 }
 
 enum class AngleMode {

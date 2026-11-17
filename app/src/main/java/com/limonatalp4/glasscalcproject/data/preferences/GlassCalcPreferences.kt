@@ -51,7 +51,11 @@ class GlassCalcPreferences(private val context: Context) {
     val themeFlow: Flow<AppTheme?> = safeDataFlow.map { prefs ->
         val name = prefs[PreferencesKeys.APP_THEME] ?: return@map null
         try {
-            AppTheme.valueOf(name)
+            if (name == "AMOLED_DARK") {
+                AppTheme.DARK_MODE
+            } else {
+                AppTheme.valueOf(name)
+            }
         } catch (_: Exception) {
             null
         }

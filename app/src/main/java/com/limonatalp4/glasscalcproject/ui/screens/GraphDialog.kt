@@ -56,7 +56,6 @@ fun GraphDialog(
     onDismiss: () -> Unit
 ) {
     val glassProps = LocalGlassProperties.current
-    val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
     val colorScheme = MaterialTheme.colorScheme
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
@@ -83,8 +82,8 @@ fun GraphDialog(
                     .padding(8.dp),
                 shape = RoundedCornerShape(28.dp),
                 borderWidth = 1.2.dp,
-                customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
-                borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
+                customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
+                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
             ) {
                 Column(
                     modifier = Modifier
@@ -102,13 +101,13 @@ fun GraphDialog(
                             text = stringResource(R.string.title_graph),
                             fontSize = 21.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                            color = if (isTiefschwarz) Color.White else colorScheme.onSurface
                         )
                         val closeBtnInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
                             shape = RoundedCornerShape(50),
-                            customBgColor = if (isAmoled || isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                            customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
                             modifier = Modifier.pressScale(closeBtnInteraction)
                         ) {
                             IconButton(
@@ -124,7 +123,7 @@ fun GraphDialog(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = stringResource(R.string.nav_close),
-                                    tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                    tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }

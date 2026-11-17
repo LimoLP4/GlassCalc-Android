@@ -187,7 +187,6 @@ fun rememberSettingsSearchVisibility(
 
     val appearanceTabTitle = stringResource(R.string.title_appearance)
     val appearanceKeywords = stringResource(R.string.settings_keywords_appearance)
-    val amoledDesc = stringResource(R.string.theme_amoled_desc)
     val materialYouUnsupported = stringResource(R.string.theme_material_you_unsupported, effectiveApiLevel)
 
     val themeKwMaterialYou = stringResource(R.string.settings_keywords_theme_material_you)
@@ -195,12 +194,10 @@ fun rememberSettingsSearchVisibility(
     val themeKwWhite = stringResource(R.string.settings_keywords_theme_white)
     val themeKwStandardDark = stringResource(R.string.settings_keywords_theme_standard_dark)
     val themeKwDark = stringResource(R.string.settings_keywords_theme_dark)
-    val themeKwAmoled = stringResource(R.string.settings_keywords_theme_amoled)
 
     val scoredThemes = AppTheme.entries.mapIndexedNotNull { index, theme ->
         val label = stringResource(theme.stringResId)
         val extra = when (theme) {
-            AppTheme.AMOLED_DARK -> listOf(amoledDesc)
             AppTheme.MATERIAL_YOU -> listOf(materialYouUnsupported)
             else -> emptyList()
         }
@@ -210,7 +207,6 @@ fun rememberSettingsSearchVisibility(
             AppTheme.WHITE_MODE -> themeKwWhite
             AppTheme.STANDARD_DARK -> themeKwStandardDark
             AppTheme.DARK_MODE -> themeKwDark
-            AppTheme.AMOLED_DARK -> themeKwAmoled
         }
         val score = scoreSettingsEntry(
             tokens = tokens,
@@ -443,21 +439,19 @@ fun SettingsSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onClearClick: () -> Unit,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(percent = 50)
-    val isPureBlack = isAmoled || isTiefschwarz
-    val searchBarBgColor = if (isPureBlack) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val searchBarBorder = if (isPureBlack) {
+    val searchBarBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val searchBarBorder = if (isTiefschwarz) {
         BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
     } else {
         BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
     }
-    val textColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
-    val hintColor = if (isAmoled || isTiefschwarz) {
+    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
+    val hintColor = if (isTiefschwarz) {
         Color.White.copy(alpha = 0.6f)
     } else {
         colorScheme.onSurfaceVariant
@@ -595,7 +589,6 @@ fun SettingsSearchBar(
 
 @Composable
 fun SettingsSearchEmptyState(
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -606,8 +599,8 @@ fun SettingsSearchEmptyState(
             .testTag("settings_search_empty"),
         shape = RoundedCornerShape(22.dp),
         borderWidth = 1.dp,
-        customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
+        customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
     ) {
         Column(
             modifier = Modifier
@@ -618,7 +611,7 @@ fun SettingsSearchEmptyState(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = if (isAmoled || isTiefschwarz) {
+                tint = if (isTiefschwarz) {
                     Color.White.copy(alpha = 0.6f)
                 } else {
                     colorScheme.onSurfaceVariant
@@ -630,7 +623,7 @@ fun SettingsSearchEmptyState(
                 text = stringResource(R.string.settings_search_empty),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (isAmoled || isTiefschwarz) {
+                color = if (isTiefschwarz) {
                     Color.White.copy(alpha = 0.75f)
                 } else {
                     colorScheme.onSurfaceVariant

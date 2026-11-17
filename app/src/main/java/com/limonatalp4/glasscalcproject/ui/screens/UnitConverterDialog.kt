@@ -224,9 +224,8 @@ fun UnitConverterDialog(
     val primaryColor = colorScheme.primary
     val primaryContainerColor = colorScheme.primaryContainer
     val onPrimaryContainerColor = colorScheme.onPrimaryContainer
-    val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
-    val isPureBlack = isAmoled || isTiefschwarz
+    val isPureBlack = isTiefschwarz
 
     val dialogTransition = rememberDialogTransitionController(onDismiss)
 
@@ -314,7 +313,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.title_converter),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
+                                color = if (isPureBlack) Color.White else onSurfaceColor
                             )
                             val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
@@ -336,7 +335,7 @@ fun UnitConverterDialog(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = stringResource(R.string.nav_close),
-                                        tint = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor,
+                                        tint = if (isPureBlack) Color.White else onSurfaceColor,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -369,7 +368,6 @@ fun UnitConverterDialog(
                                     searchQuery = ""
                                 }
                             },
-                            isAmoled = isAmoled,
                             isTiefschwarz = isTiefschwarz
                         )
 
@@ -387,7 +385,6 @@ fun UnitConverterDialog(
                                     onSelectSuggestion = { suggestion ->
                                         selectUnitSuggestion(suggestion)
                                     },
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz
                                 )
                             }
@@ -595,7 +592,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.converter_select_pair),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                                color = if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                             )
 
                             Spacer(modifier = Modifier.height(6.dp))
@@ -619,7 +616,7 @@ fun UnitConverterDialog(
                                         label = "pair_bg_$idx"
                                     )
                                     val pairBorder = if (isPureBlack) Color.White.copy(alpha = 0.15f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
-                                    val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
+                                    val pairTextCol = if (isPureBlack) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
                                     val pairInteraction = remember { MutableInteractionSource() }
 
                                     GlassSurface(
@@ -673,7 +670,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.converter_input_label, fromUnit),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                                color = if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                             )
 
                             val swapInteraction = remember { MutableInteractionSource() }
@@ -720,7 +717,7 @@ fun UnitConverterDialog(
                             text = stringResource(R.string.converter_result_label, toUnit),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                            color = if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                         )
 
                         Text(

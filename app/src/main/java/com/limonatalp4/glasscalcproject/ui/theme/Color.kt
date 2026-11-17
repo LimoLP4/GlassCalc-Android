@@ -14,10 +14,6 @@ val DarkSecondaryBlue = Color(0xFF535F70)
 val DarkTertiaryBlue = Color(0xFFDDBEE0)
 val DarkErrorRed = Color(0xFFF2B8B5)
 
-// AMOLED Dark Accent (Muted Blue/Gray)
-val AmoledPrimaryBlue = Color(0xFF81D4FA)
-val AmoledSecondaryBlue = Color(0xFFBBC7DB)
-
 // Backgrounds
 val DarkBackground = Color(0xFF0A0A0A)
-val AmoledBackground = Color(0xFF000000)
+val TiefschwarzBackground = Color(0xFF000000)

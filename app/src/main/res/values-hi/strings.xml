@@ -146,9 +146,7 @@
     <string name="theme_white_mode">लाइट मोड (सफेद)</string>
     <string name="theme_standard_dark">डार्क मोड (मानक)</string>
     <string name="theme_dark_mode">डार्क मोड (गहरा काला)</string>
-    <string name="theme_amoled_dark">AMOLED डार्क (शुद्ध काला)</string>
     <string name="theme_material_you_unsupported">इस Android संस्करण के साथ संगत नहीं है (API 31+ आवश्यक, सक्रिय: API %d)</string>
-    <string name="theme_amoled_desc">अधिकतम OLED बैटरी बचत के लिए 10-15% सफेद ग्लास के साथ शुद्ध काला #000000</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड:</string>
@@ -266,7 +264,6 @@
     <string name="settings_keywords_theme_white">लाइट,सफ़ेद,दिन,उजाला,light,white</string>
     <string name="settings_keywords_theme_standard_dark">डार्क,रात,ग्रे,मानक,dark</string>
     <string name="settings_keywords_theme_dark">डार्क,गहरा काला,काला,रात,dark</string>
-    <string name="settings_keywords_theme_amoled">amoled,oled,शुद्ध काला,काला,डार्क,बैटरी</string>
     <string name="settings_keywords_units">इकाइयाँ,कोण,त्रिकोणमिति,रूपांतरण</string>
     <string name="settings_keywords_angle_deg">deg,डिग्री,अंश,360</string>
     <string name="settings_keywords_angle_rad">rad,रेडियन,pi,2pi</string>

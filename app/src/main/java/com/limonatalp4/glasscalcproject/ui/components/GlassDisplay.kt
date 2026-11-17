@@ -395,7 +395,7 @@ private fun GlassDisplayContent(
         glassState = glassState,
         shape = displayShape,
         borderStroke = displayBorder,
-        customBgColor = if (glassProps.isAmoled) Color.White.copy(alpha = 0.08f) else null
+        customBgColor = if (glassProps.isTiefschwarz) Color.White.copy(alpha = 0.08f) else null
     ) {
         Column(
             modifier = Modifier

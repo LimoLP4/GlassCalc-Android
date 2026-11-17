@@ -146,9 +146,7 @@
     <string name="theme_white_mode">White Mode (ライト)</string>
     <string name="theme_standard_dark">Dark Mode (標準)</string>
     <string name="theme_dark_mode">Dark Mode (ディープブラック)</string>
-    <string name="theme_amoled_dark">AMOLED Dark (ピュアブラック)</string>
     <string name="theme_material_you_unsupported">この Android バージョンでは非対応 (API 31+ が必要、現在: API %d)</string>
-    <string name="theme_amoled_desc">完全な黒 #000000 と 10〜15% のホワイトガラスで OLED 消費電力を最小化</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">三角関数の既定角度モード:</string>
@@ -266,7 +264,6 @@
     <string name="settings_keywords_theme_white">ライト,白,昼,明るい,light,white</string>
     <string name="settings_keywords_theme_standard_dark">ダーク,夜,グレー,標準,dark</string>
     <string name="settings_keywords_theme_dark">ダーク,漆黒,黒,夜,dark</string>
-    <string name="settings_keywords_theme_amoled">amoled,oled,純黒,黒,ダーク,省電力,バッテリー</string>
     <string name="settings_keywords_units">単位,角度,三角関数,度数法,弧度法,変換</string>
     <string name="settings_keywords_angle_deg">deg,度,度数,度数法,360</string>
     <string name="settings_keywords_angle_rad">rad,ラジアン,弧度,弧度法,pi,2pi</string>

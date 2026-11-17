@@ -203,7 +203,6 @@ fun SettingsDialog(
     var mxparserAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
-    val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
     val searchVisibility = rememberSettingsSearchVisibility(
         query = searchQuery,
@@ -306,8 +305,8 @@ fun SettingsDialog(
                             },
                         shape = RoundedCornerShape(28.dp),
                         borderWidth = 1.2.dp,
-                        customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
-                        customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
+                        customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
+                        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
                     ) {
                     Column(
                         modifier = Modifier
@@ -324,7 +323,7 @@ fun SettingsDialog(
                                 text = stringResource(R.string.title_settings),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                                color = if (isTiefschwarz) Color.White else colorScheme.onSurface
                             )
                             val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
@@ -346,7 +345,7 @@ fun SettingsDialog(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = stringResource(R.string.nav_close),
-                                        tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                        tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -370,7 +369,6 @@ fun SettingsDialog(
                                 )
                                 searchQuery = ""
                             },
-                            isAmoled = isAmoled,
                             isTiefschwarz = isTiefschwarz
                         )
 
@@ -402,7 +400,6 @@ fun SettingsDialog(
                             ) {
                                 SettingsTabBar(
                                     selectedTab = selectedTab,
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     onSelectTab = handleTabSelect
@@ -424,7 +421,6 @@ fun SettingsDialog(
                                 ) {
                                     SettingsTabBar(
                                         selectedTab = selectedTab,
-                                        isAmoled = isAmoled,
                                         isTiefschwarz = isTiefschwarz,
                                         colorScheme = colorScheme,
                                         onSelectTab = handleTabSelect
@@ -435,7 +431,6 @@ fun SettingsDialog(
 
                 if (isSearchActive && !searchVisibility.hasAnyMatch) {
                     SettingsSearchEmptyState(
-                        isAmoled = isAmoled,
                         isTiefschwarz = isTiefschwarz
                     )
                 } else {
@@ -462,7 +457,6 @@ fun SettingsDialog(
                                 0 -> AppearanceSection(
                                     currentTheme = currentTheme,
                                     effectiveApiLevel = effectiveApiLevel,
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
@@ -473,7 +467,6 @@ fun SettingsDialog(
                                 )
                                 1 -> UnitsSection(
                                     currentAngleMode = currentAngleMode,
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
@@ -495,7 +488,6 @@ fun SettingsDialog(
                                     hapticIntensity = hapticIntensity,
                                     autoResultEnabled = autoResultEnabled,
                                     lifecycleStatus = lifecycleStatus,
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     onSetSimulatedApi = onSetSimulatedApi,
@@ -511,7 +503,6 @@ fun SettingsDialog(
                                     searchVisibility = searchVisibility
                                 )
                                 3 -> InformationSection(
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
@@ -525,7 +516,6 @@ fun SettingsDialog(
                                 )
                                 4 -> LanguageSection(
                                     currentLanguage = currentLanguage,
-                                    isAmoled = isAmoled,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
@@ -585,7 +575,6 @@ fun SettingsDialog(
 private fun AppearanceSection(
     currentTheme: AppTheme,
     effectiveApiLevel: Int,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
@@ -599,7 +588,7 @@ private fun AppearanceSection(
             text = androidx.compose.ui.res.stringResource(id = R.string.theme_select_heading),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
+            color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -613,21 +602,21 @@ private fun AppearanceSection(
             val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
             val isSupported = !isMaterialYou || effectiveApiLevel >= 31
             val isSelected = currentTheme == themeOption && isSupported
-            
+
             val cardBg = if (isSelected) {
-                if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                if (isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
             } else {
-                if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             }
-            
-            val cardBorder = if (isAmoled || isTiefschwarz) {
+
+            val cardBorder = if (isTiefschwarz) {
                 Color.White.copy(alpha = 0.15f)
             } else {
                 if (isSelected) colorScheme.primary else glassProps.buttonBorderColor
             }
-            
-            val textColor = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface)
-            val radioIconColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.primary
+
+            val textColor = if (isTiefschwarz) Color.White else (if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+            val radioIconColor = if (isTiefschwarz) Color.White else colorScheme.primary
 
             GlassSurface(
                 modifier = Modifier
@@ -659,7 +648,7 @@ private fun AppearanceSection(
                         } else null,
                         colors = RadioButtonDefaults.colors(
                             selectedColor = radioIconColor,
-                            unselectedColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
+                            unselectedColor = if (isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
                         ),
                         enabled = isSupported
                     )
@@ -671,7 +660,6 @@ private fun AppearanceSection(
                             AppTheme.WHITE_MODE -> androidx.compose.ui.res.stringResource(id = R.string.theme_white_mode)
                             AppTheme.STANDARD_DARK -> androidx.compose.ui.res.stringResource(id = R.string.theme_standard_dark)
                             AppTheme.DARK_MODE -> androidx.compose.ui.res.stringResource(id = R.string.theme_dark_mode)
-                            AppTheme.AMOLED_DARK -> androidx.compose.ui.res.stringResource(id = R.string.theme_amoled_dark)
                         }
                         Text(
                             text = themeLabel,
@@ -687,13 +675,6 @@ private fun AppearanceSection(
                                 color = colorScheme.error,
                                 modifier = Modifier.testTag("text_material_you_unsupported")
                             )
-                        } else if (themeOption == AppTheme.AMOLED_DARK) {
-                            Text(
-                                text = androidx.compose.ui.res.stringResource(id = R.string.theme_amoled_desc),
-                                fontSize = 12.sp,
-                                color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isSelected) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f)),
-                                softWrap = true
-                            )
                         }
                     }
                 }
@@ -705,7 +686,6 @@ private fun AppearanceSection(
 @Composable
 private fun UnitsSection(
     currentAngleMode: AngleMode,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
@@ -734,13 +714,13 @@ private fun UnitsSection(
                 SettingsUnitCard.DEG -> {
                     val isDeg = currentAngleMode == AngleMode.DEG
                     val degBg = if (isDeg) {
-                        if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                        if (isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
                     } else {
-                        if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     }
 
-                    val degBorder = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
-                    val degTextColor = if (isAmoled || isTiefschwarz) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+                    val degBorder = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
+                    val degTextColor = if (isTiefschwarz) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
 
                     GlassSurface(
                         modifier = Modifier
@@ -768,8 +748,8 @@ private fun UnitsSection(
                                     onSelectAngleMode(AngleMode.DEG)
                                 },
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.primary,
-                                    unselectedColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
+                                    selectedColor = if (isTiefschwarz) Color.White else colorScheme.primary,
+                                    unselectedColor = if (isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
                                 )
                             )
                             Column(modifier = Modifier.padding(start = 12.dp)) {
@@ -782,7 +762,7 @@ private fun UnitsSection(
                                 Text(
                                     text = androidx.compose.ui.res.stringResource(id = R.string.angle_deg_desc),
                                     fontSize = 12.sp,
-                                    color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
+                                    color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isDeg) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
                                 )
                             }
                         }
@@ -791,12 +771,12 @@ private fun UnitsSection(
                 SettingsUnitCard.RAD -> {
                     val isRad = currentAngleMode == AngleMode.RAD
                     val radBg = if (isRad) {
-                        if (isAmoled || isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                        if (isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
                     } else {
-                        if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     }
-                    val radBorder = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
-                    val radTextColor = if (isAmoled || isTiefschwarz) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
+                    val radBorder = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
+                    val radTextColor = if (isTiefschwarz) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
 
                     GlassSurface(
                         modifier = Modifier
@@ -824,8 +804,8 @@ private fun UnitsSection(
                                     onSelectAngleMode(AngleMode.RAD)
                                 },
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.primary,
-                                    unselectedColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
+                                    selectedColor = if (isTiefschwarz) Color.White else colorScheme.primary,
+                                    unselectedColor = if (isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
                                 )
                             )
                             Column(modifier = Modifier.padding(start = 12.dp)) {
@@ -838,7 +818,7 @@ private fun UnitsSection(
                                 Text(
                                     text = androidx.compose.ui.res.stringResource(id = R.string.angle_rad_desc),
                                     fontSize = 12.sp,
-                                    color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
+                                    color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else (if (isRad) colorScheme.onPrimaryContainer.copy(alpha = 0.75f) else colorScheme.onSurface.copy(alpha = 0.55f))
                                 )
                             }
                         }
@@ -849,8 +829,8 @@ private fun UnitsSection(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
                         borderWidth = 1.dp,
-                        customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
+                        customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(
@@ -887,7 +867,6 @@ private fun DeveloperOptionsSection(
     hapticIntensity: Int,
     autoResultEnabled: Boolean,
     lifecycleStatus: String,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
@@ -908,9 +887,8 @@ private fun DeveloperOptionsSection(
     val containerSize = LocalWindowInfo.current.containerSize
     val screenWidthDp = with(density) { containerSize.width.toDp().value.roundToInt() }
     val screenHeightDp = with(density) { containerSize.height.toDp().value.roundToInt() }
-    val isPureBlack = isAmoled || isTiefschwarz
-    val devCardBg = if (isPureBlack) Color.Black else colorScheme.surfaceVariant
-    val devCardBorder = if (isPureBlack) Color.White.copy(alpha = 0.15f) else null
+    val devCardBg = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant
+    val devCardBorder = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
 
     val orderedDevCards = searchVisibility?.orderedDevCards ?: SettingsDevCard.entries
 
@@ -942,7 +920,7 @@ private fun DeveloperOptionsSection(
                     text = "WindowSizeClass: $widthClassName",
                     fontSize = 13.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = if (isPureBlack) Color.White else colorScheme.onSurface
+                    color = if (isTiefschwarz) Color.White else colorScheme.onSurface
                 )
                 Text(
                     text = stringResource(R.string.dev_resolution, screenWidthDp, screenHeightDp),
@@ -986,7 +964,7 @@ private fun DeveloperOptionsSection(
                         text = stringResource(R.string.dev_simulate_api_switch),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                        color = if (isTiefschwarz) Color.White else colorScheme.onSurface
                     )
                     Switch(
                         checked = simulatedApiEnabled,
@@ -1412,7 +1390,6 @@ private fun DeveloperOptionsSection(
 
 @Composable
 private fun InformationSection(
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
@@ -1437,8 +1414,8 @@ private fun InformationSection(
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor
+            customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "GlassCalc v${BuildConfig.VERSION_NAME}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
@@ -1450,11 +1427,10 @@ private fun InformationSection(
                 SettingsInfoCard.GITHUB -> {
         // GitHub Repository Card
         val githubCardInteraction = remember { MutableInteractionSource() }
-        val isPureBlack = isAmoled || isTiefschwarz
-        val githubCardBg = if (isPureBlack) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        val githubCardBg = if (isTiefschwarz) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         val githubCardBorder = BorderStroke(
             width = 1.dp,
-            color = if (isPureBlack) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            color = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
 
         GlassSurface(
@@ -1528,8 +1504,8 @@ private fun InformationSection(
         GlassSurface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor
+            customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Text(text = stringResource(R.string.info_oss_licenses), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
@@ -1554,11 +1530,10 @@ private fun InformationSection(
                 }
                 SettingsInfoCard.APACHE -> {
         // Accordion 1: Apache
-        val isPureBlack = isAmoled || isTiefschwarz
-        val apacheCardBg = if (isPureBlack) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        val apacheCardBg = if (isTiefschwarz) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         val apacheCardBorder = BorderStroke(
             width = 1.dp,
-            color = if (isPureBlack) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            color = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
         val apacheChevronRotation by animateFloatAsState(
             targetValue = if (apacheAccordionOpen) 180f else 0f,
@@ -1623,7 +1598,7 @@ private fun InformationSection(
                             Icon(
                                 imageVector = Icons.Default.ExpandMore,
                                 contentDescription = "Apache License 2.0",
-                                tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface,
+                                tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
                                 modifier = Modifier
                                     .size(18.dp)
                                     .graphicsLayer { rotationZ = apacheChevronRotation }
@@ -1655,7 +1630,6 @@ private fun InformationSection(
 @Composable
 private fun LanguageSection(
     currentLanguage: String,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
@@ -1672,7 +1646,7 @@ private fun LanguageSection(
             text = stringResource(R.string.language_select_heading),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
+            color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
         )
         Spacer(modifier = Modifier.height(10.dp))
     }
@@ -1682,18 +1656,17 @@ private fun LanguageSection(
                 Language.SYSTEM -> currentLanguage.isBlank() || currentLanguage.equals("SYSTEM", ignoreCase = true)
                 else -> currentLanguage.equals(langOption.localeTag, ignoreCase = true)
             }
-            val isPureBlack = isAmoled || isTiefschwarz
             val cardBg = if (isSelected) {
-                if (isPureBlack) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
+                if (isTiefschwarz) colorScheme.primaryContainer.copy(alpha = 0.7f) else colorScheme.primaryContainer
             } else {
-                if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             }
-            val cardBorder = if (isPureBlack) {
+            val cardBorder = if (isTiefschwarz) {
                 Color.White.copy(alpha = 0.15f)
             } else {
                 if (isSelected) colorScheme.primary else glassProps.buttonBorderColor
             }
-            val textColor = if (isPureBlack) Color.White else if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
+            val textColor = if (isTiefschwarz) Color.White else if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
 
             val langInteraction = remember { MutableInteractionSource() }
             GlassSurface(
@@ -1723,8 +1696,8 @@ private fun LanguageSection(
                             onDismiss()
                         },
                         colors = RadioButtonDefaults.colors(
-                            selectedColor = if (isPureBlack) Color.White else colorScheme.primary,
-                            unselectedColor = if (isPureBlack) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
+                            selectedColor = if (isTiefschwarz) Color.White else colorScheme.primary,
+                            unselectedColor = if (isTiefschwarz) Color.White.copy(alpha = 0.5f) else colorScheme.onSurfaceVariant
                         )
                     )
                     Text(text = stringResource(langOption.stringResId), color = textColor, modifier = Modifier.padding(start = 12.dp))
@@ -1737,7 +1710,6 @@ private fun LanguageSection(
 @Composable
 private fun SettingsTabBar(
     selectedTab: Int,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     onSelectTab: (Int) -> Unit
@@ -1800,11 +1772,11 @@ private fun SettingsTabBar(
             .wrapContentWidth()
             .clip(RoundedCornerShape(50.dp))
             .background(
-                if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
             .border(
                 width = 1.dp,
-                color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
+                color = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(50.dp)
             )
             .padding(4.dp)
@@ -1841,9 +1813,9 @@ private fun SettingsTabBar(
                     )
                     val tabTint by animateColorAsState(
                         targetValue = if (isSelected) {
-                            if (isAmoled || isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
+                            if (isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
                         } else {
-                            if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                            if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
                         },
                         animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                         label = "tab_${index}_tint"

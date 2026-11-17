@@ -76,7 +76,6 @@ fun ConstantsDialog(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val glassProps = LocalGlassProperties.current
-    val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
@@ -100,8 +99,8 @@ fun ConstantsDialog(
                     .padding(8.dp),
                 shape = RoundedCornerShape(28.dp),
                 borderWidth = 1.2.dp,
-                customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
-                borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
+                customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
+                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
             ) {
                 Column(
                     modifier = Modifier
@@ -128,7 +127,7 @@ fun ConstantsDialog(
                                 text = stringResource(R.string.title_constants),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                                color = if (isTiefschwarz) Color.White else colorScheme.onSurface
                             )
                         }
 
@@ -146,7 +145,7 @@ fun ConstantsDialog(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = stringResource(R.string.nav_close),
-                                tint = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
+                                tint = if (isTiefschwarz) Color.White else colorScheme.onSurface
                             )
                         }
                     }
@@ -156,7 +155,7 @@ fun ConstantsDialog(
                     Text(
                         text = stringResource(R.string.constants_select_heading),
                         fontSize = 13.sp,
-                        color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurfaceVariant
+                        color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -184,8 +183,8 @@ fun ConstantsDialog(
                                     .testTag("constant_${constant.symbol}"),
                                 shape = RoundedCornerShape(20.dp),
                                 borderWidth = 1.dp,
-                                customBgColor = if (isAmoled || isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = if (isAmoled || isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
+                                customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
                             ) {
                             Row(
                                 modifier = Modifier

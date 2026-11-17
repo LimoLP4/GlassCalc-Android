@@ -146,9 +146,7 @@
     <string name="theme_white_mode">Светлая тема</string>
     <string name="theme_standard_dark">Тёмная тема (Стандарт)</string>
     <string name="theme_dark_mode">Тёмная тема (Глубокий чёрный)</string>
-    <string name="theme_amoled_dark">AMOLED Тёмная (Чистый чёрный)</string>
     <string name="theme_material_you_unsupported">Не поддерживается этой версией Android (требуется API 31+, активен: API %d)</string>
-    <string name="theme_amoled_desc">Чистый чёрный #000000 с 10-15% белого стекла для максимальной экономии батареи OLED</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Режим углов для тригонометрии:</string>
@@ -266,7 +264,6 @@
     <string name="settings_keywords_theme_white">светлая,белая,день,свет,light,white</string>
     <string name="settings_keywords_theme_standard_dark">темная,ночь,серая,стандартная,dark</string>
     <string name="settings_keywords_theme_dark">темная,черная,ночь,dark</string>
-    <string name="settings_keywords_theme_amoled">amoled,oled,чистый черный,черный,темный,dark,батарея,экономия</string>
     <string name="settings_keywords_units">единицы,угол,углы,тригонометрия,конвертация</string>
     <string name="settings_keywords_angle_deg">deg,градус,градусы,360</string>
     <string name="settings_keywords_angle_rad">rad,радиан,радианы,pi,2pi</string>

@@ -104,7 +104,7 @@ fun GlassCalculatorButton(
     )
 
     val (bgBrush, textColor, borderColor) = remember(
-        type, glassProps.isDark, glassProps.isAmoled, glassProps.isMaterialYou, colorScheme, glassProps.buttonBackgroundAlpha
+        type, glassProps.isDark, glassProps.isTiefschwarz, glassProps.isMaterialYou, colorScheme, glassProps.buttonBackgroundAlpha
     ) {
         when (type) {
             ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> {
@@ -263,7 +263,7 @@ fun GlassCalculatorButton(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = if (glassProps.isAmoled) 0.16f else 0.10f),
+                            Color.White.copy(alpha = if (glassProps.isTiefschwarz) 0.14f else 0.10f),
                             Color.Transparent
                         )
                     )

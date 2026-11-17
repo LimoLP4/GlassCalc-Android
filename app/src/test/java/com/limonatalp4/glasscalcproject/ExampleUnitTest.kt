@@ -354,7 +354,7 @@ class ExampleUnitTest {
         )
         assertTrue(
             com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
-                "   ", "AMOLED Dark"
+                "   ", "Dark Mode (Tiefschwarz)"
             )
         )
 
@@ -1101,6 +1101,114 @@ class ExampleUnitTest {
         } finally {
             executor.shutdownNow()
         }
+    }
+
+    @Test
+    fun testAppThemeEntriesExcludeAmoledAndIncludeTiefschwarz() {
+        val names = com.limonatalp4.glasscalcproject.data.model.AppTheme.entries.map { it.name }
+        org.junit.Assert.assertFalse(names.contains("AMOLED_DARK"))
+        assertTrue(names.contains("DARK_MODE"))
+        assertTrue(names.contains("AUTOMATIC"))
+        assertEquals(5, names.size)
+    }
+
+    @Test
+    fun testResolveEffectiveThemeRespectsPowerSaveMode() {
+        val automatic = com.limonatalp4.glasscalcproject.data.model.AppTheme.AUTOMATIC
+        val darkMode = com.limonatalp4.glasscalcproject.data.model.AppTheme.DARK_MODE
+        val standardDark = com.limonatalp4.glasscalcproject.data.model.AppTheme.STANDARD_DARK
+        val whiteMode = com.limonatalp4.glasscalcproject.data.model.AppTheme.WHITE_MODE
+        val materialYou = com.limonatalp4.glasscalcproject.data.model.AppTheme.MATERIAL_YOU
+
+        // Power Saver ON overrides AUTOMATIC to Tiefschwarz (DARK_MODE) even in system light mode
+        assertEquals(
+            darkMode,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = automatic,
+                systemDark = false,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 35
+            )
+        )
+        assertEquals(
+            darkMode,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = automatic,
+                systemDark = true,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 35
+            )
+        )
+
+        // Power Saver OFF falls back to system dark / white mode
+        assertEquals(
+            standardDark,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = automatic,
+                systemDark = true,
+                isPowerSaveMode = false,
+                effectiveApiLevel = 35
+            )
+        )
+        assertEquals(
+            whiteMode,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = automatic,
+                systemDark = false,
+                isPowerSaveMode = false,
+                effectiveApiLevel = 35
+            )
+        )
+
+        // Material You MUST keep dynamic colors and NEVER switch to Tiefschwarz on Power Saver
+        assertEquals(
+            materialYou,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = materialYou,
+                systemDark = false,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 35
+            )
+        )
+        assertEquals(
+            materialYou,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = materialYou,
+                systemDark = true,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 35
+            )
+        )
+        // On API < 31, falls back to regular light/dark without switching to Tiefschwarz
+        assertEquals(
+            whiteMode,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = materialYou,
+                systemDark = false,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 30
+            )
+        )
+
+        // Explicit selections stay intact
+        assertEquals(
+            whiteMode,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = whiteMode,
+                systemDark = true,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 35
+            )
+        )
+        assertEquals(
+            standardDark,
+            com.limonatalp4.glasscalcproject.ui.theme.resolveEffectiveTheme(
+                selectedTheme = standardDark,
+                systemDark = false,
+                isPowerSaveMode = true,
+                effectiveApiLevel = 35
+            )
+        )
     }
 }
 

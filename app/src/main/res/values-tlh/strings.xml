@@ -146,9 +146,7 @@
     <string name="theme_white_mode">chIS (wov)</string>
     <string name="theme_standard_dark">qIj (motlh)</string>
     <string name="theme_dark_mode">qIjqu\'</string>
-    <string name="theme_amoled_dark">AMOLED qIj (Hurghqu\')</string>
     <string name="theme_material_you_unsupported">AndroidvamDaq Qapbe\' (API 31+ poQ, DaH: API %d)</string>
-    <string name="theme_amoled_desc">Hurghqu\' #000000, HoS polmeH</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">tajwI\' juvmeH:</string>
@@ -266,7 +264,6 @@
     <string name="settings_keywords_theme_white">chis,wov,light,white</string>
     <string name="settings_keywords_theme_standard_dark">qij,hurgh,dark</string>
     <string name="settings_keywords_theme_dark">tiefschwarz,qij,dark</string>
-    <string name="settings_keywords_theme_amoled">amoled,oled,qij,black,dark</string>
     <string name="settings_keywords_units">juvmeh,tajwi\',gho,patmey,units</string>
     <string name="settings_keywords_angle_deg">deg,grad,degree,360</string>
     <string name="settings_keywords_angle_rad">rad,radian,pi,2pi</string>

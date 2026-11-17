@@ -146,9 +146,7 @@
     <string name="theme_white_mode">Modo Claro (Branco)</string>
     <string name="theme_standard_dark">Modo Escuro (Padrão)</string>
     <string name="theme_dark_mode">Modo Escuro (Preto profundo)</string>
-    <string name="theme_amoled_dark">AMOLED Dark (Preto puro)</string>
     <string name="theme_material_you_unsupported">Incompatível com esta versão do Android (requer API 31+, ativo: API %d)</string>
-    <string name="theme_amoled_desc">Preto puro #000000 com 10-15% de vidro branco para máxima economia de bateria OLED</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Modo angular padrão para trigonometria:</string>
@@ -266,7 +264,6 @@
     <string name="settings_keywords_theme_white">claro,branco,dia,luz,light,white</string>
     <string name="settings_keywords_theme_standard_dark">escuro,noite,cinza,padrão,dark</string>
     <string name="settings_keywords_theme_dark">escuro,preto,noite,dark</string>
-    <string name="settings_keywords_theme_amoled">amoled,oled,preto puro,preto,escuro,dark,bateria</string>
     <string name="settings_keywords_units">unidades,ângulo,ângulos,trigonometria,conversão</string>
     <string name="settings_keywords_angle_deg">deg,grau,graus,360</string>
     <string name="settings_keywords_angle_rad">rad,radiano,radianos,pi,2pi</string>

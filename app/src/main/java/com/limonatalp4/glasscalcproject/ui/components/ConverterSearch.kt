@@ -157,22 +157,20 @@ fun UnitConverterSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onClearClick: () -> Unit,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     modifier: Modifier = Modifier,
     onSearchSubmit: (() -> Unit)? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(percent = 50)
-    val isPureBlack = isAmoled || isTiefschwarz
-    val searchBarBgColor = if (isPureBlack) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val searchBarBorder = if (isPureBlack) {
+    val searchBarBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val searchBarBorder = if (isTiefschwarz) {
         BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
     } else {
         BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
     }
-    val textColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
-    val hintColor = if (isAmoled || isTiefschwarz) {
+    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
+    val hintColor = if (isTiefschwarz) {
         Color.White.copy(alpha = 0.6f)
     } else {
         colorScheme.onSurfaceVariant
@@ -318,15 +316,14 @@ fun UnitConverterSearchBar(
 fun UnitSuggestionsDropdown(
     suggestions: List<LocalizedUnitSuggestion>,
     onSelectSuggestion: (LocalizedUnitSuggestion) -> Unit,
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val density = LocalDensity.current
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
-    val textColor = if (isAmoled || isTiefschwarz) Color.White else colorScheme.onSurface
-    val dividerColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.08f) else colorScheme.outline.copy(alpha = 0.12f)
+    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
+    val dividerColor = if (isTiefschwarz) Color.White.copy(alpha = 0.08f) else colorScheme.outline.copy(alpha = 0.12f)
 
     GlassSurface(
         modifier = modifier
@@ -334,8 +331,8 @@ fun UnitSuggestionsDropdown(
             .testTag("unit_suggestions_dropdown"),
         shape = RoundedCornerShape(18.dp),
         borderWidth = 1.dp,
-        customBgColor = if (isAmoled || isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.12f) else colorScheme.outline.copy(alpha = 0.25f)
+        customBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.12f) else colorScheme.outline.copy(alpha = 0.25f)
     ) {
         val displayedSuggestions = remember(suggestions) { suggestions.take(8) }
         LazyColumn(
@@ -354,7 +351,7 @@ fun UnitSuggestionsDropdown(
                     ) {
                         Text(
                             text = stringResource(R.string.converter_search_empty),
-                            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
+                            color = if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -442,7 +439,6 @@ fun filterConversionPairs(
 
 @Composable
 fun ConverterSearchEmptyState(
-    isAmoled: Boolean,
     isTiefschwarz: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -453,8 +449,8 @@ fun ConverterSearchEmptyState(
             .testTag("converter_search_empty"),
         shape = RoundedCornerShape(22.dp),
         borderWidth = 1.dp,
-        customBgColor = if (isAmoled || isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        customBorderColor = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
+        customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
     ) {
         Column(
             modifier = Modifier
@@ -465,7 +461,7 @@ fun ConverterSearchEmptyState(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = if (isAmoled || isTiefschwarz) {
+                tint = if (isTiefschwarz) {
                     Color.White.copy(alpha = 0.6f)
                 } else {
                     colorScheme.onSurfaceVariant
@@ -477,7 +473,7 @@ fun ConverterSearchEmptyState(
                 text = stringResource(R.string.converter_search_empty),
                 fontSize = 13.5.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (isAmoled || isTiefschwarz) {
+                color = if (isTiefschwarz) {
                     Color.White.copy(alpha = 0.75f)
                 } else {
                     colorScheme.onSurfaceVariant

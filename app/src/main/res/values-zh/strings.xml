@@ -146,9 +146,7 @@
     <string name="theme_white_mode">White Mode (浅色)</string>
     <string name="theme_standard_dark">Dark Mode (标准深色)</string>
     <string name="theme_dark_mode">Dark Mode (深邃黑)</string>
-    <string name="theme_amoled_dark">AMOLED Dark (纯黑省电)</string>
     <string name="theme_material_you_unsupported">当前 Android 版本不支持 (需要 API 31+，当前: API %d)</string>
-    <string name="theme_amoled_desc">纯黑 #000000 搭配 10-15% 白玻璃质感，最大化节省 OLED 电量</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">三角函数默认角度模式:</string>
@@ -266,7 +264,6 @@
     <string name="settings_keywords_theme_white">浅色,白色,日间,明亮,light,white</string>
     <string name="settings_keywords_theme_standard_dark">深色,夜间,灰色,标准,dark</string>
     <string name="settings_keywords_theme_dark">深色,纯黑,夜间,极黑,dark</string>
-    <string name="settings_keywords_theme_amoled">amoled,oled,纯黑,深色,暗黑,省电,电池</string>
     <string name="settings_keywords_units">单位,角度,三角函数,角度制,弧度制,转换</string>
     <string name="settings_keywords_angle_deg">deg,度,角度,角度制,360</string>
     <string name="settings_keywords_angle_rad">rad,弧度,弧度制,pi,2pi</string>

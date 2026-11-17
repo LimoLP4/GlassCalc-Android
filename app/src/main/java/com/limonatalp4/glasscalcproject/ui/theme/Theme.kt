@@ -1,6 +1,11 @@
 package com.limonatalp4.glasscalcproject.ui.theme
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
+import android.os.PowerManager
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -9,12 +14,20 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 
 @Immutable
@@ -25,7 +38,6 @@ data class GlassThemeProperties(
     val cardBackground: Color,
     val isDark: Boolean,
     val isTiefschwarz: Boolean,
-    val isAmoled: Boolean,
     val isMaterialYou: Boolean,
     val supportsBlur: Boolean,
     val supportsPredictiveBack: Boolean,
@@ -40,7 +52,6 @@ val LocalGlassProperties = staticCompositionLocalOf {
         cardBackground = Color.White.copy(alpha = 0.07f),
         isDark = true,
         isTiefschwarz = true,
-        isAmoled = false,
         isMaterialYou = false,
         supportsBlur = true,
         supportsPredictiveBack = true,
@@ -65,25 +76,6 @@ private val DarkColorScheme = darkColorScheme(
     outline = Color(0xFF8C9199)
 )
 
-private val AmoledColorScheme = darkColorScheme(
-    primary = AmoledPrimaryBlue,
-    onPrimary = Color(0xFF003554),
-    primaryContainer = Color(0xFF004D73),
-    onPrimaryContainer = Color(0xFFE0F3FF),
-    secondary = AmoledSecondaryBlue,
-    tertiary = DarkTertiaryBlue,
-    error = DarkErrorRed,
-    background = AmoledBackground,
-    surface = Color(0xFF000000),
-    surfaceContainer = Color(0xFF000000),
-    surfaceContainerHigh = Color(0xFF000000),
-    onBackground = Color.White,
-    onSurface = Color.White,
-    surfaceVariant = Color(0xFF141414),
-    onSurfaceVariant = Color(0xFFBCC2CD),
-    outline = Color(0xFF8A909A)
-)
-
 private val TiefschwarzColorScheme = darkColorScheme(
     primary = DarkPrimaryBlue,
     onPrimary = Color(0xFF003258),
@@ -92,10 +84,13 @@ private val TiefschwarzColorScheme = darkColorScheme(
     secondary = DarkSecondaryBlue,
     tertiary = DarkTertiaryBlue,
     error = DarkErrorRed,
-    background = Color(0xFF000000),
-    surface = Color(0xFF000000),
-    surfaceContainer = Color(0xFF000000),
-    surfaceContainerHigh = Color(0xFF000000),
+    background = TiefschwarzBackground,
+    surface = TiefschwarzBackground,
+    surfaceContainerLowest = TiefschwarzBackground,
+    surfaceContainerLow = TiefschwarzBackground,
+    surfaceContainer = TiefschwarzBackground,
+    surfaceContainerHigh = TiefschwarzBackground,
+    surfaceContainerHighest = Color(0xFF0E0E0E),
     onBackground = Color(0xFFF0F4F8),
     onSurface = Color(0xFFF0F4F8),
     surfaceVariant = Color(0xFF141414),
@@ -120,34 +115,129 @@ private val LightColorScheme = lightColorScheme(
     outline = Color(0xFF73777F)
 )
 
+/**
+ * Resolves the effective [AppTheme] while respecting Android API fallbacks and device Power Saver mode.
+ *
+ * 1. [AppTheme.AUTOMATIC]:
+ *    - Wechselt AUSSCHLIESSLICH hier bei aktivem Energiesparmodus zu [AppTheme.DARK_MODE] (Tiefschwarz / Deep Black),
+ *      um maximal Akku zu sparen.
+ *    - Bei deaktiviertem Energiesparmodus erfolgt der Rückfall auf das normale System-Design
+ *      ([AppTheme.STANDARD_DARK] bei System-Dark-Theme, sonst [AppTheme.WHITE_MODE]).
+ *
+ * 2. [AppTheme.MATERIAL_YOU]:
+ *    - Behält strikt die dynamischen Material-You-Farben (Monet) bei. Der Energiesparmodus hat hier
+ *      KEINEN Einfluss und darf nicht auf Tiefschwarz wechseln.
+ *    - Auf Geräten < API 31 fällt das Theme ohne Energiespar-Umschaltung auf Standard-Dark bzw. Hell zurück.
+ *
+ * 3. Manuell gewählte Themes ([AppTheme.WHITE_MODE], [AppTheme.STANDARD_DARK], [AppTheme.DARK_MODE]):
+ *    - Bleiben stets exakt unverändert, unabhängig vom Energiesparmodus.
+ */
+internal fun resolveEffectiveTheme(
+    selectedTheme: AppTheme,
+    systemDark: Boolean,
+    isPowerSaveMode: Boolean,
+    effectiveApiLevel: Int
+): AppTheme {
+    return when (selectedTheme) {
+        AppTheme.AUTOMATIC -> {
+            when {
+                isPowerSaveMode -> AppTheme.DARK_MODE
+                systemDark -> AppTheme.STANDARD_DARK
+                else -> AppTheme.WHITE_MODE
+            }
+        }
+        AppTheme.MATERIAL_YOU -> {
+            if (effectiveApiLevel >= 31) {
+                AppTheme.MATERIAL_YOU
+            } else {
+                if (systemDark) AppTheme.STANDARD_DARK else AppTheme.WHITE_MODE
+            }
+        }
+        AppTheme.WHITE_MODE -> AppTheme.WHITE_MODE
+        AppTheme.STANDARD_DARK -> AppTheme.STANDARD_DARK
+        AppTheme.DARK_MODE -> AppTheme.DARK_MODE
+    }
+}
+
 @Composable
 fun GlassCalcTheme(
     selectedTheme: AppTheme = AppTheme.AUTOMATIC,
     simulatedApiLevel: Int = Build.VERSION.SDK_INT,
+    powerSaveModeOverride: Boolean? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val systemDark = isSystemInDarkTheme()
     val effectiveApi = simulatedApiLevel
 
-    // 1. Handle Fallback for Material You if not supported
-    val themeAfterFallback = when (selectedTheme) {
-        AppTheme.MATERIAL_YOU -> if (effectiveApi >= 31) AppTheme.MATERIAL_YOU else AppTheme.AUTOMATIC
-        else -> selectedTheme
+    val powerManager = remember(context) {
+        runCatching {
+            context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        }.getOrNull()
     }
 
-    // 2. Fully resolve AUTOMATIC to a concrete theme
-    val resolvedTheme = if (themeAfterFallback == AppTheme.AUTOMATIC) {
-        if (systemDark) AppTheme.STANDARD_DARK else AppTheme.WHITE_MODE
-    } else {
-        themeAfterFallback
+    var systemPowerSaveMode by remember(powerManager) {
+        mutableStateOf(
+            runCatching { powerManager?.isPowerSaveMode == true }.getOrDefault(false)
+        )
     }
 
-    val isAmoled = resolvedTheme == AppTheme.AMOLED_DARK
+    DisposableEffect(context, lifecycleOwner, powerManager, powerSaveModeOverride) {
+        if (powerSaveModeOverride != null || powerManager == null) {
+            onDispose { }
+        } else {
+            val refreshPowerSaveState = {
+                systemPowerSaveMode = runCatching { powerManager.isPowerSaveMode }.getOrDefault(false)
+            }
+            refreshPowerSaveState()
+
+            val powerSaveReceiver = object : BroadcastReceiver() {
+                override fun onReceive(ctx: Context?, intent: Intent?) {
+                    if (intent?.action == PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) {
+                        refreshPowerSaveState()
+                    }
+                }
+            }
+
+            val receiverRegistered = runCatching {
+                ContextCompat.registerReceiver(
+                    context,
+                    powerSaveReceiver,
+                    IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
+            }.isSuccess
+
+            val lifecycleObserver = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    refreshPowerSaveState()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+
+            onDispose {
+                if (receiverRegistered) {
+                    runCatching { context.unregisterReceiver(powerSaveReceiver) }
+                }
+                lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
+            }
+        }
+    }
+
+    val isPowerSaveMode = powerSaveModeOverride ?: systemPowerSaveMode
+
+    val resolvedTheme = resolveEffectiveTheme(
+        selectedTheme = selectedTheme,
+        systemDark = systemDark,
+        isPowerSaveMode = isPowerSaveMode,
+        effectiveApiLevel = effectiveApi
+    )
+
     val isTiefschwarz = resolvedTheme == AppTheme.DARK_MODE
     val isMaterialYou = resolvedTheme == AppTheme.MATERIAL_YOU
     val isDark = when (resolvedTheme) {
-        AppTheme.DARK_MODE, AppTheme.AMOLED_DARK, AppTheme.STANDARD_DARK -> true
+        AppTheme.DARK_MODE, AppTheme.STANDARD_DARK -> true
         AppTheme.MATERIAL_YOU -> systemDark
         else -> false
     }
@@ -171,7 +261,6 @@ fun GlassCalcTheme(
                 if (systemDark) DarkColorScheme else LightColorScheme
             }
         }
-        isAmoled -> AmoledColorScheme
         isTiefschwarz -> TiefschwarzColorScheme
         resolvedTheme == AppTheme.STANDARD_DARK -> DarkColorScheme.copy(
             background = Color(0xFF1A1C1E),
@@ -205,22 +294,12 @@ fun GlassCalcTheme(
                 )
             }
         }
-        isAmoled -> {
-            // AMOLED: Pure black with very subtle deep dark blue gradient at the top/bottom
-            Brush.verticalGradient(
-                listOf(
-                    Color(0xFF000000),
-                    Color(0xFF020408),
-                    Color(0xFF000000)
-                )
-            )
-        }
         isTiefschwarz -> {
-            // Tiefschwarz: Pure deep black
+            // Tiefschwarz (Deep Black): Pure #000000 OLED black
             Brush.verticalGradient(
                 listOf(
                     Color(0xFF000000),
-                    Color(0xFF050505),
+                    Color(0xFF030303),
                     Color(0xFF000000)
                 )
             )
@@ -236,7 +315,7 @@ fun GlassCalcTheme(
             )
         }
         isDark -> {
-            // Dark Mode: Deep #0A0A0A with atmospheric midnight indigo & cyan glows
+            // Dark Mode fallback: Deep #0A0A0A with atmospheric midnight indigo & cyan glows
             Brush.verticalGradient(
                 listOf(
                     Color(0xFF0A0A0A),
@@ -259,11 +338,9 @@ fun GlassCalcTheme(
         }
     }
 
-    // Button alphas: For AMOLED, 10-15% white (0.13f) as requested so they remain visible
     val buttonAlpha = when {
         isMaterialYou -> if (isDark) 0.35f else 0.65f
-        isAmoled -> 0.14f
-        isTiefschwarz -> 0.12f
+        isTiefschwarz -> 0.13f
         resolvedTheme == AppTheme.STANDARD_DARK -> 0.12f
         isDark -> 0.08f
         else -> 0.65f
@@ -271,15 +348,14 @@ fun GlassCalcTheme(
 
     val buttonBorderColor = when {
         isMaterialYou -> colorScheme.outline.copy(alpha = if (isDark) 0.30f else 0.20f)
-        isAmoled -> Color.White.copy(alpha = 0.28f)
-        isTiefschwarz -> Color.White.copy(alpha = 0.20f)
+        isTiefschwarz -> Color.White.copy(alpha = 0.22f)
         isDark -> Color.White.copy(alpha = 0.18f)
         else -> Color.Black.copy(alpha = 0.08f)
     }
 
     val cardBackground = when {
         isMaterialYou -> colorScheme.surfaceVariant.copy(alpha = if (isDark) 0.35f else 0.60f)
-        isAmoled || isTiefschwarz -> Color.Black
+        isTiefschwarz -> Color.Black
         isDark -> Color.White.copy(alpha = 0.06f)
         else -> Color.White.copy(alpha = 0.75f)
     }
@@ -291,7 +367,6 @@ fun GlassCalcTheme(
         cardBackground,
         isDark,
         isTiefschwarz,
-        isAmoled,
         isMaterialYou,
         supportsBlur,
         supportsPredictiveBack,
@@ -304,7 +379,6 @@ fun GlassCalcTheme(
             cardBackground = cardBackground,
             isDark = isDark,
             isTiefschwarz = isTiefschwarz,
-            isAmoled = isAmoled,
             isMaterialYou = isMaterialYou,
             supportsBlur = supportsBlur,
             supportsPredictiveBack = supportsPredictiveBack,
