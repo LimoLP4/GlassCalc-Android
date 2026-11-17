@@ -38,7 +38,11 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Search Improvements (v1.2.9):** Better keyword matching and relevance sorting in all three search bars.
 *   **Graph System Overhaul (v1.3.0):** Completely rewrote the screen-to-math coordinate transformation for accurate point placement (P1/P2) and strict domain enforcement.
 *   **Keyboard Toggle & Landscape Fix (v1.3.0):** The keyboard button now opens and closes the keyboard. Fixed landscape layout where the keyboard covered the display.
-*   **UI Polish (v1.3.0) (Latest):** Applied Liquid Glass pill styling to the graph's P1/P2 info panel, GitHub logo, and Apache License card.
+*   **UI Polish (v1.3.0):** Applied Liquid Glass pill styling to the graph's P1/P2 info panel, GitHub logo, and Apache License card.
+*   **Liquid Glass History Overhaul (v1.3.1):** Redesigned the History panel into a modern, floating pill-shaped container with seamless theme integration, an intuitive "X" close button with custom haptics, and outside-click (scrim) dismissal.
+*   **UI State Persistence & Rotation Fixes (v1.3.1):** Implemented `rememberSaveable` across the Hamburger Menu, History Panel, Settings Dialog, Unit Converter, and Graph Dialog to preserve active states during device rotation.
+*   **Landscape & Navigation Polish (v1.3.1):** Added smooth sizing transitions for landscape keyboards on narrow displays and ensured proper system window insets so the classic 3-button navigation bar never obscures header actions.
+*   **Robust Math & Engine Core (v1.3.1) (Latest):** Integrated crash-proof `evaluateSafely` protection layers for integrals and expanded unit conversions down to the Planck length.
 
 ## 🌍 Localization / Sprache
 
