@@ -280,20 +280,32 @@ private fun GlassDisplayContent(
     )
 
     val copiedToastTemplate = stringResource(R.string.toast_copied, "__GLASSCALC_VAL__")
+    val currentExpression by rememberUpdatedState(expression)
+    val currentResult by rememberUpdatedState(result)
+    val currentCursorPosition by rememberUpdatedState(cursorPosition)
+    val currentOnExpressionChange by rememberUpdatedState(onExpressionChange)
+    val currentOnCursorPositionChanged by rememberUpdatedState(onCursorPositionChanged)
+    val currentOnEvaluate by rememberUpdatedState(onEvaluate)
+    val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+    val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
 
-    fun performCopy() {
-        val textToCopy = if (result.isNotEmpty() && result != "0") result else if (expression.isNotEmpty()) expression else result
-        if (textToCopy.isNotEmpty()) {
-            try {
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-                if (clipboard != null) {
-                    val clip = ClipData.newPlainText("GlassCalc", textToCopy)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, copiedToastTemplate.replace("__GLASSCALC_VAL__", textToCopy), Toast.LENGTH_SHORT).show()
-                    isCopyFlashed = true
+    val performCopy = remember(context, copiedToastTemplate) {
+        {
+            val exprSnap = currentExpression
+            val resSnap = currentResult
+            val textToCopy = if (resSnap.isNotEmpty() && resSnap != "0") resSnap else if (exprSnap.isNotEmpty()) exprSnap else resSnap
+            if (textToCopy.isNotEmpty()) {
+                try {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                    if (clipboard != null) {
+                        val clip = ClipData.newPlainText("GlassCalc", textToCopy)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, copiedToastTemplate.replace("__GLASSCALC_VAL__", textToCopy), Toast.LENGTH_SHORT).show()
+                        isCopyFlashed = true
+                    }
+                } catch (_: Exception) {
+                    // Ignore silent failures for clipboard in release
                 }
-            } catch (e: Exception) {
-                // Ignore silent failures for clipboard in release
             }
         }
     }
@@ -519,6 +531,17 @@ private fun GlassDisplayContent(
 
                     // Copy indicator button in corner (Pill Glass Design)
                     val copyBtnInteraction = remember { MutableInteractionSource() }
+                    val onCopyClick = remember(context, view, performCopy) {
+                        {
+                            HapticUtil.performAppHaptic(
+                                context = context,
+                                view = view,
+                                enabled = currentHapticEnabled,
+                                intensityLevel = currentHapticIntensity
+                            )
+                            performCopy()
+                        }
+                    }
                     GlassSurface(
                         shape = RoundedCornerShape(50),
                         customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -527,15 +550,7 @@ private fun GlassDisplayContent(
                         modifier = Modifier.pressScale(copyBtnInteraction)
                     ) {
                         IconButton(
-                            onClick = {
-                                HapticUtil.performAppHaptic(
-                                    context = context,
-                                    view = view,
-                                    enabled = hapticFeedbackEnabled,
-                                    intensityLevel = hapticIntensity
-                                )
-                                performCopy()
-                            },
+                            onClick = onCopyClick,
                             interactionSource = copyBtnInteraction,
                             modifier = Modifier
                                 .size(32.dp)
@@ -557,6 +572,36 @@ private fun GlassDisplayContent(
             val safeSelection = cursorPosition.coerceIn(0, expression.length)
             val exprFontSize = animatedExprFontSp.sp
             val accentCursorColor = MaterialTheme.colorScheme.primary
+            val keyboardOptions = remember {
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    autoCorrectEnabled = false,
+                    imeAction = ImeAction.Done
+                )
+            }
+            val keyboardActions = remember(focusManager, keyboardController) {
+                KeyboardActions(
+                    onDone = {
+                        isKeyboardActive = false
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                        currentOnEvaluate()
+                    }
+                )
+            }
+            val onTextValueChange = remember {
+                { newValue: TextFieldValue ->
+                    val (filteredText, filteredCursor) = filterCalculatorExpression(
+                        text = newValue.text,
+                        cursorPosition = newValue.selection.start
+                    )
+                    if (filteredText != currentExpression) {
+                        currentOnExpressionChange(filteredText, filteredCursor)
+                    } else if (filteredCursor != currentCursorPosition) {
+                        currentOnCursorPositionChanged(filteredCursor)
+                    }
+                }
+            }
 
             InterceptPlatformTextInput(
                 interceptor = { request, nextHandler ->
@@ -571,31 +616,10 @@ private fun GlassDisplayContent(
                         text = expression,
                         selection = TextRange(safeSelection)
                     ),
-                    onValueChange = { newValue ->
-                        val (filteredText, filteredCursor) = filterCalculatorExpression(
-                            text = newValue.text,
-                            cursorPosition = newValue.selection.start
-                        )
-                        if (filteredText != expression) {
-                            onExpressionChange(filteredText, filteredCursor)
-                        } else if (filteredCursor != cursorPosition) {
-                            onCursorPositionChanged(filteredCursor)
-                        }
-                    },
+                    onValueChange = onTextValueChange,
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Ascii,
-                        autoCorrectEnabled = false,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            isKeyboardActive = false
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                            onEvaluate()
-                        }
-                    ),
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
                     textStyle = TextStyle(
                         fontSize = exprFontSize,
                         fontWeight = FontWeight.Normal,

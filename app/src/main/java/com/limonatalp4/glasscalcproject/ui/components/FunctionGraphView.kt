@@ -54,6 +54,7 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,7 +89,9 @@ import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mariuszgromada.math.mxparser.Argument
 import org.mariuszgromada.math.mxparser.Expression
@@ -541,9 +544,12 @@ fun FunctionGraphView(
     val currentIsGraphLocked by rememberUpdatedState(isGraphLocked)
     val currentHapticEnabled by rememberUpdatedState(hapticEnabled)
     val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
+    val coroutineScope = rememberCoroutineScope()
+    var tapEvalJob by remember { mutableStateOf<Job?>(null) }
 
     // Auto-bounds and point reset on preset or angleMode change
     LaunchedEffect(selectedPreset, angleMode) {
+        tapEvalJob?.cancel()
         val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
         xMin = bounds.xMin
         xMax = bounds.xMax
@@ -660,6 +666,7 @@ fun FunctionGraphView(
 
     fun resetView() {
         if (currentIsGraphLocked) return
+        tapEvalJob?.cancel()
         val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
         xMin = bounds.xMin
         xMax = bounds.xMax
@@ -671,56 +678,64 @@ fun FunctionGraphView(
         triggerClickHaptic()
     }
 
-    // 2. CORRECT CALCULATION OF POINTS (P1/P2): X from tap using screenToMath, Y strictly from function evaluation
+    // 2. CORRECT CALCULATION OF POINTS (P1/P2): X from tap using screenToMath, Y strictly from function evaluation on Dispatchers.Default
     fun tryPlacePointAtTap(tapOffset: Offset, canvasWidth: Float, canvasHeight: Float) {
-        try {
-            if (currentIsGraphLocked || canvasWidth <= 0f || canvasHeight <= 0f) return
+        if (currentIsGraphLocked || canvasWidth <= 0f || canvasHeight <= 0f) return
 
-            // Use screenToMath to get exact math coordinates from tap
-            val mathPoint = screenToMath(
-                offsetX = tapOffset.x,
-                offsetY = tapOffset.y,
-                width = canvasWidth,
-                height = canvasHeight,
-                xMin = xMin,
-                xMax = xMax,
-                yMin = yMin,
-                yMax = yMax
-            )
+        val mathPoint = screenToMath(
+            offsetX = tapOffset.x,
+            offsetY = tapOffset.y,
+            width = canvasWidth,
+            height = canvasHeight,
+            xMin = xMin,
+            xMax = xMax,
+            yMin = yMin,
+            yMax = yMax
+        )
 
-            val tappedX = mathPoint.x
-            val formula = resolveActiveFormula(currentPreset, currentExpression)
-            val evaluatedY = evaluateFormulaAtX(formula, tappedX, currentAngleMode)
+        val tappedX = mathPoint.x
+        val formula = resolveActiveFormula(currentPreset, currentExpression)
+        val mode = currentAngleMode
 
-            if (evaluatedY != null && evaluatedY.isFinite()) {
-                val newPoint = GraphPoint(tappedX, evaluatedY)
-                when {
-                    point1 == null -> {
-                        point1 = newPoint
-                        nextPointIndex = 2
-                    }
-                    point2 == null -> {
-                        point2 = newPoint
-                        nextPointIndex = 1
-                    }
-                    nextPointIndex == 1 -> {
-                        point1 = newPoint
-                        nextPointIndex = 2
-                    }
-                    else -> {
-                        point2 = newPoint
-                        nextPointIndex = 1
-                    }
+        tapEvalJob?.cancel()
+        tapEvalJob = coroutineScope.launch {
+            try {
+                val evaluatedY = withContext(Dispatchers.Default) {
+                    evaluateFormulaAtX(formula, tappedX, mode)
                 }
-                HapticUtil.performAppHaptic(
-                    localContext,
-                    view,
-                    currentHapticEnabled,
-                    currentHapticIntensity
-                )
+
+                if (!currentIsGraphLocked && evaluatedY != null && evaluatedY.isFinite()) {
+                    val newPoint = GraphPoint(tappedX, evaluatedY)
+                    when {
+                        point1 == null -> {
+                            point1 = newPoint
+                            nextPointIndex = 2
+                        }
+                        point2 == null -> {
+                            point2 = newPoint
+                            nextPointIndex = 1
+                        }
+                        nextPointIndex == 1 -> {
+                            point1 = newPoint
+                            nextPointIndex = 2
+                        }
+                        else -> {
+                            point2 = newPoint
+                            nextPointIndex = 1
+                        }
+                    }
+                    HapticUtil.performAppHaptic(
+                        localContext,
+                        view,
+                        currentHapticEnabled,
+                        currentHapticIntensity
+                    )
+                }
+            } catch (ce: CancellationException) {
+                throw ce
+            } catch (_: Throwable) {
+                // Schutz gegen unerwartete Rechen- oder Zustandsfehler beim Punktsetzen
             }
-        } catch (_: Throwable) {
-            // Schutz gegen unerwartete Rechen- oder Zustandsfehler beim Punktsetzen
         }
     }
 
@@ -760,12 +775,20 @@ fun FunctionGraphView(
                 ) {
                     GraphPreset.entries.forEach { preset ->
                         val isSelected = selectedPreset == preset
+                        val onPresetClick = remember(preset) {
+                            {
+                                selectedPreset = preset
+                                HapticUtil.performAppHaptic(
+                                    localContext,
+                                    view,
+                                    currentHapticEnabled,
+                                    currentHapticIntensity
+                                )
+                            }
+                        }
                         FilterChip(
                             selected = isSelected,
-                            onClick = {
-                                selectedPreset = preset
-                                triggerClickHaptic()
-                            },
+                            onClick = onPresetClick,
                             label = {
                                 Text(
                                     text = preset.label,
@@ -1461,6 +1484,7 @@ fun FunctionGraphView(
                             ) {
                                 IconButton(
                                     onClick = {
+                                        tapEvalJob?.cancel()
                                         point1 = null
                                         point2 = null
                                         nextPointIndex = 1

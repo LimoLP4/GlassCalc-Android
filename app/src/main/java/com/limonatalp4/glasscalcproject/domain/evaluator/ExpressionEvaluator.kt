@@ -1,5 +1,6 @@
 package com.limonatalp4.glasscalcproject.domain.evaluator
 
+import androidx.compose.runtime.Immutable
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import org.mariuszgromada.math.mxparser.Argument
@@ -11,8 +12,11 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.*
 
+@Immutable
 sealed class EvaluationResult {
+    @Immutable
     data class Success(val value: Double, val formatted: String) : EvaluationResult()
+    @Immutable
     data class Error(val messageResId: Int) : EvaluationResult()
 }
 

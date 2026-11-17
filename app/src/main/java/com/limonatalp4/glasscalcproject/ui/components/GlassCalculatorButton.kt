@@ -260,7 +260,6 @@ fun GlassCalculatorButton(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .clip(CircleShape)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(

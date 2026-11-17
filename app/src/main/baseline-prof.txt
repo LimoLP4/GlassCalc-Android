@@ -1,6 +1,38 @@
-HScom/limonatalp4/glasscalcproject/MainActivity
-CLcom/limonatalp4/glasscalcproject/MainActivity
-PLcom/limonatalp4/glasscalcproject/MainActivity->onCreate(Landroid/os/Bundle;)V
-CLcom/limonatalp4/glasscalcproject/GlassCalcApplication
-CLcom/limonatalp4/glasscalcproject/ui/viewmodel/CalculatorViewModel
-CLcom/limonatalp4/glasscalcproject/ui/screens/CalculatorScreenKt
+# Baseline Profile for GlassCalc Startup & Critical User Journeys (ART HRF)
+
+# Application & Activity startup classes
+Lcom/limonatalp4/glasscalcproject/GlassCalcApplication;
+Lcom/limonatalp4/glasscalcproject/MainActivity;
+Lcom/limonatalp4/glasscalcproject/MainActivityKt;
+
+# Theme & Design tokens
+Lcom/limonatalp4/glasscalcproject/ui/theme/ThemeKt;
+Lcom/limonatalp4/glasscalcproject/ui/theme/GlassThemeProperties;
+Lcom/limonatalp4/glasscalcproject/ui/theme/ColorKt;
+Lcom/limonatalp4/glasscalcproject/ui/theme/TypeKt;
+
+# Core UI screens & calculator components
+Lcom/limonatalp4/glasscalcproject/ui/screens/CalculatorScreenKt;
+Lcom/limonatalp4/glasscalcproject/ui/components/GlassDisplayKt;
+Lcom/limonatalp4/glasscalcproject/ui/components/GlassCalculatorButtonKt;
+Lcom/limonatalp4/glasscalcproject/ui/components/LiquidGlassWrapperKt;
+Lcom/limonatalp4/glasscalcproject/ui/components/MotionPrimitivesKt;
+Lcom/limonatalp4/glasscalcproject/ui/components/FunctionGraphViewKt;
+
+# State, domain evaluation & persistence
+Lcom/limonatalp4/glasscalcproject/ui/viewmodel/CalculatorViewModel;
+Lcom/limonatalp4/glasscalcproject/domain/evaluator/ExpressionEvaluator;
+
+# Startup & hot methods across GlassCalc
+HSPLcom/limonatalp4/glasscalcproject/GlassCalcApplication;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/MainActivity;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/MainActivityKt;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/theme/**;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/screens/CalculatorScreenKt;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/components/GlassDisplayKt;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/components/GlassCalculatorButtonKt;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/components/LiquidGlassWrapperKt;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/components/FunctionGraphViewKt;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/ui/viewmodel/CalculatorViewModel;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/domain/evaluator/ExpressionEvaluator;->**(**)**
+HSPLcom/limonatalp4/glasscalcproject/data/**;->**(**)**

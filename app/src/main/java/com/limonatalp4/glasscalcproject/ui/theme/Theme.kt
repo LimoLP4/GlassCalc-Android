@@ -9,12 +9,15 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 
+@Immutable
 data class GlassThemeProperties(
     val backgroundBrush: Brush,
     val buttonBackgroundAlpha: Float,
@@ -281,19 +284,33 @@ fun GlassCalcTheme(
         else -> Color.White.copy(alpha = 0.75f)
     }
 
-    val glassProps = GlassThemeProperties(
-        backgroundBrush = backgroundBrush,
-        buttonBackgroundAlpha = buttonAlpha,
-        buttonBorderColor = buttonBorderColor,
-        cardBackground = cardBackground,
-        isDark = isDark,
-        isTiefschwarz = isTiefschwarz,
-        isAmoled = isAmoled,
-        isMaterialYou = isMaterialYou,
-        supportsBlur = supportsBlur,
-        supportsPredictiveBack = supportsPredictiveBack,
-        effectiveApiLevel = effectiveApi
-    )
+    val glassProps = remember(
+        backgroundBrush,
+        buttonAlpha,
+        buttonBorderColor,
+        cardBackground,
+        isDark,
+        isTiefschwarz,
+        isAmoled,
+        isMaterialYou,
+        supportsBlur,
+        supportsPredictiveBack,
+        effectiveApi
+    ) {
+        GlassThemeProperties(
+            backgroundBrush = backgroundBrush,
+            buttonBackgroundAlpha = buttonAlpha,
+            buttonBorderColor = buttonBorderColor,
+            cardBackground = cardBackground,
+            isDark = isDark,
+            isTiefschwarz = isTiefschwarz,
+            isAmoled = isAmoled,
+            isMaterialYou = isMaterialYou,
+            supportsBlur = supportsBlur,
+            supportsPredictiveBack = supportsPredictiveBack,
+            effectiveApiLevel = effectiveApi
+        )
+    }
 
     CompositionLocalProvider(LocalGlassProperties provides glassProps) {
         MaterialTheme(

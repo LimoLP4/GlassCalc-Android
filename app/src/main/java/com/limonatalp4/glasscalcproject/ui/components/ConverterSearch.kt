@@ -48,13 +48,14 @@ import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -347,52 +348,59 @@ fun UnitSuggestionsDropdown(
             else -> colorScheme.outline.copy(alpha = 0.25f)
         }
     ) {
-        Column(
+        val displayedSuggestions = remember(suggestions) { suggestions.take(8) }
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = if (isImeVisible) 150.dp else 220.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = 4.dp)
+                .heightIn(max = if (isImeVisible) 150.dp else 220.dp),
+            contentPadding = PaddingValues(vertical = 4.dp)
         ) {
-            if (suggestions.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = stringResource(R.string.converter_search_empty),
-                        color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
-                        fontSize = 13.5.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
-            } else {
-                suggestions.take(8).forEachIndexed { index, suggestion ->
-                    if (index > 0) {
-                        HorizontalDivider(
-                            thickness = 0.5.dp,
-                            color = dividerColor,
-                            modifier = Modifier.padding(horizontal = 12.dp)
-                        )
-                    }
+            if (displayedSuggestions.isEmpty()) {
+                item(key = "empty") {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                onSelectSuggestion(suggestion)
-                            }
-                            .padding(horizontal = 16.dp, vertical = 11.dp)
-                            .testTag("unit_suggestion_${suggestion.item.id}"),
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            text = suggestion.localizedName,
-                            fontSize = 14.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = textColor
+                            text = stringResource(R.string.converter_search_empty),
+                            color = if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Normal
                         )
+                    }
+                }
+            } else {
+                itemsIndexed(
+                    items = displayedSuggestions,
+                    key = { _, suggestion -> suggestion.item.id }
+                ) { index, suggestion ->
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        if (index > 0) {
+                            HorizontalDivider(
+                                thickness = 0.5.dp,
+                                color = dividerColor,
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSelectSuggestion(suggestion)
+                                }
+                                .padding(horizontal = 16.dp, vertical = 11.dp)
+                                .testTag("unit_suggestion_${suggestion.item.id}"),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Text(
+                                text = suggestion.localizedName,
+                                fontSize = 14.5.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = textColor
+                            )
+                        }
                     }
                 }
             }

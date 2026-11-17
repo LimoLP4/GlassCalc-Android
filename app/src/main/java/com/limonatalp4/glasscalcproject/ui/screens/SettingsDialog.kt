@@ -103,6 +103,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
@@ -279,12 +280,8 @@ fun SettingsDialog(
                     .windowInsetsPadding(
                         WindowInsets.statusBars
                             .union(WindowInsets.displayCutout)
-                            .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-                    )
-                    .windowInsetsPadding(
-                        WindowInsets.ime
+                            .union(WindowInsets.ime)
                             .union(WindowInsets.navigationBars)
-                            .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
                     )
                     .padding(
                         start = 16.dp,
@@ -385,13 +382,23 @@ fun SettingsDialog(
 
                         Spacer(modifier = Modifier.height(if (isImeVisible) 8.dp else 12.dp))
 
-                        val handleTabSelect: (Int) -> Unit = { index ->
-                            triggerHaptic()
-                            if (isSearchActive) {
-                                clearedByTabTap = true
+                        val currentIsSearchActive by rememberUpdatedState(isSearchActive)
+                        val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+                        val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
+                        val handleTabSelect = remember {
+                            { index: Int ->
+                                HapticUtil.performAppHaptic(
+                                    context,
+                                    view,
+                                    currentHapticEnabled,
+                                    currentHapticIntensity
+                                )
+                                if (currentIsSearchActive) {
+                                    clearedByTabTap = true
+                                }
+                                selectedTab = index
+                                searchQuery = ""
                             }
-                            selectedTab = index
-                            searchQuery = ""
                         }
 
                         if (pinTabBar) {
@@ -1839,30 +1846,31 @@ private fun SettingsTabBar(
                         label = "tab_${index}_tint"
                     )
 
-                    Box(
-                        modifier = Modifier
-                            .onSizeChanged { size ->
-                                val w = with(density) { size.width.toDp() }
-                                val h = with(density) { size.height.toDp() }
-                                tabWidths[index] = w
-                                if (h > tabHeight) tabHeight = h
-                            }
-                            .graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
-                            }
-                            .clip(RoundedCornerShape(50.dp))
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onPress = {
-                                        isPressed = true
-                                        try { awaitRelease() } finally { isPressed = false }
-                                    },
-                                    onTap = {
-                                        onSelectTab(index)
+                            val currentOnSelectTab by rememberUpdatedState(onSelectTab)
+                            Box(
+                                modifier = Modifier
+                                    .onSizeChanged { size ->
+                                        val w = with(density) { size.width.toDp() }
+                                        val h = with(density) { size.height.toDp() }
+                                        tabWidths[index] = w
+                                        if (h > tabHeight) tabHeight = h
                                     }
-                                )
-                            }
+                                    .graphicsLayer {
+                                        scaleX = scale
+                                        scaleY = scale
+                                    }
+                                    .clip(RoundedCornerShape(50.dp))
+                                    .pointerInput(index) {
+                                        detectTapGestures(
+                                            onPress = {
+                                                isPressed = true
+                                                try { awaitRelease() } finally { isPressed = false }
+                                            },
+                                            onTap = {
+                                                currentOnSelectTab(index)
+                                            }
+                                        )
+                                    }
                             .padding(vertical = 8.dp, horizontal = 10.dp)
                             .testTag("tab_settings_$index"),
                         contentAlignment = Alignment.Center

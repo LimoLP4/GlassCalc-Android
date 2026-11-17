@@ -16,13 +16,14 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -253,7 +254,7 @@ fun DrawerFormulaSearch(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
@@ -265,50 +266,56 @@ fun DrawerFormulaSearch(
                         shape = dropdownShape
                     )
                     .heightIn(max = if (isImeVisible) 150.dp else 220.dp)
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp)
-                    .testTag("drawer_formula_dropdown")
+                    .testTag("drawer_formula_dropdown"),
+                contentPadding = PaddingValues(vertical = 4.dp)
             ) {
                 if (filteredFormulas.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.formula_search_empty),
-                        color = colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-                    )
+                    item(key = "empty") {
+                        Text(
+                            text = stringResource(R.string.formula_search_empty),
+                            color = colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                        )
+                    }
                 } else {
-                    filteredFormulas.forEachIndexed { index, entry ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .defaultMinSize(minHeight = 48.dp)
-                                .clickable { onFormulaSelected(entry.formula) }
-                                .padding(horizontal = 14.dp, vertical = 10.dp)
-                                .testTag("formula_item_${entry.formula.id}")
-                        ) {
-                            Text(
-                                text = entry.localizedName,
-                                color = colorScheme.onSurface,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = entry.formula.formula,
-                                color = colorScheme.primary,
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        if (index < filteredFormulas.lastIndex) {
-                            HorizontalDivider(
-                                color = colorScheme.outline.copy(alpha = 0.2f),
-                                modifier = Modifier.padding(horizontal = 12.dp)
-                            )
+                    itemsIndexed(
+                        items = filteredFormulas,
+                        key = { _, entry -> entry.formula.id }
+                    ) { index, entry ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .defaultMinSize(minHeight = 48.dp)
+                                    .clickable { onFormulaSelected(entry.formula) }
+                                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                                    .testTag("formula_item_${entry.formula.id}")
+                            ) {
+                                Text(
+                                    text = entry.localizedName,
+                                    color = colorScheme.onSurface,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = entry.formula.formula,
+                                    color = colorScheme.primary,
+                                    fontSize = 12.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            if (index < filteredFormulas.lastIndex) {
+                                HorizontalDivider(
+                                    color = colorScheme.outline.copy(alpha = 0.2f),
+                                    modifier = Modifier.padding(horizontal = 12.dp)
+                                )
+                            }
                         }
                     }
                 }

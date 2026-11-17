@@ -1,11 +1,14 @@
 package com.limonatalp4.glasscalcproject
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -37,7 +40,14 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("btn_add").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("btn_3").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("btn_equals").performScrollTo().performClick()
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("display_result_text")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Text)
+                ?.joinToString("") == "10"
+        }
         composeTestRule.onNodeWithTag("display_result_text").assertTextEquals("10")
 
         // Toggle keyboard via pill button (open -> close -> open), type with blocked chars, evaluate
@@ -52,7 +62,14 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("display_expression_text").performTextInput("2+3@äф")
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("btn_equals").performScrollTo().performClick()
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("display_result_text")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Text)
+                ?.joinToString("") == "5"
+        }
         composeTestRule.onNodeWithTag("display_result_text").assertTextEquals("5")
 
         // Scientific panel & Constants dialog
@@ -126,22 +143,40 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
             click(Offset(80f, 100f))
         }
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("graph_point_1_info").fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.onNodeWithTag("graph_point_1_info").performScrollTo().assertIsDisplayed()
 
         // Tap 2 -> sets P2 and displays slope & distance analysis
         composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
             click(Offset(200f, 100f))
         }
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("graph_point_2_info").fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.onNodeWithTag("graph_point_2_info").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("graph_points_analysis").performScrollTo().assertIsDisplayed()
 
         // Tap 3 -> moves P1 while keeping P2
+        val p1BeforeText = composeTestRule.onAllNodesWithText("P1:", substring = true)
+            .fetchSemanticsNodes()
+            .firstOrNull()
+            ?.config
+            ?.getOrNull(SemanticsProperties.Text)
+            ?.joinToString("")
         composeTestRule.onNodeWithTag("graph_canvas_container").performTouchInput {
             click(Offset(40f, 100f))
         }
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            val currentText = composeTestRule.onAllNodesWithText("P1:", substring = true)
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Text)
+                ?.joinToString("")
+            currentText != null && currentText != p1BeforeText
+        }
         composeTestRule.onNodeWithTag("graph_point_1_info").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("graph_point_2_info").performScrollTo().assertIsDisplayed()
 

@@ -59,6 +59,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onDirectExpressionChange(newExpression: String, newCursorPosition: Int) {
+        equalsJob?.cancel()
         _errorMessage.value = null
         justCalculated = false
         _expression.value = newExpression
@@ -86,6 +87,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     fun importConvertedValue(value: String) {
         val cleaned = value.trim()
         if (cleaned.isEmpty()) return
+        equalsJob?.cancel()
         _errorMessage.value = null
         justCalculated = false
         _expression.value = cleaned
@@ -102,6 +104,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         } else {
             "$xFormatted + $yFormatted"
         }
+        equalsJob?.cancel()
         _errorMessage.value = null
         justCalculated = false
         _expression.value = newExpr
@@ -123,6 +126,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun insertFormula(formulaExpression: String) {
         if (formulaExpression.isBlank()) return
+        equalsJob?.cancel()
         _errorMessage.value = null
         val curr = _expression.value
         val pos = _cursorPosition.value.coerceIn(0, curr.length)
@@ -271,6 +275,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private var justCalculated = false
     private var isHistoryCleared = false
     private var previewJob: Job? = null
+    private var equalsJob: Job? = null
 
     init {
         // Load and observe saved language from DataStore
@@ -362,6 +367,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onCharacterInput(char: String) {
+        equalsJob?.cancel()
         _errorMessage.value = null
 
         var curr = _expression.value
@@ -386,6 +392,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onScientificFunction(fnName: String) {
+        equalsJob?.cancel()
         _errorMessage.value = null
 
         var curr = _expression.value
@@ -415,6 +422,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onConstant(constant: String) {
+        equalsJob?.cancel()
         _errorMessage.value = null
 
         var curr = _expression.value
@@ -433,6 +441,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onPower(exponent: String) {
+        equalsJob?.cancel()
         _errorMessage.value = null
 
         var curr = _expression.value
@@ -462,6 +471,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onFractionSlash() {
+        equalsJob?.cancel()
         _errorMessage.value = null
 
         var curr = _expression.value
@@ -486,6 +496,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onNthRoot() {
+        equalsJob?.cancel()
         _errorMessage.value = null
 
         var curr = _expression.value
@@ -511,6 +522,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onToggleSign() {
+        equalsJob?.cancel()
         _errorMessage.value = null
         justCalculated = false
         val curr = _expression.value
@@ -530,6 +542,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onDelete() {
+        equalsJob?.cancel()
         _errorMessage.value = null
         justCalculated = false
         val curr = _expression.value
@@ -561,6 +574,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onClearAll() {
+        previewJob?.cancel()
+        equalsJob?.cancel()
         _expression.value = ""
         _cursorPosition.value = 1
         _result.value = "0"
@@ -574,29 +589,39 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     fun onEquals() {
         val expr = _expression.value.trim()
         if (expr.isEmpty()) return
+        val mode = angleMode.value
 
-        when (val eval = evaluator.evaluate(expr, angleMode.value)) {
-            is EvaluationResult.Success -> {
-                val formatted = eval.formatted
-                _result.value = formatted
-                _errorMessage.value = null
-                justCalculated = true
-                _cursorPosition.value = _expression.value.length
-
-                val historyItem = CalculationHistoryItem(
-                    expression = expr,
-                    result = formatted
-                )
-                isHistoryCleared = false
-                _history.value = (listOf(historyItem) + _history.value).take(20)
-                viewModelScope.launch(Dispatchers.Default) {
-                    preferences.addHistoryItem(historyItem)
-                    preferences.saveCalculationState(expr, formatted)
-                }
+        previewJob?.cancel()
+        equalsJob?.cancel()
+        equalsJob = viewModelScope.launch {
+            val eval = withContext(Dispatchers.Default) {
+                evaluator.evaluate(expr, mode)
             }
-            is EvaluationResult.Error -> {
-                _result.value = "Error"
-                _errorMessage.value = getApplication<Application>().getString(eval.messageResId)
+            if (_expression.value.trim() != expr) return@launch
+
+            when (eval) {
+                is EvaluationResult.Success -> {
+                    val formatted = eval.formatted
+                    _result.value = formatted
+                    _errorMessage.value = null
+                    justCalculated = true
+                    _cursorPosition.value = _expression.value.length
+
+                    val historyItem = CalculationHistoryItem(
+                        expression = expr,
+                        result = formatted
+                    )
+                    isHistoryCleared = false
+                    _history.value = (listOf(historyItem) + _history.value).take(20)
+                    withContext(Dispatchers.Default) {
+                        preferences.addHistoryItem(historyItem)
+                        preferences.saveCalculationState(expr, formatted)
+                    }
+                }
+                is EvaluationResult.Error -> {
+                    _result.value = "Error"
+                    _errorMessage.value = getApplication<Application>().getString(eval.messageResId)
+                }
             }
         }
     }
@@ -649,6 +674,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun restoreHistoryItem(item: CalculationHistoryItem) {
+        previewJob?.cancel()
+        equalsJob?.cancel()
         _expression.value = item.expression
         _cursorPosition.value = item.expression.length
         _result.value = item.result
@@ -671,6 +698,8 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun resetApp() {
+        previewJob?.cancel()
+        equalsJob?.cancel()
         isHistoryCleared = true
         _history.value = emptyList()
         viewModelScope.launch {

@@ -264,12 +264,8 @@ fun UnitConverterDialog(
                     .windowInsetsPadding(
                         WindowInsets.statusBars
                             .union(WindowInsets.displayCutout)
-                            .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-                    )
-                    .windowInsetsPadding(
-                        WindowInsets.ime
+                            .union(WindowInsets.ime)
                             .union(WindowInsets.navigationBars)
-                            .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
                     )
                     .padding(
                         start = 16.dp,
