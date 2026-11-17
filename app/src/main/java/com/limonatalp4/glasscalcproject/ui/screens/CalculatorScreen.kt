@@ -98,6 +98,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -465,7 +466,7 @@ fun CalculatorScreen(
                             animationSpec = tween(durationMillis = 200)
                         )
                     ) {
-                        val isAmoled = glassProps.isAmoled
+                        val isPureBlack = glassProps.isAmoled || glassProps.isTiefschwarz
                         val drawerBgColor = colorScheme.surfaceContainerHigh
                         val primaryTint = colorScheme.primary
                         val onSurfaceColor = colorScheme.onSurface
@@ -474,7 +475,7 @@ fun CalculatorScreen(
                         val drawerBorder = BorderStroke(
                             width = 1.2.dp,
                             color = when {
-                                isAmoled || glassProps.isAmoled -> Color.White.copy(alpha = 0.28f)
+                                isPureBlack -> Color.White.copy(alpha = 0.28f)
                                 glassProps.isDark -> colorScheme.outline.copy(alpha = 0.45f)
                                 else -> colorScheme.onSurface.copy(alpha = 0.25f)
                             }
@@ -487,7 +488,7 @@ fun CalculatorScreen(
                                 .testTag("floating_nav_menu"),
                             shape = RoundedCornerShape(32.dp),
                             borderStroke = drawerBorder,
-                            customBgColor = if (isAmoled) Color.Black else drawerBgColor.copy(alpha = 0.9f),
+                            customBgColor = if (isPureBlack) Color.Black else drawerBgColor.copy(alpha = 0.9f),
                             glassState = glassState
                         ) {
                         Column(
@@ -516,7 +517,7 @@ fun CalculatorScreen(
                                     text = "GlassCalc",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isAmoled) Color.White else onSurfaceColor
+                                    color = if (isPureBlack) Color.White else onSurfaceColor
                                 )
                                 Text(
                                     text = stringResource(R.string.app_version_tag, BuildConfig.VERSION_NAME),
@@ -526,7 +527,7 @@ fun CalculatorScreen(
                                     maxLines = 1
                                 )
                             }
-                            HorizontalDivider(color = (if (isAmoled) Color.White else onSurfaceColor).copy(alpha = 0.08f))
+                            HorizontalDivider(color = (if (isPureBlack) Color.White else onSurfaceColor).copy(alpha = 0.08f))
                             Spacer(modifier = Modifier.height(12.dp))
 
                             DrawerFormulaSearch(
@@ -575,10 +576,10 @@ fun CalculatorScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(32.dp))
-                                    .background(if (isAmoled) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                    .background(if (isPureBlack) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                     .border(
                                         width = 1.dp,
-                                        color = if (isAmoled) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        color = if (isPureBlack) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(32.dp)
                                     )
                                     .padding(horizontal = 2.dp, vertical = 4.dp),
@@ -624,7 +625,7 @@ fun CalculatorScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
-                                            val iconTextTint = if (isAmoled) {
+                                            val iconTextTint = if (isPureBlack) {
                                                 Color.White
                                             } else {
                                                 if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor.copy(alpha = 0.7f)
@@ -643,7 +644,7 @@ fun CalculatorScreen(
                                                 maxLines = 2,
                                                 overflow = TextOverflow.Ellipsis,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isAmoled) Color.White else (if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor)
+                                                color = if (isPureBlack) Color.White else (if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor)
                                             )
                                         }
                                     }
@@ -778,7 +779,8 @@ private fun PortraitCalculatorLayout(
 
     val density = LocalDensity.current
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
-    val isCompactPortrait = isImeVisible && LocalConfiguration.current.screenHeightDp < 640
+    val windowInfo = LocalWindowInfo.current
+    val isCompactPortrait = isImeVisible && with(density) { windowInfo.containerSize.height.toDp() } < 640.dp
 
     Column(
         modifier = Modifier
@@ -1165,10 +1167,10 @@ private fun LandscapeCalculatorLayout(
 @Composable
 private fun ScientificKeyboardGrid(
     actions: CalculatorKeypadActions,
+    modifier: Modifier = Modifier,
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null,
     buttonSize: Dp? = null,
-    spacing: Dp = 6.dp,
-    modifier: Modifier = Modifier
+    spacing: Dp = 6.dp
 ) {
     val sizedButtonModifier = remember(buttonSize) {
         if (buttonSize != null) Modifier.size(buttonSize) else null
@@ -1351,10 +1353,10 @@ private fun ScientificKeyboardGrid(
 @Composable
 private fun MainKeyboardGrid(
     actions: CalculatorKeypadActions,
+    modifier: Modifier = Modifier,
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null,
     buttonSize: Dp? = null,
-    spacing: Dp = 10.dp,
-    modifier: Modifier = Modifier
+    spacing: Dp = 10.dp
 ) {
     val sizedButtonModifier = remember(buttonSize) {
         if (buttonSize != null) Modifier.size(buttonSize) else null

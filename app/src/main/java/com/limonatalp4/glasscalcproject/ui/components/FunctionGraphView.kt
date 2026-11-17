@@ -47,11 +47,13 @@ import androidx.compose.ui.res.stringResource
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -82,7 +84,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.Role
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.domain.evaluator.MxParserLock
-import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
+import com.limonatalp4.glasscalcproject.domain.evaluator.SafeMathEvaluator
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
@@ -90,13 +92,11 @@ import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mariuszgromada.math.mxparser.Argument
 import org.mariuszgromada.math.mxparser.Expression
-import org.mariuszgromada.math.mxparser.License
-import org.mariuszgromada.math.mxparser.mXparser
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.floor
@@ -166,11 +166,20 @@ fun mathToScreen(
     yMin: Double,
     yMax: Double
 ): Offset {
+    if (!x.isFinite() || !y.isFinite() || !width.isFinite() || !height.isFinite() || width <= 0f || height <= 0f) {
+        return Offset(Float.NaN, Float.NaN)
+    }
     val xSpan = xMax - xMin
     val ySpan = yMax - yMin
-    val px = if (xSpan > 1e-12) ((x - xMin) / xSpan * width).toFloat() else 0f
-    val py = if (ySpan > 1e-12) (height - ((y - yMin) / ySpan * height)).toFloat() else 0f
-    return Offset(px, py)
+    if (!xSpan.isFinite() || !ySpan.isFinite()) {
+        return Offset(Float.NaN, Float.NaN)
+    }
+    val pxDouble = if (xSpan > 1e-12) ((x - xMin) / xSpan) * width.toDouble() else 0.0
+    val pyDouble = if (ySpan > 1e-12) height.toDouble() - (((y - yMin) / ySpan) * height.toDouble()) else 0.0
+    if (!pxDouble.isFinite() || !pyDouble.isFinite()) {
+        return Offset(Float.NaN, Float.NaN)
+    }
+    return Offset(pxDouble.toFloat(), pyDouble.toFloat())
 }
 
 fun defaultBoundsForPreset(
@@ -431,63 +440,441 @@ internal fun isWithinDomain(sanitizedExpr: String, x: Double): Boolean {
     return true
 }
 
+private data class ParsedGraphIntegral(
+    val integrand: String,
+    val varName: String,
+    val lowerExpr: String,
+    val upperExpr: String
+)
+
+private fun findClosingParen(text: String, openParenIndex: Int): Int {
+    var depth = 1
+    var i = openParenIndex + 1
+    while (i < text.length) {
+        when (text[i]) {
+            '(' -> depth++
+            ')' -> {
+                depth--
+                if (depth == 0) return i
+            }
+        }
+        i++
+    }
+    return -1
+}
+
+private fun splitTopLevelCommaArgs(inner: String): List<String> {
+    val args = mutableListOf<String>()
+    val current = StringBuilder()
+    var depth = 0
+    for (ch in inner) {
+        when (ch) {
+            '(' -> {
+                depth++
+                current.append(ch)
+            }
+            ')' -> {
+                depth--
+                current.append(ch)
+            }
+            ',' -> {
+                if (depth == 0) {
+                    args.add(current.toString().trim())
+                    current.clear()
+                } else {
+                    current.append(ch)
+                }
+            }
+            else -> current.append(ch)
+        }
+    }
+    args.add(current.toString().trim())
+    return args
+}
+
+private fun parseIntegralCall(inner: String): ParsedGraphIntegral? {
+    val args = splitTopLevelCommaArgs(inner)
+    val varPattern = Regex("""^[a-zA-Z_][a-zA-Z0-9_]*$""")
+    return when (args.size) {
+        4 -> {
+            if (args[0].isBlank() || !varPattern.matches(args[1])) null
+            else ParsedGraphIntegral(args[0], args[1], args[2], args[3])
+        }
+        3 -> {
+            if (args[0].isBlank()) null
+            else ParsedGraphIntegral(args[0], "x", args[1], args[2])
+        }
+        1 -> {
+            if (args[0].isBlank()) null
+            else ParsedGraphIntegral(args[0], "x", "0", "1")
+        }
+        else -> null
+    }
+}
+
+private fun extractTopLevelCumulativeIntegral(sanitizedExpr: String): ParsedGraphIntegral? {
+    val trimmed = sanitizedExpr.trim()
+    if (!trimmed.startsWith("int(") || !trimmed.endsWith(")")) return null
+    if (findClosingParen(trimmed, 3) != trimmed.length - 1) return null
+    val parsed = parseIntegralCall(trimmed.substring(4, trimmed.length - 1)) ?: return null
+    if (!parsed.upperExpr.trim().equals("x", ignoreCase = true)) return null
+    return parsed
+}
+
+/**
+ * Resolves any bounded int(...) tokens at a given x using SafeMathEvaluator.integrateBounded,
+ * strictly enforcing max 1000 subintervals, overflow checks, and pole/singularity detection.
+ */
+private fun resolveGraphIntegralsAtX(
+    sanitizedExpr: String,
+    x: Double,
+    angleMode: AngleMode,
+    checkActive: () -> Unit = {}
+): String? {
+    if (!sanitizedExpr.contains("int(")) return sanitizedExpr
+    val sb = StringBuilder()
+    var i = 0
+    while (i < sanitizedExpr.length) {
+        checkActive()
+        if (sanitizedExpr.startsWith("int(", i) && (i == 0 || !sanitizedExpr[i - 1].isLetterOrDigit())) {
+            val openParen = i + 3
+            val closeParen = findClosingParen(sanitizedExpr, openParen)
+            if (closeParen == -1) return null
+            val parsed = parseIntegralCall(sanitizedExpr.substring(openParen + 1, closeParen)) ?: return null
+
+            val resolvedInnerIntegrand = resolveGraphIntegralsAtX(parsed.integrand, x, angleMode, checkActive)
+                ?: return null
+            val resolvedLower = resolveGraphIntegralsAtX(parsed.lowerExpr, x, angleMode, checkActive)
+                ?: return null
+            val resolvedUpper = resolveGraphIntegralsAtX(parsed.upperExpr, x, angleMode, checkActive)
+                ?: return null
+
+            val lowerVal = SafeMathEvaluator.safeEvaluateWithVar(resolvedLower, "x", x, angleMode)
+                ?: return null
+            val upperVal = SafeMathEvaluator.safeEvaluateWithVar(resolvedUpper, "x", x, angleMode)
+                ?: return null
+
+            val integralValue = SafeMathEvaluator.integrateBounded(
+                integrandSanitized = resolvedInnerIntegrand,
+                varName = parsed.varName,
+                a = lowerVal,
+                b = upperVal,
+                angleMode = angleMode,
+                maxSteps = SafeMathEvaluator.MAX_INTEGRAL_STEPS,
+                maxAbs = SafeMathEvaluator.MAX_SAFE_VALUE,
+                checkActive = checkActive
+            ) ?: return null
+
+            sb.append('(').append(integralValue).append(')')
+            i = closeParen + 1
+        } else {
+            sb.append(sanitizedExpr[i])
+            i++
+        }
+    }
+    return sb.toString()
+}
+
 internal fun evaluateFormulaAtX(
     formula: String,
     x: Double,
-    angleMode: AngleMode
+    angleMode: AngleMode,
+    checkActive: () -> Unit = {}
 ): Double? {
-    if (!x.isFinite()) return null
+    checkActive()
+    if (!SafeMathEvaluator.isSafeValue(x)) return null
     val sanitizedExpr = sanitizeForGraphParser(formula)
     if (!isWithinDomain(sanitizedExpr, x)) return null
+
     return try {
-        val y = synchronized(MxParserLock) {
-            try {
-                License.iConfirmNonCommercialUse("limonatalp4")
-            } catch (_: Exception) {}
+        val resolvedExpr = resolveGraphIntegralsAtX(sanitizedExpr, x, angleMode, checkActive)
+            ?: return null
 
-            val lower = sanitizedExpr.lowercase()
-            val hasTrig = lower.contains("sin") || lower.contains("cos") || lower.contains("tan")
-            if (angleMode == AngleMode.DEG && hasTrig && !sanitizedExpr.startsWith("der(")) {
-                mXparser.setDegreesMode()
-            } else {
-                mXparser.setRadiansMode()
-            }
-
-            val argX = Argument("x = 0")
-            argX.argumentValue = x
-            val expr = Expression(sanitizedExpr, argX)
-            var result = expr.calculate()
-
-            // Numerical central difference fallback if mXparser returned NaN for derivative
-            if ((!result.isFinite() || result.isNaN()) && sanitizedExpr.startsWith("der(")) {
-                val match = Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr)
-                if (match != null) {
-                    val fn = match.groupValues[1]
-                    val varName = match.groupValues[2]
-                    val h = 1e-5
-                    val subArg = Argument("$varName = 0")
-                    val subExpr = Expression(fn, subArg)
-                    subArg.argumentValue = x + h
-                    val yPlus = subExpr.calculate()
-                    subArg.argumentValue = x - h
-                    val yMinus = subExpr.calculate()
-                    if (yPlus.isFinite() && yMinus.isFinite()) {
-                        result = (yPlus - yMinus) / (2.0 * h)
-                    }
-                }
-            }
-
-            result
-        }
-
-        if (!y.isFinite() || abs(y) > 1e8) {
-            null
+        val lower = resolvedExpr.lowercase()
+        val hasTrig = lower.contains("sin") || lower.contains("cos") || lower.contains("tan")
+        val isDeriv = resolvedExpr.startsWith("der(")
+        val effectiveAngleMode = if (angleMode == AngleMode.DEG && hasTrig && !isDeriv) {
+            AngleMode.DEG
         } else {
-            y
+            AngleMode.RAD
         }
+
+        val y = SafeMathEvaluator.safeEvaluateWithVar(
+            sanitizedExpression = resolvedExpr,
+            varName = "x",
+            x = x,
+            angleMode = effectiveAngleMode,
+            maxAbs = SafeMathEvaluator.MAX_SAFE_VALUE
+        )
+        if (y != null) return y
+
+        // Numerical central difference fallback if mXparser returned null/NaN for derivative
+        if (isDeriv) {
+            val match = Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(resolvedExpr)
+            if (match != null) {
+                val fn = match.groupValues[1]
+                val varName = match.groupValues[2]
+                val h = 1e-5
+                val yCenter = SafeMathEvaluator.safeEvaluateWithVar(fn, varName, x, effectiveAngleMode)
+                    ?: return null
+                if (!SafeMathEvaluator.isSafeValue(yCenter)) return null
+                val yPlus = SafeMathEvaluator.safeEvaluateWithVar(fn, varName, x + h, effectiveAngleMode)
+                    ?: return null
+                val yMinus = SafeMathEvaluator.safeEvaluateWithVar(fn, varName, x - h, effectiveAngleMode)
+                    ?: return null
+                val deriv = (yPlus - yMinus) / (2.0 * h)
+                return if (SafeMathEvaluator.isSafeValue(deriv)) deriv else null
+            }
+        }
+        null
+    } catch (ce: CancellationException) {
+        throw ce
     } catch (_: Throwable) {
         null
     }
+}
+
+internal fun computeGraphCurvePoints(
+    preset: GraphPreset,
+    expression: String,
+    angleMode: AngleMode,
+    xMin: Double,
+    xMax: Double,
+    checkActive: () -> Unit = {}
+): List<Pair<Double, Double>> {
+    checkActive()
+    if (!SafeMathEvaluator.isSafeValue(xMin) || !SafeMathEvaluator.isSafeValue(xMax) || xMax <= xMin) {
+        return emptyList()
+    }
+    val formulaString = resolveActiveFormula(preset, expression)
+    val sanitizedExpr = sanitizeForGraphParser(formulaString)
+    val xSpan = xMax - xMin
+    if (!xSpan.isFinite() || xSpan <= 0.0) return emptyList()
+
+    val cumulativeIntegral = extractTopLevelCumulativeIntegral(sanitizedExpr)
+    if (cumulativeIntegral != null) {
+        return computeCumulativeIntegralCurve(
+            parsed = cumulativeIntegral,
+            angleMode = angleMode,
+            xMin = xMin,
+            xMax = xMax,
+            xSpan = xSpan,
+            checkActive = checkActive
+        )
+    }
+
+    val containsNonCumulativeIntegral = sanitizedExpr.contains("int(")
+    val maxPoints = if (containsNonCumulativeIntegral) 180 else 1000
+    val minPoints = if (containsNonCumulativeIntegral) 80 else 300
+    val steps = (xSpan * 50).let { if (it.isFinite()) it.toInt() else maxPoints }
+        .coerceIn(minPoints, maxPoints)
+
+    val xSamples = ArrayList<Double>(steps + 5)
+    for (i in 0..steps) {
+        checkActive()
+        xSamples.add(xMin + (i.toDouble() / steps) * xSpan)
+    }
+    val lowerSanitized = sanitizedExpr.lowercase()
+    if (lowerSanitized.contains("asin") || lowerSanitized.contains("acos")) {
+        if (-1.0 in xMin..xMax) xSamples.add(-1.0)
+        if (1.0 in xMin..xMax) xSamples.add(1.0)
+    }
+    if (lowerSanitized.contains("sqrt") && 0.0 in xMin..xMax) {
+        xSamples.add(0.0)
+    }
+    xSamples.sort()
+
+    if (containsNonCumulativeIntegral) {
+        val calculatedList = ArrayList<Pair<Double, Double>>(xSamples.size)
+        for (x in xSamples) {
+            checkActive()
+            val y = evaluateFormulaAtX(formulaString, x, angleMode, checkActive)
+            calculatedList.add(Pair(x, y ?: Double.NaN))
+        }
+        return calculatedList
+    }
+
+    val calculatedList = ArrayList<Pair<Double, Double>>(xSamples.size)
+    val isDeriv = sanitizedExpr.startsWith("der(")
+    val derivMatch = if (isDeriv) Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr) else null
+    val hasTrig = lowerSanitized.contains("sin") || lowerSanitized.contains("cos") || lowerSanitized.contains("tan")
+    val effectiveAngleMode = if (angleMode == AngleMode.DEG && hasTrig && !isDeriv) AngleMode.DEG else AngleMode.RAD
+    val h = 1e-5
+    val batchSize = 30
+
+    for (startIdx in xSamples.indices step batchSize) {
+        checkActive()
+        val endIdx = minOf(startIdx + batchSize, xSamples.size)
+        synchronized(MxParserLock) {
+            SafeMathEvaluator.applyAngleMode(effectiveAngleMode)
+
+            val argX = Argument("x = 0")
+            val expr = Expression(sanitizedExpr, argX)
+            val subArg = derivMatch?.let { Argument("${it.groupValues[2]} = 0") }
+            val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
+
+            for (idx in startIdx until endIdx) {
+                val x = xSamples[idx]
+                if (!SafeMathEvaluator.isSafeValue(x) || !isWithinDomain(sanitizedExpr, x)) {
+                    calculatedList.add(Pair(x, Double.NaN))
+                    continue
+                }
+
+                argX.argumentValue = x
+                var y = SafeMathEvaluator.safeCalculate(expr)
+
+                if (y == null && subExpr != null && subArg != null) {
+                    subArg.argumentValue = x
+                    val yCenter = SafeMathEvaluator.safeCalculate(subExpr)
+                    if (yCenter != null) {
+                        subArg.argumentValue = x + h
+                        val yPlus = SafeMathEvaluator.safeCalculate(subExpr)
+                        subArg.argumentValue = x - h
+                        val yMinus = SafeMathEvaluator.safeCalculate(subExpr)
+                        if (yPlus != null && yMinus != null) {
+                            val deriv = (yPlus - yMinus) / (2.0 * h)
+                            if (SafeMathEvaluator.isSafeValue(deriv)) {
+                                y = deriv
+                            }
+                        }
+                    }
+                }
+
+                calculatedList.add(Pair(x, y ?: Double.NaN))
+            }
+        }
+    }
+    return calculatedList
+}
+
+/**
+ * Bounded O(N) adaptive cumulative integral curve sampler (max 600 steps) that guards against
+ * poles, singularities, overflow, and rapid pan/zoom ANRs.
+ */
+private fun computeCumulativeIntegralCurve(
+    parsed: ParsedGraphIntegral,
+    angleMode: AngleMode,
+    xMin: Double,
+    xMax: Double,
+    xSpan: Double,
+    checkActive: () -> Unit
+): List<Pair<Double, Double>> {
+    checkActive()
+    val lowerStr = parsed.lowerExpr.lowercase()
+    val integrandLower = parsed.integrand.lowercase()
+    val hasTrig = integrandLower.contains("sin") || integrandLower.contains("cos") || integrandLower.contains("tan") ||
+        lowerStr.contains("sin") || lowerStr.contains("cos") || lowerStr.contains("tan")
+    val effectiveAngleMode = if (angleMode == AngleMode.DEG && hasTrig) AngleMode.DEG else AngleMode.RAD
+
+    val a = SafeMathEvaluator.safeEvaluate(parsed.lowerExpr, effectiveAngleMode) ?: return emptyList()
+    if (!SafeMathEvaluator.isSafeValue(a)) return emptyList()
+
+    val steps = (xSpan * 30).let { if (it.isFinite()) it.toInt() else 600 }.coerceIn(200, 600)
+    val xSamples = ArrayList<Double>(steps + 1)
+    for (i in 0..steps) {
+        checkActive()
+        xSamples.add(xMin + (i.toDouble() / steps) * xSpan)
+    }
+
+    val yValues = DoubleArray(xSamples.size) { Double.NaN }
+    val splitIdx = xSamples.indexOfFirst { it >= a }.let { if (it == -1) xSamples.size else it }
+
+    fun integrateDirection(indices: IntProgression) {
+        if (indices.isEmpty()) return
+        var started = false
+        var prevX = a
+        var runningIntegral = 0.0
+        var diverged = false
+
+        val indexList = indices.toList()
+        val batchSize = 30
+        for (start in indexList.indices step batchSize) {
+            checkActive()
+            val end = minOf(start + batchSize, indexList.size)
+            for (pos in start until end) {
+                checkActive()
+                val sampleIdx = indexList[pos]
+                val targetX = xSamples[sampleIdx]
+                if (diverged || !SafeMathEvaluator.isSafeValue(targetX)) {
+                    yValues[sampleIdx] = Double.NaN
+                    continue
+                }
+
+                if (!started) {
+                    val anchor = SafeMathEvaluator.integrateBounded(
+                        integrandSanitized = parsed.integrand,
+                        varName = parsed.varName,
+                        a = a,
+                        b = targetX,
+                        angleMode = effectiveAngleMode,
+                        maxSteps = 400,
+                        maxAbs = SafeMathEvaluator.MAX_SAFE_VALUE,
+                        checkActive = checkActive
+                    )
+                    if (anchor == null) {
+                        diverged = true
+                        yValues[sampleIdx] = Double.NaN
+                    } else {
+                        runningIntegral = anchor
+                        prevX = targetX
+                        started = true
+                        yValues[sampleIdx] = anchor
+                    }
+                    continue
+                }
+
+                val dx = targetX - prevX
+                if (!dx.isFinite() || dx == 0.0) {
+                    yValues[sampleIdx] = runningIntegral
+                    continue
+                }
+
+                val segValid = synchronized(MxParserLock) {
+                    SafeMathEvaluator.applyAngleMode(effectiveAngleMode)
+                    val arg = Argument("${parsed.varName} = 0")
+                    val expr = Expression(parsed.integrand, arg)
+
+                    arg.argumentValue = prevX
+                    val y0 = SafeMathEvaluator.safeCalculate(expr) ?: return@synchronized false
+                    val midX = 0.5 * (prevX + targetX)
+                    arg.argumentValue = midX
+                    val yMid = SafeMathEvaluator.safeCalculate(expr) ?: return@synchronized false
+                    arg.argumentValue = targetX
+                    val y1 = SafeMathEvaluator.safeCalculate(expr) ?: return@synchronized false
+
+                    if (SafeMathEvaluator.hasPoleBetweenSamples(expr, arg, prevX, y0, midX, yMid) ||
+                        SafeMathEvaluator.hasPoleBetweenSamples(expr, arg, midX, yMid, targetX, y1)
+                    ) {
+                        return@synchronized false
+                    }
+
+                    val seg = (dx / 6.0) * (y0 + 4.0 * yMid + y1)
+                    if (!SafeMathEvaluator.isSafeValue(seg)) return@synchronized false
+                    val nextIntegral = runningIntegral + seg
+                    if (!SafeMathEvaluator.isSafeValue(nextIntegral)) return@synchronized false
+                    runningIntegral = nextIntegral
+                    true
+                }
+
+                if (!segValid) {
+                    diverged = true
+                    yValues[sampleIdx] = Double.NaN
+                } else {
+                    prevX = targetX
+                    yValues[sampleIdx] = runningIntegral
+                }
+            }
+        }
+    }
+
+    if (splitIdx < xSamples.size) {
+        integrateDirection(splitIdx until xSamples.size)
+    }
+    if (splitIdx > 0) {
+        integrateDirection((splitIdx - 1) downTo 0)
+    }
+
+    return xSamples.indices.map { i -> Pair(xSamples[i], yValues[i]) }
 }
 
 @Composable
@@ -536,7 +923,7 @@ fun FunctionGraphView(
     var point1 by remember { mutableStateOf<GraphPoint?>(null) }
     var point2 by remember { mutableStateOf<GraphPoint?>(null) }
     var nextPointIndex by remember { mutableIntStateOf(1) }
-    var lastHapticTime by remember { mutableStateOf(0L) }
+    var lastHapticTime by remember { mutableLongStateOf(0L) }
 
     val currentPreset by rememberUpdatedState(selectedPreset)
     val currentExpression by rememberUpdatedState(expression)
@@ -546,10 +933,19 @@ fun FunctionGraphView(
     val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
     val coroutineScope = rememberCoroutineScope()
     var tapEvalJob by remember { mutableStateOf<Job?>(null) }
+    var curveEvalJob by remember { mutableStateOf<Job?>(null) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            curveEvalJob?.cancel()
+            tapEvalJob?.cancel()
+        }
+    }
 
     // Auto-bounds and point reset on preset or angleMode change
     LaunchedEffect(selectedPreset, angleMode) {
         tapEvalJob?.cancel()
+        curveEvalJob?.cancel()
         val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
         xMin = bounds.xMin
         xMax = bounds.xMax
@@ -560,113 +956,51 @@ fun FunctionGraphView(
         nextPointIndex = 1
     }
 
-    // 4. CURVE DRAWING: Path calculation over visible X range with small step size (0.1 or step resolution)
+    // 4. CURVE DRAWING: Asynchronous sampling on Dispatchers.Default with explicit Job cancellation
     LaunchedEffect(selectedPreset, expression, angleMode, xMin, xMax) {
         val curveSource = Triple(selectedPreset, expression, angleMode)
-        // Wenn das Schloss aktiv ist, bleibt die bereits gezeichnete Kurve eingefroren (keine Neuberechnung)
         if (currentIsGraphLocked && cachedPoints.isNotEmpty() && lastCurveSource == curveSource) {
             return@LaunchedEffect
         }
 
-        val computedPoints = withContext(Dispatchers.Default) {
+        curveEvalJob?.cancel()
+        val capturedXMin = xMin
+        val capturedXMax = xMax
+        val job = coroutineScope.launch(Dispatchers.Default) {
             try {
-                if (!xMin.isFinite() || !xMax.isFinite() || xMax <= xMin) {
-                    return@withContext emptyList<Pair<Double, Double>>()
-                }
-                val formulaString = resolveActiveFormula(selectedPreset, expression)
-                val sanitizedExpr = sanitizeForGraphParser(formulaString)
-                
-                // High density steps across xMin..xMax plus exact domain boundary points
-                val xSpan = xMax - xMin
-                val steps = (xSpan * 50).toInt().coerceIn(300, 1200)
-                val xSamples = ArrayList<Double>(steps + 5)
-                for (i in 0..steps) {
-                    xSamples.add(xMin + (i.toDouble() / steps) * xSpan)
-                }
-                val lowerSanitized = sanitizedExpr.lowercase()
-                if (lowerSanitized.contains("asin") || lowerSanitized.contains("acos")) {
-                    if (-1.0 in xMin..xMax) xSamples.add(-1.0)
-                    if (1.0 in xMin..xMax) xSamples.add(1.0)
-                }
-                if (lowerSanitized.contains("sqrt") && 0.0 in xMin..xMax) {
-                    xSamples.add(0.0)
-                }
-                xSamples.sort()
-
-                val calculatedList = ArrayList<Pair<Double, Double>>(xSamples.size)
-                val isDeriv = sanitizedExpr.startsWith("der(")
-                val derivMatch = if (isDeriv) Regex("""der\((.+),\s*([a-zA-Z_][a-zA-Z0-9_]*)\)""").matchEntire(sanitizedExpr) else null
-                val hasTrig = lowerSanitized.contains("sin") || lowerSanitized.contains("cos") || lowerSanitized.contains("tan")
-                val h = 1e-5
-                val batchSize = 30
-
-                for (startIdx in xSamples.indices step batchSize) {
-                    if (!isActive || (currentIsGraphLocked && cachedPoints.isNotEmpty() && lastCurveSource == curveSource)) {
-                        break
-                    }
-                    val endIdx = minOf(startIdx + batchSize, xSamples.size)
-                    synchronized(MxParserLock) {
-                        try {
-                            License.iConfirmNonCommercialUse("limonatalp4")
-                        } catch (_: Exception) {}
-
-                        if (angleMode == AngleMode.DEG && hasTrig && !isDeriv) {
-                            mXparser.setDegreesMode()
-                        } else {
-                            mXparser.setRadiansMode()
-                        }
-
-                        val argX = Argument("x = 0")
-                        val expr = Expression(sanitizedExpr, argX)
-                        val subArg = derivMatch?.let { Argument("${it.groupValues[2]} = 0") }
-                        val subExpr = derivMatch?.let { Expression(it.groupValues[1], subArg) }
-
-                        for (idx in startIdx until endIdx) {
-                            if (!isActive) break
-                            val x = xSamples[idx]
-                            // Skip out of domain values
-                            if (!isWithinDomain(sanitizedExpr, x)) {
-                                calculatedList.add(Pair(x, Double.NaN))
-                                continue
-                            }
-
-                            argX.argumentValue = x
-                            var y = expr.calculate()
-
-                            if ((!y.isFinite() || y.isNaN()) && subExpr != null && subArg != null) {
-                                subArg.argumentValue = x + h
-                                val yPlus = subExpr.calculate()
-                                subArg.argumentValue = x - h
-                                val yMinus = subExpr.calculate()
-                                if (yPlus.isFinite() && yMinus.isFinite()) {
-                                    y = (yPlus - yMinus) / (2.0 * h)
-                                }
-                            }
-
-                            if (y.isFinite() && abs(y) <= 1e8) {
-                                calculatedList.add(Pair(x, y))
-                            } else {
-                                calculatedList.add(Pair(x, Double.NaN))
-                            }
+                val computedPoints = computeGraphCurvePoints(
+                    preset = selectedPreset,
+                    expression = expression,
+                    angleMode = angleMode,
+                    xMin = capturedXMin,
+                    xMax = capturedXMax,
+                    checkActive = {
+                        ensureActive()
+                        if (currentIsGraphLocked && cachedPoints.isNotEmpty() && lastCurveSource == curveSource) {
+                            throw CancellationException("Graph locked")
                         }
                     }
+                )
+                ensureActive()
+                withContext(Dispatchers.Main.immediate) {
+                    if (!currentIsGraphLocked || cachedPoints.isEmpty() || lastCurveSource != curveSource) {
+                        cachedPoints = computedPoints
+                        lastCurveSource = curveSource
+                    }
                 }
-                calculatedList
             } catch (ce: CancellationException) {
                 throw ce
             } catch (_: Throwable) {
-                emptyList()
+                // Keep UI stable if evaluation fails
             }
         }
-        if (!currentIsGraphLocked || cachedPoints.isEmpty() || lastCurveSource != curveSource) {
-            cachedPoints = computedPoints
-            lastCurveSource = curveSource
-        }
+        curveEvalJob = job
     }
 
     fun resetView() {
         if (currentIsGraphLocked) return
         tapEvalJob?.cancel()
+        curveEvalJob?.cancel()
         val bounds = defaultBoundsForPreset(selectedPreset, angleMode, expression)
         xMin = bounds.xMin
         xMax = bounds.xMax
@@ -694,6 +1028,7 @@ fun FunctionGraphView(
         )
 
         val tappedX = mathPoint.x
+        if (!SafeMathEvaluator.isSafeValue(tappedX)) return
         val formula = resolveActiveFormula(currentPreset, currentExpression)
         val mode = currentAngleMode
 
@@ -701,10 +1036,12 @@ fun FunctionGraphView(
         tapEvalJob = coroutineScope.launch {
             try {
                 val evaluatedY = withContext(Dispatchers.Default) {
-                    evaluateFormulaAtX(formula, tappedX, mode)
+                    evaluateFormulaAtX(formula, tappedX, mode) {
+                        ensureActive()
+                    }
                 }
 
-                if (!currentIsGraphLocked && evaluatedY != null && evaluatedY.isFinite()) {
+                if (!currentIsGraphLocked && evaluatedY != null && SafeMathEvaluator.isSafeValue(evaluatedY)) {
                     val newPoint = GraphPoint(tappedX, evaluatedY)
                     when {
                         point1 == null -> {
@@ -880,10 +1217,16 @@ fun FunctionGraphView(
                                     val dy = (pan.y / height) * ySpan
 
                                     if (dx.isFinite() && dy.isFinite()) {
-                                        xMin = (xMin + dx).coerceIn(-1e7, 1e7)
-                                        xMax = (xMax + dx).coerceIn(-1e7, 1e7)
-                                        yMin = (yMin + dy).coerceIn(-1e7, 1e7)
-                                        yMax = (yMax + dy).coerceIn(-1e7, 1e7)
+                                        val minDx = -1e7 - xMin
+                                        val maxDx = 1e7 - xMax
+                                        val clampedDx = if (minDx <= maxDx) dx.coerceIn(minDx, maxDx) else 0.0
+                                        val minDy = -1e7 - yMin
+                                        val maxDy = 1e7 - yMax
+                                        val clampedDy = if (minDy <= maxDy) dy.coerceIn(minDy, maxDy) else 0.0
+                                        xMin += clampedDx
+                                        xMax += clampedDx
+                                        yMin += clampedDy
+                                        yMax += clampedDy
                                     }
 
                                     if (zoom.isFinite() && zoom != 1f && zoom > 0f) {
@@ -1095,41 +1438,68 @@ fun FunctionGraphView(
                         )
                     }
 
-                    // 3. CURVE DRAWING using mathToScreen
+                    // 3. CURVE DRAWING using mathToScreen with Skia-safe clamping and pole discontinuity breaks
                     if (cachedPoints.isNotEmpty()) {
                         val path = Path()
                         var isFirst = true
+                        var hasPathData = false
                         var lastPy = 0f
+                        var lastRawPy = 0f
+                        var lastMathY = 0.0
                         val count = cachedPoints.size
+                        val safeMinX = -maxOf(width, 500f) * 2f
+                        val safeMaxX = width + maxOf(width, 500f) * 2f
+                        val safeMinY = -maxOf(height, 500f) * 2f
+                        val safeMaxY = height + maxOf(height, 500f) * 2f
 
                         for (i in 0 until count) {
                             val (x, y) = cachedPoints[i]
-                            if (!x.isFinite() || !y.isFinite()) {
+                            if (!SafeMathEvaluator.isSafeValue(x) || !SafeMathEvaluator.isSafeValue(y)) {
                                 isFirst = true
                                 continue
                             }
                             val screenPt = mathToScreen(x, y, width, height, xMin, xMax, yMin, yMax)
-                            val px = screenPt.x
-                            val py = screenPt.y
+                            val rawPx = screenPt.x
+                            val rawPy = screenPt.y
+                            if (!rawPx.isFinite() || !rawPy.isFinite()) {
+                                isFirst = true
+                                continue
+                            }
+
+                            val px = rawPx.coerceIn(safeMinX, safeMaxX)
+                            val py = rawPy.coerceIn(safeMinY, safeMaxY)
                             if (!px.isFinite() || !py.isFinite()) {
                                 isFirst = true
                                 continue
                             }
 
-                            if (isFirst || abs(py - lastPy) > height * 0.45f) {
+                            val crossedSignFlipPole = !isFirst &&
+                                ((lastMathY > 0.0 && y < 0.0) || (lastMathY < 0.0 && y > 0.0)) &&
+                                (abs(py - lastPy) > height * 0.45f || abs(rawPy - lastRawPy) > height * 0.8f)
+
+                            val largeDiscontinuity = !isFirst && abs(py - lastPy) > height * 0.45f
+                            val bothOffScreenSameSide = !isFirst &&
+                                ((lastRawPy < -height && rawPy < -height) || (lastRawPy > height * 2f && rawPy > height * 2f))
+
+                            if (isFirst || crossedSignFlipPole || largeDiscontinuity || bothOffScreenSameSide) {
                                 path.moveTo(px, py)
                                 isFirst = false
                             } else {
                                 path.lineTo(px, py)
+                                hasPathData = true
                             }
                             lastPy = py
+                            lastRawPy = rawPy
+                            lastMathY = y
                         }
 
-                        drawPath(
-                            path = path,
-                            color = graphColor,
-                            style = Stroke(width = strokeWidth)
-                        )
+                        if (hasPathData) {
+                            drawPath(
+                                path = path,
+                                color = graphColor,
+                                style = Stroke(width = strokeWidth)
+                            )
+                        }
                     }
 
                     // 4. TWO-POINT MARKER OVERLAY (P1, P2 using mathToScreen)
@@ -1233,11 +1603,20 @@ fun FunctionGraphView(
                     if (p1 != null && p2 != null) {
                         val pt1 = mathToScreen(p1.x, p1.y, width, height, xMin, xMax, yMin, yMax)
                         val pt2 = mathToScreen(p2.x, p2.y, width, height, xMin, xMax, yMin, yMax)
+                        val maxCoord = maxOf(width, height, 500f) * 3f
                         if (pt1.x.isFinite() && pt1.y.isFinite() && pt2.x.isFinite() && pt2.y.isFinite()) {
+                            val clampedPt1 = Offset(
+                                pt1.x.coerceIn(-maxCoord, width + maxCoord),
+                                pt1.y.coerceIn(-maxCoord, height + maxCoord)
+                            )
+                            val clampedPt2 = Offset(
+                                pt2.x.coerceIn(-maxCoord, width + maxCoord),
+                                pt2.y.coerceIn(-maxCoord, height + maxCoord)
+                            )
                             drawLine(
                                 color = colorScheme.secondary.copy(alpha = 0.80f),
-                                start = pt1,
-                                end = pt2,
+                                start = clampedPt1,
+                                end = clampedPt2,
                                 strokeWidth = 1.6.dp.toPx(),
                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
                             )
@@ -1372,13 +1751,13 @@ fun FunctionGraphView(
                         onClick = {
                             if (currentIsGraphLocked) return@IconButton
                             val xRange = ((xMax - xMin) * 0.75).coerceIn(1e-4, 1e6)
-                            val xCenter = (xMin + xMax) / 2
-                            xMin = xCenter - xRange / 2
-                            xMax = xCenter + xRange / 2
+                            val xCenter = ((xMin + xMax) / 2).coerceIn(-1e7, 1e7)
+                            xMin = (xCenter - xRange / 2).coerceIn(-1e7, 1e7)
+                            xMax = (xCenter + xRange / 2).coerceIn(-1e7, 1e7)
                             val yRange = ((yMax - yMin) * 0.75).coerceIn(1e-4, 1e6)
-                            val yCenter = (yMin + yMax) / 2
-                            yMin = yCenter - yRange / 2
-                            yMax = yCenter + yRange / 2
+                            val yCenter = ((yMin + yMax) / 2).coerceIn(-1e7, 1e7)
+                            yMin = (yCenter - yRange / 2).coerceIn(-1e7, 1e7)
+                            yMax = (yCenter + yRange / 2).coerceIn(-1e7, 1e7)
                             triggerClickHaptic()
                         },
                         enabled = !isGraphLocked,
@@ -1401,13 +1780,13 @@ fun FunctionGraphView(
                         onClick = {
                             if (currentIsGraphLocked) return@IconButton
                             val xRange = ((xMax - xMin) * 1.35).coerceIn(1e-4, 1e6)
-                            val xCenter = (xMin + xMax) / 2
-                            xMin = xCenter - xRange / 2
-                            xMax = xCenter + xRange / 2
+                            val xCenter = ((xMin + xMax) / 2).coerceIn(-1e7, 1e7)
+                            xMin = (xCenter - xRange / 2).coerceIn(-1e7, 1e7)
+                            xMax = (xCenter + xRange / 2).coerceIn(-1e7, 1e7)
                             val yRange = ((yMax - yMin) * 1.35).coerceIn(1e-4, 1e6)
-                            val yCenter = (yMin + yMax) / 2
-                            yMin = yCenter - yRange / 2
-                            yMax = yCenter + yRange / 2
+                            val yCenter = ((yMin + yMax) / 2).coerceIn(-1e7, 1e7)
+                            yMin = (yCenter - yRange / 2).coerceIn(-1e7, 1e7)
+                            yMax = (yCenter + yRange / 2).coerceIn(-1e7, 1e7)
                             triggerClickHaptic()
                         },
                         enabled = !isGraphLocked,

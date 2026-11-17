@@ -1,7 +1,6 @@
 package com.limonatalp4.glasscalcproject.ui.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.content.res.Resources
 import android.os.Build
 import android.util.Log
@@ -117,10 +116,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         if (abs(value - round(value)) < 1e-7 && abs(value) < 1e12) {
             return round(value).toLong().toString().replace("-", "−")
         }
-        val symbols = DecimalFormatSymbols(Locale.GERMANY)
-        val formatter = DecimalFormat("#,##0.####", symbols).apply {
-            isGroupingUsed = false
-        }
+        val formatter = GRAPH_COORD_FORMAT.get()
+            ?: DecimalFormat("#,##0.####", DecimalFormatSymbols(Locale.GERMANY)).apply {
+                isGroupingUsed = false
+            }
         return formatter.format(value).replace("-", "−")
     }
 
@@ -149,23 +148,6 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     val formulas: List<MathFormula> = FormulaCatalog.FORMULAS
-
-    fun searchFormulas(query: String, context: Context): List<MathFormula> {
-        val trimmed = query.trim()
-        if (trimmed.isEmpty()) return emptyList()
-        return formulas.filter { item ->
-            val localizedName = context.getString(item.nameResId)
-            val localizedKeywords = item.keywordsResIds.flatMap { resId ->
-                context.getString(resId)
-                    .split(',', ';')
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-            }
-            localizedName.contains(trimmed, ignoreCase = true) ||
-                item.formula.contains(trimmed, ignoreCase = true) ||
-                localizedKeywords.any { it.contains(trimmed, ignoreCase = true) }
-        }
-    }
 
     val angleMode: StateFlow<AngleMode> = preferences.angleModeFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, AngleMode.DEG)
@@ -594,9 +576,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         previewJob?.cancel()
         equalsJob?.cancel()
         equalsJob = viewModelScope.launch {
-            val eval = withContext(Dispatchers.Default) {
-                evaluator.evaluate(expr, mode)
-            }
+            val eval = evaluator.evaluateCancellable(expr, mode)
             if (_expression.value.trim() != expr) return@launch
 
             when (eval) {
@@ -626,7 +606,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    private fun tryLivePreview() {
+    private fun tryLivePreview(overrideAngleMode: AngleMode = angleMode.value) {
         previewJob?.cancel()
         val expr = _expression.value.trim()
         if (expr.isEmpty()) {
@@ -634,10 +614,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             return
         }
         // Live preview only if expression has operators/functions/constants
-        val hasOp = expr.any { it in "+-*÷×/^%!scl∫√ⁿeπdat;" }
+        val hasOp = expr.any { it in "+-−*÷×/⁄^%!scl∫√ⁿeπdat;²³" }
         if (hasOp && _isAutoResultEnabled.value) {
-            previewJob = viewModelScope.launch(Dispatchers.Default) {
-                when (val eval = evaluator.evaluate(expr, angleMode.value)) {
+            previewJob = viewModelScope.launch {
+                when (val eval = evaluator.evaluateCancellable(expr, overrideAngleMode)) {
                     is EvaluationResult.Success -> {
                         if (_expression.value.trim() == expr) {
                             _result.value = eval.formatted
@@ -652,7 +632,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun isOperator(s: String): Boolean {
-        return s in listOf("+", "-", "*", "/", "×", "÷", "%", "^")
+        return s in listOf("+", "-", "−", "*", "/", "⁄", "×", "÷", "%", "^")
     }
 
     fun toggleScientificPanel() {
@@ -664,7 +644,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             preferences.setAngleMode(next)
         }
-        tryLivePreview()
+        tryLivePreview(overrideAngleMode = next)
     }
 
     fun setTheme(theme: AppTheme) {
@@ -701,7 +681,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         previewJob?.cancel()
         equalsJob?.cancel()
         isHistoryCleared = true
+        justCalculated = false
         _history.value = emptyList()
+        _isGraphLocked.value = false
+        HapticUtil.currentIntensityLevel = 5
         viewModelScope.launch {
             preferences.resetAll()
             _expression.value = ""
@@ -717,6 +700,11 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     companion object {
+        private val GRAPH_COORD_FORMAT = ThreadLocal.withInitial {
+            DecimalFormat("#,##0.####", DecimalFormatSymbols(Locale.GERMANY)).apply {
+                isGroupingUsed = false
+            }
+        }
         val SUPPORTED_LANGUAGE_TAGS: Set<String> = setOf("de", "en", "es", "fr", "ja", "zh", "tlh", "ru", "pt", "hi")
         const val FALLBACK_LANGUAGE_TAG: String = "en"
 

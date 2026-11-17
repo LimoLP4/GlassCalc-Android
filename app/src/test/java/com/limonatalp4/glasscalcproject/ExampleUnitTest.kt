@@ -947,6 +947,162 @@ class ExampleUnitTest {
         assertEquals(1.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("der(sin(x), x)", 0.0, AngleMode.RAD)!!, 1e-4)
         assertEquals(1.0, com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("d/dx(sin(x))", 0.0, AngleMode.RAD)!!, 1e-4)
     }
+
+    @Test
+    fun testSafeMathEvaluatorOverflowAndErrorGuards() {
+        val safeEval = com.limonatalp4.glasscalcproject.domain.evaluator.SafeMathEvaluator
+
+        // isSafeValue strictly rejects NaN, +/-Infinity, and abs(y) > 1e15
+        assertTrue(!safeEval.isSafeValue(Double.NaN))
+        assertTrue(!safeEval.isSafeValue(Double.POSITIVE_INFINITY))
+        assertTrue(!safeEval.isSafeValue(Double.NEGATIVE_INFINITY))
+        assertTrue(!safeEval.isSafeValue(1e16))
+        assertTrue(!safeEval.isSafeValue(-1e16))
+        assertTrue(safeEval.isSafeValue(1e15))
+        assertTrue(safeEval.isSafeValue(-1e15))
+
+        // Domain errors, overflow, and malformed expressions return null cleanly
+        assertNull(safeEval.safeEvaluate("1/0"))
+        assertNull(safeEval.safeEvaluate("ln(0)"))
+        assertNull(safeEval.safeEvaluate("sqrt(-1)"))
+        assertNull(safeEval.safeEvaluate("2^5000"))
+        assertNull(safeEval.safeEvaluate("10^20"))
+        assertNull(safeEval.safeEvaluate("((("))
+        assertNull(safeEval.safeEvaluate(""))
+
+        // Variable evaluation overflow and singularity protection
+        assertNull(safeEval.safeEvaluateWithVar("x^500", "x", 2.0, AngleMode.RAD))
+        assertNull(safeEval.safeEvaluateWithVar("e^x", "x", 100.0, AngleMode.RAD))
+        assertNull(safeEval.safeEvaluateWithVar("1/x", "x", 0.0, AngleMode.RAD))
+        assertNull(safeEval.safeEvaluateWithVar("x^2", "x", 1e16, AngleMode.RAD))
+        assertEquals(16.0, safeEval.safeEvaluateWithVar("x^2", "x", 4.0, AngleMode.RAD)!!, 1e-6)
+    }
+
+    @Test
+    fun testBoundedIntegrationPoleDetectionAndCancellation() {
+        val safeEval = com.limonatalp4.glasscalcproject.domain.evaluator.SafeMathEvaluator
+
+        // Poles inside integration interval must be caught cleanly (null / Error, no Infinity or crash)
+        assertNull(safeEval.integrateBounded("1/x", "x", -1.0, 1.0, AngleMode.RAD))
+        assertNull(safeEval.integrateBounded("1/(x-0.33)", "x", 0.0, 1.0, AngleMode.RAD))
+        assertNull(safeEval.integrateBounded("tan(x)", "x", 0.0, 3.0, AngleMode.RAD))
+
+        // Extreme integrand values and out-of-range bounds return null cleanly
+        assertNull(safeEval.integrateBounded("x^500", "x", 0.0, 10.0, AngleMode.RAD))
+        assertNull(safeEval.integrateBounded("e^x", "x", 0.0, 100.0, AngleMode.RAD))
+        assertNull(safeEval.integrateBounded("x", "x", 0.0, 1e20, AngleMode.RAD))
+
+        // ExpressionEvaluator surfaces pole/overflow integrals cleanly as EvaluationResult.Error
+        assertTrue(evaluator.evaluate("∫(1/x; -1; 1)", AngleMode.RAD) is EvaluationResult.Error)
+        assertTrue(evaluator.evaluate("∫(tan(x); 0; 3)", AngleMode.RAD) is EvaluationResult.Error)
+        assertTrue(evaluator.evaluate("∫(x^500; 0; 10)", AngleMode.RAD) is EvaluationResult.Error)
+
+        // Bounded valid integral with large bounds completes quickly without ANR (capped at 1000 steps)
+        val startMs = System.currentTimeMillis()
+        val largeBounds = safeEval.integrateBounded("sin(x)", "x", -10000.0, 10000.0, AngleMode.RAD)
+        val elapsedMs = System.currentTimeMillis() - startMs
+        assertTrue("Bounded integration took too long: ${elapsedMs}ms", elapsedMs < 3000L)
+        assertTrue(largeBounds != null && safeEval.isSafeValue(largeBounds))
+
+        // Coroutine cancellation via checkActive aborts integration immediately
+        var cancelled = false
+        try {
+            safeEval.integrateBounded("sin(x)", "x", 0.0, 10.0, AngleMode.RAD) {
+                throw kotlinx.coroutines.CancellationException("cancelled")
+            }
+        } catch (_: kotlinx.coroutines.CancellationException) {
+            cancelled = true
+        }
+        assertTrue(cancelled)
+    }
+
+    @Test
+    fun testGraphCrashAndAnrProtections() {
+        val safeEval = com.limonatalp4.glasscalcproject.domain.evaluator.SafeMathEvaluator
+
+        // 1. Extreme expressions in graph evaluator never crash or leak Infinity/NaN > 1e15
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("x^500", 2.0, AngleMode.RAD))
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("e^x", 100.0, AngleMode.RAD))
+        assertNull(com.limonatalp4.glasscalcproject.ui.components.evaluateFormulaAtX("1/x", 0.0, AngleMode.RAD))
+
+        // 2. Curve sampling across extreme functions and wide bounds remains bounded & safe
+        val extremeCurves = listOf(
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.CUSTOM to "x^500",
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.CUSTOM to "e^x",
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.CUSTOM to "1/x",
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.TAN to "",
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.INTEGRAL to "1/x",
+            com.limonatalp4.glasscalcproject.ui.components.GraphPreset.INTEGRAL to "sin(x)"
+        )
+        extremeCurves.forEach { (preset, expr) ->
+            val startMs = System.currentTimeMillis()
+            val pts = com.limonatalp4.glasscalcproject.ui.components.computeGraphCurvePoints(
+                preset = preset,
+                expression = expr,
+                angleMode = AngleMode.RAD,
+                xMin = -1000.0,
+                xMax = 1000.0
+            )
+            val elapsedMs = System.currentTimeMillis() - startMs
+            assertTrue("Sampling $preset ($expr) took too long: ${elapsedMs}ms", elapsedMs < 3000L)
+            assertTrue("Sampling $preset ($expr) exceeded bounded sample budget", pts.size <= 1010)
+            pts.forEach { (x, y) ->
+                assertTrue(x.isFinite())
+                if (!y.isNaN()) {
+                    assertTrue("y out of safe bounds: $y", safeEval.isSafeValue(y))
+                }
+            }
+        }
+
+        // 3. mathToScreen returns NaN Offset safely on invalid/infinite coordinates instead of crashing Skia
+        val nanScreen = com.limonatalp4.glasscalcproject.ui.components.mathToScreen(
+            x = 1.0, y = Double.POSITIVE_INFINITY,
+            width = 400f, height = 200f,
+            xMin = -10.0, xMax = 10.0, yMin = -10.0, yMax = 10.0
+        )
+        assertTrue(nanScreen.y.isNaN())
+
+        val zeroSpanScreen = com.limonatalp4.glasscalcproject.ui.components.mathToScreen(
+            x = 1.0, y = 1.0,
+            width = 0f, height = 200f,
+            xMin = -10.0, xMax = 10.0, yMin = -10.0, yMax = 10.0
+        )
+        assertTrue(zeroSpanScreen.x.isNaN())
+    }
+
+    @Test
+    fun testConcurrentFormattingAndUnicodeOperators() {
+        // Unicode minus and fraction slash evaluate accurately
+        val unicodeSub = evaluator.evaluate("5−2")
+        assertTrue(unicodeSub is EvaluationResult.Success)
+        assertEquals("3", (unicodeSub as EvaluationResult.Success).formatted)
+
+        val unicodeFrac = evaluator.evaluate("6⁄2")
+        assertTrue(unicodeFrac is EvaluationResult.Success)
+        assertEquals("3", (unicodeFrac as EvaluationResult.Success).formatted)
+
+        // Concurrent formatting via ThreadLocal DecimalFormat must never throw or mix results
+        val meterToFeet = UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }
+        val threads = (0 until 8).map { threadIdx ->
+            java.util.concurrent.Callable {
+                repeat(200) { iter ->
+                    val n = (threadIdx * 100 + iter + 1).toDouble()
+                    val evalRes = evaluator.evaluate("$n+0.5")
+                    assertTrue(evalRes is EvaluationResult.Success)
+                    val conv = UnitConverter.convert(n, meterToFeet, forward = true)
+                    assertTrue(conv.isNotBlank() && conv != "Fehler")
+                }
+            }
+        }
+        val executor = java.util.concurrent.Executors.newFixedThreadPool(8)
+        try {
+            val futures = executor.invokeAll(threads)
+            futures.forEach { it.get() }
+        } finally {
+            executor.shutdownNow()
+        }
+    }
 }
+
 
 

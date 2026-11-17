@@ -67,6 +67,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.SideEffect
@@ -74,7 +75,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -156,13 +159,17 @@ fun UnitConverterDialog(
         UnitConverter.CONVERSIONS.filter { it.category == currentCategory }
     }
 
-    val localizedUnitSuggestions = ALL_UNIT_ITEMS.map { item ->
-        LocalizedUnitSuggestion(
-            item = item,
-            localizedName = stringResource(item.nameResId),
-            symbol = item.symbol,
-            localizedKeywords = splitSearchKeywords(stringResource(item.keywordsResId))
-        )
+    val configuration = LocalConfiguration.current
+    val resources = LocalResources.current
+    val localizedUnitSuggestions = remember(configuration, resources) {
+        ALL_UNIT_ITEMS.map { item ->
+            LocalizedUnitSuggestion(
+                item = item,
+                localizedName = resources.getString(item.nameResId),
+                symbol = item.symbol,
+                localizedKeywords = splitSearchKeywords(resources.getString(item.keywordsResId))
+            )
+        }
     }
 
     val filteredUnitSuggestions = remember(searchQuery, localizedUnitSuggestions) {
@@ -219,6 +226,7 @@ fun UnitConverterDialog(
     val onPrimaryContainerColor = colorScheme.onPrimaryContainer
     val isAmoled = glassProps.isAmoled
     val isTiefschwarz = glassProps.isTiefschwarz
+    val isPureBlack = isAmoled || isTiefschwarz
 
     val dialogTransition = rememberDialogTransitionController(onDismiss)
 
@@ -288,16 +296,8 @@ fun UnitConverterDialog(
                             },
                         shape = RoundedCornerShape(28.dp),
                         borderWidth = 1.2.dp,
-                        customBgColor = when {
-                            isAmoled -> Color.Black
-                            isTiefschwarz -> Color(0xFF121212)
-                            else -> dialogBgColor
-                        },
-                        customBorderColor = when {
-                            isAmoled -> Color.White.copy(alpha = 0.15f)
-                            isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                            else -> null
-                        }
+                        customBgColor = if (isPureBlack) Color.Black else dialogBgColor,
+                        customBorderColor = if (isPureBlack) Color.White.copy(alpha = 0.15f) else null
                     ) {
                     Column(
                         modifier = Modifier
@@ -452,19 +452,11 @@ fun UnitConverterDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(50.dp))
                         .background(
-                            when {
-                                isAmoled -> Color.Black
-                                isTiefschwarz -> colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                                else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            }
+                            if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         )
                         .border(
                             width = 1.dp,
-                            color = when {
-                                isAmoled -> Color.White.copy(alpha = 0.15f)
-                                isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                                else -> colorScheme.outline.copy(alpha = 0.3f)
-                            },
+                            color = if (isPureBlack) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
                             shape = RoundedCornerShape(50.dp)
                         )
                         .padding(4.dp)
@@ -492,6 +484,8 @@ fun UnitConverterDialog(
                             horizontalArrangement = Arrangement.spacedBy(tabSpacing),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+                            val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
                             categoryTabs.forEachIndexed { index, (cat, icon, shortLabelRes) ->
                                 val isSelected = selectedCategoryIndex == index
                                 var isPressed by remember { mutableStateOf(false) }
@@ -502,9 +496,9 @@ fun UnitConverterDialog(
                                 )
                                 val tabTint by animateColorAsState(
                                     targetValue = if (isSelected) {
-                                        if (isAmoled || isTiefschwarz) Color.White else onPrimaryContainerColor
+                                        if (isPureBlack) Color.White else onPrimaryContainerColor
                                     } else {
-                                        if (isAmoled || isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
+                                        if (isPureBlack) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
                                     },
                                     animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                                     label = "cat_tab_tint_$index"
@@ -524,14 +518,19 @@ fun UnitConverterDialog(
                                             scaleY = scale
                                         }
                                         .clip(RoundedCornerShape(50.dp))
-                                        .pointerInput(Unit) {
+                                        .pointerInput(cat, index) {
                                             detectTapGestures(
                                                 onPress = {
                                                     isPressed = true
                                                     try { awaitRelease() } finally { isPressed = false }
                                                 },
                                                 onTap = {
-                                                    triggerHaptic()
+                                                    HapticUtil.performAppHaptic(
+                                                        context,
+                                                        view,
+                                                        currentHapticEnabled,
+                                                        currentHapticIntensity
+                                                    )
                                                     searchQuery = ""
                                                     selectedCategoryIndex = index
                                                     selectedPair = UnitConverter.CONVERSIONS.first { it.category == cat }
@@ -612,14 +611,14 @@ fun UnitConverterDialog(
                                     val isSelected = pair == currentPair && targetIndex == selectedCategoryIndex
                                     val pairBg by animateColorAsState(
                                         targetValue = if (isSelected) {
-                                            if (isAmoled || isTiefschwarz) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
+                                            if (isPureBlack) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
                                         } else {
-                                            if (isAmoled) Color.Black else if (isTiefschwarz) colorScheme.surfaceVariant.copy(alpha = 0.7f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                            if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                         },
                                         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                         label = "pair_bg_$idx"
                                     )
-                                    val pairBorder = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                                    val pairBorder = if (isPureBlack) Color.White.copy(alpha = 0.15f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
                                     val pairTextCol = if (isAmoled || isTiefschwarz) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
                                     val pairInteraction = remember { MutableInteractionSource() }
 
@@ -661,16 +660,8 @@ fun UnitConverterDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     borderWidth = 1.2.dp,
-                    customBgColor = when {
-                        isAmoled -> Color.Black
-                        isTiefschwarz -> colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                        else -> null
-                    },
-                    customBorderColor = when {
-                        isAmoled -> Color.White.copy(alpha = 0.15f)
-                        isTiefschwarz -> Color.White.copy(alpha = 0.1f)
-                        else -> null
-                    }
+                    customBgColor = if (isPureBlack) Color.Black else null,
+                    customBorderColor = if (isPureBlack) Color.White.copy(alpha = 0.15f) else null
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -714,20 +705,12 @@ fun UnitConverterDialog(
                                 .fillMaxWidth()
                                 .testTag("input_converter_value"),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = when {
-                                    isAmoled -> Color.Black
-                                    isTiefschwarz -> Color(0xFF1E1E1E)
-                                    else -> colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                },
-                                unfocusedContainerColor = when {
-                                    isAmoled -> Color.Black
-                                    isTiefschwarz -> Color(0xFF1A1A1A)
-                                    else -> colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                                },
-                                focusedBorderColor = if (isAmoled || isTiefschwarz) Color.White else primaryColor,
-                                unfocusedBorderColor = if (isAmoled) Color.White.copy(alpha = 0.15f) else if (isTiefschwarz) Color.White.copy(alpha = 0.1f) else glassProps.buttonBorderColor,
-                                focusedTextColor = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor,
-                                unfocusedTextColor = if (isAmoled || isTiefschwarz) Color.White else onSurfaceColor
+                                focusedContainerColor = if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                unfocusedContainerColor = if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                                focusedBorderColor = if (isPureBlack) Color.White else primaryColor,
+                                unfocusedBorderColor = if (isPureBlack) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor,
+                                focusedTextColor = if (isPureBlack) Color.White else onSurfaceColor,
+                                unfocusedTextColor = if (isPureBlack) Color.White else onSurfaceColor
                             )
                         )
 

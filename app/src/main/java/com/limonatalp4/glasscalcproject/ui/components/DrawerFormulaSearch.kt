@@ -61,8 +61,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import kotlinx.coroutines.delay
 import com.limonatalp4.glasscalcproject.R
@@ -92,20 +94,25 @@ fun DrawerFormulaSearch(
     val searchBarShape = RoundedCornerShape(percent = 50)
     val dropdownShape = RoundedCornerShape(22.dp)
 
-    // Namen und Keywords werden dynamisch aus der aktuell aktiven Sprache geladen
-    val localizedFormulas = FormulaCatalog.FORMULAS.map { item ->
-        val name = stringResource(item.nameResId)
-        val keywords = item.keywordsResIds.flatMap { resId ->
-            splitSearchKeywords(stringResource(resId))
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val configuration = LocalConfiguration.current
+
+    // Namen und Keywords werden pro Sprache/Konfiguration einmalig geladen und gecacht
+    val localizedFormulas = remember(configuration, resources) {
+        FormulaCatalog.FORMULAS.map { item ->
+            val name = resources.getString(item.nameResId)
+            val keywords = item.keywordsResIds.flatMap { resId ->
+                splitSearchKeywords(resources.getString(resId))
+            }
+            LocalizedFormula(
+                formula = item,
+                localizedName = name,
+                localizedKeywords = keywords
+            )
         }
-        LocalizedFormula(
-            formula = item,
-            localizedName = name,
-            localizedKeywords = keywords
-        )
     }
 
-    val context = LocalContext.current
     val view = LocalView.current
     val density = LocalDensity.current
     val hapticFeedbackEnabled = LocalHapticFeedbackEnabled.current

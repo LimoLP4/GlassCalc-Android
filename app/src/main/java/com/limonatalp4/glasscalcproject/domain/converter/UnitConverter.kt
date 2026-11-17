@@ -27,10 +27,14 @@ data class ConversionPair(
 )
 
 object UnitConverter {
-    private val FORMAT = DecimalFormat("#,##0.######", DecimalFormatSymbols(Locale.GERMANY)).apply {
-        isGroupingUsed = false
+    private val FORMAT = ThreadLocal.withInitial {
+        DecimalFormat("#,##0.######", DecimalFormatSymbols(Locale.GERMANY)).apply {
+            isGroupingUsed = false
+        }
     }
-    private val SCIENTIFIC_FORMAT = DecimalFormat("0.######E0", DecimalFormatSymbols(Locale.US))
+    private val SCIENTIFIC_FORMAT = ThreadLocal.withInitial {
+        DecimalFormat("0.######E0", DecimalFormatSymbols(Locale.US))
+    }
 
     val CONVERSIONS = listOf(
         // Length
@@ -158,8 +162,8 @@ object UnitConverter {
         val res = if (forward) pair.formulaFromTo(value) else pair.formulaToFrom(value)
         if (!res.isFinite()) return "—"
         if (abs(res) >= 1e12 || (abs(res) < 1e-6 && res != 0.0)) {
-            return SCIENTIFIC_FORMAT.format(res)
+            return SCIENTIFIC_FORMAT.get()!!.format(res)
         }
-        return FORMAT.format(res)
+        return FORMAT.get()!!.format(res)
     }
 }

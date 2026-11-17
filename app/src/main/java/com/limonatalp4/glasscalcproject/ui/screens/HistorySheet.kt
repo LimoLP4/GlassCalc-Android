@@ -112,25 +112,31 @@ fun HistorySheet(
     }
 
     val glassProps = LocalGlassProperties.current
-    val isAmoled = glassProps.isAmoled
+    val isPureBlack = glassProps.isAmoled || glassProps.isTiefschwarz
     val pillShape = RoundedCornerShape(32.dp)
-    val pillBackgroundColor = if (isAmoled) {
-        Color(0xFF0A0A0A).copy(alpha = 0.95f)
+    val pillBackgroundColor = if (isPureBlack) {
+        Color.Black.copy(alpha = 0.95f)
     } else {
         colorScheme.surface.copy(alpha = 0.92f)
     }
-    val pillBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.30f))
-    val titleBadgeBackground = if (isAmoled) {
+    val pillBorder = BorderStroke(
+        1.dp,
+        if (isPureBlack) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.30f)
+    )
+    val titleBadgeBackground = if (isPureBlack) {
         Color(0xFF141414).copy(alpha = 0.85f)
     } else {
         colorScheme.surfaceVariant.copy(alpha = 0.70f)
     }
-    val itemCardBackground = if (isAmoled) {
+    val itemCardBackground = if (isPureBlack) {
         Color(0xFF141414).copy(alpha = 0.90f)
     } else {
         colorScheme.surfaceVariant.copy(alpha = 0.65f)
     }
-    val itemCardBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.25f))
+    val itemCardBorder = BorderStroke(
+        1.dp,
+        if (isPureBlack) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
+    )
 
     val transitionController = rememberDialogTransitionController(onDismiss)
 

@@ -145,11 +145,11 @@ fun GlassDisplay(
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
     errorMessageFlow: StateFlow<String?>,
+    modifier: Modifier = Modifier,
     onCursorPositionChanged: (Int) -> Unit = {},
     onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
     onEvaluate: () -> Unit = {},
     isCompact: Boolean = false,
-    modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
 ) {
     val expression by expressionFlow.collectAsState()
@@ -177,15 +177,15 @@ fun GlassDisplay(
 fun GlassDisplay(
     expression: String,
     result: String,
-    cursorPosition: Int = expression.length,
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    cursorPosition: Int = expression.length,
     errorMessage: String? = null,
     onCursorPositionChanged: (Int) -> Unit = {},
     onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
     onEvaluate: () -> Unit = {},
     isCompact: Boolean = false,
-    modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
 ) {
     GlassDisplayContent(
@@ -212,12 +212,12 @@ private fun GlassDisplayContent(
     cursorPosition: Int,
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
+    modifier: Modifier = Modifier,
     errorMessage: String? = null,
     onCursorPositionChanged: (Int) -> Unit = {},
     onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
     onEvaluate: () -> Unit = {},
     isCompact: Boolean = false,
-    modifier: Modifier = Modifier,
     glassState: LiquidGlassState? = null
 ) {
     val context = LocalContext.current
