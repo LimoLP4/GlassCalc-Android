@@ -98,9 +98,8 @@ fun ConstantsDialog(
                     .fillMaxWidth()
                     .padding(8.dp),
                 shape = RoundedCornerShape(28.dp),
-                borderWidth = 1.2.dp,
                 customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
-                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
+                borderStroke = glassProps.containerBorderStroke
             ) {
                 Column(
                     modifier = Modifier
@@ -182,9 +181,8 @@ fun ConstantsDialog(
                                     }
                                     .testTag("constant_${constant.symbol}"),
                                 shape = RoundedCornerShape(20.dp),
-                                borderWidth = 1.dp,
                                 customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
+                                borderStroke = glassProps.containerBorderStroke
                             ) {
                             Row(
                                 modifier = Modifier

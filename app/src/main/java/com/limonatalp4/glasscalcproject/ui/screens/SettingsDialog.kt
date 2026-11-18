@@ -304,9 +304,8 @@ fun SettingsDialog(
                                 }
                             },
                         shape = RoundedCornerShape(28.dp),
-                        borderWidth = 1.2.dp,
                         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
-                        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
+                        borderStroke = glassProps.containerBorderStroke
                     ) {
                     Column(
                         modifier = Modifier
@@ -329,7 +328,7 @@ fun SettingsDialog(
                             GlassSurface(
                                 shape = RoundedCornerShape(50),
                                 customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                borderStroke = glassProps.containerBorderStroke,
                                 modifier = Modifier.pressScale(closeBtnInteraction)
                             ) {
                                 IconButton(
@@ -609,10 +608,10 @@ private fun AppearanceSection(
                 if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             }
 
-            val cardBorder = if (isTiefschwarz) {
-                Color.White.copy(alpha = 0.15f)
+            val cardBorder = if (!isTiefschwarz && isSelected) {
+                colorScheme.primary
             } else {
-                if (isSelected) colorScheme.primary else glassProps.buttonBorderColor
+                glassProps.buttonBorderColor
             }
 
             val textColor = if (isTiefschwarz) Color.White else (if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface)
@@ -668,6 +667,21 @@ private fun AppearanceSection(
                             color = textColor
                         )
 
+                        if (themeOption == AppTheme.DARK_MODE) {
+                            Text(
+                                text = androidx.compose.ui.res.stringResource(id = R.string.theme_amoled_desc),
+                                fontSize = 12.sp,
+                                color = if (isTiefschwarz) {
+                                    Color.White.copy(alpha = 0.7f)
+                                } else if (isSelected) {
+                                    colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                } else {
+                                    colorScheme.onSurfaceVariant
+                                },
+                                modifier = Modifier.testTag("text_theme_amoled_desc")
+                            )
+                        }
+
                         if (!isSupported) {
                             Text(
                                 text = androidx.compose.ui.res.stringResource(id = R.string.theme_material_you_unsupported, effectiveApiLevel),
@@ -719,7 +733,7 @@ private fun UnitsSection(
                         if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     }
 
-                    val degBorder = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else (if (isDeg) colorScheme.primary else glassProps.buttonBorderColor)
+                    val degBorder = if (!isTiefschwarz && isDeg) colorScheme.primary else glassProps.buttonBorderColor
                     val degTextColor = if (isTiefschwarz) Color.White else (if (isDeg) colorScheme.onPrimaryContainer else colorScheme.onSurface)
 
                     GlassSurface(
@@ -775,7 +789,7 @@ private fun UnitsSection(
                     } else {
                         if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     }
-                    val radBorder = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else (if (isRad) colorScheme.primary else glassProps.buttonBorderColor)
+                    val radBorder = if (!isTiefschwarz && isRad) colorScheme.primary else glassProps.buttonBorderColor
                     val radTextColor = if (isTiefschwarz) Color.White else (if (isRad) colorScheme.onPrimaryContainer else colorScheme.onSurface)
 
                     GlassSurface(
@@ -828,9 +842,8 @@ private fun UnitsSection(
                     GlassSurface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
-                        borderWidth = 1.dp,
                         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
+                        borderStroke = glassProps.containerBorderStroke
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Text(
@@ -887,8 +900,9 @@ private fun DeveloperOptionsSection(
     val containerSize = LocalWindowInfo.current.containerSize
     val screenWidthDp = with(density) { containerSize.width.toDp().value.roundToInt() }
     val screenHeightDp = with(density) { containerSize.height.toDp().value.roundToInt() }
+    val glassProps = LocalGlassProperties.current
     val devCardBg = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant
-    val devCardBorder = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else null
+    val devCardBorder = glassProps.buttonBorderColor
 
     val orderedDevCards = searchVisibility?.orderedDevCards ?: SettingsDevCard.entries
 
@@ -985,10 +999,7 @@ private fun DeveloperOptionsSection(
                 if (simulatedApiEnabled) {
                     val apiSliderPillShape = RoundedCornerShape(24.dp)
                     val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                    val apiSliderPillBorder = BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                    )
+                    val apiSliderPillBorder = glassProps.containerBorderStroke
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1193,10 +1204,7 @@ private fun DeveloperOptionsSection(
                 val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
                 val sliderPillShape = RoundedCornerShape(24.dp)
                 val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                val sliderPillBorder = BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                )
+                val sliderPillBorder = glassProps.containerBorderStroke
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1415,7 +1423,7 @@ private fun InformationSection(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor
+            borderStroke = glassProps.containerBorderStroke
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "GlassCalc v${BuildConfig.VERSION_NAME}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
@@ -1428,10 +1436,7 @@ private fun InformationSection(
         // GitHub Repository Card
         val githubCardInteraction = remember { MutableInteractionSource() }
         val githubCardBg = if (isTiefschwarz) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        val githubCardBorder = BorderStroke(
-            width = 1.dp,
-            color = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        )
+        val githubCardBorder = glassProps.containerBorderStroke
 
         GlassSurface(
             modifier = Modifier
@@ -1481,7 +1486,7 @@ private fun InformationSection(
                 GlassSurface(
                     shape = CircleShape,
                     customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                    borderStroke = glassProps.containerBorderStroke,
                     modifier = Modifier.testTag("github_repo_icon_pill")
                 ) {
                     Box(
@@ -1505,7 +1510,7 @@ private fun InformationSection(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor
+            borderStroke = glassProps.containerBorderStroke
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
                 Text(text = stringResource(R.string.info_oss_licenses), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
@@ -1531,10 +1536,7 @@ private fun InformationSection(
                 SettingsInfoCard.APACHE -> {
         // Accordion 1: Apache
         val apacheCardBg = if (isTiefschwarz) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        val apacheCardBorder = BorderStroke(
-            width = 1.dp,
-            color = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        )
+        val apacheCardBorder = glassProps.containerBorderStroke
         val apacheChevronRotation by animateFloatAsState(
             targetValue = if (apacheAccordionOpen) 180f else 0f,
             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
@@ -1580,7 +1582,7 @@ private fun InformationSection(
                     GlassSurface(
                         shape = CircleShape,
                         customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        borderStroke = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+                        borderStroke = glassProps.containerBorderStroke,
                         modifier = Modifier
                             .size(36.dp)
                             .pressScale(apachePillInteraction)
@@ -1661,10 +1663,10 @@ private fun LanguageSection(
             } else {
                 if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             }
-            val cardBorder = if (isTiefschwarz) {
-                Color.White.copy(alpha = 0.15f)
+            val cardBorder = if (!isTiefschwarz && isSelected) {
+                colorScheme.primary
             } else {
-                if (isSelected) colorScheme.primary else glassProps.buttonBorderColor
+                glassProps.buttonBorderColor
             }
             val textColor = if (isTiefschwarz) Color.White else if (isSelected) colorScheme.onPrimaryContainer else colorScheme.onSurface
 
@@ -1775,8 +1777,7 @@ private fun SettingsTabBar(
                 if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
             .border(
-                width = 1.dp,
-                color = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
+                border = LocalGlassProperties.current.containerBorderStroke,
                 shape = RoundedCornerShape(50.dp)
             )
             .padding(4.dp)

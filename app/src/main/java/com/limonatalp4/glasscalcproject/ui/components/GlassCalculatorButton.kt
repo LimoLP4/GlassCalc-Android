@@ -104,7 +104,7 @@ fun GlassCalculatorButton(
     )
 
     val (bgBrush, textColor, borderColor) = remember(
-        type, glassProps.isDark, glassProps.isTiefschwarz, glassProps.isMaterialYou, colorScheme, glassProps.buttonBackgroundAlpha
+        type, glassProps.isDark, glassProps.isTiefschwarz, glassProps.isMaterialYou, colorScheme, glassProps.buttonBackgroundAlpha, glassProps.buttonBorderColor
     ) {
         when (type) {
             ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> {
@@ -142,7 +142,7 @@ fun GlassCalculatorButton(
                         colorScheme.surfaceVariant.copy(alpha = alpha)
                     )
                 )
-                Triple(brush, colorScheme.onSurface, colorScheme.outline.copy(alpha = 0.25f))
+                Triple(brush, colorScheme.onSurface, glassProps.buttonBorderColor)
             }
         }
     }
@@ -251,7 +251,7 @@ fun GlassCalculatorButton(
                     Modifier
                 }
             )
-            .border(1.2.dp, if (isLongPressTriggered) colorScheme.error else borderColor, CircleShape)
+            .border(1.dp, if (isLongPressTriggered) colorScheme.error else borderColor, CircleShape)
             .then(clickModifier)
             .semantics { contentDescription = contentDesc }
             .testTag(testTag),

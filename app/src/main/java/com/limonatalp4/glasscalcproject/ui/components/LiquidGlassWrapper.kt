@@ -110,14 +110,20 @@ fun GlassSurface(
     content: @Composable BoxScope.() -> Unit
 ) {
     val glassProps = LocalGlassProperties.current
-    val effectiveBorder = borderStroke ?: BorderStroke(
-        width = borderWidth,
-        color = customBorderColor ?: glassProps.buttonBorderColor
-    )
+    val effectiveBorder = borderStroke ?: if (customBorderColor == null && borderWidth == 1.dp) {
+        glassProps.containerBorderStroke
+    } else {
+        BorderStroke(
+            width = borderWidth,
+            color = customBorderColor ?: glassProps.buttonBorderColor
+        )
+    }
     val effectiveBgColor = customBgColor ?: glassProps.cardBackground
 
     val state = glassState ?: rememberAdaptiveGlassState(forceFallback = true)
     val isBlurActive = glassState != null && glassProps.supportsBlur && state.quality != LiquidGlassQuality.Fallback
+
+    val isPureBlackSurface = glassProps.isTiefschwarz && effectiveBgColor == Color.Black
 
     Box(
         modifier = modifier
@@ -125,25 +131,27 @@ fun GlassSurface(
             .safeLiquidGlass(
                 state = state,
                 shape = shape,
-                supportsBlur = isBlurActive
+                supportsBlur = isBlurActive && !isPureBlackSurface
             )
             .background(effectiveBgColor, shape)
             .border(effectiveBorder, shape)
     ) {
-        // Specular light reflection on the top-left edge
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = if (glassProps.isDark) 0.08f else 0.25f),
-                            Color.Transparent,
-                            Color.White.copy(alpha = if (glassProps.isDark) 0.02f else 0.08f)
+        // Specular light reflection on the top-left edge (omitted on pure-black AMOLED surfaces to prevent gray tint)
+        if (!isPureBlackSurface) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = if (glassProps.isDark) 0.08f else 0.25f),
+                                Color.Transparent,
+                                Color.White.copy(alpha = if (glassProps.isDark) 0.02f else 0.08f)
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
         content()
     }
 }

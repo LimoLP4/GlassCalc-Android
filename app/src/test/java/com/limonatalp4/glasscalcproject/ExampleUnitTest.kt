@@ -354,7 +354,7 @@ class ExampleUnitTest {
         )
         assertTrue(
             com.limonatalp4.glasscalcproject.ui.components.matchesSettingsSearch(
-                "   ", "Dark Mode (Tiefschwarz)"
+                "   ", "AMOLED"
             )
         )
 

@@ -145,7 +145,8 @@
     <string name="theme_automatic">自動 (システム)</string>
     <string name="theme_white_mode">White Mode (ライト)</string>
     <string name="theme_standard_dark">Dark Mode (標準)</string>
-    <string name="theme_dark_mode">Dark Mode (ディープブラック)</string>
+    <string name="theme_dark_mode">AMOLED</string>
+    <string name="theme_amoled_desc">OLEDディスプレイで最大限のバッテリー節約を実現する完全な黒。</string>
     <string name="theme_material_you_unsupported">この Android バージョンでは非対応 (API 31+ が必要、現在: API %d)</string>
 
     <!-- Settings: Units Tab -->
@@ -263,7 +264,7 @@
     <string name="settings_keywords_theme_automatic">自動,システム,昼,夜,auto</string>
     <string name="settings_keywords_theme_white">ライト,白,昼,明るい,light,white</string>
     <string name="settings_keywords_theme_standard_dark">ダーク,夜,グレー,標準,dark</string>
-    <string name="settings_keywords_theme_dark">ダーク,漆黒,黒,夜,dark</string>
+    <string name="settings_keywords_theme_dark">amoled,ダーク,漆黒,黒,夜,dark</string>
     <string name="settings_keywords_units">単位,角度,三角関数,度数法,弧度法,変換</string>
     <string name="settings_keywords_angle_deg">deg,度,度数,度数法,360</string>
     <string name="settings_keywords_angle_rad">rad,ラジアン,弧度,弧度法,pi,2pi</string>

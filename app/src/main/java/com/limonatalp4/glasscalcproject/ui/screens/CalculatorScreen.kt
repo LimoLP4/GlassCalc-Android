@@ -292,7 +292,7 @@ fun CalculatorScreen(
                                 .testTag("header_pill"),
                             shape = RoundedCornerShape(50),
                             customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            borderWidth = 1.2.dp,
+                            borderStroke = glassProps.containerBorderStroke,
                             glassState = glassState
                         ) {
                             Row(
@@ -337,7 +337,7 @@ fun CalculatorScreen(
                                 .testTag("history_pill"),
                             shape = RoundedCornerShape(50),
                             customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            borderWidth = 1.2.dp,
+                            borderStroke = glassProps.containerBorderStroke,
                             glassState = glassState
                         ) {
                             val view = LocalView.current
@@ -472,14 +472,7 @@ fun CalculatorScreen(
                         val onSurfaceColor = colorScheme.onSurface
                         val view = LocalView.current
                         
-                        val drawerBorder = BorderStroke(
-                            width = 1.2.dp,
-                            color = when {
-                                isPureBlack -> Color.White.copy(alpha = 0.28f)
-                                glassProps.isDark -> colorScheme.outline.copy(alpha = 0.45f)
-                                else -> colorScheme.onSurface.copy(alpha = 0.25f)
-                            }
-                        )
+                        val drawerBorder = glassProps.containerBorderStroke
 
                         GlassSurface(
                             modifier = Modifier
@@ -572,14 +565,15 @@ fun CalculatorScreen(
                             }
 
                             // Outer Segmented Control Container
+                            val menuPillBorder = glassProps.containerBorderStroke
+
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(32.dp))
                                     .background(if (isPureBlack) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                                     .border(
-                                        width = 1.dp,
-                                        color = if (isPureBlack) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        border = menuPillBorder,
                                         shape = RoundedCornerShape(32.dp)
                                     )
                                     .padding(horizontal = 2.dp, vertical = 4.dp),
@@ -809,22 +803,12 @@ private fun PortraitCalculatorLayout(
             )
 
             // Bar with DEG/RAD Toggle & Scientific Switch
-            val angleButtonBorder = BorderStroke(
-                width = 1.dp,
-                color = if (glassProps.isDark) {
-                    glassProps.buttonBorderColor
-                } else {
-                    colorScheme.onSurface.copy(alpha = 0.3f)
-                }
-            )
-            val scientificButtonBorder = BorderStroke(
-                width = 1.dp,
-                color = when {
-                    isScientificExpanded -> colorScheme.tertiary
-                    glassProps.isDark -> glassProps.buttonBorderColor
-                    else -> colorScheme.onSurface.copy(alpha = 0.3f)
-                }
-            )
+            val angleButtonBorder = glassProps.containerBorderStroke
+            val scientificButtonBorder = if (isScientificExpanded) {
+                BorderStroke(width = 1.dp, color = colorScheme.tertiary)
+            } else {
+                glassProps.containerBorderStroke
+            }
 
             Row(
                 modifier = Modifier
@@ -1078,14 +1062,7 @@ private fun LandscapeCalculatorLayout(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    val landscapeAngleBorder = BorderStroke(
-                        width = 1.dp,
-                        color = if (glassProps.isDark) {
-                            glassProps.buttonBorderColor
-                        } else {
-                            colorScheme.onSurface.copy(alpha = 0.3f)
-                        }
-                    )
+                    val landscapeAngleBorder = glassProps.containerBorderStroke
                     Box(modifier = Modifier.fillMaxWidth()) {
                         val landscapeAngleInteraction = remember { MutableInteractionSource() }
                         GlassSurface(

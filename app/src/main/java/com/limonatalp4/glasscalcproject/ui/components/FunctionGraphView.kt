@@ -1267,8 +1267,7 @@ fun FunctionGraphView(
                     .clip(RoundedCornerShape(16.dp))
                     .background(if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerLow)
                     .border(
-                        1.dp,
-                        if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else gridColor,
+                        glassProps.containerBorderStroke,
                         RoundedCornerShape(16.dp)
                     )
                     .then(gestureModifier)
@@ -1832,7 +1831,7 @@ fun FunctionGraphView(
                     glassState = glassState,
                     shape = RoundedCornerShape(24.dp),
                     customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+                    borderStroke = glassProps.containerBorderStroke
                 ) {
                     Column(
                         modifier = Modifier
@@ -1856,7 +1855,7 @@ fun FunctionGraphView(
                             GlassSurface(
                                 shape = RoundedCornerShape(50),
                                 customBgColor = if (isTiefschwarz) Color(0xFF1C1C1E).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                borderStroke = glassProps.containerBorderStroke,
                                 glassState = glassState,
                                 modifier = Modifier.pressScale(clearPointsInteraction)
                             ) {
@@ -1989,7 +1988,7 @@ fun FunctionGraphView(
                     borderStroke = if (hasActivePoint) {
                         BorderStroke(1.dp, colorScheme.onPrimary.copy(alpha = 0.25f))
                     } else {
-                        BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.2f))
+                        glassProps.containerBorderStroke
                     },
                     customBgColor = if (hasActivePoint) {
                         colorScheme.primary.copy(alpha = 0.90f)

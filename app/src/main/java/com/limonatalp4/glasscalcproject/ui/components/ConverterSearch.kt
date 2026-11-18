@@ -46,6 +46,7 @@ import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.converter.ConversionPair
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
+import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.PaddingValues
@@ -164,11 +165,7 @@ fun UnitConverterSearchBar(
     val colorScheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(percent = 50)
     val searchBarBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val searchBarBorder = if (isTiefschwarz) {
-        BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
-    } else {
-        BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
-    }
+    val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
     val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
     val hintColor = if (isTiefschwarz) {
         Color.White.copy(alpha = 0.6f)
@@ -330,9 +327,8 @@ fun UnitSuggestionsDropdown(
             .fillMaxWidth()
             .testTag("unit_suggestions_dropdown"),
         shape = RoundedCornerShape(18.dp),
-        borderWidth = 1.dp,
         customBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.12f) else colorScheme.outline.copy(alpha = 0.25f)
+        borderStroke = LocalGlassProperties.current.containerBorderStroke
     ) {
         val displayedSuggestions = remember(suggestions) { suggestions.take(8) }
         LazyColumn(
@@ -448,9 +444,8 @@ fun ConverterSearchEmptyState(
             .fillMaxWidth()
             .testTag("converter_search_empty"),
         shape = RoundedCornerShape(22.dp),
-        borderWidth = 1.dp,
         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
+        borderStroke = LocalGlassProperties.current.containerBorderStroke
     ) {
         Column(
             modifier = Modifier

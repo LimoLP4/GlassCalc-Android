@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.PowerManager
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -24,17 +25,21 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 
+internal const val UNIFIED_GLASS_BORDER_ALPHA = 0.25f
+
 @Immutable
 data class GlassThemeProperties(
     val backgroundBrush: Brush,
     val buttonBackgroundAlpha: Float,
     val buttonBorderColor: Color,
+    val containerBorderStroke: BorderStroke,
     val cardBackground: Color,
     val isDark: Boolean,
     val isTiefschwarz: Boolean,
@@ -45,10 +50,12 @@ data class GlassThemeProperties(
 )
 
 val LocalGlassProperties = staticCompositionLocalOf {
+    val defaultBorderColor = Color.White.copy(alpha = UNIFIED_GLASS_BORDER_ALPHA)
     GlassThemeProperties(
         backgroundBrush = Brush.verticalGradient(listOf(DarkBackground, Color(0xFF131B2E))),
         buttonBackgroundAlpha = 0.10f,
-        buttonBorderColor = Color.White.copy(alpha = 0.20f),
+        buttonBorderColor = defaultBorderColor,
+        containerBorderStroke = BorderStroke(1.dp, defaultBorderColor),
         cardBackground = Color.White.copy(alpha = 0.07f),
         isDark = true,
         isTiefschwarz = true,
@@ -346,11 +353,13 @@ fun GlassCalcTheme(
         else -> 0.65f
     }
 
-    val buttonBorderColor = when {
-        isMaterialYou -> colorScheme.outline.copy(alpha = if (isDark) 0.30f else 0.20f)
-        isTiefschwarz -> Color.White.copy(alpha = 0.22f)
-        isDark -> Color.White.copy(alpha = 0.18f)
-        else -> Color.Black.copy(alpha = 0.08f)
+    val buttonBorderColor = if (isTiefschwarz) {
+        Color.White.copy(alpha = UNIFIED_GLASS_BORDER_ALPHA)
+    } else {
+        colorScheme.outline.copy(alpha = UNIFIED_GLASS_BORDER_ALPHA)
+    }
+    val containerBorderStroke = remember(buttonBorderColor) {
+        BorderStroke(width = 1.dp, color = buttonBorderColor)
     }
 
     val cardBackground = when {
@@ -364,6 +373,7 @@ fun GlassCalcTheme(
         backgroundBrush,
         buttonAlpha,
         buttonBorderColor,
+        containerBorderStroke,
         cardBackground,
         isDark,
         isTiefschwarz,
@@ -376,6 +386,7 @@ fun GlassCalcTheme(
             backgroundBrush = backgroundBrush,
             buttonBackgroundAlpha = buttonAlpha,
             buttonBorderColor = buttonBorderColor,
+            containerBorderStroke = containerBorderStroke,
             cardBackground = cardBackground,
             isDark = isDark,
             isTiefschwarz = isTiefschwarz,

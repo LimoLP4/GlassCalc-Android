@@ -63,6 +63,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -165,8 +166,7 @@ fun DrawerFormulaSearch(
                 .clip(searchBarShape)
                 .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
                 .border(
-                    width = 1.dp,
-                    color = colorScheme.outline.copy(alpha = 0.3f),
+                    border = LocalGlassProperties.current.containerBorderStroke,
                     shape = searchBarShape
                 )
                 .clickable(
@@ -268,8 +268,7 @@ fun DrawerFormulaSearch(
                     .clip(dropdownShape)
                     .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.92f))
                     .border(
-                        width = 1.dp,
-                        color = colorScheme.outline.copy(alpha = 0.3f),
+                        border = LocalGlassProperties.current.containerBorderStroke,
                         shape = dropdownShape
                     )
                     .heightIn(max = if (isImeVisible) 150.dp else 220.dp)

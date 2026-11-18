@@ -145,7 +145,8 @@
     <string name="theme_automatic">自动 (跟随系统)</string>
     <string name="theme_white_mode">White Mode (浅色)</string>
     <string name="theme_standard_dark">Dark Mode (标准深色)</string>
-    <string name="theme_dark_mode">Dark Mode (深邃黑)</string>
+    <string name="theme_dark_mode">AMOLED</string>
+    <string name="theme_amoled_desc">纯黑背景，可在 OLED 屏幕上实现最大程度省电。</string>
     <string name="theme_material_you_unsupported">当前 Android 版本不支持 (需要 API 31+，当前: API %d)</string>
 
     <!-- Settings: Units Tab -->
@@ -263,7 +264,7 @@
     <string name="settings_keywords_theme_automatic">自动,系统,日间,夜间,auto</string>
     <string name="settings_keywords_theme_white">浅色,白色,日间,明亮,light,white</string>
     <string name="settings_keywords_theme_standard_dark">深色,夜间,灰色,标准,dark</string>
-    <string name="settings_keywords_theme_dark">深色,纯黑,夜间,极黑,dark</string>
+    <string name="settings_keywords_theme_dark">amoled,深色,纯黑,夜间,极黑,dark</string>
     <string name="settings_keywords_units">单位,角度,三角函数,角度制,弧度制,转换</string>
     <string name="settings_keywords_angle_deg">deg,度,角度,角度制,360</string>
     <string name="settings_keywords_angle_rad">rad,弧度,弧度制,pi,2pi</string>

@@ -145,7 +145,8 @@
     <string name="theme_automatic">Automatisch (System)</string>
     <string name="theme_white_mode">White Mode (Hell)</string>
     <string name="theme_standard_dark">Dark Mode (Standard)</string>
-    <string name="theme_dark_mode">Dark Mode (Tiefschwarz)</string>
+    <string name="theme_dark_mode">AMOLED</string>
+    <string name="theme_amoled_desc">Reines Schwarz für maximale Akku-Ersparnis auf OLED-Displays.</string>
     <string name="theme_material_you_unsupported">Nicht mit dieser Android-Version kompatibel (erfordert API 31+, aktiv: API %d)</string>
 
     <!-- Settings: Units Tab -->
@@ -263,7 +264,7 @@
     <string name="settings_keywords_theme_automatic">automatisch,auto,system,tag,nacht,adaptive</string>
     <string name="settings_keywords_theme_white">hell,weiß,tag,tageslicht,light,white,klar</string>
     <string name="settings_keywords_theme_standard_dark">dunkel,dark,nacht,grau,standard</string>
-    <string name="settings_keywords_theme_dark">dunkel,dark,tiefschwarz,nacht,schwarz</string>
+    <string name="settings_keywords_theme_dark">amoled,dunkel,dark,tiefschwarz,nacht,schwarz</string>
     <string name="settings_keywords_units">einheiten,winkel,winkelmodus,trigonometrie,umrechnung</string>
     <string name="settings_keywords_angle_deg">grad,deg,degree,degrees,360,altgrad</string>
     <string name="settings_keywords_angle_rad">bogenmaß,rad,radian,radians,pi,2pi</string>

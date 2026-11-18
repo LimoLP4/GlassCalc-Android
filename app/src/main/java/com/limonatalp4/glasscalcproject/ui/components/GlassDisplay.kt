@@ -376,14 +376,13 @@ private fun GlassDisplayContent(
 
     val resultColor = colorScheme.onSurface
 
-    val displayBorder = BorderStroke(
-        width = 1.dp,
-        color = if (glassProps.isDark) {
-            glassProps.buttonBorderColor
-        } else {
-            colorScheme.onSurface.copy(alpha = 0.20f)
-        }
-    )
+    val displayBorder = glassProps.containerBorderStroke
+
+    val displayBackgroundColor = if (glassProps.isTiefschwarz) {
+        Color.Black
+    } else {
+        null
+    }
 
     GlassSurface(
         modifier = modifier
@@ -395,7 +394,7 @@ private fun GlassDisplayContent(
         glassState = glassState,
         shape = displayShape,
         borderStroke = displayBorder,
-        customBgColor = if (glassProps.isTiefschwarz) Color.White.copy(alpha = 0.08f) else null
+        customBgColor = displayBackgroundColor
     ) {
         Column(
             modifier = Modifier
@@ -486,14 +485,14 @@ private fun GlassDisplayContent(
                         } else {
                             colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         },
-                        borderStroke = BorderStroke(
-                            width = 1.dp,
-                            color = if (isKeyboardOpen) {
-                                colorScheme.primary.copy(alpha = 0.6f)
-                            } else {
-                                colorScheme.outline.copy(alpha = 0.3f)
-                            }
-                        ),
+                        borderStroke = if (isKeyboardOpen) {
+                            BorderStroke(
+                                width = 1.dp,
+                                color = colorScheme.primary.copy(alpha = 0.6f)
+                            )
+                        } else {
+                            glassProps.containerBorderStroke
+                        },
                         glassState = glassState,
                         modifier = Modifier.pressScale(keyboardBtnInteraction)
                     ) {
@@ -545,7 +544,7 @@ private fun GlassDisplayContent(
                     GlassSurface(
                         shape = RoundedCornerShape(50),
                         customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                        borderStroke = glassProps.containerBorderStroke,
                         glassState = glassState,
                         modifier = Modifier.pressScale(copyBtnInteraction)
                     ) {

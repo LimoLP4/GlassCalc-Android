@@ -119,10 +119,7 @@ fun HistorySheet(
     } else {
         colorScheme.surface.copy(alpha = 0.92f)
     }
-    val pillBorder = BorderStroke(
-        1.dp,
-        if (isPureBlack) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.30f)
-    )
+    val pillBorder = glassProps.containerBorderStroke
     val titleBadgeBackground = if (isPureBlack) {
         Color(0xFF141414).copy(alpha = 0.85f)
     } else {
@@ -133,10 +130,7 @@ fun HistorySheet(
     } else {
         colorScheme.surfaceVariant.copy(alpha = 0.65f)
     }
-    val itemCardBorder = BorderStroke(
-        1.dp,
-        if (isPureBlack) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
-    )
+    val itemCardBorder = glassProps.containerBorderStroke
 
     val transitionController = rememberDialogTransitionController(onDismiss)
 

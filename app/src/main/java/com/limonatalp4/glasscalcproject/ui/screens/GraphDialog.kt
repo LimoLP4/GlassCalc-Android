@@ -81,9 +81,8 @@ fun GraphDialog(
                     .fillMaxWidth()
                     .padding(8.dp),
                 shape = RoundedCornerShape(28.dp),
-                borderWidth = 1.2.dp,
                 customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
-                borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else null
+                borderStroke = glassProps.containerBorderStroke
             ) {
                 Column(
                     modifier = Modifier
@@ -107,7 +106,7 @@ fun GraphDialog(
                         GlassSurface(
                             shape = RoundedCornerShape(50),
                             customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            borderStroke = if (isTiefschwarz) BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)) else BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                            borderStroke = glassProps.containerBorderStroke,
                             modifier = Modifier.pressScale(closeBtnInteraction)
                         ) {
                             IconButton(

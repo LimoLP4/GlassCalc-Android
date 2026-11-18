@@ -64,6 +64,7 @@ import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
+import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 
 enum class SettingsUnitCard { DEG, RAD, SYSTEMS }
 
@@ -188,6 +189,7 @@ fun rememberSettingsSearchVisibility(
     val appearanceTabTitle = stringResource(R.string.title_appearance)
     val appearanceKeywords = stringResource(R.string.settings_keywords_appearance)
     val materialYouUnsupported = stringResource(R.string.theme_material_you_unsupported, effectiveApiLevel)
+    val amoledDesc = stringResource(R.string.theme_amoled_desc)
 
     val themeKwMaterialYou = stringResource(R.string.settings_keywords_theme_material_you)
     val themeKwAutomatic = stringResource(R.string.settings_keywords_theme_automatic)
@@ -199,6 +201,7 @@ fun rememberSettingsSearchVisibility(
         val label = stringResource(theme.stringResId)
         val extra = when (theme) {
             AppTheme.MATERIAL_YOU -> listOf(materialYouUnsupported)
+            AppTheme.DARK_MODE -> listOf(amoledDesc)
             else -> emptyList()
         }
         val themeKw = when (theme) {
@@ -445,11 +448,7 @@ fun SettingsSearchBar(
     val colorScheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(percent = 50)
     val searchBarBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val searchBarBorder = if (isTiefschwarz) {
-        BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
-    } else {
-        BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
-    }
+    val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
     val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
     val hintColor = if (isTiefschwarz) {
         Color.White.copy(alpha = 0.6f)
@@ -598,9 +597,8 @@ fun SettingsSearchEmptyState(
             .fillMaxWidth()
             .testTag("settings_search_empty"),
         shape = RoundedCornerShape(22.dp),
-        borderWidth = 1.dp,
         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        customBorderColor = if (isTiefschwarz) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.25f)
+        borderStroke = LocalGlassProperties.current.containerBorderStroke
     ) {
         Column(
             modifier = Modifier

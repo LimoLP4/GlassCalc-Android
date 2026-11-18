@@ -294,9 +294,8 @@ fun UnitConverterDialog(
                                 }
                             },
                         shape = RoundedCornerShape(28.dp),
-                        borderWidth = 1.2.dp,
                         customBgColor = if (isPureBlack) Color.Black else dialogBgColor,
-                        customBorderColor = if (isPureBlack) Color.White.copy(alpha = 0.15f) else null
+                        borderStroke = glassProps.containerBorderStroke
                     ) {
                     Column(
                         modifier = Modifier
@@ -319,7 +318,7 @@ fun UnitConverterDialog(
                             GlassSurface(
                                 shape = RoundedCornerShape(50),
                                 customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                borderStroke = glassProps.containerBorderStroke,
                                 modifier = Modifier.pressScale(closeBtnInteraction)
                             ) {
                                 IconButton(
@@ -452,8 +451,7 @@ fun UnitConverterDialog(
                             if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         )
                         .border(
-                            width = 1.dp,
-                            color = if (isPureBlack) Color.White.copy(alpha = 0.15f) else colorScheme.outline.copy(alpha = 0.3f),
+                            border = glassProps.containerBorderStroke,
                             shape = RoundedCornerShape(50.dp)
                         )
                         .padding(4.dp)
@@ -615,7 +613,7 @@ fun UnitConverterDialog(
                                         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                         label = "pair_bg_$idx"
                                     )
-                                    val pairBorder = if (isPureBlack) Color.White.copy(alpha = 0.15f) else (if (isSelected) primaryColor else glassProps.buttonBorderColor)
+                                    val pairBorder = if (!isPureBlack && isSelected) primaryColor else glassProps.buttonBorderColor
                                     val pairTextCol = if (isPureBlack) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
                                     val pairInteraction = remember { MutableInteractionSource() }
 
@@ -656,9 +654,8 @@ fun UnitConverterDialog(
                 GlassSurface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    borderWidth = 1.2.dp,
                     customBgColor = if (isPureBlack) Color.Black else null,
-                    customBorderColor = if (isPureBlack) Color.White.copy(alpha = 0.15f) else null
+                    borderStroke = glassProps.containerBorderStroke
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -705,7 +702,7 @@ fun UnitConverterDialog(
                                 focusedContainerColor = if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 unfocusedContainerColor = if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
                                 focusedBorderColor = if (isPureBlack) Color.White else primaryColor,
-                                unfocusedBorderColor = if (isPureBlack) Color.White.copy(alpha = 0.15f) else glassProps.buttonBorderColor,
+                                unfocusedBorderColor = glassProps.buttonBorderColor,
                                 focusedTextColor = if (isPureBlack) Color.White else onSurfaceColor,
                                 unfocusedTextColor = if (isPureBlack) Color.White else onSurfaceColor
                             )
