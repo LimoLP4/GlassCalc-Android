@@ -304,7 +304,7 @@ fun SettingsDialog(
                                     }
                                 }
                             },
-                        shape = RoundedCornerShape(28.dp),
+                        shape = RoundedCornerShape(32.dp),
                         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
                         borderStroke = glassProps.containerBorderStroke
                     ) {
@@ -691,13 +691,8 @@ private fun UnitsSection(
                     )
                 }
                 SettingsUnitCard.SYSTEMS -> {
-                    GlassSurface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
-                        customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        borderStroke = glassProps.containerBorderStroke
-                    ) {
-                        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+                    SettingsGlassCard(glassProps = glassProps) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = stringResource(id = R.string.units_supported_systems),
                                 fontSize = 14.sp,
@@ -753,8 +748,6 @@ private fun DeveloperOptionsSection(
     val screenWidthDp = with(density) { containerSize.width.toDp().value.roundToInt() }
     val screenHeightDp = with(density) { containerSize.height.toDp().value.roundToInt() }
     val glassProps = LocalGlassProperties.current
-    val devCardBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val devCardBorder = glassProps.buttonBorderColor
 
     val orderedDevCards = searchVisibility?.orderedDevCards ?: SettingsDevCard.entries
 
@@ -766,13 +759,8 @@ private fun DeveloperOptionsSection(
             when (devCard) {
                 SettingsDevCard.SCREEN -> {
         // Card 1: Screen & WindowSizeClass
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.dev_screen_scaling),
                     fontSize = 15.sp,
@@ -799,13 +787,8 @@ private fun DeveloperOptionsSection(
                 }
                 SettingsDevCard.API -> {
         // Card 2: Simulated API Level
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.dev_simulated_api_title),
                     fontSize = 15.sp,
@@ -849,8 +832,8 @@ private fun DeveloperOptionsSection(
                 }
 
                 if (simulatedApiEnabled) {
-                    val apiSliderPillShape = RoundedCornerShape(24.dp)
-                    val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    val apiSliderPillShape = RoundedCornerShape(28.dp)
+                    val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
                     val apiSliderPillBorder = glassProps.containerBorderStroke
                     Column(
                         modifier = Modifier
@@ -859,7 +842,7 @@ private fun DeveloperOptionsSection(
                             .clip(apiSliderPillShape)
                             .background(apiSliderPillBg)
                             .border(apiSliderPillBorder, shape = apiSliderPillShape)
-                            .padding(horizontal = 18.dp, vertical = 12.dp)
+                            .padding(horizontal = 20.dp, vertical = 14.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.dev_api_level_slider, currentSliderApi.roundToInt()),
@@ -978,13 +961,8 @@ private fun DeveloperOptionsSection(
             mutableFloatStateOf(hapticIntensity.toFloat().coerceIn(1f, 10f))
         }
 
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1054,8 +1032,8 @@ private fun DeveloperOptionsSection(
 
                 // Haptic Intensity Slider Pill (10 levels: 1..10, default 5)
                 val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
-                val sliderPillShape = RoundedCornerShape(24.dp)
-                val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                val sliderPillShape = RoundedCornerShape(28.dp)
+                val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
                 val sliderPillBorder = glassProps.containerBorderStroke
                 Column(
                     modifier = Modifier
@@ -1064,7 +1042,7 @@ private fun DeveloperOptionsSection(
                         .clip(sliderPillShape)
                         .background(sliderPillBg)
                         .border(sliderPillBorder, shape = sliderPillShape)
-                        .padding(horizontal = 18.dp, vertical = 12.dp)
+                        .padding(horizontal = 20.dp, vertical = 14.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -1151,13 +1129,13 @@ private fun DeveloperOptionsSection(
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp),
             shape = RoundedCornerShape(percent = 50),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
+            customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            borderStroke = glassProps.containerBorderStroke
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                    .padding(horizontal = 24.dp, vertical = 14.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -1171,16 +1149,11 @@ private fun DeveloperOptionsSection(
                 }
                 SettingsDevCard.LIFECYCLE -> {
         // Card 5: Lifecycle & State
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.dev_lifecycle_title), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                 Text(text = "Status: $lifecycleStatus", fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = colorScheme.primary)
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
                         onClick = { triggerHaptic(); onSimulateBackground() },
                         shape = RoundedCornerShape(percent = 50),
@@ -1202,13 +1175,8 @@ private fun DeveloperOptionsSection(
                 }
                 SettingsDevCard.CLEAR_CACHE -> {
         // Card 6: Cache leeren (Eigene Karte)
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.dev_clear_cache_title),
                     fontSize = 15.sp,
@@ -1220,7 +1188,7 @@ private fun DeveloperOptionsSection(
                     fontSize = 12.sp,
                     color = colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
                         triggerHaptic()
@@ -1245,20 +1213,15 @@ private fun DeveloperOptionsSection(
                 }
                 SettingsDevCard.RESET_STORAGE -> {
         // Card 7: App-Speicher zurücksetzen
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = devCardBg,
-            customBorderColor = devCardBorder
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.dev_reset_storage_title), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.error)
                 Text(text = stringResource(R.string.dev_reset_storage_desc), fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                 Button(
                     onClick = { triggerHaptic(); onResetAppRequest() },
                     shape = RoundedCornerShape(percent = 50),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error),
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("btn_reset_storage")
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp).testTag("btn_reset_storage")
                 ) {
                     Text(stringResource(R.string.dev_btn_reset_storage), fontWeight = FontWeight.Bold)
                 }
@@ -1293,13 +1256,8 @@ private fun InformationSection(
             when (infoCard) {
                 SettingsInfoCard.VERSION -> {
         // App Version Card
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            borderStroke = glassProps.containerBorderStroke
-        ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "GlassCalc v${BuildConfig.VERSION_NAME}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.app_version_subtitle), fontSize = 12.sp, color = colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                 Text(text = stringResource(R.string.copyright_notice), fontSize = 11.sp, color = colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
@@ -1309,35 +1267,30 @@ private fun InformationSection(
                 SettingsInfoCard.GITHUB -> {
         // GitHub Repository Card (Pill-Design)
         val githubCardInteraction = remember { MutableInteractionSource() }
-        val githubCardBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        val githubCardBorder = glassProps.containerBorderStroke
 
-        GlassSurface(
+        SettingsGlassCard(
+            glassProps = glassProps,
+            shape = RoundedCornerShape(percent = 50),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 14.dp),
             modifier = Modifier
-                .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
                 .pressScale(githubCardInteraction)
-                .testTag("card_github_repo"),
-            shape = RoundedCornerShape(percent = 50),
-            customBgColor = githubCardBg,
-            borderStroke = githubCardBorder
+                .clickable(
+                    interactionSource = githubCardInteraction,
+                    indication = androidx.compose.material3.ripple()
+                ) {
+                    triggerHaptic()
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, "https://github.com/LimoLP4/GlassCalc-Android/releases/".toUri())
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .testTag("card_github_repo")
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(
-                        interactionSource = githubCardInteraction,
-                        indication = androidx.compose.material3.ripple()
-                    ) {
-                        triggerHaptic()
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW, "https://github.com/LimoLP4/GlassCalc-Android/releases/".toUri())
-                            context.startActivity(intent)
-                        } catch (_: Exception) {
-                            Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    .padding(horizontal = 22.dp, vertical = 14.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -1381,13 +1334,8 @@ private fun InformationSection(
                 }
                 SettingsInfoCard.OSS -> {
         // Third-Party OSS Licenses Button
-        GlassSurface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            borderStroke = glassProps.containerBorderStroke
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+        SettingsGlassCard(glassProps = glassProps) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.info_oss_licenses), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                 Text(text = stringResource(R.string.info_oss_licenses_desc), fontSize = 12.sp, color = colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
                 Button(
@@ -1411,8 +1359,6 @@ private fun InformationSection(
                 }
                 SettingsInfoCard.APACHE -> {
         // Accordion 1: Apache
-        val apacheCardBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        val apacheCardBorder = glassProps.containerBorderStroke
         val apacheChevronRotation by animateFloatAsState(
             targetValue = if (apacheAccordionOpen) 180f else 0f,
             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
@@ -1421,26 +1367,20 @@ private fun InformationSection(
         val apacheCardInteraction = remember { MutableInteractionSource() }
         val apachePillInteraction = remember { MutableInteractionSource() }
 
-        GlassSurface(
+        SettingsGlassCard(
+            glassProps = glassProps,
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 16.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .testTag("card_apache_license"),
-            shape = RoundedCornerShape(28.dp),
-            customBgColor = apacheCardBg,
-            borderStroke = apacheCardBorder
+                .clickable(
+                    interactionSource = apacheCardInteraction,
+                    indication = androidx.compose.material3.ripple()
+                ) {
+                    triggerHaptic()
+                    onToggleApache()
+                }
+                .testTag("card_apache_license")
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(
-                        interactionSource = apacheCardInteraction,
-                        indication = androidx.compose.material3.ripple()
-                    ) {
-                        triggerHaptic()
-                        onToggleApache()
-                    }
-                    .padding(horizontal = 20.dp, vertical = 14.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1661,6 +1601,33 @@ private fun SettingsPillOption(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingsGlassCard(
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(32.dp),
+    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(
+        horizontal = 24.dp,
+        vertical = 20.dp
+    ),
+    content: @Composable () -> Unit
+) {
+    GlassSurface(
+        modifier = modifier.fillMaxWidth(),
+        shape = shape,
+        customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        borderStroke = glassProps.containerBorderStroke
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(contentPadding)
+        ) {
+            content()
         }
     }
 }
