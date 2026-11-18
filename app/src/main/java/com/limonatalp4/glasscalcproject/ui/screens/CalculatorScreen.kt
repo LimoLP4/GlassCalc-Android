@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -63,9 +64,11 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,12 +79,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -564,82 +571,170 @@ fun CalculatorScreen(
                                 )
                             }
 
-                            // Outer Segmented Control Container
-                            val menuPillBorder = glassProps.containerBorderStroke
+                            // Outer Segmented Control Container (große Pille)
+                            var selectedNavTag by remember { mutableStateOf("nav_item_calculator") }
+                            LaunchedEffect(
+                                isDrawerOpen,
+                                isHistoryOpen,
+                                isUnitConverterOpen,
+                                isGraphOpen,
+                                isSettingsOpen
+                            ) {
+                                selectedNavTag = when {
+                                    isHistoryOpen -> "nav_item_history"
+                                    isUnitConverterOpen -> "nav_item_converter"
+                                    isGraphOpen -> "nav_item_graph"
+                                    isSettingsOpen -> "nav_item_settings"
+                                    else -> "nav_item_calculator"
+                                }
+                            }
 
-                            Column(
+                            val selectedIndex = remember(selectedNavTag, menuItems) {
+                                menuItems.indexOfFirst { it.third == selectedNavTag }.coerceAtLeast(0)
+                            }
+                            val itemHeights = remember { mutableStateMapOf<Int, Dp>() }
+                            val itemSpacing = 4.dp
+                            val targetOffsetY = remember(selectedIndex, itemHeights.toMap()) {
+                                var pos = 0.dp
+                                for (i in 0 until selectedIndex) {
+                                    pos += (itemHeights[i] ?: 0.dp) + itemSpacing
+                                }
+                                pos
+                            }
+                            val targetHeight = itemHeights[selectedIndex] ?: 0.dp
+
+                            val indicatorOffsetY by animateDpAsState(
+                                targetValue = targetOffsetY,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                label = "drawer_pill_offset_y"
+                            )
+                            val indicatorHeight by animateDpAsState(
+                                targetValue = targetHeight,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                label = "drawer_pill_height"
+                            )
+                            val activePillBgColor by animateColorAsState(
+                                targetValue = colorScheme.primaryContainer,
+                                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                                label = "drawer_active_pill_bg"
+                            )
+
+                            val outerPillShape = RoundedCornerShape(32.dp)
+                            val outerPillBg = colorScheme.surfaceVariant.copy(
+                                alpha = if (isPureBlack) 0.45f else 0.3f
+                            )
+                            val outerPillBorder = glassProps.containerBorderStroke
+
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(32.dp))
-                                    .background(if (isPureBlack) Color.Black else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                    .clip(outerPillShape)
+                                    .background(outerPillBg)
                                     .border(
-                                        border = menuPillBorder,
-                                        shape = RoundedCornerShape(32.dp)
+                                        border = outerPillBorder,
+                                        shape = outerPillShape
                                     )
-                                    .padding(horizontal = 2.dp, vertical = 4.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    .padding(4.dp)
                             ) {
-                                menuItems.forEach { (icon, labelRes, tag) ->
-                                    val isSelected = tag == "nav_item_calculator"
-                                    val menuItemInteraction = remember { MutableInteractionSource() }
-
+                                // Gleitende aktive Pille (Schieberegler-Indikator)
+                                if (targetHeight > 0.dp) {
                                     Box(
                                         modifier = Modifier
-                                            .padding(horizontal = 4.dp, vertical = 2.dp)
                                             .fillMaxWidth()
-                                            .defaultMinSize(minHeight = 48.dp)
-                                            .pressScale(menuItemInteraction)
+                                            .offset { IntOffset(0, indicatorOffsetY.roundToPx()) }
+                                            .height(indicatorHeight)
                                             .clip(RoundedCornerShape(percent = 50))
-                                            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                                            .clickable(
-                                                interactionSource = menuItemInteraction,
-                                                indication = androidx.compose.material3.ripple()
-                                            ) {
-                                                focusManager.clearFocus()
-                                                keyboardController?.hide()
-                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                                isDrawerOpen = false
-                                                menuVisibleState.targetState = false
-                                                coroutineScope.launch {
-                                                    snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
-                                                        .first { it }
-                                                    when (tag) {
-                                                        "nav_item_history" -> isHistoryOpen = true
-                                                        "nav_item_converter" -> isUnitConverterOpen = true
-                                                        "nav_item_graph" -> isGraphOpen = true
-                                                        "nav_item_settings" -> isSettingsOpen = true
+                                            .background(activePillBgColor)
+                                    )
+                                }
+
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(itemSpacing)
+                                ) {
+                                    menuItems.forEachIndexed { index, (icon, labelRes, tag) ->
+                                        val isSelected = selectedNavTag == tag
+                                        val menuItemInteraction = remember { MutableInteractionSource() }
+                                        val iconTint by animateColorAsState(
+                                            targetValue = if (isSelected) {
+                                                if (isPureBlack) Color.White else colorScheme.onPrimaryContainer
+                                            } else {
+                                                if (isPureBlack) Color.White.copy(alpha = 0.65f) else onSurfaceColor.copy(alpha = 0.7f)
+                                            },
+                                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                                            label = "nav_icon_tint_$tag"
+                                        )
+                                        val labelColor by animateColorAsState(
+                                            targetValue = if (isSelected) {
+                                                if (isPureBlack) Color.White else colorScheme.onPrimaryContainer
+                                            } else {
+                                                if (isPureBlack) Color.White.copy(alpha = 0.85f) else onSurfaceColor.copy(alpha = 0.85f)
+                                            },
+                                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                                            label = "nav_label_color_$tag"
+                                        )
+
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .defaultMinSize(minHeight = 48.dp)
+                                                .onSizeChanged { size ->
+                                                    itemHeights[index] = with(density) { size.height.toDp() }
+                                                }
+                                                .pressScale(menuItemInteraction)
+                                                .clip(RoundedCornerShape(percent = 50))
+                                                .background(Color.Transparent)
+                                                .clickable(
+                                                    interactionSource = menuItemInteraction,
+                                                    indication = androidx.compose.material3.ripple()
+                                                ) {
+                                                    focusManager.clearFocus()
+                                                    keyboardController?.hide()
+                                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                                                    selectedNavTag = tag
+                                                    isDrawerOpen = false
+                                                    menuVisibleState.targetState = false
+                                                    coroutineScope.launch {
+                                                        snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
+                                                            .first { it }
+                                                        when (tag) {
+                                                            "nav_item_history" -> isHistoryOpen = true
+                                                            "nav_item_converter" -> isUnitConverterOpen = true
+                                                            "nav_item_graph" -> isGraphOpen = true
+                                                            "nav_item_settings" -> isSettingsOpen = true
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            .testTag(tag),
-                                        contentAlignment = Alignment.CenterStart
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                .testTag(tag),
+                                            contentAlignment = Alignment.CenterStart
                                         ) {
-                                            val iconTextTint = if (isPureBlack) {
-                                                Color.White
-                                            } else {
-                                                if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor.copy(alpha = 0.7f)
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = icon,
+                                                    contentDescription = null,
+                                                    tint = iconTint,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(labelRes),
+                                                    fontSize = 15.sp,
+                                                    lineHeight = 19.sp,
+                                                    maxLines = 2,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                    color = labelColor
+                                                )
                                             }
-                                            
-                                            Icon(
-                                                imageVector = icon,
-                                                contentDescription = null,
-                                                tint = iconTextTint,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Text(
-                                                text = stringResource(labelRes),
-                                                fontSize = 15.sp,
-                                                lineHeight = 19.sp,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis,
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isPureBlack) Color.White else (if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else onSurfaceColor)
-                                            )
                                         }
                                     }
                                 }
