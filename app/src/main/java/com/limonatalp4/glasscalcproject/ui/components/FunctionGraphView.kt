@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -72,13 +73,16 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.Role
@@ -884,6 +888,7 @@ fun FunctionGraphView(
     isGestureLocked: Boolean,
     onGestureLockChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    canvasHeight: Dp? = null,
     glassState: LiquidGlassState? = null,
     onApplyPointToCalculator: ((Double, Double) -> Unit)? = null
 ) {
@@ -892,6 +897,16 @@ fun FunctionGraphView(
     val isTiefschwarz = glassProps.isTiefschwarz
     val localContext = LocalContext.current
     val view = LocalView.current
+    val density = LocalDensity.current
+    val windowContainerSize = LocalWindowInfo.current.containerSize
+    val windowWidthDp = with(density) { windowContainerSize.width.toDp() }
+    val windowHeightDp = with(density) { windowContainerSize.height.toDp() }
+    val isCompactVertical = windowHeightDp < 500.dp || windowWidthDp > windowHeightDp
+    val resolvedCanvasHeight = canvasHeight ?: if (isCompactVertical) {
+        (windowHeightDp * 0.36f).coerceIn(130.dp, 190.dp)
+    } else {
+        230.dp
+    }
     val textMeasurer = rememberTextMeasurer()
     val hapticEnabled = LocalHapticFeedbackEnabled.current
     val hapticIntensity = LocalHapticIntensity.current
@@ -1095,7 +1110,10 @@ fun FunctionGraphView(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(
+                    horizontal = 14.dp,
+                    vertical = if (isCompactVertical) 10.dp else 14.dp
+                )
         ) {
             // Header Preset Selector Chips + Lock Toggle
             Row(
@@ -1263,7 +1281,8 @@ fun FunctionGraphView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(230.dp)
+                    .height(resolvedCanvasHeight)
+                    .heightIn(max = if (isCompactVertical) 190.dp else 230.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerLow)
                     .border(

@@ -571,7 +571,7 @@ fun CalculatorScreen(
                                 )
                             }
 
-                            // Outer Segmented Control Container (große Pille)
+                            // Outer Segmented Control Container (große schwebende Pille)
                             var selectedNavTag by remember { mutableStateOf("nav_item_calculator") }
                             LaunchedEffect(
                                 isDrawerOpen,
@@ -593,15 +593,16 @@ fun CalculatorScreen(
                                 menuItems.indexOfFirst { it.third == selectedNavTag }.coerceAtLeast(0)
                             }
                             val itemHeights = remember { mutableStateMapOf<Int, Dp>() }
-                            val itemSpacing = 4.dp
+                            val itemSpacing = 6.dp
+                            val defaultItemHeight = 48.dp
                             val targetOffsetY = remember(selectedIndex, itemHeights.toMap()) {
                                 var pos = 0.dp
                                 for (i in 0 until selectedIndex) {
-                                    pos += (itemHeights[i] ?: 0.dp) + itemSpacing
+                                    pos += (itemHeights[i] ?: defaultItemHeight) + itemSpacing
                                 }
                                 pos
                             }
-                            val targetHeight = itemHeights[selectedIndex] ?: 0.dp
+                            val targetHeight = itemHeights[selectedIndex] ?: defaultItemHeight
 
                             val indicatorOffsetY by animateDpAsState(
                                 targetValue = targetOffsetY,
@@ -626,6 +627,7 @@ fun CalculatorScreen(
                             )
 
                             val outerPillShape = RoundedCornerShape(32.dp)
+                            val innerPillShape = RoundedCornerShape(percent = 50)
                             val outerPillBg = colorScheme.surfaceVariant.copy(
                                 alpha = if (isPureBlack) 0.45f else 0.3f
                             )
@@ -640,19 +642,17 @@ fun CalculatorScreen(
                                         border = outerPillBorder,
                                         shape = outerPillShape
                                     )
-                                    .padding(4.dp)
+                                    .padding(8.dp)
                             ) {
-                                // Gleitende aktive Pille (Schieberegler-Indikator)
-                                if (targetHeight > 0.dp) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .offset { IntOffset(0, indicatorOffsetY.roundToPx()) }
-                                            .height(indicatorHeight)
-                                            .clip(RoundedCornerShape(percent = 50))
-                                            .background(activePillBgColor)
-                                    )
-                                }
+                                // Gleitende aktive Pille (konzentrisch zum 32.dp-Container)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .offset { IntOffset(0, indicatorOffsetY.roundToPx()) }
+                                        .height(indicatorHeight)
+                                        .clip(innerPillShape)
+                                        .background(activePillBgColor)
+                                )
 
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
@@ -663,16 +663,16 @@ fun CalculatorScreen(
                                         val menuItemInteraction = remember { MutableInteractionSource() }
                                         val iconTint by animateColorAsState(
                                             targetValue = if (isSelected) {
-                                                if (isPureBlack) Color.White else colorScheme.onPrimaryContainer
+                                                colorScheme.onPrimaryContainer
                                             } else {
-                                                if (isPureBlack) Color.White.copy(alpha = 0.65f) else onSurfaceColor.copy(alpha = 0.7f)
+                                                if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
                                             },
                                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                             label = "nav_icon_tint_$tag"
                                         )
                                         val labelColor by animateColorAsState(
                                             targetValue = if (isSelected) {
-                                                if (isPureBlack) Color.White else colorScheme.onPrimaryContainer
+                                                colorScheme.onPrimaryContainer
                                             } else {
                                                 if (isPureBlack) Color.White.copy(alpha = 0.85f) else onSurfaceColor.copy(alpha = 0.85f)
                                             },
@@ -683,12 +683,12 @@ fun CalculatorScreen(
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .defaultMinSize(minHeight = 48.dp)
+                                                .defaultMinSize(minHeight = defaultItemHeight)
                                                 .onSizeChanged { size ->
                                                     itemHeights[index] = with(density) { size.height.toDp() }
                                                 }
                                                 .pressScale(menuItemInteraction)
-                                                .clip(RoundedCornerShape(percent = 50))
+                                                .clip(innerPillShape)
                                                 .background(Color.Transparent)
                                                 .clickable(
                                                     interactionSource = menuItemInteraction,
@@ -715,7 +715,9 @@ fun CalculatorScreen(
                                             contentAlignment = Alignment.CenterStart
                                         ) {
                                             Row(
-                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 18.dp, vertical = 12.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {

@@ -833,7 +833,7 @@ private fun DeveloperOptionsSection(
 
                 if (simulatedApiEnabled) {
                     val apiSliderPillShape = RoundedCornerShape(28.dp)
-                    val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                     val apiSliderPillBorder = glassProps.containerBorderStroke
                     Column(
                         modifier = Modifier
@@ -842,7 +842,7 @@ private fun DeveloperOptionsSection(
                             .clip(apiSliderPillShape)
                             .background(apiSliderPillBg)
                             .border(apiSliderPillBorder, shape = apiSliderPillShape)
-                            .padding(horizontal = 20.dp, vertical = 14.dp)
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.dev_api_level_slider, currentSliderApi.roundToInt()),
@@ -1033,7 +1033,7 @@ private fun DeveloperOptionsSection(
                 // Haptic Intensity Slider Pill (10 levels: 1..10, default 5)
                 val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
                 val sliderPillShape = RoundedCornerShape(28.dp)
-                val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 val sliderPillBorder = glassProps.containerBorderStroke
                 Column(
                     modifier = Modifier
@@ -1042,7 +1042,7 @@ private fun DeveloperOptionsSection(
                         .clip(sliderPillShape)
                         .background(sliderPillBg)
                         .border(sliderPillBorder, shape = sliderPillShape)
-                        .padding(horizontal = 20.dp, vertical = 14.dp)
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -1124,18 +1124,17 @@ private fun DeveloperOptionsSection(
                 }
                 SettingsDevCard.AUTO_RESULT -> {
         // Card 4: Auto Result Switch (Pill-Option)
-        GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp),
+        SettingsGlassCard(
+            glassProps = glassProps,
             shape = RoundedCornerShape(percent = 50),
-            customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            borderStroke = glassProps.containerBorderStroke
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                horizontal = 24.dp,
+                vertical = 14.dp
+            ),
+            modifier = Modifier.defaultMinSize(minHeight = 56.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 14.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -1609,17 +1608,17 @@ private fun SettingsPillOption(
 private fun SettingsGlassCard(
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     modifier: Modifier = Modifier,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(32.dp),
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(36.dp),
     contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(
         horizontal = 24.dp,
-        vertical = 20.dp
+        vertical = 22.dp
     ),
     content: @Composable () -> Unit
 ) {
     GlassSurface(
         modifier = modifier.fillMaxWidth(),
         shape = shape,
-        customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         borderStroke = glassProps.containerBorderStroke
     ) {
         Box(
