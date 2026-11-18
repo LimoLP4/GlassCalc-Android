@@ -4,8 +4,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.ContentObserver
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
+import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -178,9 +182,10 @@ fun GlassCalcTheme(
     val systemDark = isSystemInDarkTheme()
     val effectiveApi = simulatedApiLevel
 
-    val powerManager = remember(context) {
+    val appContext = remember(context) { context.applicationContext ?: context }
+    val powerManager = remember(appContext) {
         runCatching {
-            context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+            appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
         }.getOrNull()
     }
 
@@ -190,12 +195,15 @@ fun GlassCalcTheme(
         )
     }
 
-    DisposableEffect(context, lifecycleOwner, powerManager, powerSaveModeOverride) {
-        if (powerSaveModeOverride != null || powerManager == null) {
+    DisposableEffect(appContext, lifecycleOwner, powerManager, powerSaveModeOverride, selectedTheme) {
+        if (selectedTheme != AppTheme.AUTOMATIC || powerSaveModeOverride != null || powerManager == null) {
             onDispose { }
         } else {
             val refreshPowerSaveState = {
-                systemPowerSaveMode = runCatching { powerManager.isPowerSaveMode }.getOrDefault(false)
+                val latest = runCatching { powerManager.isPowerSaveMode }.getOrDefault(false)
+                if (systemPowerSaveMode != latest) {
+                    systemPowerSaveMode = latest
+                }
             }
             refreshPowerSaveState()
 
@@ -209,15 +217,33 @@ fun GlassCalcTheme(
 
             val receiverRegistered = runCatching {
                 ContextCompat.registerReceiver(
-                    context,
+                    appContext,
                     powerSaveReceiver,
                     IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
-                    ContextCompat.RECEIVER_NOT_EXPORTED
+                    ContextCompat.RECEIVER_EXPORTED
                 )
             }.isSuccess
 
+            val lowPowerUri = runCatching { Settings.Global.getUriFor("low_power") }.getOrNull()
+            val lowPowerObserver = if (lowPowerUri != null) {
+                object : ContentObserver(Handler(Looper.getMainLooper())) {
+                    override fun onChange(selfChange: Boolean) {
+                        refreshPowerSaveState()
+                    }
+                }
+            } else {
+                null
+            }
+            val observerRegistered = if (lowPowerUri != null && lowPowerObserver != null) {
+                runCatching {
+                    appContext.contentResolver.registerContentObserver(lowPowerUri, false, lowPowerObserver)
+                }.isSuccess
+            } else {
+                false
+            }
+
             val lifecycleObserver = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
+                if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
                     refreshPowerSaveState()
                 }
             }
@@ -225,14 +251,21 @@ fun GlassCalcTheme(
 
             onDispose {
                 if (receiverRegistered) {
-                    runCatching { context.unregisterReceiver(powerSaveReceiver) }
+                    runCatching { appContext.unregisterReceiver(powerSaveReceiver) }
+                }
+                if (observerRegistered && lowPowerObserver != null) {
+                    runCatching { appContext.contentResolver.unregisterContentObserver(lowPowerObserver) }
                 }
                 lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
             }
         }
     }
 
-    val isPowerSaveMode = powerSaveModeOverride ?: systemPowerSaveMode
+    val isPowerSaveMode = if (selectedTheme == AppTheme.AUTOMATIC) {
+        powerSaveModeOverride ?: systemPowerSaveMode
+    } else {
+        false
+    }
 
     val resolvedTheme = resolveEffectiveTheme(
         selectedTheme = selectedTheme,

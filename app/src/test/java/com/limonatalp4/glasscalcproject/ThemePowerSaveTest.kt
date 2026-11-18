@@ -74,11 +74,79 @@ class ThemePowerSaveTest {
     }
 
     @Test
-    fun materialYouDoesNotSwitchToTiefschwarzWhenPowerSaverIsActive() {
+    @Config(sdk = [35], qualifiers = "night")
+    fun automaticThemeReturnsToStandardDarkWhenPowerSaveModeIsDisabledInDarkSystemMode() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val shadowPowerManager = Shadows.shadowOf(powerManager)
+        shadowPowerManager.setIsPowerSaveMode(false)
+
+        var latestIsTiefschwarz = true
+        var latestIsDark = false
+        var latestBgColor = Color.Unspecified
+
+        composeTestRule.setContent {
+            GlassCalcTheme(selectedTheme = AppTheme.AUTOMATIC) {
+                val glassProps = LocalGlassProperties.current
+                val colorScheme = MaterialTheme.colorScheme
+                latestIsTiefschwarz = glassProps.isTiefschwarz
+                latestIsDark = glassProps.isDark
+                latestBgColor = colorScheme.background
+            }
+        }
+
+        composeTestRule.waitForIdle()
+        assertFalse(latestIsTiefschwarz)
+        assertTrue(latestIsDark)
+        assertEquals(Color(0xFF1A1C1E), latestBgColor)
+
+        // Enable Power Save -> AMOLED (Tiefschwarz)
         shadowPowerManager.setIsPowerSaveMode(true)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertTrue(latestIsTiefschwarz)
+        assertEquals(Color.Black, latestBgColor)
+
+        // Disable Power Save -> immediately back to Standard Dark
+        shadowPowerManager.setIsPowerSaveMode(false)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertFalse(latestIsTiefschwarz)
+        assertTrue(latestIsDark)
+        assertEquals(Color(0xFF1A1C1E), latestBgColor)
+    }
+
+    @Test
+    fun calculatorViewModelReactsBidirectionallyToPowerSaveBroadcast() {
+        val app = ApplicationProvider.getApplicationContext<android.app.Application>()
+        val powerManager = app.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val shadowPowerManager = Shadows.shadowOf(powerManager)
+        shadowPowerManager.setIsPowerSaveMode(false)
+
+        val viewModel = com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel(app)
+        assertFalse(viewModel.isPowerSaveMode.value)
+
+        shadowPowerManager.setIsPowerSaveMode(true)
+        app.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        assertTrue(viewModel.isPowerSaveMode.value)
+
+        shadowPowerManager.setIsPowerSaveMode(false)
+        app.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        assertFalse(viewModel.isPowerSaveMode.value)
+    }
+
+    @Test
+    fun materialYouDoesNotSwitchToTiefschwarzWhenPowerSaverTogglesOnAndOff() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val shadowPowerManager = Shadows.shadowOf(powerManager)
+        shadowPowerManager.setIsPowerSaveMode(false)
 
         var latestIsTiefschwarz = false
         var latestIsMaterialYou = false
@@ -92,7 +160,23 @@ class ThemePowerSaveTest {
         }
 
         composeTestRule.waitForIdle()
+        assertFalse(latestIsTiefschwarz)
+        assertTrue(latestIsMaterialYou)
+
+        shadowPowerManager.setIsPowerSaveMode(true)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
         assertFalse("Material You must never switch to Tiefschwarz on Power Saver", latestIsTiefschwarz)
+        assertTrue(latestIsMaterialYou)
+
+        shadowPowerManager.setIsPowerSaveMode(false)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertFalse(latestIsTiefschwarz)
         assertTrue(latestIsMaterialYou)
     }
 
@@ -120,6 +204,115 @@ class ThemePowerSaveTest {
         }
         composeTestRule.waitForIdle()
         assertFalse(isStandardDarkTiefschwarz)
+    }
+
+    @Test
+    fun manualAmoledThemeRemainsUnchangedWhenPowerSaverTogglesOnAndOff() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val shadowPowerManager = Shadows.shadowOf(powerManager)
+        shadowPowerManager.setIsPowerSaveMode(true)
+
+        var latestIsTiefschwarz = false
+        var latestBgColor = Color.Unspecified
+
+        composeTestRule.setContent {
+            GlassCalcTheme(selectedTheme = AppTheme.DARK_MODE) {
+                latestIsTiefschwarz = LocalGlassProperties.current.isTiefschwarz
+                latestBgColor = MaterialTheme.colorScheme.background
+            }
+        }
+
+        composeTestRule.waitForIdle()
+        assertTrue(latestIsTiefschwarz)
+        assertEquals(Color.Black, latestBgColor)
+
+        // Power Save OFF must keep manual AMOLED intact
+        shadowPowerManager.setIsPowerSaveMode(false)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertTrue(latestIsTiefschwarz)
+        assertEquals(Color.Black, latestBgColor)
+
+        // Power Save ON again must still keep manual AMOLED intact
+        shadowPowerManager.setIsPowerSaveMode(true)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertTrue(latestIsTiefschwarz)
+        assertEquals(Color.Black, latestBgColor)
+    }
+
+    @Test
+    fun manualStandardDarkThemeRemainsUnchangedWhenPowerSaverTogglesOnAndOff() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val shadowPowerManager = Shadows.shadowOf(powerManager)
+        shadowPowerManager.setIsPowerSaveMode(false)
+
+        var latestIsTiefschwarz = true
+        var latestBgColor = Color.Unspecified
+
+        composeTestRule.setContent {
+            GlassCalcTheme(selectedTheme = AppTheme.STANDARD_DARK) {
+                latestIsTiefschwarz = LocalGlassProperties.current.isTiefschwarz
+                latestBgColor = MaterialTheme.colorScheme.background
+            }
+        }
+
+        composeTestRule.waitForIdle()
+        assertFalse(latestIsTiefschwarz)
+        assertEquals(Color(0xFF1A1C1E), latestBgColor)
+
+        shadowPowerManager.setIsPowerSaveMode(true)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertFalse(latestIsTiefschwarz)
+        assertEquals(Color(0xFF1A1C1E), latestBgColor)
+
+        shadowPowerManager.setIsPowerSaveMode(false)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertFalse(latestIsTiefschwarz)
+        assertEquals(Color(0xFF1A1C1E), latestBgColor)
+    }
+
+    @Test
+    fun manualWhiteThemeRemainsUnchangedWhenPowerSaverTogglesOnAndOff() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val shadowPowerManager = Shadows.shadowOf(powerManager)
+        shadowPowerManager.setIsPowerSaveMode(false)
+
+        var latestIsTiefschwarz = true
+        var latestIsDark = true
+
+        composeTestRule.setContent {
+            GlassCalcTheme(selectedTheme = AppTheme.WHITE_MODE) {
+                val props = LocalGlassProperties.current
+                latestIsTiefschwarz = props.isTiefschwarz
+                latestIsDark = props.isDark
+            }
+        }
+
+        composeTestRule.waitForIdle()
+        assertFalse(latestIsTiefschwarz)
+        assertFalse(latestIsDark)
+
+        shadowPowerManager.setIsPowerSaveMode(true)
+        context.sendBroadcast(Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED))
+        Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+        composeTestRule.waitForIdle()
+
+        assertFalse(latestIsTiefschwarz)
+        assertFalse(latestIsDark)
     }
 }
 

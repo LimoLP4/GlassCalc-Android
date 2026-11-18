@@ -9,11 +9,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.limonatalp4.glasscalcproject.ui.screens.CalculatorScreen
 import com.limonatalp4.glasscalcproject.ui.theme.GlassCalcTheme
@@ -38,11 +42,26 @@ class MainActivity : AppCompatActivity() {
 fun GlassCalcAppRoot() {
     val viewModel: CalculatorViewModel = viewModel()
     val currentTheme by viewModel.currentTheme.collectAsState()
+    val isPowerSaveMode by viewModel.isPowerSaveMode.collectAsState()
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
     val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
     val selectedLanguage by viewModel.language.collectAsState()
     val effectiveLanguage by viewModel.effectiveLanguage.collectAsState()
     val isLanguageLoaded by viewModel.isLanguageLoaded.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Sync Power Save Mode whenever the app starts or resumes (e.g. after closing Quick Settings)
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START || event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshPowerSaveMode()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // Sichere Sprach-Initialisierung ohne unnötige Cold-Start-Activity-Recreation
     LaunchedEffect(selectedLanguage, effectiveLanguage, isLanguageLoaded) {
@@ -79,7 +98,8 @@ fun GlassCalcAppRoot() {
 
     GlassCalcTheme(
         selectedTheme = currentTheme,
-        simulatedApiLevel = effectiveApi
+        simulatedApiLevel = effectiveApi,
+        powerSaveModeOverride = isPowerSaveMode
     ) {
         CalculatorScreen(
             viewModel = viewModel,

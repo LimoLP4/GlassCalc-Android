@@ -1,10 +1,20 @@
 package com.limonatalp4.glasscalcproject.ui.viewmodel
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Resources
+import android.database.ContentObserver
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.AndroidViewModel
@@ -40,8 +50,15 @@ import kotlin.math.round
 
 class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val appContext: Context = application.applicationContext ?: application
     private val preferences = GlassCalcPreferences(application)
     private val evaluator = ExpressionEvaluator()
+
+    private val _isPowerSaveMode = MutableStateFlow(readPowerSaveMode(appContext))
+    val isPowerSaveMode: StateFlow<Boolean> = _isPowerSaveMode.asStateFlow()
+
+    private var powerSaveReceiver: BroadcastReceiver? = null
+    private var powerSaveObserver: ContentObserver? = null
 
     private val _expression = MutableStateFlow("")
     val expression: StateFlow<String> = _expression.asStateFlow()
@@ -303,11 +320,82 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             onStart = { onAppStart() }
         )
 
+        // Register reactive Power Save Mode listeners (BroadcastReceiver + low_power ContentObserver)
+        refreshPowerSaveMode()
+        registerPowerSaveListeners()
+
         // Keep HapticUtil intensity synced with persisted preference
         viewModelScope.launch {
             preferences.hapticIntensityFlow.collect { intensity ->
                 HapticUtil.currentIntensityLevel = intensity
             }
+        }
+    }
+
+    fun refreshPowerSaveMode() {
+        val latest = readPowerSaveMode(appContext)
+        if (_isPowerSaveMode.value != latest) {
+            _isPowerSaveMode.value = latest
+        }
+    }
+
+    private fun registerPowerSaveListeners() {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) {
+                    refreshPowerSaveMode()
+                }
+            }
+        }
+        val receiverRegistered = runCatching {
+            ContextCompat.registerReceiver(
+                appContext,
+                receiver,
+                IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
+                ContextCompat.RECEIVER_EXPORTED
+            )
+        }.isSuccess
+        if (receiverRegistered) {
+            powerSaveReceiver = receiver
+        }
+
+        val lowPowerUri = runCatching { Settings.Global.getUriFor("low_power") }.getOrNull()
+        if (lowPowerUri != null) {
+            val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+                override fun onChange(selfChange: Boolean) {
+                    refreshPowerSaveMode()
+                }
+            }
+            val observerRegistered = runCatching {
+                appContext.contentResolver.registerContentObserver(lowPowerUri, false, observer)
+            }.isSuccess
+            if (observerRegistered) {
+                powerSaveObserver = observer
+            }
+        }
+    }
+
+    private fun readPowerSaveMode(context: Context): Boolean {
+        val powerManager = runCatching {
+            context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        }.getOrNull()
+        if (powerManager != null) {
+            return runCatching { powerManager.isPowerSaveMode }.getOrDefault(false)
+        }
+        return runCatching {
+            Settings.Global.getInt(context.contentResolver, "low_power", 0) == 1
+        }.getOrDefault(false)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        powerSaveReceiver?.let { receiver ->
+            runCatching { appContext.unregisterReceiver(receiver) }
+            powerSaveReceiver = null
+        }
+        powerSaveObserver?.let { observer ->
+            runCatching { appContext.contentResolver.unregisterContentObserver(observer) }
+            powerSaveObserver = null
         }
     }
 
@@ -319,8 +407,9 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun onAppStart() {
-        // Re-check device locale in case system language changed while in background
+        // Re-check device locale and power save mode in case system settings changed while in background
         _systemLocaleRefreshTrigger.value += 1
+        refreshPowerSaveMode()
     }
 
     fun simulateBackgroundSave() {
