@@ -14,6 +14,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -31,11 +32,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
@@ -64,6 +68,7 @@ fun GlassCalculatorButton(
     contentDesc: String = text,
     hapticFeedbackEnabled: Boolean = LocalHapticFeedbackEnabled.current,
     isRepeatable: Boolean = false,
+    visualPadding: Dp = 0.dp,
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
@@ -147,20 +152,23 @@ fun GlassCalculatorButton(
         }
     }
 
-    val clickModifier = when {
+    val touchModifier = when {
         isRepeatable -> {
             Modifier
-                .indication(interactionSource, ripple(bounded = true, radius = 48.dp, color = textColor))
+                .semantics {
+                    contentDescription = contentDesc
+                    role = Role.Button
+                }
                 .pointerInput(onClick, isHapticActive) {
                     detectTapGestures(
                         onPress = { offset ->
                             val press = PressInteraction.Press(offset)
                             interactionSource.emit(press)
-                            
+
                             // Execute first action immediately on press
                             onClick()
                             triggerHapticTap()
-                            
+
                             val repeatJob = coroutineScope.launch {
                                 delay(450) // Wait for long press threshold
                                 while (true) {
@@ -169,14 +177,14 @@ fun GlassCalculatorButton(
                                     delay(90) // Repeat interval (50-100ms)
                                 }
                             }
-                            
+
                             val released = try {
                                 awaitRelease()
                                 true
                             } catch (c: Exception) {
                                 false
                             }
-                            
+
                             repeatJob.cancel()
                             interactionSource.emit(if (released) PressInteraction.Release(press) else PressInteraction.Cancel(press))
                         }
@@ -185,7 +193,10 @@ fun GlassCalculatorButton(
         }
         onLongClick != null -> {
             Modifier
-                .indication(interactionSource, ripple(bounded = true, radius = 48.dp, color = textColor))
+                .semantics {
+                    contentDescription = contentDesc
+                    role = Role.Button
+                }
                 .pointerInput(onLongClick, onClick, isHapticActive) {
                     detectTapGestures(
                         onPress = { offset ->
@@ -219,44 +230,55 @@ fun GlassCalculatorButton(
                 }
         }
         else -> {
-            Modifier.clickable(
-                interactionSource = interactionSource,
-                indication = ripple(bounded = true, radius = 48.dp, color = textColor),
-                onClick = {
-                    triggerHapticTap()
-                    onClick()
-                }
-            )
+            Modifier
+                .semantics { contentDescription = contentDesc }
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    role = Role.Button,
+                    onClick = {
+                        triggerHapticTap()
+                        onClick()
+                    }
+                )
         }
     }
 
-    BoxWithConstraints(
+    // Äußerer rechteckiger Touch-Container: umfasst die gesamte Tasten-Zelle inklusive Ecken und Rand
+    Box(
         modifier = modifier
             .aspectRatio(1f)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clip(CircleShape)
-            .safeLiquidGlass(
-                state = if (type != ButtonType.EQUALS && type != ButtonType.ACTION_CLEAR) glassState else null,
-                shape = CircleShape,
-                supportsBlur = glassProps.supportsBlur
-            )
-            .background(bgBrush, CircleShape)
-            .then(
-                if (isLongPressTriggered) {
-                    Modifier.background(flashColor, CircleShape)
-                } else {
-                    Modifier
-                }
-            )
-            .border(1.dp, if (isLongPressTriggered) colorScheme.error else borderColor, CircleShape)
-            .then(clickModifier)
-            .semantics { contentDescription = contentDesc }
+            .then(touchModifier)
             .testTag(testTag),
         contentAlignment = Alignment.Center
     ) {
+        // Sichtbarer runder Liquid-Glass-Button mit geclipptem Ripple
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(visualPadding)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .clip(CircleShape)
+                .safeLiquidGlass(
+                    state = if (type != ButtonType.EQUALS && type != ButtonType.ACTION_CLEAR) glassState else null,
+                    shape = CircleShape,
+                    supportsBlur = glassProps.supportsBlur
+                )
+                .background(bgBrush, CircleShape)
+                .then(
+                    if (isLongPressTriggered) {
+                        Modifier.background(flashColor, CircleShape)
+                    } else {
+                        Modifier
+                    }
+                )
+                .border(1.dp, if (isLongPressTriggered) colorScheme.error else borderColor, CircleShape)
+                .indication(interactionSource, ripple(bounded = true, color = textColor)),
+            contentAlignment = Alignment.Center
+        ) {
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -304,5 +326,6 @@ fun GlassCalculatorButton(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
+        }
     }
 }

@@ -1007,8 +1007,8 @@ private fun PortraitCalculatorLayout(
                 .weight(1f)
         ) {
             val availableWidth = maxWidth
-            val mainButtonSize = ((availableWidth - 30.dp) / 4f).coerceIn(48.dp, 72.dp)
-            val sciButtonSize = ((availableWidth - 24.dp) / 5f).coerceIn(36.dp, 60.dp)
+            val mainButtonSize = ((availableWidth - 32.dp) / 4f).coerceIn(48.dp, 72.dp)
+            val sciButtonSize = ((availableWidth - 25.dp) / 5f).coerceIn(36.dp, 60.dp)
 
             Column(
                 modifier = Modifier
@@ -1112,8 +1112,8 @@ private fun LandscapeCalculatorLayout(
         val rightHalfWidth = (availableWidth - 14.dp) / 2f
         val interKeypadSpacing = 8.dp
 
-        val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.dp * 7)) / 9.2f)
-        val maxButtonHeight = ((stableKeypadHeight - 14.dp) / 6.3f)
+        val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.6.dp * 9)) / 9.2f)
+        val maxButtonHeight = ((stableKeypadHeight - 20.dp) / 6.3f)
 
         val buttonSize = minOf(maxButtonWidth, maxButtonHeight).coerceIn(28.dp, 62.dp)
         val spacing = (buttonSize * 0.08f).coerceIn(2.5.dp, 6.dp)
@@ -1225,7 +1225,7 @@ private fun LandscapeCalculatorLayout(
                         glassState = glassState,
                         buttonSize = buttonSize,
                         spacing = spacing,
-                        modifier = Modifier.width(buttonSize * 5 + spacing * 4)
+                        modifier = Modifier.width((buttonSize + spacing) * 5)
                     )
 
                     Spacer(modifier = Modifier.width(interKeypadSpacing))
@@ -1235,7 +1235,7 @@ private fun LandscapeCalculatorLayout(
                         glassState = glassState,
                         buttonSize = buttonSize,
                         spacing = spacing,
-                        modifier = Modifier.width(buttonSize * 4 + spacing * 3)
+                        modifier = Modifier.width((buttonSize + spacing) * 4)
                     )
                 }
             }
@@ -1260,11 +1260,14 @@ private fun ScientificKeyboardGrid(
     buttonSize: Dp? = null,
     spacing: Dp = 6.dp
 ) {
-    val sizedButtonModifier = remember(buttonSize) {
-        if (buttonSize != null) Modifier.size(buttonSize) else null
+    val touchPadding = if (buttonSize != null) spacing / 2 else 0.dp
+    val cellSize = if (buttonSize != null) buttonSize + spacing else null
+    val gridSpacing = if (buttonSize != null) 0.dp else spacing
+    val sizedButtonModifier = remember(cellSize) {
+        if (cellSize != null) Modifier.size(cellSize) else null
     }
     fun RowScope.buttonModifier(): Modifier = sizedButtonModifier ?: Modifier.weight(1f)
-    val rowModifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth()
+    val rowModifier = if (cellSize != null) Modifier else Modifier.fillMaxWidth()
 
     // Stabilized button callbacks
     val onSin = remember(actions) { { actions.onScientificFunction("sin") } }
@@ -1305,36 +1308,38 @@ private fun ScientificKeyboardGrid(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(spacing),
-        horizontalAlignment = if (buttonSize != null) Alignment.CenterHorizontally else Alignment.Start
+        verticalArrangement = Arrangement.spacedBy(gridSpacing),
+        horizontalAlignment = if (cellSize != null) Alignment.CenterHorizontally else Alignment.Start
     ) {
         // Row 1: sin, cos, tan, π, e
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "sin", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onSin)
-            GlassCalculatorButton(text = "cos", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onCos)
-            GlassCalculatorButton(text = "tan", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onTan)
-            GlassCalculatorButton(text = "π", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onPi)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "sin", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onSin)
+            GlassCalculatorButton(text = "cos", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onCos)
+            GlassCalculatorButton(text = "tan", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onTan)
+            GlassCalculatorButton(text = "π", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onPi)
             GlassCalculatorButton(
                 text = "e",
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_euler",
                 contentDesc = stringResource(R.string.btn_euler_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onEuler
             )
         }
 
         // Row 2: ln, log, x², x³, xʸ
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "ln", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onLn)
-            GlassCalculatorButton(text = "log", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onLog)
-            GlassCalculatorButton(text = "x²", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onPow2)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "ln", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onLn)
+            GlassCalculatorButton(text = "log", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onLog)
+            GlassCalculatorButton(text = "x²", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onPow2)
             GlassCalculatorButton(
                 text = "x³",
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_power_cube",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onPow3
             )
@@ -1344,63 +1349,67 @@ private fun ScientificKeyboardGrid(
                 glassState = glassState,
                 testTag = "btn_power_xy",
                 contentDesc = stringResource(R.string.btn_power_xy_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onPowY
             )
         }
 
         // Row 3: √, ³√, ⁿ√, n!, /
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onSqrt)
-            GlassCalculatorButton(text = "³√", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onCbrt)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "√", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onSqrt)
+            GlassCalculatorButton(text = "³√", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onCbrt)
             GlassCalculatorButton(
                 text = "ⁿ√",
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_nth_root",
                 contentDesc = stringResource(R.string.btn_nth_root_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onNthRoot
             )
-            GlassCalculatorButton(text = "n!", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onFact)
+            GlassCalculatorButton(text = "n!", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onFact)
             GlassCalculatorButton(
                 text = "/",
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_fraction_slash",
                 contentDesc = stringResource(R.string.btn_fraction_slash_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onFrac
             )
         }
 
         // Row 4: asin, acos, atan, (, )
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "asin", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onAsin)
-            GlassCalculatorButton(text = "acos", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onAcos)
-            GlassCalculatorButton(text = "atan", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onAtan)
-            GlassCalculatorButton(text = "(", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onOpenParen)
-            GlassCalculatorButton(text = ")", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onCloseParen)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "asin", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onAsin)
+            GlassCalculatorButton(text = "acos", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onAcos)
+            GlassCalculatorButton(text = "atan", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onAtan)
+            GlassCalculatorButton(text = "(", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onOpenParen)
+            GlassCalculatorButton(text = ")", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onCloseParen)
         }
 
         // Row 5: sinh, cosh, tanh, |x|, mod
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "sinh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onSinh)
-            GlassCalculatorButton(text = "cosh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onCosh)
-            GlassCalculatorButton(text = "tanh", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onTanh)
-            GlassCalculatorButton(text = "|x|", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onAbs)
-            GlassCalculatorButton(text = "mod", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onMod)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "sinh", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onSinh)
+            GlassCalculatorButton(text = "cosh", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onCosh)
+            GlassCalculatorButton(text = "tanh", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onTanh)
+            GlassCalculatorButton(text = "|x|", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onAbs)
+            GlassCalculatorButton(text = "mod", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onMod)
         }
 
         // Row 6: d/dx, ∫, x, ;, Konst.
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "d/dx", type = ButtonType.FUNCTION, glassState = glassState, modifier = buttonModifier(), onClick = onDeriv)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "d/dx", type = ButtonType.FUNCTION, glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = onDeriv)
             GlassCalculatorButton(
                 text = "∫",
                 type = ButtonType.FUNCTION,
                 glassState = glassState,
                 testTag = "btn_integral",
                 contentDesc = stringResource(R.string.btn_integral_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onIntegral
             )
@@ -1410,6 +1419,7 @@ private fun ScientificKeyboardGrid(
                 glassState = glassState,
                 testTag = "btn_var_x",
                 contentDesc = stringResource(R.string.btn_var_x_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onVarX
             )
@@ -1419,6 +1429,7 @@ private fun ScientificKeyboardGrid(
                 glassState = glassState,
                 testTag = "btn_semicolon",
                 contentDesc = stringResource(R.string.btn_semicolon_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onSemicolon
             )
@@ -1428,6 +1439,7 @@ private fun ScientificKeyboardGrid(
                 glassState = glassState,
                 testTag = "btn_constants",
                 contentDesc = stringResource(R.string.btn_constants_desc),
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onOpenConstants
             )
@@ -1446,11 +1458,14 @@ private fun MainKeyboardGrid(
     buttonSize: Dp? = null,
     spacing: Dp = 10.dp
 ) {
-    val sizedButtonModifier = remember(buttonSize) {
-        if (buttonSize != null) Modifier.size(buttonSize) else null
+    val touchPadding = if (buttonSize != null) spacing / 2 else 0.dp
+    val cellSize = if (buttonSize != null) buttonSize + spacing else null
+    val gridSpacing = if (buttonSize != null) 0.dp else spacing
+    val sizedButtonModifier = remember(cellSize) {
+        if (cellSize != null) Modifier.size(cellSize) else null
     }
     fun RowScope.buttonModifier(): Modifier = sizedButtonModifier ?: Modifier.weight(1f)
-    val rowModifier = if (buttonSize != null) Modifier else Modifier.fillMaxWidth()
+    val rowModifier = if (cellSize != null) Modifier else Modifier.fillMaxWidth()
 
     // Stabilized button callbacks
     val onClearAll = actions.onClearAll
@@ -1476,16 +1491,17 @@ private fun MainKeyboardGrid(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(spacing),
+        verticalArrangement = Arrangement.spacedBy(gridSpacing),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Row 1: AC, DEL (with Long-Press), %, ÷
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
             GlassCalculatorButton(
                 text = "AC",
                 type = ButtonType.ACTION_CLEAR,
                 glassState = glassState,
                 testTag = "btn_clear",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onClearAll
             )
@@ -1496,6 +1512,7 @@ private fun MainKeyboardGrid(
                 testTag = "btn_delete",
                 contentDesc = stringResource(R.string.btn_del_desc),
                 isRepeatable = true,
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onDelete
             )
@@ -1504,6 +1521,7 @@ private fun MainKeyboardGrid(
                 type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_percent",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onPercent
             )
@@ -1512,63 +1530,68 @@ private fun MainKeyboardGrid(
                 type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_div",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onDiv
             )
         }
 
         // Row 2: 7, 8, 9, ×
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "7", glassState = glassState, modifier = buttonModifier(), onClick = on7)
-            GlassCalculatorButton(text = "8", glassState = glassState, modifier = buttonModifier(), onClick = on8)
-            GlassCalculatorButton(text = "9", glassState = glassState, modifier = buttonModifier(), onClick = on9)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "7", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on7)
+            GlassCalculatorButton(text = "8", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on8)
+            GlassCalculatorButton(text = "9", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on9)
             GlassCalculatorButton(
                 text = "×",
                 type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_mul",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onMul
             )
         }
 
         // Row 3: 4, 5, 6, −
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "4", glassState = glassState, modifier = buttonModifier(), onClick = on4)
-            GlassCalculatorButton(text = "5", glassState = glassState, modifier = buttonModifier(), onClick = on5)
-            GlassCalculatorButton(text = "6", glassState = glassState, modifier = buttonModifier(), onClick = on6)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "4", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on4)
+            GlassCalculatorButton(text = "5", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on5)
+            GlassCalculatorButton(text = "6", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on6)
             GlassCalculatorButton(
                 text = "−",
                 type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_sub",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onSub
             )
         }
 
         // Row 4: 1, 2, 3, +
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            GlassCalculatorButton(text = "1", glassState = glassState, modifier = buttonModifier(), onClick = on1)
-            GlassCalculatorButton(text = "2", glassState = glassState, modifier = buttonModifier(), onClick = on2)
-            GlassCalculatorButton(text = "3", glassState = glassState, modifier = buttonModifier(), onClick = on3)
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
+            GlassCalculatorButton(text = "1", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on1)
+            GlassCalculatorButton(text = "2", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on2)
+            GlassCalculatorButton(text = "3", glassState = glassState, visualPadding = touchPadding, modifier = buttonModifier(), onClick = on3)
             GlassCalculatorButton(
                 text = "+",
                 type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_add",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onAdd
             )
         }
 
         // Row 5: ±, 0, ,, = (All perfectly equal size!)
-        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(spacing)) {
+        Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(gridSpacing)) {
             GlassCalculatorButton(
                 text = "±",
                 type = ButtonType.OPERATOR,
                 glassState = glassState,
                 testTag = "btn_sign",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onSign
             )
@@ -1576,6 +1599,7 @@ private fun MainKeyboardGrid(
                 text = "0",
                 glassState = glassState,
                 testTag = "btn_zero",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = on0
             )
@@ -1583,6 +1607,7 @@ private fun MainKeyboardGrid(
                 text = ",",
                 glassState = glassState,
                 testTag = "btn_comma",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onComma
             )
@@ -1591,6 +1616,7 @@ private fun MainKeyboardGrid(
                 type = ButtonType.EQUALS,
                 glassState = glassState,
                 testTag = "btn_equals",
+                visualPadding = touchPadding,
                 modifier = buttonModifier(),
                 onClick = onEquals
             )
