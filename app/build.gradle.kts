@@ -18,8 +18,8 @@ android {
     applicationId = "com.limonatalp4.glasscalcproject"
     minSdk = 26
     targetSdk = 37
-    versionCode = 15
-    versionName = "1.3.2"
+    versionCode = 16
+    versionName = "1.3.3"
 
     ndk {
       abiFilters += listOf("arm64-v8a", "armeabi-v7a")

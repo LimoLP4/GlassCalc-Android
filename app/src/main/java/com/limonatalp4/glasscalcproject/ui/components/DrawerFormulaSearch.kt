@@ -5,9 +5,11 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,13 +23,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -95,7 +97,7 @@ fun DrawerFormulaSearch(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val searchBarShape = RoundedCornerShape(percent = 50)
-    val dropdownShape = RoundedCornerShape(22.dp)
+    val suggestionPillShape = CircleShape
 
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -257,79 +259,89 @@ fun DrawerFormulaSearch(
             }
         }
 
-        // Gefiltertes Dropdown unter der Suchleiste
+        // Schwebende Suchvorschläge im einheitlichen Pill-Design
         AnimatedVisibility(
             visible = trimmedQuery.isNotEmpty(),
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
+            val suggestionBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            val suggestionBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .clip(dropdownShape)
-                    .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.92f))
-                    .border(
-                        border = LocalGlassProperties.current.containerBorderStroke,
-                        shape = dropdownShape
-                    )
-                    .heightIn(max = if (isImeVisible) 150.dp else 220.dp)
+                    .padding(top = 10.dp)
+                    .heightIn(max = if (isImeVisible) 160.dp else 232.dp)
                     .testTag("drawer_formula_dropdown"),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 4.dp)
             ) {
                 if (filteredFormulas.isEmpty()) {
                     item(key = "empty") {
-                        Text(
-                            text = stringResource(R.string.formula_search_empty),
-                            color = colorScheme.onSurfaceVariant,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
-                        )
+                        Surface(
+                            shape = suggestionPillShape,
+                            color = colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                            contentColor = colorScheme.onSurfaceVariant,
+                            border = suggestionBorder,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(R.string.formula_search_empty),
+                                color = colorScheme.onSurfaceVariant,
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                            )
+                        }
                     }
                 } else {
-                    itemsIndexed(
+                    items(
                         items = filteredFormulas,
-                        key = { _, entry -> entry.formula.id }
-                    ) { index, entry ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Surface(
-                                onClick = { onFormulaSelected(entry.formula) },
-                                shape = RoundedCornerShape(14.dp),
-                                color = Color.Transparent,
-                                contentColor = colorScheme.onSurface,
+                        key = { entry -> entry.formula.id }
+                    ) { entry ->
+                        val itemInteractionSource = remember { MutableInteractionSource() }
+                        Surface(
+                            onClick = {
+                                HapticUtil.performAppHaptic(
+                                    context = context,
+                                    view = view,
+                                    enabled = currentHapticEnabled,
+                                    intensityLevel = currentHapticIntensity
+                                )
+                                onFormulaSelected(entry.formula)
+                            },
+                            shape = suggestionPillShape,
+                            color = suggestionBgColor,
+                            contentColor = colorScheme.onSurface,
+                            border = suggestionBorder,
+                            interactionSource = itemInteractionSource,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = 52.dp)
+                                .pressScale(itemInteractionSource)
+                                .testTag("formula_item_${entry.formula.id}")
+                        ) {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .testTag("formula_item_${entry.formula.id}")
+                                    .padding(horizontal = 18.dp, vertical = 10.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 14.dp, vertical = 10.dp)
-                                ) {
-                                    Text(
-                                        text = entry.localizedName,
-                                        color = colorScheme.onSurface,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = entry.formula.formula,
-                                        color = colorScheme.primary,
-                                        fontSize = 12.sp,
-                                        fontFamily = FontFamily.Monospace,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                            if (index < filteredFormulas.lastIndex) {
-                                HorizontalDivider(
-                                    color = colorScheme.outline.copy(alpha = 0.2f),
-                                    modifier = Modifier.padding(horizontal = 12.dp)
+                                Text(
+                                    text = entry.localizedName,
+                                    color = colorScheme.onSurface,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = entry.formula.formula,
+                                    color = colorScheme.primary,
+                                    fontSize = 12.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }

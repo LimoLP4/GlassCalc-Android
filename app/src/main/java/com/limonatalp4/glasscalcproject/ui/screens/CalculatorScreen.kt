@@ -549,12 +549,6 @@ fun CalculatorScreen(
                                 onFormulaSelected = { formula ->
                                     focusManager.clearFocus()
                                     keyboardController?.hide()
-                                    HapticUtil.performAppHaptic(
-                                        context = context,
-                                        view = view,
-                                        enabled = hapticFeedbackEnabled,
-                                        intensityLevel = hapticIntensity
-                                    )
                                     viewModel.insertFormula(formula.insertExpression)
                                     formulaSearchQuery = ""
                                     isDrawerOpen = false
