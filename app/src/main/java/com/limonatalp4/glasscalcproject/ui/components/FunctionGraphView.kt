@@ -1701,140 +1701,157 @@ fun FunctionGraphView(
                     text = String.format(Locale.US, "X: [%.1f .. %.1f]  Y: [%.1f .. %.1f]", xMin, xMax, yMin, yMax),
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = labelColor
+                    color = labelColor,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
                 )
 
                 val controlTint = if (isGraphLocked) graphColor.copy(alpha = 0.30f) else graphColor
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                GlassSurface(
+                    shape = RoundedCornerShape(50),
+                    glassState = glassState,
+                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    borderStroke = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                    modifier = Modifier.testTag("graph_controls_pill")
                 ) {
-                    // Pan Left (◀)
-                    val panLeftInteraction = remember { MutableInteractionSource() }
-                    IconButton(
-                        onClick = {
-                            if (currentIsGraphLocked) return@IconButton
-                            val shift = (xMax - xMin) * 0.25
-                            if (shift.isFinite()) {
-                                xMin = (xMin - shift).coerceIn(-1e7, 1e7)
-                                xMax = (xMax - shift).coerceIn(-1e7, 1e7)
-                            }
-                            triggerClickHaptic()
-                        },
-                        enabled = !isGraphLocked,
-                        interactionSource = panLeftInteraction,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .pressScale(panLeftInteraction, enabled = !isGraphLocked)
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.graph_pan_left),
-                            tint = controlTint,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                        // Pan Left (◀)
+                        val panLeftInteraction = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = {
+                                if (currentIsGraphLocked) return@IconButton
+                                val shift = (xMax - xMin) * 0.25
+                                if (shift.isFinite()) {
+                                    xMin = (xMin - shift).coerceIn(-1e7, 1e7)
+                                    xMax = (xMax - shift).coerceIn(-1e7, 1e7)
+                                }
+                                triggerClickHaptic()
+                            },
+                            enabled = !isGraphLocked,
+                            interactionSource = panLeftInteraction,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .pressScale(panLeftInteraction, enabled = !isGraphLocked)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.graph_pan_left),
+                                tint = controlTint,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
 
-                    // Pan Right (▶)
-                    val panRightInteraction = remember { MutableInteractionSource() }
-                    IconButton(
-                        onClick = {
-                            if (currentIsGraphLocked) return@IconButton
-                            val shift = (xMax - xMin) * 0.25
-                            if (shift.isFinite()) {
-                                xMin = (xMin + shift).coerceIn(-1e7, 1e7)
-                                xMax = (xMax + shift).coerceIn(-1e7, 1e7)
-                            }
-                            triggerClickHaptic()
-                        },
-                        enabled = !isGraphLocked,
-                        interactionSource = panRightInteraction,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .pressScale(panRightInteraction, enabled = !isGraphLocked)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = stringResource(R.string.graph_pan_right),
-                            tint = controlTint,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                        // Pan Right (▶)
+                        val panRightInteraction = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = {
+                                if (currentIsGraphLocked) return@IconButton
+                                val shift = (xMax - xMin) * 0.25
+                                if (shift.isFinite()) {
+                                    xMin = (xMin + shift).coerceIn(-1e7, 1e7)
+                                    xMax = (xMax + shift).coerceIn(-1e7, 1e7)
+                                }
+                                triggerClickHaptic()
+                            },
+                            enabled = !isGraphLocked,
+                            interactionSource = panRightInteraction,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .pressScale(panRightInteraction, enabled = !isGraphLocked)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = stringResource(R.string.graph_pan_right),
+                                tint = controlTint,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
 
-                    // Zoom In (+)
-                    val zoomInInteraction = remember { MutableInteractionSource() }
-                    IconButton(
-                        onClick = {
-                            if (currentIsGraphLocked) return@IconButton
-                            val xRange = ((xMax - xMin) * 0.75).coerceIn(1e-4, 1e6)
-                            val xCenter = ((xMin + xMax) / 2).coerceIn(-1e7, 1e7)
-                            xMin = (xCenter - xRange / 2).coerceIn(-1e7, 1e7)
-                            xMax = (xCenter + xRange / 2).coerceIn(-1e7, 1e7)
-                            val yRange = ((yMax - yMin) * 0.75).coerceIn(1e-4, 1e6)
-                            val yCenter = ((yMin + yMax) / 2).coerceIn(-1e7, 1e7)
-                            yMin = (yCenter - yRange / 2).coerceIn(-1e7, 1e7)
-                            yMax = (yCenter + yRange / 2).coerceIn(-1e7, 1e7)
-                            triggerClickHaptic()
-                        },
-                        enabled = !isGraphLocked,
-                        interactionSource = zoomInInteraction,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .pressScale(zoomInInteraction, enabled = !isGraphLocked)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(R.string.graph_zoom_in),
-                            tint = controlTint,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                        // Zoom In (+)
+                        val zoomInInteraction = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = {
+                                if (currentIsGraphLocked) return@IconButton
+                                val xRange = ((xMax - xMin) * 0.75).coerceIn(1e-4, 1e6)
+                                val xCenter = ((xMin + xMax) / 2).coerceIn(-1e7, 1e7)
+                                xMin = (xCenter - xRange / 2).coerceIn(-1e7, 1e7)
+                                xMax = (xCenter + xRange / 2).coerceIn(-1e7, 1e7)
+                                val yRange = ((yMax - yMin) * 0.75).coerceIn(1e-4, 1e6)
+                                val yCenter = ((yMin + yMax) / 2).coerceIn(-1e7, 1e7)
+                                yMin = (yCenter - yRange / 2).coerceIn(-1e7, 1e7)
+                                yMax = (yCenter + yRange / 2).coerceIn(-1e7, 1e7)
+                                triggerClickHaptic()
+                            },
+                            enabled = !isGraphLocked,
+                            interactionSource = zoomInInteraction,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .pressScale(zoomInInteraction, enabled = !isGraphLocked)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.graph_zoom_in),
+                                tint = controlTint,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
 
-                    // Zoom Out (-)
-                    val zoomOutInteraction = remember { MutableInteractionSource() }
-                    IconButton(
-                        onClick = {
-                            if (currentIsGraphLocked) return@IconButton
-                            val xRange = ((xMax - xMin) * 1.35).coerceIn(1e-4, 1e6)
-                            val xCenter = ((xMin + xMax) / 2).coerceIn(-1e7, 1e7)
-                            xMin = (xCenter - xRange / 2).coerceIn(-1e7, 1e7)
-                            xMax = (xCenter + xRange / 2).coerceIn(-1e7, 1e7)
-                            val yRange = ((yMax - yMin) * 1.35).coerceIn(1e-4, 1e6)
-                            val yCenter = ((yMin + yMax) / 2).coerceIn(-1e7, 1e7)
-                            yMin = (yCenter - yRange / 2).coerceIn(-1e7, 1e7)
-                            yMax = (yCenter + yRange / 2).coerceIn(-1e7, 1e7)
-                            triggerClickHaptic()
-                        },
-                        enabled = !isGraphLocked,
-                        interactionSource = zoomOutInteraction,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .pressScale(zoomOutInteraction, enabled = !isGraphLocked)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = stringResource(R.string.graph_zoom_out),
-                            tint = controlTint,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                        // Zoom Out (-)
+                        val zoomOutInteraction = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = {
+                                if (currentIsGraphLocked) return@IconButton
+                                val xRange = ((xMax - xMin) * 1.35).coerceIn(1e-4, 1e6)
+                                val xCenter = ((xMin + xMax) / 2).coerceIn(-1e7, 1e7)
+                                xMin = (xCenter - xRange / 2).coerceIn(-1e7, 1e7)
+                                xMax = (xCenter + xRange / 2).coerceIn(-1e7, 1e7)
+                                val yRange = ((yMax - yMin) * 1.35).coerceIn(1e-4, 1e6)
+                                val yCenter = ((yMin + yMax) / 2).coerceIn(-1e7, 1e7)
+                                yMin = (yCenter - yRange / 2).coerceIn(-1e7, 1e7)
+                                yMax = (yCenter + yRange / 2).coerceIn(-1e7, 1e7)
+                                triggerClickHaptic()
+                            },
+                            enabled = !isGraphLocked,
+                            interactionSource = zoomOutInteraction,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .pressScale(zoomOutInteraction, enabled = !isGraphLocked)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = stringResource(R.string.graph_zoom_out),
+                                tint = controlTint,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
 
-                    // Reset View (↺)
-                    val resetInteraction = remember { MutableInteractionSource() }
-                    IconButton(
-                        onClick = { resetView() },
-                        enabled = !isGraphLocked,
-                        interactionSource = resetInteraction,
-                        modifier = Modifier
-                            .size(28.dp)
-                            .pressScale(resetInteraction, enabled = !isGraphLocked)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.RestartAlt,
-                            contentDescription = stringResource(R.string.graph_reset),
-                            tint = colorScheme.onSurface.copy(alpha = if (isGraphLocked) 0.25f else 0.70f),
-                            modifier = Modifier.size(16.dp)
-                        )
+                        // Reset View (↺)
+                        val resetInteraction = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = { resetView() },
+                            enabled = !isGraphLocked,
+                            interactionSource = resetInteraction,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .pressScale(resetInteraction, enabled = !isGraphLocked)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.RestartAlt,
+                                contentDescription = stringResource(R.string.graph_reset),
+                                tint = colorScheme.onSurface.copy(alpha = if (isGraphLocked) 0.25f else 0.70f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }
