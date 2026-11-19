@@ -147,15 +147,14 @@ fun GlassSurface(
                     Modifier
                 }
             )
+            .clip(shape)
             .then(
                 if (applyBlur) {
-                    Modifier
-                        .clip(shape)
-                        .safeLiquidGlass(
-                            state = state,
-                            shape = shape,
-                            supportsBlur = true
-                        )
+                    Modifier.safeLiquidGlass(
+                        state = state,
+                        shape = shape,
+                        supportsBlur = true
+                    )
                 } else {
                     Modifier
                 }

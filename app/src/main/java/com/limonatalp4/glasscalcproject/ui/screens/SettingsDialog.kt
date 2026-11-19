@@ -1486,8 +1486,7 @@ private fun LanguageSection(
                 },
                 title = stringResource(langOption.stringResId),
                 glassProps = glassProps,
-                testTag = "radio_lang_${langOption.name}",
-                minHeight = GlassDialogDefaults.PillOptionMinHeight
+                testTag = "radio_lang_${langOption.name}"
             )
         }
     }
@@ -1542,7 +1541,7 @@ private fun SettingsPillOption(
                 Text(
                     text = title,
                     fontSize = 14.5.sp,
-                    lineHeight = if (hasSecondaryText) 18.sp else 17.sp,
+                    lineHeight = 18.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                     color = textColor,
                     maxLines = if (hasSecondaryText) 1 else 2,
