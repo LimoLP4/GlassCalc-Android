@@ -7,8 +7,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -39,10 +40,16 @@ object GlassDialogDefaults {
     val PillShape: Shape = CircleShape
 
     val SearchBarHeight: Dp = 48.dp
-    val PillOptionMinHeight: Dp = 52.dp
+    val PillOptionMinHeight: Dp = 56.dp
+    val PillOptionExpandedMinHeight: Dp = 74.dp
     val ActionButtonMinHeight: Dp = 48.dp
-    val PillHorizontalPadding: Dp = 20.dp
+    val PillHorizontalPadding: Dp = 18.dp
+    val PillVerticalPadding: Dp = 10.dp
 
+    val PillOptionPadding = PaddingValues(
+        horizontal = PillHorizontalPadding,
+        vertical = PillVerticalPadding
+    )
     val CardContentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp)
     val SettingsCardContentPadding = PaddingValues(horizontal = 24.dp, vertical = 22.dp)
 
@@ -124,10 +131,7 @@ fun GlassPillOptionContainer(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     minHeight: Dp = GlassDialogDefaults.PillOptionMinHeight,
-    contentPadding: PaddingValues = PaddingValues(
-        horizontal = GlassDialogDefaults.PillHorizontalPadding,
-        vertical = 12.dp
-    ),
+    contentPadding: PaddingValues = GlassDialogDefaults.PillOptionPadding,
     animationLabel: String = "pill_option",
     content: @Composable (textColor: Color) -> Unit
 ) {
@@ -154,7 +158,7 @@ fun GlassPillOptionContainer(
     GlassSurface(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = minHeight)
+            .heightIn(min = minHeight)
             .alpha(if (enabled) 1.0f else 0.45f)
             .pressScale(interactionSource, enabled = enabled),
         shape = GlassDialogDefaults.PillShape,
@@ -170,7 +174,8 @@ fun GlassPillOptionContainer(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(contentPadding)
+                .padding(contentPadding),
+            contentAlignment = Alignment.CenterStart
         ) {
             content(textColor)
         }

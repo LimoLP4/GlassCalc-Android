@@ -126,6 +126,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -1484,7 +1486,8 @@ private fun LanguageSection(
                 },
                 title = stringResource(langOption.stringResId),
                 glassProps = glassProps,
-                testTag = "radio_lang_${langOption.name}"
+                testTag = "radio_lang_${langOption.name}",
+                minHeight = GlassDialogDefaults.PillOptionMinHeight
             )
         }
     }
@@ -1501,20 +1504,20 @@ private fun SettingsPillOption(
     description: String? = null,
     errorText: String? = null,
     enabled: Boolean = true,
+    minHeight: Dp = GlassDialogDefaults.PillOptionExpandedMinHeight,
     descriptionTestTag: String? = null,
     errorTestTag: String? = null
 ) {
+    val hasSecondaryText = description != null || errorText != null
+
     GlassPillOptionContainer(
         selected = selected,
         onClick = onClick,
         glassProps = glassProps,
         modifier = modifier.testTag(testTag),
         enabled = enabled,
-        minHeight = 56.dp,
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            horizontal = GlassDialogDefaults.PillHorizontalPadding,
-            vertical = 14.dp
-        ),
+        minHeight = minHeight,
+        contentPadding = GlassDialogDefaults.PillOptionPadding,
         animationLabel = "pill_$testTag"
     ) { textColor ->
         Row(
@@ -1531,32 +1534,47 @@ private fun SettingsPillOption(
                 enabled = enabled
             )
 
-            Column(modifier = Modifier.padding(start = 12.dp, end = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp, end = 4.dp)
+            ) {
                 Text(
                     text = title,
-                    fontSize = 15.sp,
+                    fontSize = 14.5.sp,
+                    lineHeight = if (hasSecondaryText) 18.sp else 17.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                    color = textColor
+                    color = textColor,
+                    maxLines = if (hasSecondaryText) 1 else 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 if (description != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = description,
-                        fontSize = 12.sp,
+                        fontSize = 11.5.sp,
+                        lineHeight = 14.sp,
                         color = if (selected) {
                             MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = if (descriptionTestTag != null) Modifier.testTag(descriptionTestTag) else Modifier
                     )
                 }
 
                 if (errorText != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = errorText,
-                        fontSize = 12.sp,
+                        fontSize = 11.5.sp,
+                        lineHeight = 14.sp,
                         color = MaterialTheme.colorScheme.error,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = if (errorTestTag != null) Modifier.testTag(errorTestTag) else Modifier
                     )
                 }

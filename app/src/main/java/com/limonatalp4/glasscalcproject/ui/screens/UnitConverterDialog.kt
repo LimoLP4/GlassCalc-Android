@@ -619,16 +619,14 @@ fun UnitConverterDialog(
                                         },
                                         glassProps = glassProps,
                                         minHeight = GlassDialogDefaults.PillOptionMinHeight,
-                                        contentPadding = PaddingValues(
-                                            horizontal = GlassDialogDefaults.PillHorizontalPadding,
-                                            vertical = 12.dp
-                                        ),
+                                        contentPadding = GlassDialogDefaults.PillOptionPadding,
                                         animationLabel = "pair_${pair.unitFrom}_${pair.unitTo}",
                                         modifier = Modifier.testTag("pair_${pair.unitFrom}_${pair.unitTo}")
                                     ) { pairTextCol ->
                                         Text(
                                             text = stringResource(pair.labelResId),
                                             fontSize = 14.sp,
+                                            lineHeight = 17.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                             color = pairTextCol,
                                             maxLines = 2,
