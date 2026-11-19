@@ -136,6 +136,9 @@ import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
+import com.limonatalp4.glasscalcproject.ui.components.GlassCardContainer
+import com.limonatalp4.glasscalcproject.ui.components.GlassDialogDefaults
+import com.limonatalp4.glasscalcproject.ui.components.GlassPillOptionContainer
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.components.SettingsDevCard
 import com.limonatalp4.glasscalcproject.ui.components.SettingsInfoCard
@@ -304,7 +307,7 @@ fun SettingsDialog(
                                     }
                                 }
                             },
-                        shape = RoundedCornerShape(32.dp),
+                        shape = GlassDialogDefaults.DialogShellShape,
                         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceContainerHigh,
                         borderStroke = glassProps.containerBorderStroke
                     ) {
@@ -327,7 +330,7 @@ fun SettingsDialog(
                             )
                             val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
-                                shape = RoundedCornerShape(50),
+                                shape = GlassDialogDefaults.PillShape,
                                 customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 borderStroke = glassProps.containerBorderStroke,
                                 modifier = Modifier.pressScale(closeBtnInteraction)
@@ -832,8 +835,8 @@ private fun DeveloperOptionsSection(
                 }
 
                 if (simulatedApiEnabled) {
-                    val apiSliderPillShape = RoundedCornerShape(28.dp)
-                    val apiSliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    val apiSliderPillShape = GlassDialogDefaults.NestedPanelShape
+                    val apiSliderPillBg = GlassDialogDefaults.cardBackgroundColor()
                     val apiSliderPillBorder = glassProps.containerBorderStroke
                     Column(
                         modifier = Modifier
@@ -1503,61 +1506,21 @@ private fun SettingsPillOption(
     descriptionTestTag: String? = null,
     errorTestTag: String? = null
 ) {
-    val pillShape = RoundedCornerShape(percent = 50)
-    val interactionSource = remember { MutableInteractionSource() }
-
-    val cardBg by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        },
-        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-        label = "pill_bg_$testTag"
-    )
-
-    val cardBorder by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            glassProps.buttonBorderColor
-        },
-        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-        label = "pill_border_$testTag"
-    )
-
-    val textColor by animateColorAsState(
-        targetValue = if (selected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
-        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-        label = "pill_text_$testTag"
-    )
-
-    GlassSurface(
-        modifier = modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp)
-            .alpha(if (enabled) 1.0f else 0.45f)
-            .pressScale(interactionSource)
-            .clickable(
-                enabled = enabled,
-                interactionSource = interactionSource,
-                indication = androidx.compose.material3.ripple(),
-                onClick = onClick
-            )
-            .testTag(testTag),
-        shape = pillShape,
-        borderWidth = if (selected) 1.5.dp else 1.dp,
-        customBorderColor = cardBorder,
-        customBgColor = cardBg
-    ) {
+    GlassPillOptionContainer(
+        selected = selected,
+        onClick = onClick,
+        glassProps = glassProps,
+        modifier = modifier.testTag(testTag),
+        enabled = enabled,
+        minHeight = 56.dp,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            horizontal = GlassDialogDefaults.PillHorizontalPadding,
+            vertical = 14.dp
+        ),
+        animationLabel = "pill_$testTag"
+    ) { textColor ->
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
@@ -1608,27 +1571,17 @@ private fun SettingsPillOption(
 private fun SettingsGlassCard(
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     modifier: Modifier = Modifier,
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(36.dp),
-    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(
-        horizontal = 24.dp,
-        vertical = 22.dp
-    ),
+    shape: androidx.compose.ui.graphics.Shape = GlassDialogDefaults.SettingsCardShape,
+    contentPadding: androidx.compose.foundation.layout.PaddingValues = GlassDialogDefaults.SettingsCardContentPadding,
     content: @Composable () -> Unit
 ) {
-    GlassSurface(
-        modifier = modifier.fillMaxWidth(),
+    GlassCardContainer(
+        glassProps = glassProps,
+        modifier = modifier,
         shape = shape,
-        customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        borderStroke = glassProps.containerBorderStroke
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(contentPadding)
-        ) {
-            content()
-        }
-    }
+        contentPadding = contentPadding,
+        content = content
+    )
 }
 
 @Composable
@@ -1694,13 +1647,13 @@ private fun SettingsTabBar(
     Box(
         modifier = Modifier
             .wrapContentWidth()
-            .clip(RoundedCornerShape(50.dp))
+            .clip(GlassDialogDefaults.PillShape)
             .background(
-                if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                GlassDialogDefaults.pillBarBackgroundColor(isTiefschwarz)
             )
             .border(
                 border = LocalGlassProperties.current.containerBorderStroke,
-                shape = RoundedCornerShape(50.dp)
+                shape = GlassDialogDefaults.PillShape
             )
             .padding(4.dp)
     ) {
@@ -1716,7 +1669,7 @@ private fun SettingsTabBar(
                         .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                         .width(indicatorWidth)
                         .height(if (tabHeight > 0.dp) tabHeight else 36.dp)
-                        .clip(RoundedCornerShape(50.dp))
+                        .clip(GlassDialogDefaults.PillShape)
                         .background(activePillBgColor)
                 )
             }

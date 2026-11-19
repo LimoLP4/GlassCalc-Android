@@ -1,55 +1,72 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
+import android.view.WindowManager
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
-import android.view.WindowManager
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.core.view.WindowCompat
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Straighten
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,11 +74,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -70,38 +86,50 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.domain.converter.ConversionPair
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS
-import com.limonatalp4.glasscalcproject.ui.components.ConverterSearchEmptyState
 import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
+import com.limonatalp4.glasscalcproject.ui.components.GlassCardContainer
+import com.limonatalp4.glasscalcproject.ui.components.GlassDialogDefaults
+import com.limonatalp4.glasscalcproject.ui.components.GlassPillOptionContainer
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
-import com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair
 import com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion
 import com.limonatalp4.glasscalcproject.ui.components.UnitConverterSearchBar
 import com.limonatalp4.glasscalcproject.ui.components.UnitSuggestionsDropdown
-import com.limonatalp4.glasscalcproject.ui.components.categoryKeywordsResId
-import com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs
 import com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions
 import com.limonatalp4.glasscalcproject.ui.components.pressScale
 import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
@@ -110,28 +138,7 @@ import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.offset
-import androidx.compose.material3.ripple
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -293,7 +300,7 @@ fun UnitConverterDialog(
                                     }
                                 }
                             },
-                        shape = RoundedCornerShape(28.dp),
+                        shape = GlassDialogDefaults.DialogShellShape,
                         customBgColor = if (isPureBlack) Color.Black else dialogBgColor,
                         borderStroke = glassProps.containerBorderStroke
                     ) {
@@ -316,7 +323,7 @@ fun UnitConverterDialog(
                             )
                             val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
-                                shape = RoundedCornerShape(50),
+                                shape = GlassDialogDefaults.PillShape,
                                 customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 borderStroke = glassProps.containerBorderStroke,
                                 modifier = Modifier.pressScale(closeBtnInteraction)
@@ -446,13 +453,13 @@ fun UnitConverterDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(50.dp))
+                        .clip(GlassDialogDefaults.PillShape)
                         .background(
-                            if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            GlassDialogDefaults.pillBarBackgroundColor(isPureBlack)
                         )
                         .border(
                             border = glassProps.containerBorderStroke,
-                            shape = RoundedCornerShape(50.dp)
+                            shape = GlassDialogDefaults.PillShape
                         )
                         .padding(4.dp)
                 ) {
@@ -469,7 +476,7 @@ fun UnitConverterDialog(
                                     .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
                                     .width(indicatorWidth)
                                     .height(if (tabHeight > 0.dp) tabHeight else 40.dp)
-                                    .clip(RoundedCornerShape(50.dp))
+                                    .clip(GlassDialogDefaults.PillShape)
                                     .background(activeCatPillColor)
                             )
                         }
@@ -512,7 +519,7 @@ fun UnitConverterDialog(
                                             scaleX = scale
                                             scaleY = scale
                                         }
-                                        .clip(RoundedCornerShape(50.dp))
+                                        .clip(GlassDialogDefaults.PillShape)
                                         .pointerInput(cat, index) {
                                             detectTapGestures(
                                                 onPress = {
@@ -596,51 +603,36 @@ fun UnitConverterDialog(
                             Spacer(modifier = Modifier.height(6.dp))
 
                             LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(max = 240.dp)
                             ) {
                                 items(pairs, key = { "${it.unitFrom}_${it.unitTo}" }) { pair ->
-                                    val idx = pairs.indexOf(pair)
                                     val isSelected = pair == currentPair && targetIndex == selectedCategoryIndex
-                                    val pairBg by animateColorAsState(
-                                        targetValue = if (isSelected) {
-                                            if (isPureBlack) primaryContainerColor.copy(alpha = 0.7f) else primaryContainerColor
-                                        } else {
-                                            if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                        },
-                                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-                                        label = "pair_bg_$idx"
-                                    )
-                                    val pairBorder = if (!isPureBlack && isSelected) primaryColor else glassProps.buttonBorderColor
-                                    val pairTextCol = if (isPureBlack) Color.White else (if (isSelected) onPrimaryContainerColor else onSurfaceColor)
-                                    val pairInteraction = remember { MutableInteractionSource() }
 
-                                    GlassSurface(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 2.dp)
-                                            .pressScale(pairInteraction)
-                                            .clickable(
-                                                interactionSource = pairInteraction,
-                                                indication = ripple()
-                                            ) {
-                                                triggerHaptic()
-                                                selectedPair = pair
-                                            }
-                                            .testTag("pair_${pair.unitFrom}_${pair.unitTo}"),
-                                        shape = RoundedCornerShape(50.dp),
-                                        borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                                        customBorderColor = pairBorder,
-                                        customBgColor = pairBg
-                                    ) {
+                                    GlassPillOptionContainer(
+                                        selected = isSelected,
+                                        onClick = {
+                                            triggerHaptic()
+                                            selectedPair = pair
+                                        },
+                                        glassProps = glassProps,
+                                        minHeight = GlassDialogDefaults.PillOptionMinHeight,
+                                        contentPadding = PaddingValues(
+                                            horizontal = GlassDialogDefaults.PillHorizontalPadding,
+                                            vertical = 12.dp
+                                        ),
+                                        animationLabel = "pair_${pair.unitFrom}_${pair.unitTo}",
+                                        modifier = Modifier.testTag("pair_${pair.unitFrom}_${pair.unitTo}")
+                                    ) { pairTextCol ->
                                         Text(
                                             text = stringResource(pair.labelResId),
                                             fontSize = 14.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                             color = pairTextCol,
-                                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 }
@@ -650,14 +642,13 @@ fun UnitConverterDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Live Conversion Box
-                GlassSurface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    customBgColor = if (isPureBlack) Color.Black else null,
-                    borderStroke = glassProps.containerBorderStroke
+                // Live Conversion Box im Settings-Stil (großer harmonischer Radius + feiner BorderStroke)
+                GlassCardContainer(
+                    glassProps = glassProps,
+                    shape = GlassDialogDefaults.LargeCardShape,
+                    contentPadding = GlassDialogDefaults.CardContentPadding
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -666,74 +657,211 @@ fun UnitConverterDialog(
                             Text(
                                 text = stringResource(R.string.converter_input_label, fromUnit),
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isPureBlack) Color.White.copy(alpha = 0.72f) else onSurfaceColor.copy(alpha = 0.75f),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 12.dp)
                             )
 
                             val swapInteraction = remember { MutableInteractionSource() }
-                            IconButton(
-                                onClick = {
-                                    triggerHaptic()
-                                    isForward = !isForward
-                                },
-                                interactionSource = swapInteraction,
-                                modifier = Modifier
-                                    .pressScale(swapInteraction)
-                                    .testTag("btn_swap_units")
+                            GlassSurface(
+                                shape = GlassDialogDefaults.PillShape,
+                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                borderStroke = glassProps.containerBorderStroke,
+                                modifier = Modifier.pressScale(swapInteraction)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.SwapHoriz,
-                                    contentDescription = stringResource(R.string.converter_swap_direction),
-                                    tint = primaryColor
-                                )
+                                IconButton(
+                                    onClick = {
+                                        triggerHaptic()
+                                        isForward = !isForward
+                                    },
+                                    interactionSource = swapInteraction,
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .testTag("btn_swap_units")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.SwapHoriz,
+                                        contentDescription = stringResource(R.string.converter_swap_direction),
+                                        tint = primaryColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         }
 
-                        OutlinedTextField(
-                            value = inputValue,
-                            onValueChange = { inputValue = it },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            singleLine = true,
-                            shape = RoundedCornerShape(24.dp),
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Eingabefeld im vollen Pill-Shape (CircleShape) passend zu den Einstellungen
+                        val inputFocusRequester = remember { FocusRequester() }
+                        val inputPillInteraction = remember { MutableInteractionSource() }
+                        val inputFieldInteraction = remember { MutableInteractionSource() }
+                        val inputBringIntoView = remember { BringIntoViewRequester() }
+                        var isInputFocused by remember { mutableStateOf(false) }
+                        val inputImeBottomPx = WindowInsets.ime.getBottom(imeDensity)
+                        val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+                        val currentHapticIntensity by rememberUpdatedState(hapticIntensity)
+
+                        LaunchedEffect(isInputFocused, inputImeBottomPx) {
+                            if (isInputFocused) {
+                                delay(80)
+                                inputBringIntoView.bringIntoView()
+                            }
+                        }
+
+                        LaunchedEffect(inputFieldInteraction) {
+                            inputFieldInteraction.interactions.collect { interaction ->
+                                if (interaction is PressInteraction.Release) {
+                                    HapticUtil.performAppHaptic(
+                                        context = context,
+                                        view = view,
+                                        enabled = currentHapticEnabled,
+                                        intensityLevel = currentHapticIntensity
+                                    )
+                                }
+                            }
+                        }
+
+                        val inputBorderColor by animateColorAsState(
+                            targetValue = if (isInputFocused) {
+                                if (isPureBlack) Color.White else primaryColor
+                            } else {
+                                glassProps.buttonBorderColor
+                            },
+                            animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                            label = "converter_input_border"
+                        )
+                        val inputBgColor = GlassDialogDefaults.searchBarBackgroundColor(isPureBlack)
+                        val inputTextColor = if (isPureBlack) Color.White else onSurfaceColor
+
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .testTag("input_converter_value"),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                unfocusedContainerColor = if (isPureBlack) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                                focusedBorderColor = if (isPureBlack) Color.White else primaryColor,
-                                unfocusedBorderColor = glassProps.buttonBorderColor,
-                                focusedTextColor = if (isPureBlack) Color.White else onSurfaceColor,
-                                unfocusedTextColor = if (isPureBlack) Color.White else onSurfaceColor
+                                .defaultMinSize(minHeight = 52.dp)
+                                .bringIntoViewRequester(inputBringIntoView)
+                                .clip(GlassDialogDefaults.PillShape)
+                                .background(inputBgColor)
+                                .border(
+                                    border = BorderStroke(
+                                        width = if (isInputFocused) 1.5.dp else 1.dp,
+                                        color = inputBorderColor
+                                    ),
+                                    shape = GlassDialogDefaults.PillShape
+                                )
+                                .clickable(
+                                    interactionSource = inputPillInteraction,
+                                    indication = null
+                                ) {
+                                    triggerHaptic()
+                                    inputFocusRequester.requestFocus()
+                                }
+                                .padding(
+                                    horizontal = GlassDialogDefaults.PillHorizontalPadding,
+                                    vertical = 12.dp
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                BasicTextField(
+                                    value = inputValue,
+                                    onValueChange = { inputValue = it },
+                                    singleLine = true,
+                                    interactionSource = inputFieldInteraction,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    textStyle = TextStyle(
+                                        color = inputTextColor,
+                                        fontSize = 17.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    cursorBrush = SolidColor(primaryColor),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(inputFocusRequester)
+                                        .onFocusChanged { focusState ->
+                                            isInputFocused = focusState.isFocused
+                                        }
+                                        .testTag("input_converter_value")
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = fromUnit,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isPureBlack) Color.White.copy(alpha = 0.72f) else colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false
                             )
-                        )
+                        }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         Text(
                             text = stringResource(R.string.converter_result_label, toUnit),
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isPureBlack) Color.White.copy(alpha = 0.72f) else onSurfaceColor.copy(alpha = 0.75f)
                         )
 
-                        Text(
-                            text = "$convertedResult $toUnit",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = primaryColor,
-                            textAlign = TextAlign.Start,
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        val resultDisplayText = "$convertedResult $toUnit"
+                        val textMeasurer = rememberTextMeasurer()
+                        val resultScrollState = rememberScrollState()
+
+                        LaunchedEffect(resultDisplayText) {
+                            resultScrollState.scrollTo(0)
+                        }
+
+                        BoxWithConstraints(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .testTag("text_converted_result")
-                        )
+                                .padding(vertical = 2.dp)
+                        ) {
+                            val maxWidthPx = constraints.maxWidth
+                            val baseResultStyle = TextStyle(
+                                fontWeight = FontWeight.Bold,
+                                color = primaryColor
+                            )
+                            val candidateFontSizes = listOf(28.sp, 24.sp, 20.sp, 17.sp, 15.sp)
+                            val fittedFontSize = remember(resultDisplayText, maxWidthPx) {
+                                candidateFontSizes.firstOrNull { candidateSize ->
+                                    textMeasurer.measure(
+                                        text = resultDisplayText,
+                                        style = baseResultStyle.copy(fontSize = candidateSize),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    ).size.width <= maxWidthPx
+                                } ?: 15.sp
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(resultScrollState)
+                            ) {
+                                Text(
+                                    text = resultDisplayText,
+                                    fontSize = fittedFontSize,
+                                    fontWeight = FontWeight.Bold,
+                                    color = primaryColor,
+                                    textAlign = TextAlign.Start,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    modifier = Modifier.testTag("text_converted_result")
+                                )
+                            }
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Button to import converted value into calculator
+                // Button to import converted value into calculator (voller Pill-Shape wie in den Einstellungen)
                 val importInteraction = remember { MutableInteractionSource() }
                 Button(
                     onClick = {
@@ -747,13 +875,30 @@ fun UnitConverterDialog(
                     interactionSource = importInteraction,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .defaultMinSize(minHeight = GlassDialogDefaults.ActionButtonMinHeight)
                         .pressScale(importInteraction)
                         .testTag("btn_import_converter"),
-                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor, contentColor = colorScheme.onPrimary),
-                    shape = RoundedCornerShape(16.dp)
+                    contentPadding = PaddingValues(
+                        horizontal = GlassDialogDefaults.PillHorizontalPadding,
+                        vertical = 12.dp
+                    ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = primaryColor,
+                        contentColor = colorScheme.onPrimary
+                    ),
+                    shape = GlassDialogDefaults.PillShape
                 ) {
-                    Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
-                    Text(stringResource(R.string.converter_import), fontWeight = FontWeight.Bold)
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(18.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.converter_import),
+                        fontWeight = FontWeight.Bold
+                    )
                         }
                     }
                 }

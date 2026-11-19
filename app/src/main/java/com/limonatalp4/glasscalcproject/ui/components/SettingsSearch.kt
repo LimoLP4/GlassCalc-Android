@@ -446,8 +446,8 @@ fun SettingsSearchBar(
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(percent = 50)
-    val searchBarBgColor = if (isTiefschwarz) Color(0xFF0A0A0A) else colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val shape = GlassDialogDefaults.PillShape
+    val searchBarBgColor = GlassDialogDefaults.searchBarBackgroundColor(isTiefschwarz)
     val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
     val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
     val hintColor = if (isTiefschwarz) {
@@ -494,7 +494,7 @@ fun SettingsSearchBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(GlassDialogDefaults.SearchBarHeight)
             .bringIntoViewRequester(bringIntoViewRequester)
             .clip(shape)
             .background(searchBarBgColor)
@@ -596,7 +596,7 @@ fun SettingsSearchEmptyState(
         modifier = modifier
             .fillMaxWidth()
             .testTag("settings_search_empty"),
-        shape = RoundedCornerShape(22.dp),
+        shape = GlassDialogDefaults.SearchEmptyStateShape,
         customBgColor = if (isTiefschwarz) Color.Black else colorScheme.surfaceVariant.copy(alpha = 0.45f),
         borderStroke = LocalGlassProperties.current.containerBorderStroke
     ) {
