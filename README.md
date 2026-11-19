@@ -45,6 +45,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Robust Math & Engine Core (v1.3.1):** Integrated crash-proof `evaluateSafely` protection layers for integrals and expanded unit conversions down to the Planck length.
 *   **Theme Logic & Consistency (v1.3.2):** Renamed "Deep Black" to "AMOLED", removed the redundant theme, and unified all border strokes and card shapes (pill design) across the app.
 *   **Battery Saver Integration (v1.3.2) (Latest):** The "Automatic" theme now automatically switches to the AMOLED theme when the device's battery saver is active (does not affect Material You).
+*   **UI Hotfix & Polish (v1.3.3) (Latest):** Fixed pill shapes in settings (no more bulging), clipped rectangular ripples on pill buttons, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys (no more precise center-tapping required).
 
 ## 🌍 Localization / Sprache
 
