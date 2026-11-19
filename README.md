@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.3.1)
+### 🔄 Intermediate Updates (v1.2.0 - v1.3.2)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
@@ -42,7 +42,9 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Liquid Glass History Overhaul (v1.3.1):** Redesigned the History panel into a modern, floating pill-shaped container with seamless theme integration, an intuitive "X" close button with custom haptics, and outside-click (scrim) dismissal.
 *   **UI State Persistence & Rotation Fixes (v1.3.1):** Implemented `rememberSaveable` across the Hamburger Menu, History Panel, Settings Dialog, Unit Converter, and Graph Dialog to preserve active states during device rotation.
 *   **Landscape & Navigation Polish (v1.3.1):** Added smooth sizing transitions for landscape keyboards on narrow displays and ensured proper system window insets so the classic 3-button navigation bar never obscures header actions.
-*   **Robust Math & Engine Core (v1.3.1) (Latest):** Integrated crash-proof `evaluateSafely` protection layers for integrals and expanded unit conversions down to the Planck length.
+*   **Robust Math & Engine Core (v1.3.1):** Integrated crash-proof `evaluateSafely` protection layers for integrals and expanded unit conversions down to the Planck length.
+*   **Theme Logic & Consistency (v1.3.2):** Renamed "Deep Black" to "AMOLED", removed the redundant theme, and unified all border strokes and card shapes (pill design) across the app.
+*   **Battery Saver Integration (v1.3.2) (Latest):** The "Automatic" theme now automatically switches to the AMOLED theme when the device's battery saver is active (does not affect Material You).
 
 ## 🌍 Localization / Sprache
 
