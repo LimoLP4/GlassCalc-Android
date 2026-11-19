@@ -55,7 +55,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -408,18 +407,16 @@ fun HistorySheet(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .pressScale(itemInteraction)
-                                            .clickable(
-                                                interactionSource = itemInteraction,
-                                                indication = ripple()
-                                            ) {
-                                                triggerHaptic()
-                                                onSelect(item)
-                                                transitionController.dismiss()
-                                            }
                                             .testTag("history_item_${item.id}"),
                                         shape = RoundedCornerShape(22.dp),
                                         borderStroke = itemCardBorder,
-                                        customBgColor = itemCardBackground
+                                        customBgColor = itemCardBackground,
+                                        onClick = {
+                                            triggerHaptic()
+                                            onSelect(item)
+                                            transitionController.dismiss()
+                                        },
+                                        interactionSource = itemInteraction
                                     ) {
                                         Column(
                                             modifier = Modifier

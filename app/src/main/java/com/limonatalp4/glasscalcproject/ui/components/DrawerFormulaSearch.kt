@@ -31,6 +31,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -290,31 +292,39 @@ fun DrawerFormulaSearch(
                         key = { _, entry -> entry.formula.id }
                     ) { index, entry ->
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            Column(
+                            Surface(
+                                onClick = { onFormulaSelected(entry.formula) },
+                                shape = RoundedCornerShape(14.dp),
+                                color = Color.Transparent,
+                                contentColor = colorScheme.onSurface,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .defaultMinSize(minHeight = 48.dp)
-                                    .clickable { onFormulaSelected(entry.formula) }
-                                    .padding(horizontal = 14.dp, vertical = 10.dp)
                                     .testTag("formula_item_${entry.formula.id}")
                             ) {
-                                Text(
-                                    text = entry.localizedName,
-                                    color = colorScheme.onSurface,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = entry.formula.formula,
-                                    color = colorScheme.primary,
-                                    fontSize = 12.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                                ) {
+                                    Text(
+                                        text = entry.localizedName,
+                                        color = colorScheme.onSurface,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = entry.formula.formula,
+                                        color = colorScheme.primary,
+                                        fontSize = 12.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
                             if (index < filteredFormulas.lastIndex) {
                                 HorizontalDivider(

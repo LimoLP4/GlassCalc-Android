@@ -59,6 +59,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
@@ -107,6 +108,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -284,38 +286,38 @@ fun CalculatorScreen(
                         // Floating Pill (Menu + App Name)
                         val menuBtnInteraction = remember { MutableInteractionSource() }
                         val view = LocalView.current
+                        val toggleDrawer: () -> Unit = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                            isDrawerOpen = !isDrawerOpen
+                        }
                         GlassSurface(
                             modifier = Modifier
                                 .pressScale(menuBtnInteraction)
-                                .clickable(
-                                    interactionSource = menuBtnInteraction,
-                                    indication = null
-                                ) {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                    isDrawerOpen = !isDrawerOpen
-                                }
                                 .testTag("header_pill"),
                             shape = RoundedCornerShape(50),
                             customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             borderStroke = glassProps.containerBorderStroke,
-                            glassState = glassState
+                            glassState = glassState,
+                            onClick = toggleDrawer,
+                            role = Role.Button,
+                            interactionSource = menuBtnInteraction
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
                             ) {
-                                IconButton(
-                                    onClick = {
-                                        focusManager.clearFocus()
-                                        keyboardController?.hide()
-                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                        isDrawerOpen = !isDrawerOpen
-                                    },
-                                    interactionSource = menuBtnInteraction,
+                                Box(
+                                    contentAlignment = Alignment.Center,
                                     modifier = Modifier
                                         .size(36.dp)
+                                        .clip(CircleShape)
+                                        .clickable(
+                                            interactionSource = menuBtnInteraction,
+                                            indication = null,
+                                            onClick = toggleDrawer
+                                        )
                                         .testTag("btn_hamburger_menu")
                                 ) {
                                     Icon(
@@ -325,7 +327,7 @@ fun CalculatorScreen(
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
-                                
+
                                 Text(
                                     text = "GlassCalc",
                                     fontWeight = FontWeight.Bold,
@@ -680,7 +682,30 @@ fun CalculatorScreen(
                                             label = "nav_label_color_$tag"
                                         )
 
-                                        Box(
+                                        Surface(
+                                            selected = isSelected,
+                                            onClick = {
+                                                focusManager.clearFocus()
+                                                keyboardController?.hide()
+                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                                                selectedNavTag = tag
+                                                isDrawerOpen = false
+                                                menuVisibleState.targetState = false
+                                                coroutineScope.launch {
+                                                    snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
+                                                        .first { it }
+                                                    when (tag) {
+                                                        "nav_item_history" -> isHistoryOpen = true
+                                                        "nav_item_converter" -> isUnitConverterOpen = true
+                                                        "nav_item_graph" -> isGraphOpen = true
+                                                        "nav_item_settings" -> isSettingsOpen = true
+                                                    }
+                                                }
+                                            },
+                                            shape = innerPillShape,
+                                            color = Color.Transparent,
+                                            contentColor = labelColor,
+                                            interactionSource = menuItemInteraction,
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .defaultMinSize(minHeight = defaultItemHeight)
@@ -688,54 +713,35 @@ fun CalculatorScreen(
                                                     itemHeights[index] = with(density) { size.height.toDp() }
                                                 }
                                                 .pressScale(menuItemInteraction)
-                                                .clip(innerPillShape)
-                                                .background(Color.Transparent)
-                                                .clickable(
-                                                    interactionSource = menuItemInteraction,
-                                                    indication = androidx.compose.material3.ripple()
-                                                ) {
-                                                    focusManager.clearFocus()
-                                                    keyboardController?.hide()
-                                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                                    selectedNavTag = tag
-                                                    isDrawerOpen = false
-                                                    menuVisibleState.targetState = false
-                                                    coroutineScope.launch {
-                                                        snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
-                                                            .first { it }
-                                                        when (tag) {
-                                                            "nav_item_history" -> isHistoryOpen = true
-                                                            "nav_item_converter" -> isUnitConverterOpen = true
-                                                            "nav_item_graph" -> isGraphOpen = true
-                                                            "nav_item_settings" -> isSettingsOpen = true
-                                                        }
-                                                    }
-                                                }
-                                                .testTag(tag),
-                                            contentAlignment = Alignment.CenterStart
+                                                .testTag(tag)
                                         ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 18.dp, vertical = 12.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            Box(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                contentAlignment = Alignment.CenterStart
                                             ) {
-                                                Icon(
-                                                    imageVector = icon,
-                                                    contentDescription = null,
-                                                    tint = iconTint,
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(labelRes),
-                                                    fontSize = 15.sp,
-                                                    lineHeight = 19.sp,
-                                                    maxLines = 2,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                    color = labelColor
-                                                )
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 18.dp, vertical = 12.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = icon,
+                                                        contentDescription = null,
+                                                        tint = iconTint,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(labelRes),
+                                                        fontSize = 15.sp,
+                                                        lineHeight = 19.sp,
+                                                        maxLines = 2,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                        color = labelColor
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -918,18 +924,21 @@ private fun PortraitCalculatorLayout(
                 val angleBtnInteraction = remember { MutableInteractionSource() }
                 GlassSurface(
                     modifier = Modifier
+                        .size(width = 76.dp, height = 36.dp)
                         .pressScale(angleBtnInteraction)
                         .testTag("btn_toggle_angle_mode"),
                     shape = CircleShape,
-                    borderStroke = angleButtonBorder
+                    borderStroke = angleButtonBorder,
+                    onClick = {
+                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
+                        actions.onToggleAngleMode()
+                    },
+                    role = Role.Button,
+                    interactionSource = angleBtnInteraction
                 ) {
-                    IconButton(
-                        onClick = {
-                            HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
-                            actions.onToggleAngleMode()
-                        },
-                        interactionSource = angleBtnInteraction,
-                        modifier = Modifier.size(width = 76.dp, height = 36.dp)
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (angleMode == AngleMode.DEG) "DEG" else "RAD",
@@ -944,27 +953,29 @@ private fun PortraitCalculatorLayout(
                 val sciBtnInteraction = remember { MutableInteractionSource() }
                 GlassSurface(
                     modifier = Modifier
+                        .wrapContentWidth()
+                        .widthIn(min = 108.dp)
+                        .height(36.dp)
                         .pressScale(sciBtnInteraction)
                         .testTag("btn_toggle_scientific"),
                     shape = CircleShape,
-                    borderStroke = scientificButtonBorder
+                    borderStroke = scientificButtonBorder,
+                    onClick = {
+                        HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
+                        actions.onToggleScientificPanel()
+                    },
+                    role = Role.Button,
+                    interactionSource = sciBtnInteraction
                 ) {
-                    IconButton(
-                        onClick = {
-                            HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
-                            actions.onToggleScientificPanel()
-                        },
-                        interactionSource = sciBtnInteraction,
+                    Box(
                         modifier = Modifier
-                            .wrapContentWidth()
-                            .widthIn(min = 108.dp)
-                            .height(36.dp)
-                            .padding(horizontal = 10.dp)
+                            .fillMaxHeight()
+                            .padding(horizontal = 12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(horizontal = 2.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Science,
@@ -1165,20 +1176,23 @@ private fun LandscapeCalculatorLayout(
                         GlassSurface(
                             shape = CircleShape,
                             borderStroke = landscapeAngleBorder,
+                            onClick = {
+                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
+                                actions.onToggleAngleMode()
+                            },
+                            role = Role.Button,
+                            interactionSource = landscapeAngleInteraction,
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
-                                .pressScale(landscapeAngleInteraction)
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
-                                    actions.onToggleAngleMode()
-                                },
-                                interactionSource = landscapeAngleInteraction,
-                                modifier = Modifier.size(
+                                .size(
                                     width = (buttonSize * 1.8f).coerceIn(68.dp, 96.dp),
                                     height = (buttonSize * 0.75f).coerceIn(28.dp, 38.dp)
                                 )
+                                .pressScale(landscapeAngleInteraction)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = if (angleMode == AngleMode.DEG) "DEG" else "RAD",

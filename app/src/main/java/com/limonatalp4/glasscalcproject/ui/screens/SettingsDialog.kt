@@ -95,6 +95,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -1274,21 +1275,20 @@ private fun InformationSection(
             glassProps = glassProps,
             shape = RoundedCornerShape(percent = 50),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+            onClick = {
+                triggerHaptic()
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, "https://github.com/LimoLP4/GlassCalc-Android/releases/".toUri())
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
+                }
+            },
+            role = Role.Button,
+            interactionSource = githubCardInteraction,
             modifier = Modifier
                 .defaultMinSize(minHeight = 56.dp)
                 .pressScale(githubCardInteraction)
-                .clickable(
-                    interactionSource = githubCardInteraction,
-                    indication = androidx.compose.material3.ripple()
-                ) {
-                    triggerHaptic()
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, "https://github.com/LimoLP4/GlassCalc-Android/releases/".toUri())
-                        context.startActivity(intent)
-                    } catch (_: Exception) {
-                        Toast.makeText(context, context.getString(R.string.info_github_repo), Toast.LENGTH_SHORT).show()
-                    }
-                }
                 .testTag("card_github_repo")
         ) {
             Row(
@@ -1372,15 +1372,13 @@ private fun InformationSection(
         SettingsGlassCard(
             glassProps = glassProps,
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-            modifier = Modifier
-                .clickable(
-                    interactionSource = apacheCardInteraction,
-                    indication = androidx.compose.material3.ripple()
-                ) {
-                    triggerHaptic()
-                    onToggleApache()
-                }
-                .testTag("card_apache_license")
+            onClick = {
+                triggerHaptic()
+                onToggleApache()
+            },
+            role = Role.Button,
+            interactionSource = apacheCardInteraction,
+            modifier = Modifier.testTag("card_apache_license")
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -1525,7 +1523,7 @@ private fun SettingsPillOption(
         ) {
             RadioButton(
                 selected = selected,
-                onClick = if (enabled) onClick else null,
+                onClick = null,
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colorScheme.primary,
                     unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1573,6 +1571,10 @@ private fun SettingsGlassCard(
     modifier: Modifier = Modifier,
     shape: androidx.compose.ui.graphics.Shape = GlassDialogDefaults.SettingsCardShape,
     contentPadding: androidx.compose.foundation.layout.PaddingValues = GlassDialogDefaults.SettingsCardContentPadding,
+    onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
+    role: Role? = null,
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
     GlassCardContainer(
@@ -1580,6 +1582,10 @@ private fun SettingsGlassCard(
         modifier = modifier,
         shape = shape,
         contentPadding = contentPadding,
+        onClick = onClick,
+        enabled = enabled,
+        role = role,
+        interactionSource = interactionSource,
         content = content
     )
 }
@@ -1710,7 +1716,7 @@ private fun SettingsTabBar(
                                         scaleX = scale
                                         scaleY = scale
                                     }
-                                    .clip(RoundedCornerShape(50.dp))
+                                    .clip(GlassDialogDefaults.PillShape)
                                     .pointerInput(index) {
                                         detectTapGestures(
                                             onPress = {

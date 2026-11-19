@@ -6,9 +6,12 @@ import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -16,6 +19,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
@@ -96,7 +102,7 @@ fun Modifier.safeLiquidGlass(
 
 /**
  * A reusable frosted glass card container with automatic fallback,
- * light reflection highlight, and soft borders.
+ * light reflection highlight, soft borders, and shape-clipped Material 3 touch ripple.
  */
 @Composable
 fun GlassSurface(
@@ -107,6 +113,11 @@ fun GlassSurface(
     customBorderColor: Color? = null,
     borderStroke: BorderStroke? = null,
     customBgColor: Color? = null,
+    onClick: (() -> Unit)? = null,
+    selected: Boolean? = null,
+    enabled: Boolean = true,
+    role: Role? = null,
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val glassProps = LocalGlassProperties.current
@@ -124,34 +135,101 @@ fun GlassSurface(
     val isBlurActive = glassState != null && glassProps.supportsBlur && state.quality != LiquidGlassQuality.Fallback
 
     val isPureBlackSurface = glassProps.isTiefschwarz && effectiveBgColor == Color.Black
+    val applyBlur = isBlurActive && !isPureBlackSurface
 
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .safeLiquidGlass(
-                state = state,
-                shape = shape,
-                supportsBlur = isBlurActive && !isPureBlackSurface
+    if (onClick != null) {
+        val resolvedInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
+        val surfaceModifier = modifier
+            .then(
+                if (role != null) {
+                    Modifier.semantics { this.role = role }
+                } else {
+                    Modifier
+                }
             )
-            .background(effectiveBgColor, shape)
-            .border(effectiveBorder, shape)
-    ) {
-        // Specular light reflection on the top-left edge (omitted on pure-black AMOLED surfaces to prevent gray tint)
-        if (!isPureBlackSurface) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = if (glassProps.isDark) 0.08f else 0.25f),
-                                Color.Transparent,
-                                Color.White.copy(alpha = if (glassProps.isDark) 0.02f else 0.08f)
-                            )
+            .then(
+                if (applyBlur) {
+                    Modifier
+                        .clip(shape)
+                        .safeLiquidGlass(
+                            state = state,
+                            shape = shape,
+                            supportsBlur = true
                         )
-                    )
+                } else {
+                    Modifier
+                }
+            )
+
+        val surfaceContent: @Composable () -> Unit = {
+            Box(propagateMinConstraints = true) {
+                if (!isPureBlackSurface) {
+                    GlassSpecularOverlay(isDark = glassProps.isDark)
+                }
+                content()
+            }
+        }
+
+        if (selected != null) {
+            Surface(
+                selected = selected,
+                onClick = onClick,
+                modifier = surfaceModifier,
+                enabled = enabled,
+                shape = shape,
+                color = effectiveBgColor,
+                contentColor = LocalContentColor.current,
+                border = effectiveBorder,
+                interactionSource = resolvedInteractionSource,
+                content = surfaceContent
+            )
+        } else {
+            Surface(
+                onClick = onClick,
+                modifier = surfaceModifier,
+                enabled = enabled,
+                shape = shape,
+                color = effectiveBgColor,
+                contentColor = LocalContentColor.current,
+                border = effectiveBorder,
+                interactionSource = resolvedInteractionSource,
+                content = surfaceContent
             )
         }
-        content()
+    } else {
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .safeLiquidGlass(
+                    state = state,
+                    shape = shape,
+                    supportsBlur = applyBlur
+                )
+                .background(effectiveBgColor, shape)
+                .border(effectiveBorder, shape)
+        ) {
+            if (!isPureBlackSurface) {
+                GlassSpecularOverlay(isDark = glassProps.isDark)
+            }
+            content()
+        }
     }
+}
+
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.GlassSpecularOverlay(isDark: Boolean) {
+    // Specular light reflection on the top-left edge (omitted on pure-black AMOLED surfaces to prevent gray tint)
+    Box(
+        modifier = Modifier
+            .matchParentSize()
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = if (isDark) 0.08f else 0.25f),
+                        Color.Transparent,
+                        Color.White.copy(alpha = if (isDark) 0.02f else 0.08f)
+                    )
+                )
+            )
+    )
 }

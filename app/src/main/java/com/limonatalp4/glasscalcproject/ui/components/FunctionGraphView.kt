@@ -6,7 +6,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
@@ -1989,18 +1988,6 @@ fun FunctionGraphView(
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 48.dp)
                         .pressScale(applyInteraction, enabled = hasActivePoint)
-                        .clip(RoundedCornerShape(50))
-                        .clickable(
-                            interactionSource = applyInteraction,
-                            indication = androidx.compose.material3.ripple(),
-                            enabled = hasActivePoint,
-                            role = Role.Button
-                        ) {
-                            activePoint?.let { pt ->
-                                triggerClickHaptic()
-                                onApplyPointToCalculator(pt.x, pt.y)
-                            }
-                        }
                         .testTag("btn_apply_graph_point"),
                     glassState = glassState,
                     shape = RoundedCornerShape(50),
@@ -2013,7 +2000,16 @@ fun FunctionGraphView(
                         colorScheme.primary.copy(alpha = 0.90f)
                     } else {
                         colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                    }
+                    },
+                    onClick = {
+                        activePoint?.let { pt ->
+                            triggerClickHaptic()
+                            onApplyPointToCalculator(pt.x, pt.y)
+                        }
+                    },
+                    enabled = hasActivePoint,
+                    role = Role.Button,
+                    interactionSource = applyInteraction
                 ) {
                     Row(
                         modifier = Modifier

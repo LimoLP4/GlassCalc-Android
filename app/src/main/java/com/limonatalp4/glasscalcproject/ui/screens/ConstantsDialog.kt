@@ -1,6 +1,5 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
@@ -171,18 +169,16 @@ fun ConstantsDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .pressScale(cardInteraction)
-                                    .clickable(
-                                        interactionSource = cardInteraction,
-                                        indication = ripple()
-                                    ) {
-                                        triggerHaptic()
-                                        onSelectConstant(constant.value)
-                                        dialogTransition.dismiss()
-                                    }
                                     .testTag("constant_${constant.symbol}"),
                                 shape = RoundedCornerShape(20.dp),
                                 customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = glassProps.containerBorderStroke
+                                borderStroke = glassProps.containerBorderStroke,
+                                onClick = {
+                                    triggerHaptic()
+                                    onSelectConstant(constant.value)
+                                    dialogTransition.dismiss()
+                                },
+                                interactionSource = cardInteraction
                             ) {
                             Row(
                                 modifier = Modifier

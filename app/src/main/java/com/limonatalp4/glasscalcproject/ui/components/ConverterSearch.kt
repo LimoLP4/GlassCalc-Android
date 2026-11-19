@@ -369,6 +369,7 @@ fun UnitSuggestionsDropdown(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
                                 .clickable {
                                     onSelectSuggestion(suggestion)
                                 }

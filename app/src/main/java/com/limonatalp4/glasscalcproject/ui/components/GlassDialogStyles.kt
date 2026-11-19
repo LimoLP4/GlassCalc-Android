@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties
@@ -91,13 +90,21 @@ fun GlassCardContainer(
     contentPadding: PaddingValues = GlassDialogDefaults.CardContentPadding,
     backgroundColor: Color = GlassDialogDefaults.cardBackgroundColor(),
     borderStroke: BorderStroke = glassProps.containerBorderStroke,
+    onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
+    role: Role? = null,
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit
 ) {
     GlassSurface(
         modifier = modifier.fillMaxWidth(),
         shape = shape,
         customBgColor = backgroundColor,
-        borderStroke = borderStroke
+        borderStroke = borderStroke,
+        onClick = onClick,
+        enabled = enabled,
+        role = role,
+        interactionSource = interactionSource
     ) {
         Box(
             modifier = Modifier
@@ -149,17 +156,16 @@ fun GlassPillOptionContainer(
             .fillMaxWidth()
             .defaultMinSize(minHeight = minHeight)
             .alpha(if (enabled) 1.0f else 0.45f)
-            .pressScale(interactionSource)
-            .clickable(
-                enabled = enabled,
-                interactionSource = interactionSource,
-                indication = ripple(),
-                onClick = onClick
-            ),
+            .pressScale(interactionSource, enabled = enabled),
         shape = GlassDialogDefaults.PillShape,
         borderWidth = if (selected) 1.5.dp else 1.dp,
         customBorderColor = cardBorder,
-        customBgColor = cardBg
+        customBgColor = cardBg,
+        onClick = onClick,
+        selected = selected,
+        enabled = enabled,
+        role = Role.RadioButton,
+        interactionSource = interactionSource
     ) {
         Box(
             modifier = Modifier
