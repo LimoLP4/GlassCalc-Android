@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">Метры ↔ Футы (m ↔ ft)</string>
+    <string name="unit_m_cm">Метры ↔ Сантиметры (m ↔ cm)</string>
+    <string name="unit_m_mm">Метры ↔ Миллиметры (m ↔ mm)</string>
+    <string name="unit_m_nm">Метры ↔ Нанометры (m ↔ nm)</string>
     <string name="unit_cm_in">Сантиметры ↔ Дюймы (cm ↔ in)</string>
     <string name="unit_km_mi">Километры ↔ Мили (km ↔ mi)</string>
     <string name="unit_kg_lb">Килограммы ↔ Фунты (kg ↔ lb)</string>
+    <string name="unit_kg_t">Килограммы ↔ Тонны (kg ↔ t)</string>
     <string name="unit_c_f">Цельсий ↔ Фаренгейт (°C ↔ °F)</string>
+    <string name="unit_c_k">Цельсий ↔ Кельвин (°C ↔ K)</string>
+    <string name="unit_f_k">Фаренгейт ↔ Кельвин (°F ↔ K)</string>
     <string name="unit_l_gal">Литры ↔ Галлоны (l ↔ gal)</string>
     <string name="unit_b_kb">Байт ↔ Килобайт (B ↔ KB)</string>
     <string name="unit_kb_mb">Килобайт ↔ Мегабайт (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">Метр</string>
     <string name="unit_name_feet">Футы</string>
     <string name="unit_name_centimeter">Сантиметр</string>
+    <string name="unit_name_millimeter">Миллиметр</string>
+    <string name="unit_name_nanometer">Нанометр</string>
     <string name="unit_name_inch">Дюйм</string>
     <string name="unit_name_kilometer">Километр</string>
     <string name="unit_name_mile">Миля</string>
     <string name="unit_name_kilogram">Килограмм</string>
     <string name="unit_name_pound">Фунт</string>
+    <string name="unit_name_ton">Тонна</string>
     <string name="unit_name_celsius">Цельсий</string>
     <string name="unit_name_fahrenheit">Фаренгейт</string>
+    <string name="unit_name_kelvin">Кельвин</string>
     <string name="unit_name_liter">Литр</string>
     <string name="unit_name_gallon">Галлон</string>
     <string name="unit_name_byte">Байт</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">Радианы (RAD)</string>
     <string name="angle_rad_desc">Полный круг = 2π</string>
     <string name="units_supported_systems">Поддерживаемые системы конвертации:</string>
-    <string name="units_systems_detail">• Метрическая ↔ Имперская (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Температура (°C ↔ °F)\n• Объем (l ↔ gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)</string>
+    <string name="units_systems_detail">• Метрическая ↔ Имперская (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Температура (°C, °F, K)\n• Объем (l ↔ gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Размер экрана и масштабирование</string>
@@ -327,13 +337,17 @@
     <string name="unit_keywords_meter">метр,метры,м,длина,расстояние,метрическая</string>
     <string name="unit_keywords_feet">фут,футы,ft,имперская,длина</string>
     <string name="unit_keywords_centimeter">сантиметр,сантиметры,см,длина,метрическая</string>
+    <string name="unit_keywords_millimeter">миллиметр,миллиметры,мм,mm,длина,метрическая</string>
+    <string name="unit_keywords_nanometer">нанометр,нанометры,нм,nm,длина,метрическая,нано</string>
     <string name="unit_keywords_inch">дюйм,дюймы,in,имперская,длина</string>
     <string name="unit_keywords_kilometer">километр,километры,км,длина,расстояние</string>
     <string name="unit_keywords_mile">миля,мили,mi,имперская,расстояние</string>
     <string name="unit_keywords_kilogram">килограмм,килограммы,кг,масса,вес</string>
     <string name="unit_keywords_pound">фунт,фунты,lb,lbs,масса,вес</string>
+    <string name="unit_keywords_ton">тонна,тонны,т,t,метрическая тонна,масса,вес</string>
     <string name="unit_keywords_celsius">цельсий,цельсия,°c,c,градусы,температура</string>
     <string name="unit_keywords_fahrenheit">фаренгейт,фаренгейта,°f,f,градусы,температура</string>
+    <string name="unit_keywords_kelvin">кельвин,кельвины,kelvin,k,к,температура,абсолютная</string>
     <string name="unit_keywords_liter">литр,литры,л,l,объем,емкость</string>
     <string name="unit_keywords_gallon">галлон,галлоны,gal,объем,емкость</string>
     <string name="unit_keywords_byte">байт,байты,b,б,данные,память,хранилище</string>

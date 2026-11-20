@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">米 ↔ 英尺 (m ↔ ft)</string>
+    <string name="unit_m_cm">米 ↔ 厘米 (m ↔ cm)</string>
+    <string name="unit_m_mm">米 ↔ 毫米 (m ↔ mm)</string>
+    <string name="unit_m_nm">米 ↔ 纳米 (m ↔ nm)</string>
     <string name="unit_cm_in">厘米 ↔ 英寸 (cm ↔ in)</string>
     <string name="unit_km_mi">千米 ↔ 英里 (km ↔ mi)</string>
     <string name="unit_kg_lb">千克 ↔ 磅 (kg ↔ lb)</string>
+    <string name="unit_kg_t">千克 ↔ 吨 (kg ↔ t)</string>
     <string name="unit_c_f">摄氏度 ↔ 华氏度 (°C ↔ °F)</string>
+    <string name="unit_c_k">摄氏度 ↔ 开尔文 (°C ↔ K)</string>
+    <string name="unit_f_k">华氏度 ↔ 开尔文 (°F ↔ K)</string>
     <string name="unit_l_gal">升 ↔ 加仑 (l ↔ gal)</string>
     <string name="unit_b_kb">字节 ↔ 千字节 (B ↔ KB)</string>
     <string name="unit_kb_mb">千字节 ↔ 兆字节 (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">米</string>
     <string name="unit_name_feet">英尺</string>
     <string name="unit_name_centimeter">厘米</string>
+    <string name="unit_name_millimeter">毫米</string>
+    <string name="unit_name_nanometer">纳米</string>
     <string name="unit_name_inch">英寸</string>
     <string name="unit_name_kilometer">千米</string>
     <string name="unit_name_mile">英里</string>
     <string name="unit_name_kilogram">千克</string>
     <string name="unit_name_pound">磅</string>
+    <string name="unit_name_ton">吨</string>
     <string name="unit_name_celsius">摄氏度</string>
     <string name="unit_name_fahrenheit">华氏度</string>
+    <string name="unit_name_kelvin">开尔文</string>
     <string name="unit_name_liter">升</string>
     <string name="unit_name_gallon">加仑</string>
     <string name="unit_name_byte">字节</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">弧度 (RAD)</string>
     <string name="angle_rad_desc">整圆 = 2π</string>
     <string name="units_supported_systems">支持的换算系统:</string>
-    <string name="units_systems_detail">• 公制 ↔ 英制 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体积 (l ↔ gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)\n• 电压 (mV, V, kV)\n• 电流 (µA, mA, A)\n• 功率 (mW, W, kW, MW)\n• 电荷 (mAh, Ah)</string>
+    <string name="units_systems_detail">• 公制 ↔ 英制 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体积 (l ↔ gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)\n• 电压 (mV, V, kV)\n• 电流 (µA, mA, A)\n• 功率 (mW, W, kW, MW)\n• 电荷 (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">屏幕尺寸与缩放</string>
@@ -327,13 +337,17 @@
     <string name="unit_keywords_meter">米,公尺,m,长度,距离,公制</string>
     <string name="unit_keywords_feet">英尺,呎,ft,英制,长度</string>
     <string name="unit_keywords_centimeter">厘米,公分,cm,长度,公制</string>
+    <string name="unit_keywords_millimeter">毫米,mm,长度,公制</string>
+    <string name="unit_keywords_nanometer">纳米,nm,长度,公制,毫微米</string>
     <string name="unit_keywords_inch">英寸,吋,in,英制,长度</string>
     <string name="unit_keywords_kilometer">千米,公里,km,长度,距离</string>
     <string name="unit_keywords_mile">英里,哩,mi,英制,距离</string>
     <string name="unit_keywords_kilogram">千克,公斤,kg,质量,重量</string>
     <string name="unit_keywords_pound">磅,lb,lbs,质量,重量</string>
+    <string name="unit_keywords_ton">吨,公吨,t,质量,重量</string>
     <string name="unit_keywords_celsius">摄氏度,摄氏,°c,c,温度,公制</string>
     <string name="unit_keywords_fahrenheit">华氏度,华氏,°f,f,温度</string>
+    <string name="unit_keywords_kelvin">开尔文,克尔文,kelvin,k,温度,热力学温度,绝对零度</string>
     <string name="unit_keywords_liter">升,公升,l,体积,容积</string>
     <string name="unit_keywords_gallon">加仑,gal,体积,容积</string>
     <string name="unit_keywords_byte">字节,b,数据,存储,容量</string>

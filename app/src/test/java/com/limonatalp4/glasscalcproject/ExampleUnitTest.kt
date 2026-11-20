@@ -90,9 +90,22 @@ class ExampleUnitTest {
         assertTrue(lbVal.startsWith("2,20"))
 
         // Celsius to Fahrenheit (0°C -> 32°F)
-        val cToF = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }
+        val cToF = UnitConverter.CONVERSIONS.first { it.unitFrom == "°C" && it.unitTo == "°F" }
         val fVal = UnitConverter.convert(0.0, cToF, forward = true)
         assertEquals("32", fVal)
+
+        // Temperature: °C ↔ K and °F ↔ K in both directions
+        val cToK = UnitConverter.CONVERSIONS.first { it.unitFrom == "°C" && it.unitTo == "K" }
+        assertEquals("273,15", UnitConverter.convert(0.0, cToK, forward = true))
+        assertEquals("373,15", UnitConverter.convert(100.0, cToK, forward = true))
+        assertEquals("-273,15", UnitConverter.convert(0.0, cToK, forward = false))
+        assertEquals("0", UnitConverter.convert(273.15, cToK, forward = false))
+
+        val fToK = UnitConverter.CONVERSIONS.first { it.unitFrom == "°F" && it.unitTo == "K" }
+        assertEquals("273,15", UnitConverter.convert(32.0, fToK, forward = true))
+        assertEquals("373,15", UnitConverter.convert(212.0, fToK, forward = true))
+        assertEquals("32", UnitConverter.convert(273.15, fToK, forward = false))
+        assertEquals("-459,67", UnitConverter.convert(0.0, fToK, forward = false))
 
         // Data: Binary standard (1024) in both directions
         val mbToGb = UnitConverter.CONVERSIONS.first { it.unitFrom == "MB" && it.unitTo == "GB" }
@@ -167,6 +180,25 @@ class ExampleUnitTest {
         val mahToAh = UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }
         assertEquals("5", UnitConverter.convert(5000.0, mahToAh, forward = true))
         assertEquals("2500", UnitConverter.convert(2.5, mahToAh, forward = false))
+
+        // Length: m ↔ cm, m ↔ mm, m ↔ nm in both directions
+        val mToCm = UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "cm" }
+        assertEquals("250", UnitConverter.convert(2.5, mToCm, forward = true))
+        assertEquals("1,5", UnitConverter.convert(150.0, mToCm, forward = false))
+
+        val mToMm = UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "mm" }
+        assertEquals("1500", UnitConverter.convert(1.5, mToMm, forward = true))
+        assertEquals("0,5", UnitConverter.convert(500.0, mToMm, forward = false))
+
+        val mToNm = UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "nm" }
+        assertEquals("1000000000", UnitConverter.convert(1.0, mToNm, forward = true))
+        assertEquals("1E-9", UnitConverter.convert(1.0, mToNm, forward = false))
+        assertEquals("0,000001", UnitConverter.convert(1000.0, mToNm, forward = false))
+
+        // Mass: kg ↔ t in both directions
+        val kgToT = UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "t" }
+        assertEquals("1", UnitConverter.convert(1000.0, kgToT, forward = true))
+        assertEquals("2500", UnitConverter.convert(2.5, kgToT, forward = false))
     }
 
     @Test
@@ -480,10 +512,16 @@ class ExampleUnitTest {
         val localizedGermanPairs = UnitConverter.CONVERSIONS.map { pair ->
             val label = when (pair.unitFrom to pair.unitTo) {
                 "m" to "ft" -> "Meter ↔ Fuß (m ↔ ft)"
+                "m" to "cm" -> "Meter ↔ Zentimeter (m ↔ cm)"
+                "m" to "mm" -> "Meter ↔ Millimeter (m ↔ mm)"
+                "m" to "nm" -> "Meter ↔ Nanometer (m ↔ nm)"
                 "cm" to "in" -> "Zentimeter ↔ Zoll (cm ↔ in)"
                 "km" to "mi" -> "Kilometer ↔ Meilen (km ↔ mi)"
                 "kg" to "lb" -> "Kilogramm ↔ Pfund (kg ↔ lb)"
+                "kg" to "t" -> "Kilogramm ↔ Tonnen (kg ↔ t)"
                 "°C" to "°F" -> "Celsius ↔ Fahrenheit (°C ↔ °F)"
+                "°C" to "K" -> "Celsius ↔ Kelvin (°C ↔ K)"
+                "°F" to "K" -> "Fahrenheit ↔ Kelvin (°F ↔ K)"
                 "l" to "gal" -> "Liter ↔ Gallonen (l ↔ gal)"
                 "B" to "KB" -> "Byte ↔ Kilobyte (B ↔ KB)"
                 "KB" to "MB" -> "Kilobyte ↔ Megabyte (KB ↔ MB)"
@@ -492,9 +530,9 @@ class ExampleUnitTest {
                 else -> "${pair.unitFrom} ↔ ${pair.unitTo}"
             }
             val keywords = when (pair.category) {
-                UnitCategory.LENGTH -> listOf("länge", "meter", "fuß", "zentimeter", "zoll", "kilometer", "meilen")
-                UnitCategory.MASS -> listOf("masse", "gewicht", "kilogramm", "pfund")
-                UnitCategory.TEMPERATURE -> listOf("temperatur", "celsius", "fahrenheit")
+                UnitCategory.LENGTH -> listOf("länge", "meter", "fuß", "zentimeter", "millimeter", "nanometer", "zoll", "kilometer", "meilen")
+                UnitCategory.MASS -> listOf("masse", "gewicht", "kilogramm", "pfund", "tonne")
+                UnitCategory.TEMPERATURE -> listOf("temperatur", "celsius", "fahrenheit", "kelvin")
                 UnitCategory.VOLUME -> listOf("volumen", "liter", "gallonen")
                 UnitCategory.DATA -> listOf("daten", "speicher", "byte", "gigabyte")
                 UnitCategory.TIME -> listOf("zeit", "sekunden", "minuten", "stunden")
@@ -513,9 +551,12 @@ class ExampleUnitTest {
 
         // "Meter" matches all meter-based length conversions
         val meterResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Meter", localizedGermanPairs)
-        assertEquals(listOf("m", "cm", "km"), meterResults.map { it.unitFrom })
+        assertEquals(
+            listOf("m" to "ft", "m" to "cm", "m" to "mm", "m" to "nm", "cm" to "in", "km" to "mi"),
+            meterResults.map { it.unitFrom to it.unitTo }
+        )
 
-        // "m" puts exact symbol match "m ↔ ft" first
+        // "m" puts exact symbol match "m ↔ ..." first
         val mResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("m", localizedGermanPairs)
         assertTrue(mResults.isNotEmpty())
         assertEquals("m", mResults.first().unitFrom)
@@ -524,9 +565,17 @@ class ExampleUnitTest {
         val gbResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("GB", localizedGermanPairs)
         assertEquals(listOf("MB" to "GB", "GB" to "TB"), gbResults.map { it.unitFrom to it.unitTo })
 
-        // "Gewicht" matches only Mass (kg↔lb) in German
+        // "Gewicht" matches Mass pairs (kg↔lb, kg↔t) in German
         val weightResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Gewicht", localizedGermanPairs)
-        assertEquals(listOf("kg" to "lb"), weightResults.map { it.unitFrom to it.unitTo })
+        assertEquals(listOf("kg" to "lb", "kg" to "t"), weightResults.map { it.unitFrom to it.unitTo })
+
+        // "Tonne" matches kg↔t
+        val tonResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Tonne", localizedGermanPairs)
+        assertTrue(tonResults.any { it.unitFrom == "kg" && it.unitTo == "t" })
+
+        // "Kelvin" prioritizes °C↔K and °F↔K
+        val kelvinPairResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Kelvin", localizedGermanPairs)
+        assertEquals(listOf("°C" to "K", "°F" to "K"), kelvinPairResults.take(2).map { it.unitFrom to it.unitTo })
 
         // Empty search returns empty list (dialog switches back to active category view)
         assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("   ", localizedGermanPairs).isEmpty())
@@ -590,13 +639,17 @@ class ExampleUnitTest {
                 "meter" -> "Meter"
                 "feet" -> "Fuß"
                 "centimeter" -> "Zentimeter"
+                "millimeter" -> "Millimeter"
+                "nanometer" -> "Nanometer"
                 "inch" -> "Zoll"
                 "kilometer" -> "Kilometer"
                 "mile" -> "Meilen"
                 "kilogram" -> "Kilogramm"
                 "pound" -> "Pfund"
+                "ton" -> "Tonne"
                 "celsius" -> "Celsius"
                 "fahrenheit" -> "Fahrenheit"
+                "kelvin" -> "Kelvin"
                 "liter" -> "Liter"
                 "gallon" -> "Gallonen"
                 "byte" -> "Byte"
@@ -634,10 +687,19 @@ class ExampleUnitTest {
         assertTrue(mResults.isNotEmpty())
         assertEquals("Meter", mResults.first().localizedName)
 
-        // 4. Spanish localization test ("Pulgadas")
+        // 3b. New Length & Mass units in German suggestions (cm, mm, nm, t)
+        assertEquals("Zentimeter", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Zentimeter", germanSuggestions).first().localizedName)
+        assertEquals("Millimeter", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Millimeter", germanSuggestions).first().localizedName)
+        assertEquals("Nanometer", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Nanometer", germanSuggestions).first().localizedName)
+        assertEquals("Tonne", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Tonne", germanSuggestions).first().localizedName)
+        assertEquals("Kelvin", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Kelvin", germanSuggestions).first().localizedName)
+        assertEquals(UnitCategory.TEMPERATURE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("kel", germanSuggestions).first().item.category)
+
+        // 4. Spanish localization test ("Pulgadas", "Tonelada")
         val spanishSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
             val localizedName = when (item.id) {
                 "inch" -> "Pulgadas"
+                "ton" -> "Tonelada"
                 "gigabyte" -> "Gigabyte"
                 else -> item.id
             }
@@ -651,6 +713,7 @@ class ExampleUnitTest {
         assertEquals(1, pulgResults.size)
         assertEquals("Pulgadas", pulgResults.first().localizedName)
         assertEquals(UnitCategory.LENGTH, pulgResults.first().item.category)
+        assertEquals("Tonelada", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Tonelada", spanishSuggestions).first().localizedName)
 
         // 5. French localization test ("Octet")
         val frenchSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
@@ -670,7 +733,7 @@ class ExampleUnitTest {
         assertTrue(octResults.any { it.localizedName == "Octet" })
         assertTrue(octResults.any { it.localizedName == "Gigaoctet" })
 
-        // 6. Electrical units & categories across languages (German, Russian, Spanish, Klingon)
+        // 6. Electrical & Mass units across languages (German, English, Russian, Spanish)
         val multiLangElectricalSuggestions = listOf(
             com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
                 item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "volt" },
@@ -689,12 +752,27 @@ class ExampleUnitTest {
                 localizedName = "Milliamperestunden",
                 symbol = "mAh",
                 localizedKeywords = listOf("mah", "ladung", "akku")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "ton" },
+                localizedName = "Тонна",
+                symbol = "t",
+                localizedKeywords = listOf("тонна", "т", "metric ton", "tonne")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "kelvin" },
+                localizedName = "Кельвин",
+                symbol = "K",
+                localizedKeywords = listOf("кельвин", "kelvin", "температура")
             )
         )
         assertEquals(UnitCategory.VOLTAGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Напряжение", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.VOLTAGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("tension", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.CURRENT, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("uA", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.CHARGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("mAh", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.MASS, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Metric Ton", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.MASS, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Тонна", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.TEMPERATURE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Кельвин", multiLangElectricalSuggestions).first().item.category)
     }
 
     @Test

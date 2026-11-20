@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">メートル ↔ フィート (m ↔ ft)</string>
+    <string name="unit_m_cm">メートル ↔ センチメートル (m ↔ cm)</string>
+    <string name="unit_m_mm">メートル ↔ ミリメートル (m ↔ mm)</string>
+    <string name="unit_m_nm">メートル ↔ ナノメートル (m ↔ nm)</string>
     <string name="unit_cm_in">センチ ↔ インチ (cm ↔ in)</string>
     <string name="unit_km_mi">キロメートル ↔ マイル (km ↔ mi)</string>
     <string name="unit_kg_lb">キログラム ↔ ポンド (kg ↔ lb)</string>
+    <string name="unit_kg_t">キログラム ↔ トン (kg ↔ t)</string>
     <string name="unit_c_f">摂氏 ↔ 華氏 (°C ↔ °F)</string>
+    <string name="unit_c_k">摂氏 ↔ ケルビン (°C ↔ K)</string>
+    <string name="unit_f_k">華氏 ↔ ケルビン (°F ↔ K)</string>
     <string name="unit_l_gal">リットル ↔ ガロン (l ↔ gal)</string>
     <string name="unit_b_kb">バイト ↔ キロバイト (B ↔ KB)</string>
     <string name="unit_kb_mb">キロバイト ↔ メガバイト (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">メートル</string>
     <string name="unit_name_feet">フィート</string>
     <string name="unit_name_centimeter">センチメートル</string>
+    <string name="unit_name_millimeter">ミリメートル</string>
+    <string name="unit_name_nanometer">ナノメートル</string>
     <string name="unit_name_inch">インチ</string>
     <string name="unit_name_kilometer">キロメートル</string>
     <string name="unit_name_mile">マイル</string>
     <string name="unit_name_kilogram">キログラム</string>
     <string name="unit_name_pound">ポンド</string>
+    <string name="unit_name_ton">トン</string>
     <string name="unit_name_celsius">摂氏</string>
     <string name="unit_name_fahrenheit">華氏</string>
+    <string name="unit_name_kelvin">ケルビン</string>
     <string name="unit_name_liter">リットル</string>
     <string name="unit_name_gallon">ガロン</string>
     <string name="unit_name_byte">バイト</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">ラジアン (RAD)</string>
     <string name="angle_rad_desc">円周 = 2π</string>
     <string name="units_supported_systems">対応する変換単位:</string>
-    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体積 (l ↔ gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)</string>
+    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体積 (l ↔ gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">画面サイズとスケーリング</string>
@@ -327,13 +337,17 @@
     <string name="unit_keywords_meter">メートル,m,長さ,距離,メートル法</string>
     <string name="unit_keywords_feet">フィート,フット,ft,ヤードポンド,長さ</string>
     <string name="unit_keywords_centimeter">センチメートル,センチ,cm,長さ,メートル法</string>
+    <string name="unit_keywords_millimeter">ミリメートル,ミリ,mm,長さ,メートル法</string>
+    <string name="unit_keywords_nanometer">ナノメートル,ナノ,nm,長さ,メートル法</string>
     <string name="unit_keywords_inch">インチ,in,ヤードポンド,長さ</string>
     <string name="unit_keywords_kilometer">キロメートル,キロ,km,長さ,距離</string>
     <string name="unit_keywords_mile">マイル,mi,ヤードポンド,距離</string>
     <string name="unit_keywords_kilogram">キログラム,キロ,kg,質量,重さ</string>
     <string name="unit_keywords_pound">ポンド,lb,lbs,質量,重さ</string>
+    <string name="unit_keywords_ton">トン,t,メートルトン,質量,重さ</string>
     <string name="unit_keywords_celsius">摂氏,セルシウス,°c,c,温度,メートル法</string>
     <string name="unit_keywords_fahrenheit">華氏,ファーレンハイト,°f,f,温度</string>
+    <string name="unit_keywords_kelvin">ケルビン,kelvin,k,温度,絶対温度,絶対零度</string>
     <string name="unit_keywords_liter">リットル,l,体積,容量</string>
     <string name="unit_keywords_gallon">ガロン,gal,体積,容量</string>
     <string name="unit_keywords_byte">バイト,b,データ,容量,ストレージ</string>

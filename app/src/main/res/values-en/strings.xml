@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">Meters ↔ Feet (m ↔ ft)</string>
+    <string name="unit_m_cm">Meters ↔ Centimeters (m ↔ cm)</string>
+    <string name="unit_m_mm">Meters ↔ Millimeters (m ↔ mm)</string>
+    <string name="unit_m_nm">Meters ↔ Nanometers (m ↔ nm)</string>
     <string name="unit_cm_in">Centimeters ↔ Inches (cm ↔ in)</string>
     <string name="unit_km_mi">Kilometers ↔ Miles (km ↔ mi)</string>
     <string name="unit_kg_lb">Kilograms ↔ Pounds (kg ↔ lb)</string>
+    <string name="unit_kg_t">Kilograms ↔ Metric Tons (kg ↔ t)</string>
     <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
+    <string name="unit_c_k">Celsius ↔ Kelvin (°C ↔ K)</string>
+    <string name="unit_f_k">Fahrenheit ↔ Kelvin (°F ↔ K)</string>
     <string name="unit_l_gal">Liters ↔ Gallons (l ↔ gal)</string>
     <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
     <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">Meter</string>
     <string name="unit_name_feet">Feet</string>
     <string name="unit_name_centimeter">Centimeter</string>
+    <string name="unit_name_millimeter">Millimeter</string>
+    <string name="unit_name_nanometer">Nanometer</string>
     <string name="unit_name_inch">Inch</string>
     <string name="unit_name_kilometer">Kilometer</string>
     <string name="unit_name_mile">Miles</string>
     <string name="unit_name_kilogram">Kilogram</string>
     <string name="unit_name_pound">Pound</string>
+    <string name="unit_name_ton">Metric Ton</string>
     <string name="unit_name_celsius">Celsius</string>
     <string name="unit_name_fahrenheit">Fahrenheit</string>
+    <string name="unit_name_kelvin">Kelvin</string>
     <string name="unit_name_liter">Liter</string>
     <string name="unit_name_gallon">Gallon</string>
     <string name="unit_name_byte">Byte</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">Radian (RAD)</string>
     <string name="angle_rad_desc">Full circle = 2π</string>
     <string name="units_supported_systems">Supported conversion systems:</string>
-    <string name="units_systems_detail">• Metric ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperature (°C ↔ °F)\n• Volume (l ↔ gal)\n• Data Storage (B, KB, MB, GB, TB)\n• Time (ms, s, min, h, d)\n• Voltage (mV, V, kV)\n• Current (µA, mA, A)\n• Power (mW, W, kW, MW)\n• Charge (mAh, Ah)</string>
+    <string name="units_systems_detail">• Metric ↔ US/Imperial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Temperature (°C, °F, K)\n• Volume (l ↔ gal)\n• Data Storage (B, KB, MB, GB, TB)\n• Time (ms, s, min, h, d)\n• Voltage (mV, V, kV)\n• Current (µA, mA, A)\n• Power (mW, W, kW, MW)\n• Charge (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Screen Size &amp; Scaling</string>
@@ -327,13 +337,17 @@
     <string name="unit_keywords_meter">meter,meters,metre,metres,m,length,distance,metric</string>
     <string name="unit_keywords_feet">feet,foot,ft,imperial,length</string>
     <string name="unit_keywords_centimeter">centimeter,centimeters,centimetre,cm,length,metric</string>
+    <string name="unit_keywords_millimeter">millimeter,millimeters,millimetre,mm,length,metric</string>
+    <string name="unit_keywords_nanometer">nanometer,nanometers,nanometre,nm,length,metric,nano</string>
     <string name="unit_keywords_inch">inch,inches,in,imperial,length</string>
     <string name="unit_keywords_kilometer">kilometer,kilometers,kilometre,km,length,distance</string>
     <string name="unit_keywords_mile">mile,miles,mi,imperial,distance</string>
     <string name="unit_keywords_kilogram">kilogram,kilograms,kilo,kg,mass,weight</string>
     <string name="unit_keywords_pound">pound,pounds,lb,lbs,mass,weight</string>
+    <string name="unit_keywords_ton">metric ton,metric tons,tonne,tonnes,ton,tons,t,mass,weight</string>
     <string name="unit_keywords_celsius">celsius,centigrade,°c,c,degrees,temperature,metric</string>
     <string name="unit_keywords_fahrenheit">fahrenheit,°f,f,degrees,temperature,imperial</string>
+    <string name="unit_keywords_kelvin">kelvin,k,temperature,absolute,zero,thermodynamic,si</string>
     <string name="unit_keywords_liter">liter,liters,litre,litres,l,volume,capacity</string>
     <string name="unit_keywords_gallon">gallon,gallons,gal,volume,capacity</string>
     <string name="unit_keywords_byte">byte,bytes,b,data,storage,memory</string>

@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">Meter ↔ Fuß (m ↔ ft)</string>
+    <string name="unit_m_cm">Meter ↔ Centimeter (m ↔ cm)</string>
+    <string name="unit_m_mm">Meter ↔ Millimeter (m ↔ mm)</string>
+    <string name="unit_m_nm">Meter ↔ Nanometer (m ↔ nm)</string>
     <string name="unit_cm_in">Centimeter ↔ Zoll (cm ↔ in)</string>
     <string name="unit_km_mi">Kilometer ↔ Meilen (km ↔ mi)</string>
     <string name="unit_kg_lb">Kilogramm ↔ Pfund (kg ↔ lb)</string>
+    <string name="unit_kg_t">Kilogramm ↔ Tonne (kg ↔ t)</string>
     <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
+    <string name="unit_c_k">Celsius ↔ Kelvin (°C ↔ K)</string>
+    <string name="unit_f_k">Fahrenheit ↔ Kelvin (°F ↔ K)</string>
     <string name="unit_l_gal">Liter ↔ Gallonen (l ↔ gal)</string>
     <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
     <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">\'uj</string>
     <string name="unit_name_feet">qam</string>
     <string name="unit_name_centimeter">vI\'</string>
+    <string name="unit_name_millimeter">vI\'Hom</string>
+    <string name="unit_name_nanometer">vI\'Homqu\'</string>
     <string name="unit_name_inch">\'Inche</string>
     <string name="unit_name_kilometer">qelI\'qam</string>
     <string name="unit_name_mile">vatlh qelI\'qam</string>
     <string name="unit_name_kilogram">cheb</string>
     <string name="unit_name_pound">DIS</string>
+    <string name="unit_name_ton">cheb\'a\'</string>
     <string name="unit_name_celsius">Hat (Celsius)</string>
     <string name="unit_name_fahrenheit">Hat (Fahrenheit)</string>
+    <string name="unit_name_kelvin">Hat (Kelvin)</string>
     <string name="unit_name_liter">bal</string>
     <string name="unit_name_gallon">tlha\'</string>
     <string name="unit_name_byte">De\' vI\'</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">RAD (2π)</string>
     <string name="angle_rad_desc">naQ gho = 2π</string>
     <string name="units_supported_systems">patmey:</string>
-    <string name="units_systems_detail">• Metric ↔ US (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• tuj (°C ↔ °F)\n• bal (l ↔ gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)\n• \'ul HoS (mV, V, kV)\n• \'ul He (µA, mA, A)\n• HoS (mW, W, kW, MW)\n• \'ul pol (mAh, Ah)</string>
+    <string name="units_systems_detail">• Metric ↔ US (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• tuj (°C, °F, K)\n• bal (l ↔ gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)\n• \'ul HoS (mV, V, kV)\n• \'ul He (µA, mA, A)\n• HoS (mW, W, kW, MW)\n• \'ul pol (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">jIH tIn</string>
@@ -326,14 +336,18 @@
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">meter,m,\'ab</string>
     <string name="unit_keywords_feet">qelqam,ft,foot,feet</string>
-    <string name="unit_keywords_centimeter">centimeter,cm</string>
+    <string name="unit_keywords_centimeter">vI\',centimeter,zentimeter,cm,\'ab</string>
+    <string name="unit_keywords_millimeter">vI\'Hom,millimeter,mm,\'ab</string>
+    <string name="unit_keywords_nanometer">vI\'Homqu\',nanometer,nm,\'ab</string>
     <string name="unit_keywords_inch">inch,in</string>
     <string name="unit_keywords_kilometer">kilometer,km</string>
     <string name="unit_keywords_mile">mile,mi</string>
     <string name="unit_keywords_kilogram">cheb,kilogram,kg,ngI\'</string>
     <string name="unit_keywords_pound">pound,lb,lbs</string>
+    <string name="unit_keywords_ton">cheb\'a\',tonne,metric ton,ton,t,ngI\'</string>
     <string name="unit_keywords_celsius">celsius,°c,c,hat</string>
     <string name="unit_keywords_fahrenheit">fahrenheit,°f,f,hat</string>
+    <string name="unit_keywords_kelvin">kelvin,k,hat,tuj,bir</string>
     <string name="unit_keywords_liter">liter,l,bal</string>
     <string name="unit_keywords_gallon">gallon,gal,bal</string>
     <string name="unit_keywords_byte">byte,b,de\'</string>

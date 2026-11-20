@@ -52,6 +52,30 @@ object UnitConverter {
         ),
         ConversionPair(
             category = UnitCategory.LENGTH,
+            unitFrom = "m",
+            unitTo = "cm",
+            labelResId = R.string.unit_m_cm,
+            formulaFromTo = { it * 100.0 },
+            formulaToFrom = { it / 100.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.LENGTH,
+            unitFrom = "m",
+            unitTo = "mm",
+            labelResId = R.string.unit_m_mm,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.LENGTH,
+            unitFrom = "m",
+            unitTo = "nm",
+            labelResId = R.string.unit_m_nm,
+            formulaFromTo = { it * 1_000_000_000.0 },
+            formulaToFrom = { it / 1_000_000_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.LENGTH,
             unitFrom = "cm",
             unitTo = "in",
             labelResId = R.string.unit_cm_in,
@@ -75,6 +99,14 @@ object UnitConverter {
             formulaFromTo = { it * 2.2046226218 },
             formulaToFrom = { it / 2.2046226218 }
         ),
+        ConversionPair(
+            category = UnitCategory.MASS,
+            unitFrom = "kg",
+            unitTo = "t",
+            labelResId = R.string.unit_kg_t,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
         // Temperature
         ConversionPair(
             category = UnitCategory.TEMPERATURE,
@@ -83,6 +115,22 @@ object UnitConverter {
             labelResId = R.string.unit_c_f,
             formulaFromTo = { (it * 9.0 / 5.0) + 32.0 },
             formulaToFrom = { (it - 32.0) * 5.0 / 9.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.TEMPERATURE,
+            unitFrom = "°C",
+            unitTo = "K",
+            labelResId = R.string.unit_c_k,
+            formulaFromTo = { it + 273.15 },
+            formulaToFrom = { it - 273.15 }
+        ),
+        ConversionPair(
+            category = UnitCategory.TEMPERATURE,
+            unitFrom = "°F",
+            unitTo = "K",
+            labelResId = R.string.unit_f_k,
+            formulaFromTo = { (it - 32.0) * 5.0 / 9.0 + 273.15 },
+            formulaToFrom = { (it - 273.15) * 9.0 / 5.0 + 32.0 }
         ),
         // Volume
         ConversionPair(

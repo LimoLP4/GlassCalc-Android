@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">मीटर ↔ फीट (m ↔ ft)</string>
+    <string name="unit_m_cm">मीटर ↔ सेंटीमीटर (m ↔ cm)</string>
+    <string name="unit_m_mm">मीटर ↔ मिलीमीटर (m ↔ mm)</string>
+    <string name="unit_m_nm">मीटर ↔ नैनोमीटर (m ↔ nm)</string>
     <string name="unit_cm_in">सेंटीमीटर ↔ इंच (cm ↔ in)</string>
     <string name="unit_km_mi">किलोमीटर ↔ मील (km ↔ mi)</string>
     <string name="unit_kg_lb">किलोग्राम ↔ पाउंड (kg ↔ lb)</string>
+    <string name="unit_kg_t">किलोग्राम ↔ टन (kg ↔ t)</string>
     <string name="unit_c_f">सेल्सियस ↔ फारेनहाइट (°C ↔ °F)</string>
+    <string name="unit_c_k">सेल्सियस ↔ केल्विन (°C ↔ K)</string>
+    <string name="unit_f_k">फारेनहाइट ↔ केल्विन (°F ↔ K)</string>
     <string name="unit_l_gal">लीटर ↔ गैलन (l ↔ gal)</string>
     <string name="unit_b_kb">बाइट ↔ किलोबाइट (B ↔ KB)</string>
     <string name="unit_kb_mb">किलोबाइट ↔ मेगाबाइट (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">मीटर</string>
     <string name="unit_name_feet">फीट</string>
     <string name="unit_name_centimeter">सेंटीमीटर</string>
+    <string name="unit_name_millimeter">मिलीमीटर</string>
+    <string name="unit_name_nanometer">नैनोमीटर</string>
     <string name="unit_name_inch">इंच</string>
     <string name="unit_name_kilometer">किलोमीटर</string>
     <string name="unit_name_mile">मील</string>
     <string name="unit_name_kilogram">किलोग्राम</string>
     <string name="unit_name_pound">पाउंड</string>
+    <string name="unit_name_ton">टन</string>
     <string name="unit_name_celsius">सेल्सियस</string>
     <string name="unit_name_fahrenheit">फारेनहाइट</string>
+    <string name="unit_name_kelvin">केल्विन</string>
     <string name="unit_name_liter">लीटर</string>
     <string name="unit_name_gallon">गैलन</string>
     <string name="unit_name_byte">बाइट</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">रेडियन (RAD)</string>
     <string name="angle_rad_desc">पूर्ण वृत्त = 2π</string>
     <string name="units_supported_systems">समर्थित रूपांतरण प्रणालियाँ:</string>
-    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• तापमान (°C ↔ °F)\n• आयतन (l ↔ gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)</string>
+    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• तापमान (°C, °F, K)\n• आयतन (l ↔ gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
@@ -327,13 +337,17 @@
     <string name="unit_keywords_meter">मीटर,m,लंबाई,दूरी,मीट्रिक</string>
     <string name="unit_keywords_feet">फीट,फुट,ft,इंपीरियल,लंबाई</string>
     <string name="unit_keywords_centimeter">सेंटीमीटर,cm,लंबाई,मीट्रिक</string>
+    <string name="unit_keywords_millimeter">मिलीमीटर,mm,लंबाई,मीट्रिक</string>
+    <string name="unit_keywords_nanometer">नैनोमीटर,nm,लंबाई,मीट्रिक</string>
     <string name="unit_keywords_inch">इंच,in,इंपीरियल,लंबाई</string>
     <string name="unit_keywords_kilometer">किलोमीटर,किमी,km,लंबाई,दूरी</string>
     <string name="unit_keywords_mile">मील,mi,इंपीरियल,दूरी</string>
     <string name="unit_keywords_kilogram">किलोग्राम,किलो,kg,द्रव्यमान,वजन</string>
     <string name="unit_keywords_pound">पाउंड,lb,lbs,द्रव्यमान,वजन</string>
+    <string name="unit_keywords_ton">टन,मीट्रिक टन,t,द्रव्यमान,वजन</string>
     <string name="unit_keywords_celsius">सेल्सियस,°c,c,डिग्री,तापमान</string>
     <string name="unit_keywords_fahrenheit">फ़ारेनहाइट,°f,f,डिग्री,तापमान</string>
+    <string name="unit_keywords_kelvin">केल्विन,kelvin,k,तापमान,परम शून्य</string>
     <string name="unit_keywords_liter">लीटर,l,आयतन,क्षमता</string>
     <string name="unit_keywords_gallon">गैलन,gal,आयतन,क्षमता</string>
     <string name="unit_keywords_byte">बाइट,b,डेटा,स्टोरेज,मेमोरी</string>

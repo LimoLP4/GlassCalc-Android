@@ -90,7 +90,9 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
         // Length
         UnitItem("meter", "m", UnitCategory.LENGTH, R.string.unit_name_meter, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }, R.string.unit_keywords_meter),
         UnitItem("feet", "ft", UnitCategory.LENGTH, R.string.unit_name_feet, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "ft" }, R.string.unit_keywords_feet),
-        UnitItem("centimeter", "cm", UnitCategory.LENGTH, R.string.unit_name_centimeter, UnitConverter.CONVERSIONS.first { it.unitFrom == "cm" && it.unitTo == "in" }, R.string.unit_keywords_centimeter),
+        UnitItem("centimeter", "cm", UnitCategory.LENGTH, R.string.unit_name_centimeter, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "cm" }, R.string.unit_keywords_centimeter),
+        UnitItem("millimeter", "mm", UnitCategory.LENGTH, R.string.unit_name_millimeter, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "mm" }, R.string.unit_keywords_millimeter),
+        UnitItem("nanometer", "nm", UnitCategory.LENGTH, R.string.unit_name_nanometer, UnitConverter.CONVERSIONS.first { it.unitFrom == "m" && it.unitTo == "nm" }, R.string.unit_keywords_nanometer),
         UnitItem("inch", "in", UnitCategory.LENGTH, R.string.unit_name_inch, UnitConverter.CONVERSIONS.first { it.unitFrom == "cm" && it.unitTo == "in" }, R.string.unit_keywords_inch),
         UnitItem("kilometer", "km", UnitCategory.LENGTH, R.string.unit_name_kilometer, UnitConverter.CONVERSIONS.first { it.unitFrom == "km" && it.unitTo == "mi" }, R.string.unit_keywords_kilometer),
         UnitItem("mile", "mi", UnitCategory.LENGTH, R.string.unit_name_mile, UnitConverter.CONVERSIONS.first { it.unitFrom == "km" && it.unitTo == "mi" }, R.string.unit_keywords_mile),
@@ -98,10 +100,12 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
         // Mass
         UnitItem("kilogram", "kg", UnitCategory.MASS, R.string.unit_name_kilogram, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "lb" }, R.string.unit_keywords_kilogram),
         UnitItem("pound", "lb", UnitCategory.MASS, R.string.unit_name_pound, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "lb" }, R.string.unit_keywords_pound),
+        UnitItem("ton", "t", UnitCategory.MASS, R.string.unit_name_ton, UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "t" }, R.string.unit_keywords_ton),
 
         // Temperature
-        UnitItem("celsius", "°C", UnitCategory.TEMPERATURE, R.string.unit_name_celsius, UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }, R.string.unit_keywords_celsius),
-        UnitItem("fahrenheit", "°F", UnitCategory.TEMPERATURE, R.string.unit_name_fahrenheit, UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TEMPERATURE }, R.string.unit_keywords_fahrenheit),
+        UnitItem("celsius", "°C", UnitCategory.TEMPERATURE, R.string.unit_name_celsius, UnitConverter.CONVERSIONS.first { it.unitFrom == "°C" && it.unitTo == "°F" }, R.string.unit_keywords_celsius),
+        UnitItem("fahrenheit", "°F", UnitCategory.TEMPERATURE, R.string.unit_name_fahrenheit, UnitConverter.CONVERSIONS.first { it.unitFrom == "°C" && it.unitTo == "°F" }, R.string.unit_keywords_fahrenheit),
+        UnitItem("kelvin", "K", UnitCategory.TEMPERATURE, R.string.unit_name_kelvin, UnitConverter.CONVERSIONS.first { it.unitFrom == "°C" && it.unitTo == "K" }, R.string.unit_keywords_kelvin),
 
         // Volume
         UnitItem("liter", "l", UnitCategory.VOLUME, R.string.unit_name_liter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }, R.string.unit_keywords_liter),

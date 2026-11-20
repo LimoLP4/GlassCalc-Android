@@ -64,10 +64,16 @@
 
     <!-- Unit Pairs -->
     <string name="unit_m_ft">Meter ↔ Fuß (m ↔ ft)</string>
+    <string name="unit_m_cm">Meter ↔ Zentimeter (m ↔ cm)</string>
+    <string name="unit_m_mm">Meter ↔ Millimeter (m ↔ mm)</string>
+    <string name="unit_m_nm">Meter ↔ Nanometer (m ↔ nm)</string>
     <string name="unit_cm_in">Zentimeter ↔ Zoll (cm ↔ in)</string>
     <string name="unit_km_mi">Kilometer ↔ Meilen (km ↔ mi)</string>
     <string name="unit_kg_lb">Kilogramm ↔ Pfund (kg ↔ lb)</string>
+    <string name="unit_kg_t">Kilogramm ↔ Tonnen (kg ↔ t)</string>
     <string name="unit_c_f">Celsius ↔ Fahrenheit (°C ↔ °F)</string>
+    <string name="unit_c_k">Celsius ↔ Kelvin (°C ↔ K)</string>
+    <string name="unit_f_k">Fahrenheit ↔ Kelvin (°F ↔ K)</string>
     <string name="unit_l_gal">Liter ↔ Gallonen (l ↔ gal)</string>
     <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
     <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
@@ -93,13 +99,17 @@
     <string name="unit_name_meter">Meter</string>
     <string name="unit_name_feet">Fuß</string>
     <string name="unit_name_centimeter">Zentimeter</string>
+    <string name="unit_name_millimeter">Millimeter</string>
+    <string name="unit_name_nanometer">Nanometer</string>
     <string name="unit_name_inch">Zoll</string>
     <string name="unit_name_kilometer">Kilometer</string>
     <string name="unit_name_mile">Meilen</string>
     <string name="unit_name_kilogram">Kilogramm</string>
     <string name="unit_name_pound">Pfund</string>
+    <string name="unit_name_ton">Tonne</string>
     <string name="unit_name_celsius">Celsius</string>
     <string name="unit_name_fahrenheit">Fahrenheit</string>
+    <string name="unit_name_kelvin">Kelvin</string>
     <string name="unit_name_liter">Liter</string>
     <string name="unit_name_gallon">Gallonen</string>
     <string name="unit_name_byte">Byte</string>
@@ -183,7 +193,7 @@
     <string name="angle_rad_label">Bogenmaß (RAD)</string>
     <string name="angle_rad_desc">Vollkreis = 2π</string>
     <string name="units_supported_systems">Unterstützte Umrechnungssysteme:</string>
-    <string name="units_systems_detail">• Metrisch ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperatur (°C ↔ °F)\n• Volumen (l ↔ gal)\n• Datenmengen (B, KB, MB, GB, TB)\n• Zeit (ms, s, min, h, d)\n• Spannung (mV, V, kV)\n• Stromstärke (µA, mA, A)\n• Leistung (mW, W, kW, MW)\n• Ladung (mAh, Ah)</string>
+    <string name="units_systems_detail">• Metrisch ↔ US/Imperial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Temperatur (°C, °F, K)\n• Volumen (l ↔ gal)\n• Datenmengen (B, KB, MB, GB, TB)\n• Zeit (ms, s, min, h, d)\n• Spannung (mV, V, kV)\n• Stromstärke (µA, mA, A)\n• Leistung (mW, W, kW, MW)\n• Ladung (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Bildschirmgröße &amp; Skalierung</string>
@@ -327,13 +337,17 @@
     <string name="unit_keywords_meter">meter,m,länge,strecke,entfernung,metrisch</string>
     <string name="unit_keywords_feet">fuß,fuss,ft,foot,feet,imperial,länge</string>
     <string name="unit_keywords_centimeter">zentimeter,cm,länge,metrisch</string>
+    <string name="unit_keywords_millimeter">millimeter,mm,länge,metrisch,tausendstel</string>
+    <string name="unit_keywords_nanometer">nanometer,nm,länge,metrisch,nano</string>
     <string name="unit_keywords_inch">zoll,in,inch,inches,imperial,länge</string>
     <string name="unit_keywords_kilometer">kilometer,km,länge,entfernung,strecke</string>
     <string name="unit_keywords_mile">meilen,meile,mi,mile,miles,imperial,entfernung</string>
     <string name="unit_keywords_kilogram">kilogramm,kilo,kg,masse,gewicht</string>
     <string name="unit_keywords_pound">pfund,lb,lbs,pound,pounds,masse,gewicht</string>
+    <string name="unit_keywords_ton">tonne,tonnen,t,metrische tonne,masse,gewicht</string>
     <string name="unit_keywords_celsius">celsius,°c,c,grad,temperatur,metrisch</string>
     <string name="unit_keywords_fahrenheit">fahrenheit,°f,f,grad,temperatur,imperial</string>
+    <string name="unit_keywords_kelvin">kelvin,k,temperatur,absolut,nullpunkt,thermodynamisch,si</string>
     <string name="unit_keywords_liter">liter,l,volumen,flüssigkeit,rauminhalt</string>
     <string name="unit_keywords_gallon">gallonen,gallone,gal,gallon,volumen,flüssigkeit</string>
     <string name="unit_keywords_byte">byte,bytes,b,daten,datenmenge,speicher</string>
