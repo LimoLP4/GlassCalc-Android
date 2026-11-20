@@ -75,6 +75,23 @@
     <string name="unit_c_k">सेल्सियस ↔ केल्विन (°C ↔ K)</string>
     <string name="unit_f_k">फारेनहाइट ↔ केल्विन (°F ↔ K)</string>
     <string name="unit_l_gal">लीटर ↔ गैलन (l ↔ gal)</string>
+    <string name="unit_l_ml">लीटर ↔ मिलीलीटर (l ↔ ml)</string>
+    <string name="unit_l_cl">लीटर ↔ सेंटीलीटर (l ↔ cl)</string>
+    <string name="unit_l_dl">लीटर ↔ डेसीलीटर (l ↔ dl)</string>
+    <string name="unit_m3_l">घन मीटर ↔ लीटर (m³ ↔ l)</string>
+    <string name="unit_dl_ml">डेसीलीटर ↔ मिलीलीटर (dl ↔ ml)</string>
+    <string name="unit_cl_ml">सेंटीलीटर ↔ मिलीलीटर (cl ↔ ml)</string>
+    <string name="unit_l_qt">लीटर ↔ क्वार्ट (l ↔ qt)</string>
+    <string name="unit_l_pt">लीटर ↔ पिंट (l ↔ pt)</string>
+    <string name="unit_ml_cup">मिलीलीटर ↔ कप (ml ↔ cup)</string>
+    <string name="unit_ml_floz">मिलीलीटर ↔ फ्लूइड औंस (ml ↔ fl oz)</string>
+    <string name="unit_ml_tbsp">मिलीलीटर ↔ बड़ा चम्मच (ml ↔ tbsp)</string>
+    <string name="unit_ml_tsp">मिलीलीटर ↔ छोटा चम्मच (ml ↔ tsp)</string>
+    <string name="unit_gal_qt">गैलन ↔ क्वार्ट (gal ↔ qt)</string>
+    <string name="unit_qt_pt">क्वार्ट ↔ पिंट (qt ↔ pt)</string>
+    <string name="unit_pt_cup">पिंट ↔ कप (pt ↔ cup)</string>
+    <string name="unit_cup_floz">कप ↔ फ्लूइड औंस (cup ↔ fl oz)</string>
+    <string name="unit_tbsp_tsp">बड़ा चम्मच ↔ छोटा चम्मच (tbsp ↔ tsp)</string>
     <string name="unit_b_kb">बाइट ↔ किलोबाइट (B ↔ KB)</string>
     <string name="unit_kb_mb">किलोबाइट ↔ मेगाबाइट (KB ↔ MB)</string>
     <string name="unit_mb_gb">मेगाबाइट ↔ गीगाबाइट (MB ↔ GB)</string>
@@ -111,6 +128,16 @@
     <string name="unit_name_fahrenheit">फारेनहाइट</string>
     <string name="unit_name_kelvin">केल्विन</string>
     <string name="unit_name_liter">लीटर</string>
+    <string name="unit_name_milliliter">मिलीलीटर</string>
+    <string name="unit_name_centiliter">सेंटीलीटर</string>
+    <string name="unit_name_deciliter">डेसीलीटर</string>
+    <string name="unit_name_cubic_meter">घन मीटर</string>
+    <string name="unit_name_teaspoon">छोटा चम्मच (tsp)</string>
+    <string name="unit_name_tablespoon">बड़ा चम्मच (tbsp)</string>
+    <string name="unit_name_fluid_ounce">फ्लूइड औंस</string>
+    <string name="unit_name_cup">कप</string>
+    <string name="unit_name_pint">पिंट</string>
+    <string name="unit_name_quart">क्वार्ट</string>
     <string name="unit_name_gallon">गैलन</string>
     <string name="unit_name_byte">बाइट</string>
     <string name="unit_name_kilobyte">किलोबाइट</string>
@@ -193,7 +220,7 @@
     <string name="angle_rad_label">रेडियन (RAD)</string>
     <string name="angle_rad_desc">पूर्ण वृत्त = 2π</string>
     <string name="units_supported_systems">समर्थित रूपांतरण प्रणालियाँ:</string>
-    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• तापमान (°C, °F, K)\n• आयतन (l ↔ gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)</string>
+    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• तापमान (°C, °F, K)\n• आयतन (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
@@ -349,6 +376,16 @@
     <string name="unit_keywords_fahrenheit">फ़ारेनहाइट,°f,f,डिग्री,तापमान</string>
     <string name="unit_keywords_kelvin">केल्विन,kelvin,k,तापमान,परम शून्य</string>
     <string name="unit_keywords_liter">लीटर,l,आयतन,क्षमता</string>
+    <string name="unit_keywords_milliliter">मिलीलीटर,milliliter,ml,आयतन,क्षमता</string>
+    <string name="unit_keywords_centiliter">सेंटीलीटर,centiliter,cl,आयतन,क्षमता</string>
+    <string name="unit_keywords_deciliter">डेसीलीटर,deciliter,dl,आयतन,क्षमता</string>
+    <string name="unit_keywords_cubic_meter">घन मीटर,क्यूबिक मीटर,m3,m³,आयतन,क्षमता</string>
+    <string name="unit_keywords_teaspoon">छोटा चम्मच,चम्मच,टीस्पून,teaspoon,tsp,आयतन</string>
+    <string name="unit_keywords_tablespoon">बड़ा चम्मच,टेबलस्पून,tablespoon,tbsp,आयतन</string>
+    <string name="unit_keywords_fluid_ounce">फ्लूइड औंस,तरल औंस,fluid ounce,fl oz,oz,आयतन</string>
+    <string name="unit_keywords_cup">कप,cup,आयतन</string>
+    <string name="unit_keywords_pint">पिंट,pint,pt,आयतन</string>
+    <string name="unit_keywords_quart">क्वार्ट,quart,qt,आयतन</string>
     <string name="unit_keywords_gallon">गैलन,gal,आयतन,क्षमता</string>
     <string name="unit_keywords_byte">बाइट,b,डेटा,स्टोरेज,मेमोरी</string>
     <string name="unit_keywords_kilobyte">किलोबाइट,kb,kib,डेटा,स्टोरेज</string>

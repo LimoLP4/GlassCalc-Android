@@ -75,6 +75,23 @@
     <string name="unit_c_k">Celsius ↔ Kelvin (°C ↔ K)</string>
     <string name="unit_f_k">Fahrenheit ↔ Kelvin (°F ↔ K)</string>
     <string name="unit_l_gal">Liter ↔ Gallonen (l ↔ gal)</string>
+    <string name="unit_l_ml">Liter ↔ Milliliter (l ↔ ml)</string>
+    <string name="unit_l_cl">Liter ↔ Centiliter (l ↔ cl)</string>
+    <string name="unit_l_dl">Liter ↔ Deciliter (l ↔ dl)</string>
+    <string name="unit_m3_l">Kubikmeter ↔ Liter (m³ ↔ l)</string>
+    <string name="unit_dl_ml">Deciliter ↔ Milliliter (dl ↔ ml)</string>
+    <string name="unit_cl_ml">Centiliter ↔ Milliliter (cl ↔ ml)</string>
+    <string name="unit_l_qt">Liter ↔ Quart (l ↔ qt)</string>
+    <string name="unit_l_pt">Liter ↔ Pint (l ↔ pt)</string>
+    <string name="unit_ml_cup">Milliliter ↔ Cup (ml ↔ cup)</string>
+    <string name="unit_ml_floz">Milliliter ↔ Fluid Ounce (ml ↔ fl oz)</string>
+    <string name="unit_ml_tbsp">Milliliter ↔ Tablespoon (ml ↔ tbsp)</string>
+    <string name="unit_ml_tsp">Milliliter ↔ Teaspoon (ml ↔ tsp)</string>
+    <string name="unit_gal_qt">Gallonen ↔ Quart (gal ↔ qt)</string>
+    <string name="unit_qt_pt">Quart ↔ Pint (qt ↔ pt)</string>
+    <string name="unit_pt_cup">Pint ↔ Cup (pt ↔ cup)</string>
+    <string name="unit_cup_floz">Cup ↔ Fluid Ounce (cup ↔ fl oz)</string>
+    <string name="unit_tbsp_tsp">Tablespoon ↔ Teaspoon (tbsp ↔ tsp)</string>
     <string name="unit_b_kb">Byte ↔ Kilobyte (B ↔ KB)</string>
     <string name="unit_kb_mb">Kilobyte ↔ Megabyte (KB ↔ MB)</string>
     <string name="unit_mb_gb">Megabyte ↔ Gigabyte (MB ↔ GB)</string>
@@ -111,6 +128,16 @@
     <string name="unit_name_fahrenheit">Hat (Fahrenheit)</string>
     <string name="unit_name_kelvin">Hat (Kelvin)</string>
     <string name="unit_name_liter">bal</string>
+    <string name="unit_name_milliliter">balHom (ml)</string>
+    <string name="unit_name_centiliter">bal vI\' (cl)</string>
+    <string name="unit_name_deciliter">bal maH (dl)</string>
+    <string name="unit_name_cubic_meter">bal\'a\' (m³)</string>
+    <string name="unit_name_teaspoon">baghneQHom (tsp)</string>
+    <string name="unit_name_tablespoon">baghneQ (tbsp)</string>
+    <string name="unit_name_fluid_ounce">tIq bIQ (fl oz)</string>
+    <string name="unit_name_cup">HIvje\' (Cup)</string>
+    <string name="unit_name_pint">Pint (pt)</string>
+    <string name="unit_name_quart">Quart (qt)</string>
     <string name="unit_name_gallon">tlha\'</string>
     <string name="unit_name_byte">De\' vI\'</string>
     <string name="unit_name_kilobyte">De\' kilo</string>
@@ -193,7 +220,7 @@
     <string name="angle_rad_label">RAD (2π)</string>
     <string name="angle_rad_desc">naQ gho = 2π</string>
     <string name="units_supported_systems">patmey:</string>
-    <string name="units_systems_detail">• Metric ↔ US (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• tuj (°C, °F, K)\n• bal (l ↔ gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)\n• \'ul HoS (mV, V, kV)\n• \'ul He (µA, mA, A)\n• HoS (mW, W, kW, MW)\n• \'ul pol (mAh, Ah)</string>
+    <string name="units_systems_detail">• Metric ↔ US (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• tuj (°C, °F, K)\n• bal (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)\n• \'ul HoS (mV, V, kV)\n• \'ul He (µA, mA, A)\n• HoS (mW, W, kW, MW)\n• \'ul pol (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">jIH tIn</string>
@@ -349,6 +376,16 @@
     <string name="unit_keywords_fahrenheit">fahrenheit,°f,f,hat</string>
     <string name="unit_keywords_kelvin">kelvin,k,hat,tuj,bir</string>
     <string name="unit_keywords_liter">liter,l,bal</string>
+    <string name="unit_keywords_milliliter">milliliter,ml,balhom,bal</string>
+    <string name="unit_keywords_centiliter">centiliter,cl,bal</string>
+    <string name="unit_keywords_deciliter">deciliter,dl,bal</string>
+    <string name="unit_keywords_cubic_meter">kubikmeter,cubic meter,m3,m³,bal</string>
+    <string name="unit_keywords_teaspoon">teaspoon,tsp,teelöffel,baghneqhom,bal</string>
+    <string name="unit_keywords_tablespoon">tablespoon,tbsp,esslöffel,baghneq,bal</string>
+    <string name="unit_keywords_fluid_ounce">fluid ounce,fl oz,oz,bal</string>
+    <string name="unit_keywords_cup">cup,cups,hivje\',bal</string>
+    <string name="unit_keywords_pint">pint,pt,bal</string>
+    <string name="unit_keywords_quart">quart,qt,bal</string>
     <string name="unit_keywords_gallon">gallon,gal,bal</string>
     <string name="unit_keywords_byte">byte,b,de\'</string>
     <string name="unit_keywords_kilobyte">kilobyte,kb,kib,de\'</string>

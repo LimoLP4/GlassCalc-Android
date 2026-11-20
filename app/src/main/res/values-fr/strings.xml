@@ -75,6 +75,23 @@
     <string name="unit_c_k">Celsius ↔ Kelvin (°C ↔ K)</string>
     <string name="unit_f_k">Fahrenheit ↔ Kelvin (°F ↔ K)</string>
     <string name="unit_l_gal">Litres ↔ Gallons (l ↔ gal)</string>
+    <string name="unit_l_ml">Litres ↔ Millilitres (l ↔ ml)</string>
+    <string name="unit_l_cl">Litres ↔ Centilitres (l ↔ cl)</string>
+    <string name="unit_l_dl">Litres ↔ Décilitres (l ↔ dl)</string>
+    <string name="unit_m3_l">Mètres cubes ↔ Litres (m³ ↔ l)</string>
+    <string name="unit_dl_ml">Décilitres ↔ Millilitres (dl ↔ ml)</string>
+    <string name="unit_cl_ml">Centilitres ↔ Millilitres (cl ↔ ml)</string>
+    <string name="unit_l_qt">Litres ↔ Quarts (l ↔ qt)</string>
+    <string name="unit_l_pt">Litres ↔ Pintes (l ↔ pt)</string>
+    <string name="unit_ml_cup">Millilitres ↔ Tasses (ml ↔ cup)</string>
+    <string name="unit_ml_floz">Millilitres ↔ Onces liquides (ml ↔ fl oz)</string>
+    <string name="unit_ml_tbsp">Millilitres ↔ Cuillères à soupe (ml ↔ tbsp)</string>
+    <string name="unit_ml_tsp">Millilitres ↔ Cuillères à café (ml ↔ tsp)</string>
+    <string name="unit_gal_qt">Gallons ↔ Quarts (gal ↔ qt)</string>
+    <string name="unit_qt_pt">Quarts ↔ Pintes (qt ↔ pt)</string>
+    <string name="unit_pt_cup">Pintes ↔ Tasses (pt ↔ cup)</string>
+    <string name="unit_cup_floz">Tasses ↔ Onces liquides (cup ↔ fl oz)</string>
+    <string name="unit_tbsp_tsp">Cuillères à soupe ↔ Cuillères à café (tbsp ↔ tsp)</string>
     <string name="unit_b_kb">Octet ↔ Kilooctet (B ↔ KB)</string>
     <string name="unit_kb_mb">Kilooctet ↔ Mégaoctet (KB ↔ MB)</string>
     <string name="unit_mb_gb">Mégaoctet ↔ Gigaoctet (MB ↔ GB)</string>
@@ -111,6 +128,16 @@
     <string name="unit_name_fahrenheit">Fahrenheit</string>
     <string name="unit_name_kelvin">Kelvin</string>
     <string name="unit_name_liter">Litre</string>
+    <string name="unit_name_milliliter">Millilitre</string>
+    <string name="unit_name_centiliter">Centilitre</string>
+    <string name="unit_name_deciliter">Décilitre</string>
+    <string name="unit_name_cubic_meter">Mètre cube</string>
+    <string name="unit_name_teaspoon">Cuillère à café</string>
+    <string name="unit_name_tablespoon">Cuillère à soupe</string>
+    <string name="unit_name_fluid_ounce">Once liquide</string>
+    <string name="unit_name_cup">Tasse (Cup)</string>
+    <string name="unit_name_pint">Pinte</string>
+    <string name="unit_name_quart">Quart</string>
     <string name="unit_name_gallon">Gallons</string>
     <string name="unit_name_byte">Octet</string>
     <string name="unit_name_kilobyte">Kilooctet</string>
@@ -193,7 +220,7 @@
     <string name="angle_rad_label">Radians (RAD)</string>
     <string name="angle_rad_desc">Cercle complet = 2π</string>
     <string name="units_supported_systems">Systèmes de conversion pris en charge :</string>
-    <string name="units_systems_detail">• Métrique ↔ US/Impérial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Température (°C, °F, K)\n• Volume (l ↔ gal)\n• Données (B, KB, MB, GB, TB)\n• Temps (ms, s, min, h, d)\n• Tension (mV, V, kV)\n• Courant (µA, mA, A)\n• Puissance (mW, W, kW, MW)\n• Charge (mAh, Ah)</string>
+    <string name="units_systems_detail">• Métrique ↔ US/Impérial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Température (°C, °F, K)\n• Volume (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Données (B, KB, MB, GB, TB)\n• Temps (ms, s, min, h, d)\n• Tension (mV, V, kV)\n• Courant (µA, mA, A)\n• Puissance (mW, W, kW, MW)\n• Charge (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Taille d\'écran &amp; mise à l\'échelle</string>
@@ -349,6 +376,16 @@
     <string name="unit_keywords_fahrenheit">fahrenheit,°f,f,degrés,température</string>
     <string name="unit_keywords_kelvin">kelvin,k,température,absolue,zéro absolu,thermodynamique</string>
     <string name="unit_keywords_liter">litre,litres,l,volume,capacité</string>
+    <string name="unit_keywords_milliliter">millilitre,millilitres,ml,cm3,volume,capacité,métrique</string>
+    <string name="unit_keywords_centiliter">centilitre,centilitres,cl,volume,capacité,métrique</string>
+    <string name="unit_keywords_deciliter">décilitre,décilitres,dl,volume,capacité,métrique</string>
+    <string name="unit_keywords_cubic_meter">mètre cube,mètres cubes,m3,m³,volume,capacité,métrique</string>
+    <string name="unit_keywords_teaspoon">cuillère à café,cuillères à café,tsp,teaspoon,cuisine,volume</string>
+    <string name="unit_keywords_tablespoon">cuillère à soupe,cuillères à soupe,tbsp,tablespoon,cuisine,volume</string>
+    <string name="unit_keywords_fluid_ounce">once liquide,onces liquides,fl oz,oz,fluid ounce,volume</string>
+    <string name="unit_keywords_cup">tasse,tasses,cup,cups,cuisine,volume</string>
+    <string name="unit_keywords_pint">pinte,pintes,pint,pt,volume</string>
+    <string name="unit_keywords_quart">quart,quarts,qt,volume</string>
     <string name="unit_keywords_gallon">gallon,gallons,gal,volume,capacité</string>
     <string name="unit_keywords_byte">octet,octets,byte,bytes,b,o,données,stockage,mémoire</string>
     <string name="unit_keywords_kilobyte">kilooctet,kilooctets,kilobyte,ko,kb,kib,données,stockage</string>

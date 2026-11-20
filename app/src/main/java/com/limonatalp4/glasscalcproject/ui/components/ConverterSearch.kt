@@ -109,6 +109,16 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
 
         // Volume
         UnitItem("liter", "l", UnitCategory.VOLUME, R.string.unit_name_liter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }, R.string.unit_keywords_liter),
+        UnitItem("milliliter", "ml", UnitCategory.VOLUME, R.string.unit_name_milliliter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "ml" }, R.string.unit_keywords_milliliter),
+        UnitItem("centiliter", "cl", UnitCategory.VOLUME, R.string.unit_name_centiliter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "cl" }, R.string.unit_keywords_centiliter),
+        UnitItem("deciliter", "dl", UnitCategory.VOLUME, R.string.unit_name_deciliter, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "dl" }, R.string.unit_keywords_deciliter),
+        UnitItem("cubic_meter", "m³", UnitCategory.VOLUME, R.string.unit_name_cubic_meter, UnitConverter.CONVERSIONS.first { it.unitFrom == "m³" && it.unitTo == "l" }, R.string.unit_keywords_cubic_meter),
+        UnitItem("teaspoon", "tsp", UnitCategory.VOLUME, R.string.unit_name_teaspoon, UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "tsp" }, R.string.unit_keywords_teaspoon),
+        UnitItem("tablespoon", "tbsp", UnitCategory.VOLUME, R.string.unit_name_tablespoon, UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "tbsp" }, R.string.unit_keywords_tablespoon),
+        UnitItem("fluid_ounce", "fl oz", UnitCategory.VOLUME, R.string.unit_name_fluid_ounce, UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "fl oz" }, R.string.unit_keywords_fluid_ounce),
+        UnitItem("cup", "cup", UnitCategory.VOLUME, R.string.unit_name_cup, UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "cup" }, R.string.unit_keywords_cup),
+        UnitItem("pint", "pt", UnitCategory.VOLUME, R.string.unit_name_pint, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "pt" }, R.string.unit_keywords_pint),
+        UnitItem("quart", "qt", UnitCategory.VOLUME, R.string.unit_name_quart, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "qt" }, R.string.unit_keywords_quart),
         UnitItem("gallon", "gal", UnitCategory.VOLUME, R.string.unit_name_gallon, UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }, R.string.unit_keywords_gallon),
 
         // Data

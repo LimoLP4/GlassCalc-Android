@@ -141,6 +141,142 @@ object UnitConverter {
             formulaFromTo = { it * 0.2641720524 },
             formulaToFrom = { it / 0.2641720524 }
         ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "l",
+            unitTo = "ml",
+            labelResId = R.string.unit_l_ml,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "l",
+            unitTo = "cl",
+            labelResId = R.string.unit_l_cl,
+            formulaFromTo = { it * 100.0 },
+            formulaToFrom = { it / 100.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "l",
+            unitTo = "dl",
+            labelResId = R.string.unit_l_dl,
+            formulaFromTo = { it * 10.0 },
+            formulaToFrom = { it / 10.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "m³",
+            unitTo = "l",
+            labelResId = R.string.unit_m3_l,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "dl",
+            unitTo = "ml",
+            labelResId = R.string.unit_dl_ml,
+            formulaFromTo = { it * 100.0 },
+            formulaToFrom = { it / 100.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "cl",
+            unitTo = "ml",
+            labelResId = R.string.unit_cl_ml,
+            formulaFromTo = { it * 10.0 },
+            formulaToFrom = { it / 10.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "l",
+            unitTo = "qt",
+            labelResId = R.string.unit_l_qt,
+            formulaFromTo = { it / 0.946352946 },
+            formulaToFrom = { it * 0.946352946 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "l",
+            unitTo = "pt",
+            labelResId = R.string.unit_l_pt,
+            formulaFromTo = { it / 0.473176473 },
+            formulaToFrom = { it * 0.473176473 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "ml",
+            unitTo = "cup",
+            labelResId = R.string.unit_ml_cup,
+            formulaFromTo = { it / 236.5882365 },
+            formulaToFrom = { it * 236.5882365 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "ml",
+            unitTo = "fl oz",
+            labelResId = R.string.unit_ml_floz,
+            formulaFromTo = { it / 29.5735295625 },
+            formulaToFrom = { it * 29.5735295625 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "ml",
+            unitTo = "tbsp",
+            labelResId = R.string.unit_ml_tbsp,
+            formulaFromTo = { it / 14.78676478125 },
+            formulaToFrom = { it * 14.78676478125 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "ml",
+            unitTo = "tsp",
+            labelResId = R.string.unit_ml_tsp,
+            formulaFromTo = { it / 4.92892159375 },
+            formulaToFrom = { it * 4.92892159375 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "gal",
+            unitTo = "qt",
+            labelResId = R.string.unit_gal_qt,
+            formulaFromTo = { it * 4.0 },
+            formulaToFrom = { it / 4.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "qt",
+            unitTo = "pt",
+            labelResId = R.string.unit_qt_pt,
+            formulaFromTo = { it * 2.0 },
+            formulaToFrom = { it / 2.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "pt",
+            unitTo = "cup",
+            labelResId = R.string.unit_pt_cup,
+            formulaFromTo = { it * 2.0 },
+            formulaToFrom = { it / 2.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "cup",
+            unitTo = "fl oz",
+            labelResId = R.string.unit_cup_floz,
+            formulaFromTo = { it * 8.0 },
+            formulaToFrom = { it / 8.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLUME,
+            unitFrom = "tbsp",
+            unitTo = "tsp",
+            labelResId = R.string.unit_tbsp_tsp,
+            formulaFromTo = { it * 3.0 },
+            formulaToFrom = { it / 3.0 }
+        ),
         // Data (Binary standard: 1024)
         ConversionPair(
             category = UnitCategory.DATA,

@@ -75,6 +75,23 @@
     <string name="unit_c_k">Цельсий ↔ Кельвин (°C ↔ K)</string>
     <string name="unit_f_k">Фаренгейт ↔ Кельвин (°F ↔ K)</string>
     <string name="unit_l_gal">Литры ↔ Галлоны (l ↔ gal)</string>
+    <string name="unit_l_ml">Литры ↔ Миллилитры (l ↔ ml)</string>
+    <string name="unit_l_cl">Литры ↔ Сантилитры (l ↔ cl)</string>
+    <string name="unit_l_dl">Литры ↔ Децилитры (l ↔ dl)</string>
+    <string name="unit_m3_l">Кубометры ↔ Литры (m³ ↔ l)</string>
+    <string name="unit_dl_ml">Децилитры ↔ Миллилитры (dl ↔ ml)</string>
+    <string name="unit_cl_ml">Сантилитры ↔ Миллилитры (cl ↔ ml)</string>
+    <string name="unit_l_qt">Литры ↔ Кварты (l ↔ qt)</string>
+    <string name="unit_l_pt">Литры ↔ Пинты (l ↔ pt)</string>
+    <string name="unit_ml_cup">Миллилитры ↔ Чашки (ml ↔ cup)</string>
+    <string name="unit_ml_floz">Миллилитры ↔ Жидкие унции (ml ↔ fl oz)</string>
+    <string name="unit_ml_tbsp">Миллилитры ↔ Столовые ложки (ml ↔ tbsp)</string>
+    <string name="unit_ml_tsp">Миллилитры ↔ Чайные ложки (ml ↔ tsp)</string>
+    <string name="unit_gal_qt">Галлоны ↔ Кварты (gal ↔ qt)</string>
+    <string name="unit_qt_pt">Кварты ↔ Пинты (qt ↔ pt)</string>
+    <string name="unit_pt_cup">Пинты ↔ Чашки (pt ↔ cup)</string>
+    <string name="unit_cup_floz">Чашки ↔ Жидкие унции (cup ↔ fl oz)</string>
+    <string name="unit_tbsp_tsp">Столовые ложки ↔ Чайные ложки (tbsp ↔ tsp)</string>
     <string name="unit_b_kb">Байт ↔ Килобайт (B ↔ KB)</string>
     <string name="unit_kb_mb">Килобайт ↔ Мегабайт (KB ↔ MB)</string>
     <string name="unit_mb_gb">Мегабайт ↔ Гигабайт (MB ↔ GB)</string>
@@ -111,6 +128,16 @@
     <string name="unit_name_fahrenheit">Фаренгейт</string>
     <string name="unit_name_kelvin">Кельвин</string>
     <string name="unit_name_liter">Литр</string>
+    <string name="unit_name_milliliter">Миллилитр</string>
+    <string name="unit_name_centiliter">Сантилитр</string>
+    <string name="unit_name_deciliter">Децилитр</string>
+    <string name="unit_name_cubic_meter">Кубический метр</string>
+    <string name="unit_name_teaspoon">Чайная ложка</string>
+    <string name="unit_name_tablespoon">Столовая ложка</string>
+    <string name="unit_name_fluid_ounce">Жидкая унция</string>
+    <string name="unit_name_cup">Чашка (Cup)</string>
+    <string name="unit_name_pint">Пинта</string>
+    <string name="unit_name_quart">Кварта</string>
     <string name="unit_name_gallon">Галлон</string>
     <string name="unit_name_byte">Байт</string>
     <string name="unit_name_kilobyte">Килобайт</string>
@@ -193,7 +220,7 @@
     <string name="angle_rad_label">Радианы (RAD)</string>
     <string name="angle_rad_desc">Полный круг = 2π</string>
     <string name="units_supported_systems">Поддерживаемые системы конвертации:</string>
-    <string name="units_systems_detail">• Метрическая ↔ Имперская (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Температура (°C, °F, K)\n• Объем (l ↔ gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)</string>
+    <string name="units_systems_detail">• Метрическая ↔ Имперская (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Температура (°C, °F, K)\n• Объем (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Размер экрана и масштабирование</string>
@@ -349,6 +376,16 @@
     <string name="unit_keywords_fahrenheit">фаренгейт,фаренгейта,°f,f,градусы,температура</string>
     <string name="unit_keywords_kelvin">кельвин,кельвины,kelvin,k,к,температура,абсолютная</string>
     <string name="unit_keywords_liter">литр,литры,л,l,объем,емкость</string>
+    <string name="unit_keywords_milliliter">миллилитр,миллилитры,мл,ml,milliliter,объем</string>
+    <string name="unit_keywords_centiliter">сантилитр,сантилитры,сл,cl,centiliter,объем</string>
+    <string name="unit_keywords_deciliter">децилитр,децилитры,дл,dl,deciliter,объем</string>
+    <string name="unit_keywords_cubic_meter">кубический метр,кубометр,куб,м3,m3,m³,объем</string>
+    <string name="unit_keywords_teaspoon">чайная ложка,чайные ложки,ч.л.,tsp,teaspoon,объем</string>
+    <string name="unit_keywords_tablespoon">столовая ложка,столовые ложки,ст.л.,tbsp,tablespoon,объем</string>
+    <string name="unit_keywords_fluid_ounce">жидкая унция,унция,fl oz,oz,fluid ounce,объем</string>
+    <string name="unit_keywords_cup">чашка,стакан,cup,cups,объем</string>
+    <string name="unit_keywords_pint">пинта,пинты,pint,pt,объем</string>
+    <string name="unit_keywords_quart">кварта,кварты,quart,qt,объем</string>
     <string name="unit_keywords_gallon">галлон,галлоны,gal,объем,емкость</string>
     <string name="unit_keywords_byte">байт,байты,b,б,данные,память,хранилище</string>
     <string name="unit_keywords_kilobyte">килобайт,килобайты,кб,kb,kib,данные,память</string>

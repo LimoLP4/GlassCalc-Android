@@ -75,6 +75,23 @@
     <string name="unit_c_k">摂氏 ↔ ケルビン (°C ↔ K)</string>
     <string name="unit_f_k">華氏 ↔ ケルビン (°F ↔ K)</string>
     <string name="unit_l_gal">リットル ↔ ガロン (l ↔ gal)</string>
+    <string name="unit_l_ml">リットル ↔ ミリリットル (l ↔ ml)</string>
+    <string name="unit_l_cl">リットル ↔ センチリットル (l ↔ cl)</string>
+    <string name="unit_l_dl">リットル ↔ デシリットル (l ↔ dl)</string>
+    <string name="unit_m3_l">立方メートル ↔ リットル (m³ ↔ l)</string>
+    <string name="unit_dl_ml">デシリットル ↔ ミリリットル (dl ↔ ml)</string>
+    <string name="unit_cl_ml">センチリットル ↔ ミリリットル (cl ↔ ml)</string>
+    <string name="unit_l_qt">リットル ↔ クォート (l ↔ qt)</string>
+    <string name="unit_l_pt">リットル ↔ パイント (l ↔ pt)</string>
+    <string name="unit_ml_cup">ミリリットル ↔ カップ (ml ↔ cup)</string>
+    <string name="unit_ml_floz">ミリリットル ↔ 液量オンス (ml ↔ fl oz)</string>
+    <string name="unit_ml_tbsp">ミリリットル ↔ 大さじ (ml ↔ tbsp)</string>
+    <string name="unit_ml_tsp">ミリリットル ↔ 小さじ (ml ↔ tsp)</string>
+    <string name="unit_gal_qt">ガロン ↔ クォート (gal ↔ qt)</string>
+    <string name="unit_qt_pt">クォート ↔ パイント (qt ↔ pt)</string>
+    <string name="unit_pt_cup">パイント ↔ カップ (pt ↔ cup)</string>
+    <string name="unit_cup_floz">カップ ↔ 液量オンス (cup ↔ fl oz)</string>
+    <string name="unit_tbsp_tsp">大さじ ↔ 小さじ (tbsp ↔ tsp)</string>
     <string name="unit_b_kb">バイト ↔ キロバイト (B ↔ KB)</string>
     <string name="unit_kb_mb">キロバイト ↔ メガバイト (KB ↔ MB)</string>
     <string name="unit_mb_gb">メガバイト ↔ ギガバイト (MB ↔ GB)</string>
@@ -111,6 +128,16 @@
     <string name="unit_name_fahrenheit">華氏</string>
     <string name="unit_name_kelvin">ケルビン</string>
     <string name="unit_name_liter">リットル</string>
+    <string name="unit_name_milliliter">ミリリットル</string>
+    <string name="unit_name_centiliter">センチリットル</string>
+    <string name="unit_name_deciliter">デシリットル</string>
+    <string name="unit_name_cubic_meter">立方メートル</string>
+    <string name="unit_name_teaspoon">小さじ (tsp)</string>
+    <string name="unit_name_tablespoon">大さじ (tbsp)</string>
+    <string name="unit_name_fluid_ounce">液量オンス</string>
+    <string name="unit_name_cup">カップ</string>
+    <string name="unit_name_pint">パイント</string>
+    <string name="unit_name_quart">クォート</string>
     <string name="unit_name_gallon">ガロン</string>
     <string name="unit_name_byte">バイト</string>
     <string name="unit_name_kilobyte">キロバイト</string>
@@ -193,7 +220,7 @@
     <string name="angle_rad_label">ラジアン (RAD)</string>
     <string name="angle_rad_desc">円周 = 2π</string>
     <string name="units_supported_systems">対応する変換単位:</string>
-    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体積 (l ↔ gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)</string>
+    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体積 (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">画面サイズとスケーリング</string>
@@ -349,6 +376,16 @@
     <string name="unit_keywords_fahrenheit">華氏,ファーレンハイト,°f,f,温度</string>
     <string name="unit_keywords_kelvin">ケルビン,kelvin,k,温度,絶対温度,絶対零度</string>
     <string name="unit_keywords_liter">リットル,l,体積,容量</string>
+    <string name="unit_keywords_milliliter">ミリリットル,milliliter,ml,cc,cm3,体積,容量,メートル法</string>
+    <string name="unit_keywords_centiliter">センチリットル,centiliter,cl,体積,容量,メートル法</string>
+    <string name="unit_keywords_deciliter">デシリットル,deciliter,dl,体積,容量,メートル法</string>
+    <string name="unit_keywords_cubic_meter">立方メートル,立米,cubic meter,m3,m³,体積,容量</string>
+    <string name="unit_keywords_teaspoon">小さじ,ティースプーン,teaspoon,tsp,料理,体積</string>
+    <string name="unit_keywords_tablespoon">大さじ,テーブルスプーン,tablespoon,tbsp,料理,体積</string>
+    <string name="unit_keywords_fluid_ounce">液量オンス,フルイドオンス,fluid ounce,fl oz,oz,体積</string>
+    <string name="unit_keywords_cup">カップ,cup,料理,体積</string>
+    <string name="unit_keywords_pint">パイント,pint,pt,体積</string>
+    <string name="unit_keywords_quart">クォート,quart,qt,体積</string>
     <string name="unit_keywords_gallon">ガロン,gal,体積,容量</string>
     <string name="unit_keywords_byte">バイト,b,データ,容量,ストレージ</string>
     <string name="unit_keywords_kilobyte">キロバイト,kb,kib,データ,容量,ストレージ</string>

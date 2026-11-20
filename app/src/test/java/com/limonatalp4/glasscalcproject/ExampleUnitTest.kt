@@ -199,6 +199,80 @@ class ExampleUnitTest {
         val kgToT = UnitConverter.CONVERSIONS.first { it.unitFrom == "kg" && it.unitTo == "t" }
         assertEquals("1", UnitConverter.convert(1000.0, kgToT, forward = true))
         assertEquals("2500", UnitConverter.convert(2.5, kgToT, forward = false))
+
+        // Volume: metric & imperial/US in both directions
+        val lToGal = UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "gal" }
+        assertEquals("1", UnitConverter.convert(3.785411784, lToGal, forward = true))
+        assertEquals("3,785412", UnitConverter.convert(1.0, lToGal, forward = false))
+
+        val lToMl = UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "ml" }
+        assertEquals("1000", UnitConverter.convert(1.0, lToMl, forward = true))
+        assertEquals("0,5", UnitConverter.convert(500.0, lToMl, forward = false))
+
+        val lToCl = UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "cl" }
+        assertEquals("150", UnitConverter.convert(1.5, lToCl, forward = true))
+        assertEquals("2,5", UnitConverter.convert(250.0, lToCl, forward = false))
+
+        val lToDl = UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "dl" }
+        assertEquals("20", UnitConverter.convert(2.0, lToDl, forward = true))
+        assertEquals("0,5", UnitConverter.convert(5.0, lToDl, forward = false))
+
+        val m3ToL = UnitConverter.CONVERSIONS.first { it.unitFrom == "m³" && it.unitTo == "l" }
+        assertEquals("1500", UnitConverter.convert(1.5, m3ToL, forward = true))
+        assertEquals("0,5", UnitConverter.convert(500.0, m3ToL, forward = false))
+
+        val dlToMl = UnitConverter.CONVERSIONS.first { it.unitFrom == "dl" && it.unitTo == "ml" }
+        assertEquals("200", UnitConverter.convert(2.0, dlToMl, forward = true))
+        assertEquals("0,5", UnitConverter.convert(50.0, dlToMl, forward = false))
+
+        val clToMl = UnitConverter.CONVERSIONS.first { it.unitFrom == "cl" && it.unitTo == "ml" }
+        assertEquals("50", UnitConverter.convert(5.0, clToMl, forward = true))
+        assertEquals("2,5", UnitConverter.convert(25.0, clToMl, forward = false))
+
+        val lToQt = UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "qt" }
+        assertEquals("1", UnitConverter.convert(0.946352946, lToQt, forward = true))
+        assertEquals("1,892706", UnitConverter.convert(2.0, lToQt, forward = false))
+
+        val lToPt = UnitConverter.CONVERSIONS.first { it.unitFrom == "l" && it.unitTo == "pt" }
+        assertEquals("1", UnitConverter.convert(0.473176473, lToPt, forward = true))
+        assertEquals("0,946353", UnitConverter.convert(2.0, lToPt, forward = false))
+
+        val mlToCup = UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "cup" }
+        assertEquals("1", UnitConverter.convert(236.5882365, mlToCup, forward = true))
+        assertEquals("236,588236", UnitConverter.convert(1.0, mlToCup, forward = false))
+        assertEquals("473,176473", UnitConverter.convert(2.0, mlToCup, forward = false))
+
+        val mlToFlOz = UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "fl oz" }
+        assertEquals("1", UnitConverter.convert(29.5735295625, mlToFlOz, forward = true))
+        assertEquals("29,57353", UnitConverter.convert(1.0, mlToFlOz, forward = false))
+
+        val mlToTbsp = UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "tbsp" }
+        assertEquals("1", UnitConverter.convert(14.78676478125, mlToTbsp, forward = true))
+        assertEquals("14,786765", UnitConverter.convert(1.0, mlToTbsp, forward = false))
+
+        val mlToTsp = UnitConverter.CONVERSIONS.first { it.unitFrom == "ml" && it.unitTo == "tsp" }
+        assertEquals("1", UnitConverter.convert(4.92892159375, mlToTsp, forward = true))
+        assertEquals("4,928922", UnitConverter.convert(1.0, mlToTsp, forward = false))
+
+        val galToQt = UnitConverter.CONVERSIONS.first { it.unitFrom == "gal" && it.unitTo == "qt" }
+        assertEquals("8", UnitConverter.convert(2.0, galToQt, forward = true))
+        assertEquals("3", UnitConverter.convert(12.0, galToQt, forward = false))
+
+        val qtToPt = UnitConverter.CONVERSIONS.first { it.unitFrom == "qt" && it.unitTo == "pt" }
+        assertEquals("6", UnitConverter.convert(3.0, qtToPt, forward = true))
+        assertEquals("2", UnitConverter.convert(4.0, qtToPt, forward = false))
+
+        val ptToCup = UnitConverter.CONVERSIONS.first { it.unitFrom == "pt" && it.unitTo == "cup" }
+        assertEquals("4", UnitConverter.convert(2.0, ptToCup, forward = true))
+        assertEquals("3", UnitConverter.convert(6.0, ptToCup, forward = false))
+
+        val cupToFlOz = UnitConverter.CONVERSIONS.first { it.unitFrom == "cup" && it.unitTo == "fl oz" }
+        assertEquals("16", UnitConverter.convert(2.0, cupToFlOz, forward = true))
+        assertEquals("3", UnitConverter.convert(24.0, cupToFlOz, forward = false))
+
+        val tbspToTsp = UnitConverter.CONVERSIONS.first { it.unitFrom == "tbsp" && it.unitTo == "tsp" }
+        assertEquals("6", UnitConverter.convert(2.0, tbspToTsp, forward = true))
+        assertEquals("3", UnitConverter.convert(9.0, tbspToTsp, forward = false))
     }
 
     @Test
@@ -523,6 +597,23 @@ class ExampleUnitTest {
                 "°C" to "K" -> "Celsius ↔ Kelvin (°C ↔ K)"
                 "°F" to "K" -> "Fahrenheit ↔ Kelvin (°F ↔ K)"
                 "l" to "gal" -> "Liter ↔ Gallonen (l ↔ gal)"
+                "l" to "ml" -> "Liter ↔ Milliliter (l ↔ ml)"
+                "l" to "cl" -> "Liter ↔ Zentiliter (l ↔ cl)"
+                "l" to "dl" -> "Liter ↔ Deziliter (l ↔ dl)"
+                "m³" to "l" -> "Kubikmeter ↔ Liter (m³ ↔ l)"
+                "dl" to "ml" -> "Deziliter ↔ Milliliter (dl ↔ ml)"
+                "cl" to "ml" -> "Zentiliter ↔ Milliliter (cl ↔ ml)"
+                "l" to "qt" -> "Liter ↔ Quart (l ↔ qt)"
+                "l" to "pt" -> "Liter ↔ Pint (l ↔ pt)"
+                "ml" to "cup" -> "Milliliter ↔ Cup (ml ↔ cup)"
+                "ml" to "fl oz" -> "Milliliter ↔ Flüssigunze (ml ↔ fl oz)"
+                "ml" to "tbsp" -> "Milliliter ↔ Esslöffel (ml ↔ tbsp)"
+                "ml" to "tsp" -> "Milliliter ↔ Teelöffel (ml ↔ tsp)"
+                "gal" to "qt" -> "Gallonen ↔ Quart (gal ↔ qt)"
+                "qt" to "pt" -> "Quart ↔ Pint (qt ↔ pt)"
+                "pt" to "cup" -> "Pint ↔ Cup (pt ↔ cup)"
+                "cup" to "fl oz" -> "Cup ↔ Flüssigunze (cup ↔ fl oz)"
+                "tbsp" to "tsp" -> "Esslöffel ↔ Teelöffel (tbsp ↔ tsp)"
                 "B" to "KB" -> "Byte ↔ Kilobyte (B ↔ KB)"
                 "KB" to "MB" -> "Kilobyte ↔ Megabyte (KB ↔ MB)"
                 "MB" to "GB" -> "Megabyte ↔ Gigabyte (MB ↔ GB)"
@@ -533,7 +624,7 @@ class ExampleUnitTest {
                 UnitCategory.LENGTH -> listOf("länge", "meter", "fuß", "zentimeter", "millimeter", "nanometer", "zoll", "kilometer", "meilen")
                 UnitCategory.MASS -> listOf("masse", "gewicht", "kilogramm", "pfund", "tonne")
                 UnitCategory.TEMPERATURE -> listOf("temperatur", "celsius", "fahrenheit", "kelvin")
-                UnitCategory.VOLUME -> listOf("volumen", "liter", "gallonen")
+                UnitCategory.VOLUME -> listOf("volumen", "flüssigkeit", "rauminhalt")
                 UnitCategory.DATA -> listOf("daten", "speicher", "byte", "gigabyte")
                 UnitCategory.TIME -> listOf("zeit", "sekunden", "minuten", "stunden")
                 UnitCategory.VOLTAGE -> listOf("spannung", "volt", "millivolt", "kilovolt")
@@ -549,10 +640,10 @@ class ExampleUnitTest {
             )
         }
 
-        // "Meter" matches all meter-based length conversions
+        // "Meter" matches all meter-based length conversions as well as Kubikmeter (m³ ↔ l)
         val meterResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Meter", localizedGermanPairs)
         assertEquals(
-            listOf("m" to "ft", "m" to "cm", "m" to "mm", "m" to "nm", "cm" to "in", "km" to "mi"),
+            listOf("m" to "ft", "m" to "cm", "m" to "mm", "m" to "nm", "cm" to "in", "km" to "mi", "m³" to "l"),
             meterResults.map { it.unitFrom to it.unitTo }
         )
 
@@ -576,6 +667,15 @@ class ExampleUnitTest {
         // "Kelvin" prioritizes °C↔K and °F↔K
         val kelvinPairResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Kelvin", localizedGermanPairs)
         assertEquals(listOf("°C" to "K", "°F" to "K"), kelvinPairResults.take(2).map { it.unitFrom to it.unitTo })
+
+        // Volume pairs search in German ("Kubikmeter", "Flüssigunze", "Teelöffel")
+        val cubicResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Kubikmeter", localizedGermanPairs)
+        assertTrue(cubicResults.any { it.unitFrom == "m³" && it.unitTo == "l" })
+        val flOzResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Flüssigunze", localizedGermanPairs)
+        assertTrue(flOzResults.any { it.unitFrom == "ml" && it.unitTo == "fl oz" })
+        assertTrue(flOzResults.any { it.unitFrom == "cup" && it.unitTo == "fl oz" })
+        val tspResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Teelöffel", localizedGermanPairs)
+        assertTrue(tspResults.any { it.unitFrom == "ml" && it.unitTo == "tsp" })
 
         // Empty search returns empty list (dialog switches back to active category view)
         assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("   ", localizedGermanPairs).isEmpty())
@@ -651,6 +751,16 @@ class ExampleUnitTest {
                 "fahrenheit" -> "Fahrenheit"
                 "kelvin" -> "Kelvin"
                 "liter" -> "Liter"
+                "milliliter" -> "Milliliter"
+                "centiliter" -> "Zentiliter"
+                "deciliter" -> "Deziliter"
+                "cubic_meter" -> "Kubikmeter"
+                "teaspoon" -> "Teelöffel"
+                "tablespoon" -> "Esslöffel"
+                "fluid_ounce" -> "Flüssigunze"
+                "cup" -> "Cup"
+                "pint" -> "Pint"
+                "quart" -> "Quart"
                 "gallon" -> "Gallonen"
                 "byte" -> "Byte"
                 "kilobyte" -> "Kilobyte"
@@ -687,19 +797,25 @@ class ExampleUnitTest {
         assertTrue(mResults.isNotEmpty())
         assertEquals("Meter", mResults.first().localizedName)
 
-        // 3b. New Length & Mass units in German suggestions (cm, mm, nm, t)
+        // 3b. New Length, Mass, Temperature & Volume units in German suggestions
         assertEquals("Zentimeter", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Zentimeter", germanSuggestions).first().localizedName)
         assertEquals("Millimeter", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Millimeter", germanSuggestions).first().localizedName)
         assertEquals("Nanometer", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Nanometer", germanSuggestions).first().localizedName)
         assertEquals("Tonne", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Tonne", germanSuggestions).first().localizedName)
         assertEquals("Kelvin", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Kelvin", germanSuggestions).first().localizedName)
         assertEquals(UnitCategory.TEMPERATURE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("kel", germanSuggestions).first().item.category)
+        assertEquals("Milliliter", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Milliliter", germanSuggestions).first().localizedName)
+        assertEquals("Kubikmeter", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Kubikmeter", germanSuggestions).first().localizedName)
+        assertEquals("Flüssigunze", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Flüssigunze", germanSuggestions).first().localizedName)
+        assertEquals("Teelöffel", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Teelöffel", germanSuggestions).first().localizedName)
+        assertEquals("Cup", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Cup", germanSuggestions).first().localizedName)
 
-        // 4. Spanish localization test ("Pulgadas", "Tonelada")
+        // 4. Spanish localization test ("Pulgadas", "Tonelada", "Mililitro")
         val spanishSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
             val localizedName = when (item.id) {
                 "inch" -> "Pulgadas"
                 "ton" -> "Tonelada"
+                "milliliter" -> "Mililitro"
                 "gigabyte" -> "Gigabyte"
                 else -> item.id
             }
@@ -714,12 +830,14 @@ class ExampleUnitTest {
         assertEquals("Pulgadas", pulgResults.first().localizedName)
         assertEquals(UnitCategory.LENGTH, pulgResults.first().item.category)
         assertEquals("Tonelada", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Tonelada", spanishSuggestions).first().localizedName)
+        assertEquals("Mililitro", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Mililitro", spanishSuggestions).first().localizedName)
 
-        // 5. French localization test ("Octet")
+        // 5. French localization test ("Octet", "Millilitre")
         val frenchSuggestions = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.map { item ->
             val localizedName = when (item.id) {
                 "byte" -> "Octet"
                 "gigabyte" -> "Gigaoctet"
+                "milliliter" -> "Millilitre"
                 else -> item.id
             }
             com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
@@ -732,8 +850,9 @@ class ExampleUnitTest {
         assertTrue(octResults.isNotEmpty())
         assertTrue(octResults.any { it.localizedName == "Octet" })
         assertTrue(octResults.any { it.localizedName == "Gigaoctet" })
+        assertEquals("Millilitre", com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Millilitre", frenchSuggestions).first().localizedName)
 
-        // 6. Electrical & Mass units across languages (German, English, Russian, Spanish)
+        // 6. Electrical, Mass, Temperature & Volume units across languages (German, English, Russian, Spanish)
         val multiLangElectricalSuggestions = listOf(
             com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
                 item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "volt" },
@@ -764,6 +883,12 @@ class ExampleUnitTest {
                 localizedName = "Кельвин",
                 symbol = "K",
                 localizedKeywords = listOf("кельвин", "kelvin", "температура")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "milliliter" },
+                localizedName = "Миллилитр",
+                symbol = "ml",
+                localizedKeywords = listOf("миллилитр", "мл", "milliliter", "millilitre", "mililitro")
             )
         )
         assertEquals(UnitCategory.VOLTAGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Напряжение", multiLangElectricalSuggestions).first().item.category)
@@ -773,6 +898,7 @@ class ExampleUnitTest {
         assertEquals(UnitCategory.MASS, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Metric Ton", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.MASS, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Тонна", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.TEMPERATURE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Кельвин", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.VOLUME, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Миллилитр", multiLangElectricalSuggestions).first().item.category)
     }
 
     @Test

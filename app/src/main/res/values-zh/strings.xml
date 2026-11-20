@@ -75,6 +75,23 @@
     <string name="unit_c_k">摄氏度 ↔ 开尔文 (°C ↔ K)</string>
     <string name="unit_f_k">华氏度 ↔ 开尔文 (°F ↔ K)</string>
     <string name="unit_l_gal">升 ↔ 加仑 (l ↔ gal)</string>
+    <string name="unit_l_ml">升 ↔ 毫升 (l ↔ ml)</string>
+    <string name="unit_l_cl">升 ↔ 厘升 (l ↔ cl)</string>
+    <string name="unit_l_dl">升 ↔ 分升 (l ↔ dl)</string>
+    <string name="unit_m3_l">立方米 ↔ 升 (m³ ↔ l)</string>
+    <string name="unit_dl_ml">分升 ↔ 毫升 (dl ↔ ml)</string>
+    <string name="unit_cl_ml">厘升 ↔ 毫升 (cl ↔ ml)</string>
+    <string name="unit_l_qt">升 ↔ 夸脱 (l ↔ qt)</string>
+    <string name="unit_l_pt">升 ↔ 品脱 (l ↔ pt)</string>
+    <string name="unit_ml_cup">毫升 ↔ 杯 (ml ↔ cup)</string>
+    <string name="unit_ml_floz">毫升 ↔ 液量盎司 (ml ↔ fl oz)</string>
+    <string name="unit_ml_tbsp">毫升 ↔ 汤匙 (ml ↔ tbsp)</string>
+    <string name="unit_ml_tsp">毫升 ↔ 茶匙 (ml ↔ tsp)</string>
+    <string name="unit_gal_qt">加仑 ↔ 夸脱 (gal ↔ qt)</string>
+    <string name="unit_qt_pt">夸脱 ↔ 品脱 (qt ↔ pt)</string>
+    <string name="unit_pt_cup">品脱 ↔ 杯 (pt ↔ cup)</string>
+    <string name="unit_cup_floz">杯 ↔ 液量盎司 (cup ↔ fl oz)</string>
+    <string name="unit_tbsp_tsp">汤匙 ↔ 茶匙 (tbsp ↔ tsp)</string>
     <string name="unit_b_kb">字节 ↔ 千字节 (B ↔ KB)</string>
     <string name="unit_kb_mb">千字节 ↔ 兆字节 (KB ↔ MB)</string>
     <string name="unit_mb_gb">兆字节 ↔ 吉字节 (MB ↔ GB)</string>
@@ -111,6 +128,16 @@
     <string name="unit_name_fahrenheit">华氏度</string>
     <string name="unit_name_kelvin">开尔文</string>
     <string name="unit_name_liter">升</string>
+    <string name="unit_name_milliliter">毫升</string>
+    <string name="unit_name_centiliter">厘升</string>
+    <string name="unit_name_deciliter">分升</string>
+    <string name="unit_name_cubic_meter">立方米</string>
+    <string name="unit_name_teaspoon">茶匙 (tsp)</string>
+    <string name="unit_name_tablespoon">汤匙 (tbsp)</string>
+    <string name="unit_name_fluid_ounce">液量盎司</string>
+    <string name="unit_name_cup">杯 (Cup)</string>
+    <string name="unit_name_pint">品脱</string>
+    <string name="unit_name_quart">夸脱</string>
     <string name="unit_name_gallon">加仑</string>
     <string name="unit_name_byte">字节</string>
     <string name="unit_name_kilobyte">千字节</string>
@@ -193,7 +220,7 @@
     <string name="angle_rad_label">弧度 (RAD)</string>
     <string name="angle_rad_desc">整圆 = 2π</string>
     <string name="units_supported_systems">支持的换算系统:</string>
-    <string name="units_systems_detail">• 公制 ↔ 英制 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体积 (l ↔ gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)\n• 电压 (mV, V, kV)\n• 电流 (µA, mA, A)\n• 功率 (mW, W, kW, MW)\n• 电荷 (mAh, Ah)</string>
+    <string name="units_systems_detail">• 公制 ↔ 英制 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体积 (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)\n• 电压 (mV, V, kV)\n• 电流 (µA, mA, A)\n• 功率 (mW, W, kW, MW)\n• 电荷 (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">屏幕尺寸与缩放</string>
@@ -349,6 +376,16 @@
     <string name="unit_keywords_fahrenheit">华氏度,华氏,°f,f,温度</string>
     <string name="unit_keywords_kelvin">开尔文,克尔文,kelvin,k,温度,热力学温度,绝对零度</string>
     <string name="unit_keywords_liter">升,公升,l,体积,容积</string>
+    <string name="unit_keywords_milliliter">毫升,milliliter,ml,cc,cm3,体积,容积,公制</string>
+    <string name="unit_keywords_centiliter">厘升,centiliter,cl,体积,容积,公制</string>
+    <string name="unit_keywords_deciliter">分升,deciliter,dl,体积,容积,公制</string>
+    <string name="unit_keywords_cubic_meter">立方米,方,cubic meter,m3,m³,体积,容积</string>
+    <string name="unit_keywords_teaspoon">茶匙,小勺,teaspoon,tsp,烹饪,体积</string>
+    <string name="unit_keywords_tablespoon">汤匙,大勺,tablespoon,tbsp,烹饪,体积</string>
+    <string name="unit_keywords_fluid_ounce">液量盎司,液体盎司,盎司,fluid ounce,fl oz,oz,体积</string>
+    <string name="unit_keywords_cup">杯,美制杯,量杯,cup,烹饪,体积</string>
+    <string name="unit_keywords_pint">品脱,pint,pt,体积</string>
+    <string name="unit_keywords_quart">夸脱,quart,qt,体积</string>
     <string name="unit_keywords_gallon">加仑,gal,体积,容积</string>
     <string name="unit_keywords_byte">字节,b,数据,存储,容量</string>
     <string name="unit_keywords_kilobyte">千字节,kb,kib,数据,存储</string>
