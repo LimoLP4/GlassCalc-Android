@@ -13,7 +13,11 @@ enum class UnitCategory(val stringResId: Int) {
     TEMPERATURE(R.string.cat_temp),
     VOLUME(R.string.cat_volume),
     DATA(R.string.cat_data),
-    TIME(R.string.cat_time)
+    TIME(R.string.cat_time),
+    VOLTAGE(R.string.cat_voltage),
+    CURRENT(R.string.cat_current),
+    POWER(R.string.cat_power),
+    CHARGE(R.string.cat_charge)
 }
 
 @Immutable
@@ -154,6 +158,98 @@ object UnitConverter {
             labelResId = R.string.unit_d_h,
             formulaFromTo = { it * 24.0 },
             formulaToFrom = { it / 24.0 }
+        ),
+        // Voltage
+        ConversionPair(
+            category = UnitCategory.VOLTAGE,
+            unitFrom = "V",
+            unitTo = "mV",
+            labelResId = R.string.unit_v_mv,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLTAGE,
+            unitFrom = "kV",
+            unitTo = "V",
+            labelResId = R.string.unit_kv_v,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.VOLTAGE,
+            unitFrom = "kV",
+            unitTo = "mV",
+            labelResId = R.string.unit_kv_mv,
+            formulaFromTo = { it * 1_000_000.0 },
+            formulaToFrom = { it / 1_000_000.0 }
+        ),
+        // Current
+        ConversionPair(
+            category = UnitCategory.CURRENT,
+            unitFrom = "A",
+            unitTo = "mA",
+            labelResId = R.string.unit_a_ma,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENT,
+            unitFrom = "mA",
+            unitTo = "µA",
+            labelResId = R.string.unit_ma_ua,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENT,
+            unitFrom = "A",
+            unitTo = "µA",
+            labelResId = R.string.unit_a_ua,
+            formulaFromTo = { it * 1_000_000.0 },
+            formulaToFrom = { it / 1_000_000.0 }
+        ),
+        // Power
+        ConversionPair(
+            category = UnitCategory.POWER,
+            unitFrom = "W",
+            unitTo = "mW",
+            labelResId = R.string.unit_w_mw,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.POWER,
+            unitFrom = "kW",
+            unitTo = "W",
+            labelResId = R.string.unit_kw_w,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.POWER,
+            unitFrom = "MW",
+            unitTo = "kW",
+            labelResId = R.string.unit_mw_kw,
+            formulaFromTo = { it * 1000.0 },
+            formulaToFrom = { it / 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.POWER,
+            unitFrom = "MW",
+            unitTo = "W",
+            labelResId = R.string.unit_mw_w,
+            formulaFromTo = { it * 1_000_000.0 },
+            formulaToFrom = { it / 1_000_000.0 }
+        ),
+        // Charge
+        ConversionPair(
+            category = UnitCategory.CHARGE,
+            unitFrom = "mAh",
+            unitTo = "Ah",
+            labelResId = R.string.unit_mah_ah,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
         )
     )
 

@@ -52,6 +52,10 @@
     <string name="cat_volume">体積</string>
     <string name="cat_data">データ</string>
     <string name="cat_time">時間</string>
+    <string name="cat_voltage">電圧</string>
+    <string name="cat_current">電流</string>
+    <string name="cat_power">電力</string>
+    <string name="cat_charge">電荷</string>
     <string name="converter_select_pair">変換を選択:</string>
     <string name="converter_input_label">入力 (%s):</string>
     <string name="converter_swap_direction">方向を反転</string>
@@ -73,6 +77,17 @@
     <string name="unit_min_s">分 ↔ 秒 (min ↔ s)</string>
     <string name="unit_h_min">時間 ↔ 分 (h ↔ min)</string>
     <string name="unit_d_h">日 ↔ 時間 (d ↔ h)</string>
+    <string name="unit_v_mv">ボルト ↔ ミリボルト (V ↔ mV)</string>
+    <string name="unit_kv_v">キロボルト ↔ ボルト (kV ↔ V)</string>
+    <string name="unit_kv_mv">キロボルト ↔ ミリボルト (kV ↔ mV)</string>
+    <string name="unit_a_ma">アンペア ↔ ミリアンペア (A ↔ mA)</string>
+    <string name="unit_ma_ua">ミリアンペア ↔ マイクロアンペア (mA ↔ µA)</string>
+    <string name="unit_a_ua">アンペア ↔ マイクロアンペア (A ↔ µA)</string>
+    <string name="unit_w_mw">ワット ↔ ミリワット (W ↔ mW)</string>
+    <string name="unit_kw_w">キロワット ↔ ワット (kW ↔ W)</string>
+    <string name="unit_mw_kw">メガワット ↔ キロワット (MW ↔ kW)</string>
+    <string name="unit_mw_w">メガワット ↔ ワット (MW ↔ W)</string>
+    <string name="unit_mah_ah">ミリアンペア時 ↔ アンペア時 (mAh ↔ Ah)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">メートル</string>
@@ -97,6 +112,18 @@
     <string name="unit_name_minutes">分</string>
     <string name="unit_name_hours">時間</string>
     <string name="unit_name_days">日</string>
+    <string name="unit_name_volt">ボルト</string>
+    <string name="unit_name_millivolt">ミリボルト</string>
+    <string name="unit_name_kilovolt">キロボルト</string>
+    <string name="unit_name_ampere">アンペア</string>
+    <string name="unit_name_milliampere">ミリアンペア</string>
+    <string name="unit_name_microampere">マイクロアンペア</string>
+    <string name="unit_name_watt">ワット</string>
+    <string name="unit_name_milliwatt">ミリワット</string>
+    <string name="unit_name_kilowatt">キロワット</string>
+    <string name="unit_name_megawatt">メガワット</string>
+    <string name="unit_name_milliampere_hour">ミリアンペア時</string>
+    <string name="unit_name_ampere_hour">アンペア時</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">科学定数</string>
@@ -156,7 +183,7 @@
     <string name="angle_rad_label">ラジアン (RAD)</string>
     <string name="angle_rad_desc">円周 = 2π</string>
     <string name="units_supported_systems">対応する変換単位:</string>
-    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体積 (l ↔ gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)</string>
+    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体積 (l ↔ gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">画面サイズとスケーリング</string>
@@ -291,6 +318,10 @@
     <string name="converter_keywords_volume">体積,容量,液体</string>
     <string name="converter_keywords_data">データ,容量,ストレージ,サイズ</string>
     <string name="converter_keywords_time">時間,期間</string>
+    <string name="converter_keywords_voltage">電圧,ボルト,電気</string>
+    <string name="converter_keywords_current">電流,アンペア,電気</string>
+    <string name="converter_keywords_power">電力,仕事率,ワット,電気</string>
+    <string name="converter_keywords_charge">電荷,電気量,バッテリー,容量</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">メートル,m,長さ,距離,メートル法</string>
@@ -315,4 +346,16 @@
     <string name="unit_keywords_minute">分,min,時間</string>
     <string name="unit_keywords_hour">時間,時,h,hr,時間</string>
     <string name="unit_keywords_day">日,日間,d,日,時間</string>
+    <string name="unit_keywords_volt">ボルト,v,volt,電圧,電気</string>
+    <string name="unit_keywords_millivolt">ミリボルト,mv,millivolt,電圧,電気</string>
+    <string name="unit_keywords_kilovolt">キロボルト,kv,kilovolt,電圧,高圧,電気</string>
+    <string name="unit_keywords_ampere">アンペア,a,ampere,電流,電気</string>
+    <string name="unit_keywords_milliampere">ミリアンペア,ma,milliampere,電流,電気</string>
+    <string name="unit_keywords_microampere">マイクロアンペア,µa,μa,ua,microampere,電流</string>
+    <string name="unit_keywords_watt">ワット,w,watt,電力,仕事率,電気</string>
+    <string name="unit_keywords_milliwatt">ミリワット,mw,milliwatt,電力</string>
+    <string name="unit_keywords_kilowatt">キロワット,kw,kilowatt,電力</string>
+    <string name="unit_keywords_megawatt">メガワット,mw,megawatt,電力</string>
+    <string name="unit_keywords_milliampere_hour">ミリアンペア時,mah,電荷,電気量,バッテリー,電池,容量</string>
+    <string name="unit_keywords_ampere_hour">アンペア時,ah,電荷,電気量,バッテリー,電池,容量</string>
 </resources>

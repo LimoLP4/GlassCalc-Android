@@ -119,6 +119,54 @@ class ExampleUnitTest {
         val dToH = UnitConverter.CONVERSIONS.first { it.unitFrom == "d" && it.unitTo == "h" }
         assertEquals("48", UnitConverter.convert(2.0, dToH, forward = true))
         assertEquals("1", UnitConverter.convert(24.0, dToH, forward = false))
+
+        // Voltage: V, mV, kV in both directions
+        val vToMv = UnitConverter.CONVERSIONS.first { it.unitFrom == "V" && it.unitTo == "mV" }
+        assertEquals("1000", UnitConverter.convert(1.0, vToMv, forward = true))
+        assertEquals("0,5", UnitConverter.convert(500.0, vToMv, forward = false))
+
+        val kvToV = UnitConverter.CONVERSIONS.first { it.unitFrom == "kV" && it.unitTo == "V" }
+        assertEquals("2500", UnitConverter.convert(2.5, kvToV, forward = true))
+        assertEquals("1,5", UnitConverter.convert(1500.0, kvToV, forward = false))
+
+        val kvToMv = UnitConverter.CONVERSIONS.first { it.unitFrom == "kV" && it.unitTo == "mV" }
+        assertEquals("1000000", UnitConverter.convert(1.0, kvToMv, forward = true))
+        assertEquals("0,000001", UnitConverter.convert(1.0, kvToMv, forward = false))
+
+        // Current: A, mA, µA in both directions
+        val aToMa = UnitConverter.CONVERSIONS.first { it.unitFrom == "A" && it.unitTo == "mA" }
+        assertEquals("1000", UnitConverter.convert(1.0, aToMa, forward = true))
+        assertEquals("0,25", UnitConverter.convert(250.0, aToMa, forward = false))
+
+        val maToUa = UnitConverter.CONVERSIONS.first { it.unitFrom == "mA" && it.unitTo == "µA" }
+        assertEquals("1000", UnitConverter.convert(1.0, maToUa, forward = true))
+        assertEquals("0,5", UnitConverter.convert(500.0, maToUa, forward = false))
+
+        val aToUa = UnitConverter.CONVERSIONS.first { it.unitFrom == "A" && it.unitTo == "µA" }
+        assertEquals("1000000", UnitConverter.convert(1.0, aToUa, forward = true))
+        assertEquals("0,000001", UnitConverter.convert(1.0, aToUa, forward = false))
+
+        // Power: W, mW, kW, MW in both directions
+        val wToMw = UnitConverter.CONVERSIONS.first { it.unitFrom == "W" && it.unitTo == "mW" }
+        assertEquals("1000", UnitConverter.convert(1.0, wToMw, forward = true))
+        assertEquals("0,75", UnitConverter.convert(750.0, wToMw, forward = false))
+
+        val kwToW = UnitConverter.CONVERSIONS.first { it.unitFrom == "kW" && it.unitTo == "W" }
+        assertEquals("3000", UnitConverter.convert(3.0, kwToW, forward = true))
+        assertEquals("2,5", UnitConverter.convert(2500.0, kwToW, forward = false))
+
+        val mwToKw = UnitConverter.CONVERSIONS.first { it.unitFrom == "MW" && it.unitTo == "kW" }
+        assertEquals("1000", UnitConverter.convert(1.0, mwToKw, forward = true))
+        assertEquals("0,5", UnitConverter.convert(500.0, mwToKw, forward = false))
+
+        val mwToW = UnitConverter.CONVERSIONS.first { it.unitFrom == "MW" && it.unitTo == "W" }
+        assertEquals("1000000", UnitConverter.convert(1.0, mwToW, forward = true))
+        assertEquals("1", UnitConverter.convert(1_000_000.0, mwToW, forward = false))
+
+        // Charge: mAh, Ah in both directions
+        val mahToAh = UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }
+        assertEquals("5", UnitConverter.convert(5000.0, mahToAh, forward = true))
+        assertEquals("2500", UnitConverter.convert(2.5, mahToAh, forward = false))
     }
 
     @Test
@@ -450,6 +498,10 @@ class ExampleUnitTest {
                 UnitCategory.VOLUME -> listOf("volumen", "liter", "gallonen")
                 UnitCategory.DATA -> listOf("daten", "speicher", "byte", "gigabyte")
                 UnitCategory.TIME -> listOf("zeit", "sekunden", "minuten", "stunden")
+                UnitCategory.VOLTAGE -> listOf("spannung", "volt", "millivolt", "kilovolt")
+                UnitCategory.CURRENT -> listOf("stromstärke", "ampere", "milliampere", "mikroampere")
+                UnitCategory.POWER -> listOf("leistung", "watt", "milliwatt", "kilowatt", "megawatt")
+                UnitCategory.CHARGE -> listOf("ladung", "akku", "milliamperestunden", "amperestunden")
             }
             com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair(
                 pair = pair,
@@ -513,6 +565,22 @@ class ExampleUnitTest {
         val timePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.TIME }
         val timeCatIndex = categories.indexOf(timePair.category)
         assertEquals(5, timeCatIndex)
+
+        // Voltage (V ↔ mV) -> index 6
+        val voltagePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.VOLTAGE }
+        assertEquals(6, categories.indexOf(voltagePair.category))
+
+        // Current (A ↔ mA) -> index 7
+        val currentPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.CURRENT }
+        assertEquals(7, categories.indexOf(currentPair.category))
+
+        // Power (W ↔ mW) -> index 8
+        val powerPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.POWER }
+        assertEquals(8, categories.indexOf(powerPair.category))
+
+        // Charge (mAh ↔ Ah) -> index 9
+        val chargePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.CHARGE }
+        assertEquals(9, categories.indexOf(chargePair.category))
     }
 
     @Test
@@ -601,6 +669,32 @@ class ExampleUnitTest {
         assertTrue(octResults.isNotEmpty())
         assertTrue(octResults.any { it.localizedName == "Octet" })
         assertTrue(octResults.any { it.localizedName == "Gigaoctet" })
+
+        // 6. Electrical units & categories across languages (German, Russian, Spanish, Klingon)
+        val multiLangElectricalSuggestions = listOf(
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "volt" },
+                localizedName = "Вольт",
+                symbol = "V",
+                localizedKeywords = listOf("вольт", "напряжение", "spannung", "tensión")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "microampere" },
+                localizedName = "Mikroampere",
+                symbol = "µA",
+                localizedKeywords = listOf("mikroampere", "µa", "ua", "stromstärke")
+            ),
+            com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
+                item = com.limonatalp4.glasscalcproject.ui.components.ALL_UNIT_ITEMS.first { it.id == "milliampere_hour" },
+                localizedName = "Milliamperestunden",
+                symbol = "mAh",
+                localizedKeywords = listOf("mah", "ladung", "akku")
+            )
+        )
+        assertEquals(UnitCategory.VOLTAGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Напряжение", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.VOLTAGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("tension", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.CURRENT, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("uA", multiLangElectricalSuggestions).first().item.category)
+        assertEquals(UnitCategory.CHARGE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("mAh", multiLangElectricalSuggestions).first().item.category)
     }
 
     @Test

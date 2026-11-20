@@ -52,6 +52,10 @@
     <string name="cat_volume">आयतन</string>
     <string name="cat_data">डेटा</string>
     <string name="cat_time">समय</string>
+    <string name="cat_voltage">वोल्टेज</string>
+    <string name="cat_current">विद्युत धारा</string>
+    <string name="cat_power">शक्ति</string>
+    <string name="cat_charge">आवेश</string>
     <string name="converter_select_pair">रूपांतरण चुनें:</string>
     <string name="converter_input_label">इनपुट (%s):</string>
     <string name="converter_swap_direction">दिशा बदलें</string>
@@ -73,6 +77,17 @@
     <string name="unit_min_s">मिनट ↔ सेकंड (min ↔ s)</string>
     <string name="unit_h_min">घंटे ↔ मिनट (h ↔ min)</string>
     <string name="unit_d_h">दिन ↔ घंटे (d ↔ h)</string>
+    <string name="unit_v_mv">वोल्ट ↔ मिलीवोल्ट (V ↔ mV)</string>
+    <string name="unit_kv_v">किलोवोल्ट ↔ वोल्ट (kV ↔ V)</string>
+    <string name="unit_kv_mv">किलोवोल्ट ↔ मिलीवोल्ट (kV ↔ mV)</string>
+    <string name="unit_a_ma">एम्पियर ↔ मिलीएम्पियर (A ↔ mA)</string>
+    <string name="unit_ma_ua">मिलीएम्पियर ↔ माइक्रोएम्पियर (mA ↔ µA)</string>
+    <string name="unit_a_ua">एम्पियर ↔ माइक्रोएम्पियर (A ↔ µA)</string>
+    <string name="unit_w_mw">वाट ↔ मिलीवाट (W ↔ mW)</string>
+    <string name="unit_kw_w">किलोवाट ↔ वाट (kW ↔ W)</string>
+    <string name="unit_mw_kw">मेगावाट ↔ किलोवाट (MW ↔ kW)</string>
+    <string name="unit_mw_w">मेगावाट ↔ वाट (MW ↔ W)</string>
+    <string name="unit_mah_ah">मिलीएम्पियर-घंटा ↔ एम्पियर-घंटा (mAh ↔ Ah)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">मीटर</string>
@@ -97,6 +112,18 @@
     <string name="unit_name_minutes">मिनट</string>
     <string name="unit_name_hours">घंटे</string>
     <string name="unit_name_days">दिन</string>
+    <string name="unit_name_volt">वोल्ट</string>
+    <string name="unit_name_millivolt">मिलीवोल्ट</string>
+    <string name="unit_name_kilovolt">किलोवोल्ट</string>
+    <string name="unit_name_ampere">एम्पियर</string>
+    <string name="unit_name_milliampere">मिलीएम्पियर</string>
+    <string name="unit_name_microampere">माइक्रोएम्पियर</string>
+    <string name="unit_name_watt">वाट</string>
+    <string name="unit_name_milliwatt">मिलीवाट</string>
+    <string name="unit_name_kilowatt">किलोवाट</string>
+    <string name="unit_name_megawatt">मेगावाट</string>
+    <string name="unit_name_milliampere_hour">मिलीएम्पियर-घंटा</string>
+    <string name="unit_name_ampere_hour">एम्पियर-घंटा</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">वैज्ञानिक स्थिरांक</string>
@@ -156,7 +183,7 @@
     <string name="angle_rad_label">रेडियन (RAD)</string>
     <string name="angle_rad_desc">पूर्ण वृत्त = 2π</string>
     <string name="units_supported_systems">समर्थित रूपांतरण प्रणालियाँ:</string>
-    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• तापमान (°C ↔ °F)\n• आयतन (l ↔ gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)</string>
+    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• तापमान (°C ↔ °F)\n• आयतन (l ↔ gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
@@ -291,6 +318,10 @@
     <string name="converter_keywords_volume">आयतन,क्षमता,तरल</string>
     <string name="converter_keywords_data">डेटा,स्टोरेज,मेमोरी,आकार</string>
     <string name="converter_keywords_time">समय,अवधि</string>
+    <string name="converter_keywords_voltage">वोल्टेज,वोल्टता,विभवांतर,वोल्ट,बिजली</string>
+    <string name="converter_keywords_current">विद्युत धारा,धारा,करंट,एम्पियर,बिजली</string>
+    <string name="converter_keywords_power">शक्ति,पावर,वाट,बिजली</string>
+    <string name="converter_keywords_charge">आवेश,विद्युत आवेश,चार्ज,बैटरी,क्षमता</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">मीटर,m,लंबाई,दूरी,मीट्रिक</string>
@@ -315,4 +346,16 @@
     <string name="unit_keywords_minute">मिनट,min,समय,अवधि</string>
     <string name="unit_keywords_hour">घंटे,घंटा,h,hr,समय,अवधि</string>
     <string name="unit_keywords_day">दिन,d,समय,अवधि</string>
+    <string name="unit_keywords_volt">वोल्ट,v,volt,वोल्टेज,वोल्टता,विभवांतर,बिजली</string>
+    <string name="unit_keywords_millivolt">मिलीवोल्ट,mv,millivolt,वोल्टेज</string>
+    <string name="unit_keywords_kilovolt">किलोवोल्ट,kv,kilovolt,वोल्टेज</string>
+    <string name="unit_keywords_ampere">एम्पियर,a,ampere,विद्युत धारा,धारा,करंट</string>
+    <string name="unit_keywords_milliampere">मिलीएम्पियर,ma,milliampere,विद्युत धारा,धारा</string>
+    <string name="unit_keywords_microampere">माइक्रोएम्पियर,µa,μa,ua,microampere,विद्युत धारा,धारा</string>
+    <string name="unit_keywords_watt">वाट,w,watt,शक्ति,पावर</string>
+    <string name="unit_keywords_milliwatt">मिलीवाट,mw,milliwatt,शक्ति,पावर</string>
+    <string name="unit_keywords_kilowatt">किलोवाट,kw,kilowatt,शक्ति,पावर</string>
+    <string name="unit_keywords_megawatt">मेगावाट,mw,megawatt,शक्ति,पावर</string>
+    <string name="unit_keywords_milliampere_hour">मिलीएम्पियर-घंटा,mah,आवेश,चार्ज,बैटरी,क्षमता</string>
+    <string name="unit_keywords_ampere_hour">एम्पियर-घंटा,ah,आवेश,चार्ज,बैटरी,क्षमता</string>
 </resources>

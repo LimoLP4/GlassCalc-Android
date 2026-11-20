@@ -52,6 +52,10 @@
     <string name="cat_volume">体积</string>
     <string name="cat_data">数据</string>
     <string name="cat_time">时间</string>
+    <string name="cat_voltage">电压</string>
+    <string name="cat_current">电流</string>
+    <string name="cat_power">功率</string>
+    <string name="cat_charge">电荷</string>
     <string name="converter_select_pair">选择换算:</string>
     <string name="converter_input_label">输入 (%s):</string>
     <string name="converter_swap_direction">交换方向</string>
@@ -73,6 +77,17 @@
     <string name="unit_min_s">分 ↔ 秒 (min ↔ s)</string>
     <string name="unit_h_min">小时 ↔ 分 (h ↔ min)</string>
     <string name="unit_d_h">天 ↔ 小时 (d ↔ h)</string>
+    <string name="unit_v_mv">伏特 ↔ 毫伏 (V ↔ mV)</string>
+    <string name="unit_kv_v">千伏 ↔ 伏特 (kV ↔ V)</string>
+    <string name="unit_kv_mv">千伏 ↔ 毫伏 (kV ↔ mV)</string>
+    <string name="unit_a_ma">安培 ↔ 毫安 (A ↔ mA)</string>
+    <string name="unit_ma_ua">毫安 ↔ 微安 (mA ↔ µA)</string>
+    <string name="unit_a_ua">安培 ↔ 微安 (A ↔ µA)</string>
+    <string name="unit_w_mw">瓦特 ↔ 毫瓦 (W ↔ mW)</string>
+    <string name="unit_kw_w">千瓦 ↔ 瓦特 (kW ↔ W)</string>
+    <string name="unit_mw_kw">兆瓦 ↔ 千瓦 (MW ↔ kW)</string>
+    <string name="unit_mw_w">兆瓦 ↔ 瓦特 (MW ↔ W)</string>
+    <string name="unit_mah_ah">毫安时 ↔ 安时 (mAh ↔ Ah)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">米</string>
@@ -97,6 +112,18 @@
     <string name="unit_name_minutes">分钟</string>
     <string name="unit_name_hours">小时</string>
     <string name="unit_name_days">天</string>
+    <string name="unit_name_volt">伏特</string>
+    <string name="unit_name_millivolt">毫伏</string>
+    <string name="unit_name_kilovolt">千伏</string>
+    <string name="unit_name_ampere">安培</string>
+    <string name="unit_name_milliampere">毫安</string>
+    <string name="unit_name_microampere">微安</string>
+    <string name="unit_name_watt">瓦特</string>
+    <string name="unit_name_milliwatt">毫瓦</string>
+    <string name="unit_name_kilowatt">千瓦</string>
+    <string name="unit_name_megawatt">兆瓦</string>
+    <string name="unit_name_milliampere_hour">毫安时</string>
+    <string name="unit_name_ampere_hour">安时</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">科学常数</string>
@@ -156,7 +183,7 @@
     <string name="angle_rad_label">弧度 (RAD)</string>
     <string name="angle_rad_desc">整圆 = 2π</string>
     <string name="units_supported_systems">支持的换算系统:</string>
-    <string name="units_systems_detail">• 公制 ↔ 英制 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体积 (l ↔ gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)</string>
+    <string name="units_systems_detail">• 公制 ↔ 英制 (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• 温度 (°C ↔ °F)\n• 体积 (l ↔ gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)\n• 电压 (mV, V, kV)\n• 电流 (µA, mA, A)\n• 功率 (mW, W, kW, MW)\n• 电荷 (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">屏幕尺寸与缩放</string>
@@ -291,6 +318,10 @@
     <string name="converter_keywords_volume">体积,容积,容量,液体</string>
     <string name="converter_keywords_data">数据,存储,容量,大小</string>
     <string name="converter_keywords_time">时间,时长</string>
+    <string name="converter_keywords_voltage">电压,伏特,电势</string>
+    <string name="converter_keywords_current">电流,安培,电</string>
+    <string name="converter_keywords_power">功率,电功率,瓦特</string>
+    <string name="converter_keywords_charge">电荷,电量,电池,容量</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">米,公尺,m,长度,距离,公制</string>
@@ -315,4 +346,16 @@
     <string name="unit_keywords_minute">分钟,分,min,时间,时长</string>
     <string name="unit_keywords_hour">小时,时,h,hr,时间,时长</string>
     <string name="unit_keywords_day">天,日,d,时间,时长</string>
+    <string name="unit_keywords_volt">伏特,伏,v,volt,电压,电势</string>
+    <string name="unit_keywords_millivolt">毫伏,mv,millivolt,电压</string>
+    <string name="unit_keywords_kilovolt">千伏,kv,kilovolt,电压,高压</string>
+    <string name="unit_keywords_ampere">安培,安,a,ampere,电流</string>
+    <string name="unit_keywords_milliampere">毫安,ma,milliampere,电流</string>
+    <string name="unit_keywords_microampere">微安,µa,μa,ua,microampere,电流</string>
+    <string name="unit_keywords_watt">瓦特,瓦,w,watt,功率,电功率</string>
+    <string name="unit_keywords_milliwatt">毫瓦,mw,milliwatt,功率</string>
+    <string name="unit_keywords_kilowatt">千瓦,kw,kilowatt,功率</string>
+    <string name="unit_keywords_megawatt">兆瓦,mw,megawatt,功率</string>
+    <string name="unit_keywords_milliampere_hour">毫安时,mah,电荷,电量,电池,容量</string>
+    <string name="unit_keywords_ampere_hour">安时,安培小时,ah,电荷,电量,电池,容量</string>
 </resources>

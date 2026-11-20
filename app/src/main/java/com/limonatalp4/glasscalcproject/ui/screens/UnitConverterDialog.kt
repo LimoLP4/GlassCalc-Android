@@ -58,10 +58,14 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Straighten
@@ -162,8 +166,9 @@ fun UnitConverterDialog(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategoryIndex by rememberSaveable { mutableIntStateOf(0) }
     val categories = UnitCategory.entries
+    val safeCategoryIndex = selectedCategoryIndex.coerceIn(0, categories.lastIndex)
 
-    val currentCategory = categories[selectedCategoryIndex]
+    val currentCategory = categories[safeCategoryIndex]
     val conversionsInCategory = remember(currentCategory) {
         UnitConverter.CONVERSIONS.filter { it.category == currentCategory }
     }
@@ -406,7 +411,11 @@ fun UnitConverterDialog(
                     Triple(UnitCategory.TEMPERATURE, Icons.Default.Thermostat, R.string.cat_temp),
                     Triple(UnitCategory.VOLUME, Icons.Default.Opacity, R.string.cat_volume),
                     Triple(UnitCategory.DATA, Icons.Default.Storage, R.string.cat_data),
-                    Triple(UnitCategory.TIME, Icons.Default.Schedule, R.string.cat_time)
+                    Triple(UnitCategory.TIME, Icons.Default.Schedule, R.string.cat_time),
+                    Triple(UnitCategory.VOLTAGE, Icons.Default.Bolt, R.string.cat_voltage),
+                    Triple(UnitCategory.CURRENT, Icons.Default.ElectricalServices, R.string.cat_current),
+                    Triple(UnitCategory.POWER, Icons.Default.Power, R.string.cat_power),
+                    Triple(UnitCategory.CHARGE, Icons.Default.BatteryChargingFull, R.string.cat_charge)
                 )
                 val categoryPillItems = categoryTabs.map { (cat, icon, shortLabelRes) ->
                     GlassPillTabItem(
@@ -418,7 +427,7 @@ fun UnitConverterDialog(
 
                 GlassAutoCenterPillTabBar(
                     items = categoryPillItems,
-                    selectedIndex = selectedCategoryIndex,
+                    selectedIndex = safeCategoryIndex,
                     onSelectIndex = { index ->
                         val cat = categoryTabs[index].first
                         triggerHaptic()
@@ -441,7 +450,7 @@ fun UnitConverterDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 AnimatedContent(
-                        targetState = selectedCategoryIndex,
+                        targetState = safeCategoryIndex,
                         transitionSpec = {
                             if (targetState > initialState) {
                                 (slideInHorizontally(tween(200, easing = FastOutSlowInEasing)) { width -> width / 4 } +
@@ -478,7 +487,7 @@ fun UnitConverterDialog(
                                     .heightIn(max = 240.dp)
                             ) {
                                 items(pairs, key = { "${it.unitFrom}_${it.unitTo}" }) { pair ->
-                                    val isSelected = pair == currentPair && targetIndex == selectedCategoryIndex
+                                    val isSelected = pair == currentPair && targetIndex == safeCategoryIndex
 
                                     GlassPillOptionContainer(
                                         selected = isSelected,

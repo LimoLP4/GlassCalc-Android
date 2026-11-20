@@ -52,6 +52,10 @@
     <string name="cat_volume">Объем</string>
     <string name="cat_data">Данные</string>
     <string name="cat_time">Время</string>
+    <string name="cat_voltage">Напряжение</string>
+    <string name="cat_current">Сила тока</string>
+    <string name="cat_power">Мощность</string>
+    <string name="cat_charge">Заряд</string>
     <string name="converter_select_pair">Выберите конвертацию:</string>
     <string name="converter_input_label">Ввод (%s):</string>
     <string name="converter_swap_direction">Поменять направление</string>
@@ -73,6 +77,17 @@
     <string name="unit_min_s">Минуты ↔ Секунды (min ↔ s)</string>
     <string name="unit_h_min">Часы ↔ Минуты (h ↔ min)</string>
     <string name="unit_d_h">Дни ↔ Часы (d ↔ h)</string>
+    <string name="unit_v_mv">Вольт ↔ Милливольт (V ↔ mV)</string>
+    <string name="unit_kv_v">Киловольт ↔ Вольт (kV ↔ V)</string>
+    <string name="unit_kv_mv">Киловольт ↔ Милливольт (kV ↔ mV)</string>
+    <string name="unit_a_ma">Ампер ↔ Миллиампер (A ↔ mA)</string>
+    <string name="unit_ma_ua">Миллиампер ↔ Микроампер (mA ↔ µA)</string>
+    <string name="unit_a_ua">Ампер ↔ Микроампер (A ↔ µA)</string>
+    <string name="unit_w_mw">Ватт ↔ Милливатт (W ↔ mW)</string>
+    <string name="unit_kw_w">Киловатт ↔ Ватт (kW ↔ W)</string>
+    <string name="unit_mw_kw">Мегаватт ↔ Киловатт (MW ↔ kW)</string>
+    <string name="unit_mw_w">Мегаватт ↔ Ватт (MW ↔ W)</string>
+    <string name="unit_mah_ah">Миллиампер-час ↔ Ампер-час (mAh ↔ Ah)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">Метр</string>
@@ -97,6 +112,18 @@
     <string name="unit_name_minutes">Минуты</string>
     <string name="unit_name_hours">Часы</string>
     <string name="unit_name_days">Дни</string>
+    <string name="unit_name_volt">Вольт</string>
+    <string name="unit_name_millivolt">Милливольт</string>
+    <string name="unit_name_kilovolt">Киловольт</string>
+    <string name="unit_name_ampere">Ампер</string>
+    <string name="unit_name_milliampere">Миллиампер</string>
+    <string name="unit_name_microampere">Микроампер</string>
+    <string name="unit_name_watt">Ватт</string>
+    <string name="unit_name_milliwatt">Милливатт</string>
+    <string name="unit_name_kilowatt">Киловатт</string>
+    <string name="unit_name_megawatt">Мегаватт</string>
+    <string name="unit_name_milliampere_hour">Миллиампер-час</string>
+    <string name="unit_name_ampere_hour">Ампер-час</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">Научные константы</string>
@@ -156,7 +183,7 @@
     <string name="angle_rad_label">Радианы (RAD)</string>
     <string name="angle_rad_desc">Полный круг = 2π</string>
     <string name="units_supported_systems">Поддерживаемые системы конвертации:</string>
-    <string name="units_systems_detail">• Метрическая ↔ Имперская (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Температура (°C ↔ °F)\n• Объем (l ↔ gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)</string>
+    <string name="units_systems_detail">• Метрическая ↔ Имперская (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Температура (°C ↔ °F)\n• Объем (l ↔ gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Размер экрана и масштабирование</string>
@@ -291,6 +318,10 @@
     <string name="converter_keywords_volume">объем,емкость,вместимость,жидкость</string>
     <string name="converter_keywords_data">данные,память,хранилище,размер</string>
     <string name="converter_keywords_time">время,длительность</string>
+    <string name="converter_keywords_voltage">напряжение,вольт,электричество</string>
+    <string name="converter_keywords_current">сила тока,ток,ампер,электричество</string>
+    <string name="converter_keywords_power">мощность,ватт,электричество</string>
+    <string name="converter_keywords_charge">заряд,электрический заряд,емкость,аккумулятор</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">метр,метры,м,длина,расстояние,метрическая</string>
@@ -315,4 +346,16 @@
     <string name="unit_keywords_minute">минута,минуты,мин,min,время,длительность</string>
     <string name="unit_keywords_hour">час,часы,ч,h,hr,время,длительность</string>
     <string name="unit_keywords_day">день,дни,сутки,д,d,время,длительность</string>
+    <string name="unit_keywords_volt">вольт,в,v,напряжение,электричество</string>
+    <string name="unit_keywords_millivolt">милливольт,мв,mv,напряжение,электричество</string>
+    <string name="unit_keywords_kilovolt">киловольт,кв,kv,напряжение,высокое напряжение</string>
+    <string name="unit_keywords_ampere">ампер,а,a,сила тока,ток,электричество</string>
+    <string name="unit_keywords_milliampere">миллиампер,ма,ma,сила тока,ток</string>
+    <string name="unit_keywords_microampere">микроампер,мка,µa,μa,ua,сила тока,ток</string>
+    <string name="unit_keywords_watt">ватт,вт,w,мощность,электричество</string>
+    <string name="unit_keywords_milliwatt">милливатт,мвт,mw,мощность</string>
+    <string name="unit_keywords_kilowatt">киловатт,квт,kw,мощность</string>
+    <string name="unit_keywords_megawatt">мегаватт,мвт,mw,мощность</string>
+    <string name="unit_keywords_milliampere_hour">миллиампер-час,мач,mah,заряд,емкость,аккумулятор,батарея</string>
+    <string name="unit_keywords_ampere_hour">ампер-час,ач,ah,заряд,емкость,аккумулятор,батарея</string>
 </resources>

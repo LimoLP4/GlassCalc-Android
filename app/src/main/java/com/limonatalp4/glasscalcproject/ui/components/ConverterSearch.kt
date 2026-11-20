@@ -119,7 +119,27 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
         UnitItem("millisecond", "ms", UnitCategory.TIME, R.string.unit_name_milliseconds, UnitConverter.CONVERSIONS.first { it.unitFrom == "s" && it.unitTo == "ms" }, R.string.unit_keywords_millisecond),
         UnitItem("minute", "min", UnitCategory.TIME, R.string.unit_name_minutes, UnitConverter.CONVERSIONS.first { it.unitFrom == "min" && it.unitTo == "s" }, R.string.unit_keywords_minute),
         UnitItem("hour", "h", UnitCategory.TIME, R.string.unit_name_hours, UnitConverter.CONVERSIONS.first { it.unitFrom == "h" && it.unitTo == "min" }, R.string.unit_keywords_hour),
-        UnitItem("day", "d", UnitCategory.TIME, R.string.unit_name_days, UnitConverter.CONVERSIONS.first { it.unitFrom == "d" && it.unitTo == "h" }, R.string.unit_keywords_day)
+        UnitItem("day", "d", UnitCategory.TIME, R.string.unit_name_days, UnitConverter.CONVERSIONS.first { it.unitFrom == "d" && it.unitTo == "h" }, R.string.unit_keywords_day),
+
+        // Voltage
+        UnitItem("volt", "V", UnitCategory.VOLTAGE, R.string.unit_name_volt, UnitConverter.CONVERSIONS.first { it.unitFrom == "V" && it.unitTo == "mV" }, R.string.unit_keywords_volt),
+        UnitItem("millivolt", "mV", UnitCategory.VOLTAGE, R.string.unit_name_millivolt, UnitConverter.CONVERSIONS.first { it.unitFrom == "V" && it.unitTo == "mV" }, R.string.unit_keywords_millivolt),
+        UnitItem("kilovolt", "kV", UnitCategory.VOLTAGE, R.string.unit_name_kilovolt, UnitConverter.CONVERSIONS.first { it.unitFrom == "kV" && it.unitTo == "V" }, R.string.unit_keywords_kilovolt),
+
+        // Current
+        UnitItem("ampere", "A", UnitCategory.CURRENT, R.string.unit_name_ampere, UnitConverter.CONVERSIONS.first { it.unitFrom == "A" && it.unitTo == "mA" }, R.string.unit_keywords_ampere),
+        UnitItem("milliampere", "mA", UnitCategory.CURRENT, R.string.unit_name_milliampere, UnitConverter.CONVERSIONS.first { it.unitFrom == "A" && it.unitTo == "mA" }, R.string.unit_keywords_milliampere),
+        UnitItem("microampere", "µA", UnitCategory.CURRENT, R.string.unit_name_microampere, UnitConverter.CONVERSIONS.first { it.unitFrom == "mA" && it.unitTo == "µA" }, R.string.unit_keywords_microampere),
+
+        // Power
+        UnitItem("watt", "W", UnitCategory.POWER, R.string.unit_name_watt, UnitConverter.CONVERSIONS.first { it.unitFrom == "W" && it.unitTo == "mW" }, R.string.unit_keywords_watt),
+        UnitItem("milliwatt", "mW", UnitCategory.POWER, R.string.unit_name_milliwatt, UnitConverter.CONVERSIONS.first { it.unitFrom == "W" && it.unitTo == "mW" }, R.string.unit_keywords_milliwatt),
+        UnitItem("kilowatt", "kW", UnitCategory.POWER, R.string.unit_name_kilowatt, UnitConverter.CONVERSIONS.first { it.unitFrom == "kW" && it.unitTo == "W" }, R.string.unit_keywords_kilowatt),
+        UnitItem("megawatt", "MW", UnitCategory.POWER, R.string.unit_name_megawatt, UnitConverter.CONVERSIONS.first { it.unitFrom == "MW" && it.unitTo == "kW" }, R.string.unit_keywords_megawatt),
+
+        // Charge
+        UnitItem("milliampere_hour", "mAh", UnitCategory.CHARGE, R.string.unit_name_milliampere_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }, R.string.unit_keywords_milliampere_hour),
+        UnitItem("ampere_hour", "Ah", UnitCategory.CHARGE, R.string.unit_name_ampere_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }, R.string.unit_keywords_ampere_hour)
     )
 }
 
@@ -407,6 +427,10 @@ fun categoryKeywordsResId(category: UnitCategory): Int = when (category) {
     UnitCategory.VOLUME -> R.string.converter_keywords_volume
     UnitCategory.DATA -> R.string.converter_keywords_data
     UnitCategory.TIME -> R.string.converter_keywords_time
+    UnitCategory.VOLTAGE -> R.string.converter_keywords_voltage
+    UnitCategory.CURRENT -> R.string.converter_keywords_current
+    UnitCategory.POWER -> R.string.converter_keywords_power
+    UnitCategory.CHARGE -> R.string.converter_keywords_charge
 }
 
 fun filterConversionPairs(

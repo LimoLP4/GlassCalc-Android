@@ -52,6 +52,10 @@
     <string name="cat_volume">Volume</string>
     <string name="cat_data">Data</string>
     <string name="cat_time">Time</string>
+    <string name="cat_voltage">Voltage</string>
+    <string name="cat_current">Current</string>
+    <string name="cat_power">Power</string>
+    <string name="cat_charge">Charge</string>
     <string name="converter_select_pair">Select conversion:</string>
     <string name="converter_input_label">Input (%s):</string>
     <string name="converter_swap_direction">Reverse direction</string>
@@ -73,6 +77,17 @@
     <string name="unit_min_s">Minutes ↔ Seconds (min ↔ s)</string>
     <string name="unit_h_min">Hours ↔ Minutes (h ↔ min)</string>
     <string name="unit_d_h">Days ↔ Hours (d ↔ h)</string>
+    <string name="unit_v_mv">Volt ↔ Millivolt (V ↔ mV)</string>
+    <string name="unit_kv_v">Kilovolt ↔ Volt (kV ↔ V)</string>
+    <string name="unit_kv_mv">Kilovolt ↔ Millivolt (kV ↔ mV)</string>
+    <string name="unit_a_ma">Ampere ↔ Milliampere (A ↔ mA)</string>
+    <string name="unit_ma_ua">Milliampere ↔ Microampere (mA ↔ µA)</string>
+    <string name="unit_a_ua">Ampere ↔ Microampere (A ↔ µA)</string>
+    <string name="unit_w_mw">Watt ↔ Milliwatt (W ↔ mW)</string>
+    <string name="unit_kw_w">Kilowatt ↔ Watt (kW ↔ W)</string>
+    <string name="unit_mw_kw">Megawatt ↔ Kilowatt (MW ↔ kW)</string>
+    <string name="unit_mw_w">Megawatt ↔ Watt (MW ↔ W)</string>
+    <string name="unit_mah_ah">Milliampere-hours ↔ Ampere-hours (mAh ↔ Ah)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">Meter</string>
@@ -97,6 +112,18 @@
     <string name="unit_name_minutes">Minutes</string>
     <string name="unit_name_hours">Hours</string>
     <string name="unit_name_days">Days</string>
+    <string name="unit_name_volt">Volt</string>
+    <string name="unit_name_millivolt">Millivolt</string>
+    <string name="unit_name_kilovolt">Kilovolt</string>
+    <string name="unit_name_ampere">Ampere</string>
+    <string name="unit_name_milliampere">Milliampere</string>
+    <string name="unit_name_microampere">Microampere</string>
+    <string name="unit_name_watt">Watt</string>
+    <string name="unit_name_milliwatt">Milliwatt</string>
+    <string name="unit_name_kilowatt">Kilowatt</string>
+    <string name="unit_name_megawatt">Megawatt</string>
+    <string name="unit_name_milliampere_hour">Milliampere-hours</string>
+    <string name="unit_name_ampere_hour">Ampere-hours</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">Scientific Constants</string>
@@ -156,7 +183,7 @@
     <string name="angle_rad_label">Radian (RAD)</string>
     <string name="angle_rad_desc">Full circle = 2π</string>
     <string name="units_supported_systems">Supported conversion systems:</string>
-    <string name="units_systems_detail">• Metric ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperature (°C ↔ °F)\n• Volume (l ↔ gal)\n• Data Storage (B, KB, MB, GB, TB)\n• Time (ms, s, min, h, d)</string>
+    <string name="units_systems_detail">• Metric ↔ US/Imperial (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• Temperature (°C ↔ °F)\n• Volume (l ↔ gal)\n• Data Storage (B, KB, MB, GB, TB)\n• Time (ms, s, min, h, d)\n• Voltage (mV, V, kV)\n• Current (µA, mA, A)\n• Power (mW, W, kW, MW)\n• Charge (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Screen Size &amp; Scaling</string>
@@ -291,6 +318,10 @@
     <string name="converter_keywords_volume">volume,capacity,liquid</string>
     <string name="converter_keywords_data">data,storage,memory,size</string>
     <string name="converter_keywords_time">time,duration,span</string>
+    <string name="converter_keywords_voltage">voltage,electric potential,volt,volts</string>
+    <string name="converter_keywords_current">current,electric current,ampere,amps,electricity</string>
+    <string name="converter_keywords_power">power,watt,wattage,electricity</string>
+    <string name="converter_keywords_charge">charge,electric charge,battery,capacity,ampere hours</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">meter,meters,metre,metres,m,length,distance,metric</string>
@@ -315,4 +346,16 @@
     <string name="unit_keywords_minute">minute,minutes,min,time,duration</string>
     <string name="unit_keywords_hour">hour,hours,hr,hrs,h,time,duration</string>
     <string name="unit_keywords_day">day,days,d,time,duration</string>
+    <string name="unit_keywords_volt">volt,volts,v,voltage,electric potential,electricity</string>
+    <string name="unit_keywords_millivolt">millivolt,millivolts,mv,voltage,electricity</string>
+    <string name="unit_keywords_kilovolt">kilovolt,kilovolts,kv,voltage,high voltage,electricity</string>
+    <string name="unit_keywords_ampere">ampere,amperes,amp,amps,a,current,electric current,electricity</string>
+    <string name="unit_keywords_milliampere">milliampere,milliamperes,ma,current,electric current,electricity</string>
+    <string name="unit_keywords_microampere">microampere,microamperes,µa,μa,ua,current,electric current</string>
+    <string name="unit_keywords_watt">watt,watts,w,power,wattage,electricity</string>
+    <string name="unit_keywords_milliwatt">milliwatt,milliwatts,mw,power,wattage</string>
+    <string name="unit_keywords_kilowatt">kilowatt,kilowatts,kw,power,wattage</string>
+    <string name="unit_keywords_megawatt">megawatt,megawatts,mw,power,wattage</string>
+    <string name="unit_keywords_milliampere_hour">milliampere hour,milliampere-hours,mah,charge,electric charge,battery,capacity</string>
+    <string name="unit_keywords_ampere_hour">ampere hour,ampere-hours,ah,charge,electric charge,battery,capacity</string>
 </resources>

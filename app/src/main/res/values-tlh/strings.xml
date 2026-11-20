@@ -52,6 +52,10 @@
     <string name="cat_volume">bal</string>
     <string name="cat_data">De\'</string>
     <string name="cat_time">poH</string>
+    <string name="cat_voltage">\'ul HoS</string>
+    <string name="cat_current">\'ul He</string>
+    <string name="cat_power">HoS</string>
+    <string name="cat_charge">\'ul pol</string>
     <string name="converter_select_pair">choH wIv:</string>
     <string name="converter_input_label">chel (%s):</string>
     <string name="converter_swap_direction">He choH</string>
@@ -73,6 +77,17 @@
     <string name="unit_min_s">tup ↔ lup (min ↔ s)</string>
     <string name="unit_h_min">rep ↔ tup (h ↔ min)</string>
     <string name="unit_d_h">jaj ↔ rep (d ↔ h)</string>
+    <string name="unit_v_mv">Volt ↔ Millivolt (V ↔ mV)</string>
+    <string name="unit_kv_v">Kilovolt ↔ Volt (kV ↔ V)</string>
+    <string name="unit_kv_mv">Kilovolt ↔ Millivolt (kV ↔ mV)</string>
+    <string name="unit_a_ma">Ampere ↔ Milliampere (A ↔ mA)</string>
+    <string name="unit_ma_ua">Milliampere ↔ Microampere (mA ↔ µA)</string>
+    <string name="unit_a_ua">Ampere ↔ Microampere (A ↔ µA)</string>
+    <string name="unit_w_mw">Watt ↔ Milliwatt (W ↔ mW)</string>
+    <string name="unit_kw_w">Kilowatt ↔ Watt (kW ↔ W)</string>
+    <string name="unit_mw_kw">Megawatt ↔ Kilowatt (MW ↔ kW)</string>
+    <string name="unit_mw_w">Megawatt ↔ Watt (MW ↔ W)</string>
+    <string name="unit_mah_ah">Milliampere-rep ↔ Ampere-rep (mAh ↔ Ah)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">\'uj</string>
@@ -97,6 +112,18 @@
     <string name="unit_name_minutes">tup</string>
     <string name="unit_name_hours">rep</string>
     <string name="unit_name_days">jaj</string>
+    <string name="unit_name_volt">Volt</string>
+    <string name="unit_name_millivolt">Millivolt</string>
+    <string name="unit_name_kilovolt">Kilovolt</string>
+    <string name="unit_name_ampere">Ampere</string>
+    <string name="unit_name_milliampere">Milliampere</string>
+    <string name="unit_name_microampere">Microampere</string>
+    <string name="unit_name_watt">Watt</string>
+    <string name="unit_name_milliwatt">Milliwatt</string>
+    <string name="unit_name_kilowatt">Kilowatt</string>
+    <string name="unit_name_megawatt">Megawatt</string>
+    <string name="unit_name_milliampere_hour">Milliampere-rep</string>
+    <string name="unit_name_ampere_hour">Ampere-rep</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">QeD ru\'Ha\'wI\'pu\'</string>
@@ -156,7 +183,7 @@
     <string name="angle_rad_label">RAD (2π)</string>
     <string name="angle_rad_desc">naQ gho = 2π</string>
     <string name="units_supported_systems">patmey:</string>
-    <string name="units_systems_detail">• Metric ↔ US (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• tuj (°C ↔ °F)\n• bal (l ↔ gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)</string>
+    <string name="units_systems_detail">• Metric ↔ US (m ↔ ft, cm ↔ in, km ↔ mi, kg ↔ lb)\n• tuj (°C ↔ °F)\n• bal (l ↔ gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)\n• \'ul HoS (mV, V, kV)\n• \'ul He (µA, mA, A)\n• HoS (mW, W, kW, MW)\n• \'ul pol (mAh, Ah)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">jIH tIn</string>
@@ -291,6 +318,10 @@
     <string name="converter_keywords_volume">bal,volume</string>
     <string name="converter_keywords_data">de\',ngaq,data</string>
     <string name="converter_keywords_time">poh,time</string>
+    <string name="converter_keywords_voltage">\'ul,hos,volt,voltage,spannung</string>
+    <string name="converter_keywords_current">\'ul,he,ampere,current,strom</string>
+    <string name="converter_keywords_power">hos,watt,power,leistung</string>
+    <string name="converter_keywords_charge">\'ul,pol,mah,ah,charge,ladung</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">meter,m,\'ab</string>
@@ -315,4 +346,16 @@
     <string name="unit_keywords_minute">tup,minute,min,poh</string>
     <string name="unit_keywords_hour">rep,hour,h,hr,poh</string>
     <string name="unit_keywords_day">jaj,day,d,poh</string>
+    <string name="unit_keywords_volt">volt,v,\'ul,hos,voltage,spannung</string>
+    <string name="unit_keywords_millivolt">millivolt,mv,\'ul,hos,voltage</string>
+    <string name="unit_keywords_kilovolt">kilovolt,kv,\'ul,hos,voltage</string>
+    <string name="unit_keywords_ampere">ampere,a,\'ul,he,current,strom</string>
+    <string name="unit_keywords_milliampere">milliampere,ma,\'ul,he,current</string>
+    <string name="unit_keywords_microampere">microampere,mikroampere,µa,μa,ua,\'ul,he,current</string>
+    <string name="unit_keywords_watt">watt,w,hos,power,leistung</string>
+    <string name="unit_keywords_milliwatt">milliwatt,mw,hos,power</string>
+    <string name="unit_keywords_kilowatt">kilowatt,kw,hos,power</string>
+    <string name="unit_keywords_megawatt">megawatt,mw,hos,power</string>
+    <string name="unit_keywords_milliampere_hour">milliampere-rep,mah,\'ul,pol,charge,ladung</string>
+    <string name="unit_keywords_ampere_hour">ampere-rep,ah,\'ul,pol,charge,ladung</string>
 </resources>
