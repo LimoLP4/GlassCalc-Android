@@ -94,6 +94,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.runtime.Composable
@@ -139,9 +140,11 @@ import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.ui.components.DialogAnimatedContent
+import com.limonatalp4.glasscalcproject.ui.components.GlassAutoCenterPillTabBar
 import com.limonatalp4.glasscalcproject.ui.components.GlassCardContainer
 import com.limonatalp4.glasscalcproject.ui.components.GlassDialogDefaults
 import com.limonatalp4.glasscalcproject.ui.components.GlassPillOptionContainer
+import com.limonatalp4.glasscalcproject.ui.components.GlassPillTabItem
 import com.limonatalp4.glasscalcproject.ui.components.GlassSurface
 import com.limonatalp4.glasscalcproject.ui.components.SettingsDevCard
 import com.limonatalp4.glasscalcproject.ui.components.SettingsInfoCard
@@ -150,6 +153,7 @@ import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchEmptyState
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchVisibility
 import com.limonatalp4.glasscalcproject.ui.components.SettingsUnitCard
 import com.limonatalp4.glasscalcproject.ui.components.pressScale
+import kotlin.math.roundToInt
 import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.components.rememberSettingsSearchVisibility
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
@@ -1615,163 +1619,26 @@ private fun SettingsTabBar(
     onSelectTab: (Int) -> Unit
 ) {
     val tabs = listOf(
-        Triple(0, Icons.Default.Palette, stringResource(R.string.title_appearance)),
-        Triple(1, Icons.Default.Straighten, stringResource(R.string.title_units)),
-        Triple(2, Icons.Default.DeveloperMode, stringResource(R.string.title_dev_options)),
-        Triple(3, Icons.Default.Info, stringResource(R.string.title_info)),
-        Triple(4, Icons.Default.Language, stringResource(R.string.tab_language))
+        GlassPillTabItem(Icons.Default.Palette, stringResource(R.string.title_appearance), "tab_settings_0"),
+        GlassPillTabItem(Icons.Default.Straighten, stringResource(R.string.title_units), "tab_settings_1"),
+        GlassPillTabItem(Icons.Default.DeveloperMode, stringResource(R.string.title_dev_options), "tab_settings_2"),
+        GlassPillTabItem(Icons.Default.Info, stringResource(R.string.title_info), "tab_settings_3"),
+        GlassPillTabItem(Icons.Default.Language, stringResource(R.string.tab_language), "tab_settings_4")
     )
 
-    val tabScrollState = rememberScrollState()
-    val density = LocalDensity.current
-    val tabWidths = remember { mutableStateMapOf<Int, androidx.compose.ui.unit.Dp>() }
-    var tabHeight by remember { mutableStateOf(0.dp) }
-
-    val spacing = 4.dp
-    val targetPosition = remember(selectedTab, tabWidths.toMap()) {
-        var pos = 0.dp
-        for (i in 0 until selectedTab) {
-            pos += (tabWidths[i] ?: 0.dp) + spacing
-        }
-        pos
-    }
-    val targetWidth = tabWidths[selectedTab] ?: 0.dp
-
-    val indicatorOffset by animateDpAsState(
-        targetValue = targetPosition,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "tab_indicator_offset"
+    GlassAutoCenterPillTabBar(
+        items = tabs,
+        selectedIndex = selectedTab,
+        onSelectIndex = onSelectTab,
+        isTiefschwarz = isTiefschwarz,
+        glassProps = LocalGlassProperties.current,
+        fillMaxWidth = false,
+        minTabHeight = 36.dp,
+        tabPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp, horizontal = 10.dp),
+        labelFontSize = 12.sp,
+        activeIndicatorColor = colorScheme.primaryContainer,
+        activeContentColor = if (isTiefschwarz) Color.White else colorScheme.onPrimaryContainer,
+        inactiveContentColor = if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
+        animationLabelPrefix = "settings_tab"
     )
-    val indicatorWidth by animateDpAsState(
-        targetValue = targetWidth,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "tab_indicator_width"
-    )
-    val activePillBgColor by animateColorAsState(
-        targetValue = colorScheme.primaryContainer,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "tab_active_pill_bg"
-    )
-
-    LaunchedEffect(selectedTab, targetPosition) {
-        if (targetWidth > 0.dp) {
-            val targetPx = with(density) { targetPosition.roundToPx() }
-            val offsetPaddingPx = with(density) { 28.dp.roundToPx() }
-            tabScrollState.animateScrollTo((targetPx - offsetPaddingPx).coerceAtLeast(0))
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .wrapContentWidth()
-            .clip(GlassDialogDefaults.PillShape)
-            .background(
-                GlassDialogDefaults.pillBarBackgroundColor(isTiefschwarz)
-            )
-            .border(
-                border = LocalGlassProperties.current.containerBorderStroke,
-                shape = GlassDialogDefaults.PillShape
-            )
-            .padding(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .wrapContentWidth()
-                .horizontalScroll(tabScrollState)
-        ) {
-            if (targetWidth > 0.dp) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .offset { IntOffset(indicatorOffset.roundToPx(), 0) }
-                        .width(indicatorWidth)
-                        .height(if (tabHeight > 0.dp) tabHeight else 36.dp)
-                        .clip(GlassDialogDefaults.PillShape)
-                        .background(activePillBgColor)
-                )
-            }
-
-            Row(
-                modifier = Modifier.wrapContentWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                tabs.forEach { (index, icon, label) ->
-                    val isSelected = selectedTab == index
-                    var isPressed by remember { mutableStateOf(false) }
-                    val scale by animateFloatAsState(
-                        targetValue = if (isPressed) 0.95f else 1.0f,
-                        animationSpec = tween(durationMillis = 80, easing = FastOutSlowInEasing),
-                        label = "tab_scale"
-                    )
-                    val tabTint by animateColorAsState(
-                        targetValue = if (isSelected) {
-                            if (isTiefschwarz) Color.White else colorScheme.onPrimaryContainer
-                        } else {
-                            if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant
-                        },
-                        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-                        label = "tab_${index}_tint"
-                    )
-
-                            val currentOnSelectTab by rememberUpdatedState(onSelectTab)
-                            Box(
-                                modifier = Modifier
-                                    .onSizeChanged { size ->
-                                        val w = with(density) { size.width.toDp() }
-                                        val h = with(density) { size.height.toDp() }
-                                        tabWidths[index] = w
-                                        if (h > tabHeight) tabHeight = h
-                                    }
-                                    .graphicsLayer {
-                                        scaleX = scale
-                                        scaleY = scale
-                                    }
-                                    .clip(GlassDialogDefaults.PillShape)
-                                    .pointerInput(index) {
-                                        detectTapGestures(
-                                            onPress = {
-                                                isPressed = true
-                                                try { awaitRelease() } finally { isPressed = false }
-                                            },
-                                            onTap = {
-                                                currentOnSelectTab(index)
-                                            }
-                                        )
-                                    }
-                            .padding(vertical = 8.dp, horizontal = 10.dp)
-                            .testTag("tab_settings_$index"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = tabTint,
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = label,
-                                fontSize = 12.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = tabTint,
-                                maxLines = 1,
-                                softWrap = false
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
