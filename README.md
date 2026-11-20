@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.3.3)
+### 🔄 Intermediate Updates (v1.2.0 - v1.3.4)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
@@ -45,7 +45,10 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Robust Math & Engine Core (v1.3.1):** Integrated crash-proof `evaluateSafely` protection layers for integrals and expanded unit conversions down to the Planck length.
 *   **Theme Logic & Consistency (v1.3.2):** Renamed "Deep Black" to "AMOLED", removed the redundant theme, and unified all border strokes and card shapes (pill design) across the app.
 *   **Battery Saver Integration (v1.3.2):** The "Automatic" theme now automatically switches to the AMOLED theme when the device's battery saver is active (does not affect Material You).
-*   **UI Hotfix & Polish (v1.3.3) (Latest):** Fixed pill shapes in settings (no more bulging), clipped rectangular ripples on pill buttons, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys (no more precise center-tapping required).
+*   **UI Hotfix & Polish (v1.3.3):** Fixed pill shapes in settings (no more bulging), clipped rectangular ripples on pill buttons, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys (no more precise center-tapping required).
+*   **Unified Graph Controls (v1.3.4):** Zoom and pan buttons (Left, Right, Zoom In, Zoom Out, Reset) are grouped inside a cohesive, translucent Liquid Glass pill container below the graph canvas.
+*   **Smart Auto-Centering Pill Bars (v1.3.4):** Tab bars in Settings and category bars in Unit Conversion automatically center the active selection as far as possible within the viewport without layout clipping or edge gaps.
+*   **Responsive Motion (v1.3.4) (Latest):** Fast, smoothly damped Compose animations (`NoBouncy` spring physics) ensure snappy interactions without overshooting.
 
 ## 🌍 Localization / Sprache
 
