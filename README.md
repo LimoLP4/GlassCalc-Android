@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.3.4)
+### 🔄 Intermediate Updates (v1.2.0 - v1.3.5)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
@@ -48,7 +48,8 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **UI Hotfix & Polish (v1.3.3):** Fixed pill shapes in settings (no more bulging), clipped rectangular ripples on pill buttons, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys (no more precise center-tapping required).
 *   **Unified Graph Controls (v1.3.4):** Zoom and pan buttons (Left, Right, Zoom In, Zoom Out, Reset) are grouped inside a cohesive, translucent Liquid Glass pill container below the graph canvas.
 *   **Smart Auto-Centering Pill Bars (v1.3.4):** Tab bars in Settings and category bars in Unit Conversion automatically center the active selection as far as possible within the viewport without layout clipping or edge gaps.
-*   **Responsive Motion (v1.3.4) (Latest):** Fast, smoothly damped Compose animations (`NoBouncy` spring physics) ensure snappy interactions without overshooting.
+*   **Responsive Motion (v1.3.4):** Fast, smoothly damped Compose animations (`NoBouncy` spring physics) ensure snappy interactions without overshooting.
+*   **Expanded Unit Categories (v1.3.5) (Latest):** Massively expanded the Unit Converter with new electrical (Voltage, Current, Power, Charge), extended volume (ml, cl, m³, tsp, fl oz, etc.), and additional units for length (cm, mm, nm), mass (metric ton), and temperature (Kelvin). All units are fully localized across all 10 languages.
 
 ## 🌍 Localization / Sprache
 
