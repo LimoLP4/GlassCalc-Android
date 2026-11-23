@@ -356,6 +356,7 @@
 
     <!-- Settings: Language Tab -->
     <string name="language_select_heading">Choisissez la langue :</string>
+    <string name="language_accordion_title">Choisir la langue</string>
     <string name="language_system">Langue du système (Par défaut)</string>
     <string name="language_german">Deutsch (Allemand)</string>
     <string name="language_english">English (Anglais)</string>

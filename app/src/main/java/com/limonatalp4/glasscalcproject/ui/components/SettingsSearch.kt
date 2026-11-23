@@ -415,6 +415,7 @@ fun rememberSettingsSearchVisibility(
     val bestInfoScore = scoredInfoCards.minOfOrNull { it.second }
 
     val languageTabTitle = stringResource(R.string.tab_language)
+    val languageAccordionTitle = stringResource(R.string.language_accordion_title)
     val languageKeywords = stringResource(R.string.settings_keywords_language)
     val scoredLanguages = Language.entries.mapIndexedNotNull { index, lang ->
         val label = stringResource(lang.stringResId)
@@ -434,7 +435,7 @@ fun rememberSettingsSearchVisibility(
         val score = scoreSettingsEntry(
             tokens = tokens,
             primaryNames = listOf(label),
-            secondaryTexts = listOf(languageTabTitle),
+            secondaryTexts = listOf(languageAccordionTitle, languageTabTitle),
             keywordStrings = listOf(nativeTokens, languageKeywords)
         ) ?: return@mapIndexedNotNull null
         Triple(lang, score, index)

@@ -356,6 +356,7 @@
 
     <!-- Settings: Language Tab -->
     <string name="language_select_heading">Hol yIwIv:</string>
+    <string name="language_accordion_title">Hol yIwIv</string>
     <string name="language_system">pat Hol (motlh)</string>
     <string name="language_german">DoyIchlan Hol (Deutsch)</string>
     <string name="language_english">DIvI\' Hol (English)</string>

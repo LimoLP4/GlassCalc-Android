@@ -356,6 +356,7 @@
 
     <!-- Settings: Language Tab -->
     <string name="language_select_heading">选择语言:</string>
+    <string name="language_accordion_title">选择语言</string>
     <string name="language_system">系统语言 (默认)</string>
     <string name="language_german">Deutsch (德语)</string>
     <string name="language_english">English (英语)</string>

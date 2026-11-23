@@ -270,6 +270,30 @@ class AppCrashRegressionTest {
         }
         composeTestRule.onNodeWithTag("radio_theme_DARK_MODE").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("radio_app_icon_BLUE").performScrollTo().assertIsDisplayed()
+
+        // Switch to Language tab: accordion initially collapsed
+        composeTestRule.onNodeWithTag("tab_settings_4").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_language_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_language_accordion").assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("radio_lang_GERMAN").fetchSemanticsNodes().isEmpty())
+
+        // Expand Language accordion
+        composeTestRule.onNodeWithTag("card_language_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_lang_GERMAN").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_lang_GERMAN").performScrollTo().assertIsDisplayed()
+
+        // Recreate activity -> Language tab and expanded Language accordion stay preserved
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.recreate()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_lang_GERMAN").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_lang_GERMAN").performScrollTo().assertIsDisplayed()
     }
 }
 

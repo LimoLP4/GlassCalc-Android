@@ -356,6 +356,7 @@
 
     <!-- Settings: Language Tab -->
     <string name="language_select_heading">भाषा चुनें:</string>
+    <string name="language_accordion_title">भाषा चुनें</string>
     <string name="language_system">सिस्टम भाषा (डिफ़ॉल्ट)</string>
     <string name="language_german">जर्मन (Deutsch)</string>
     <string name="language_english">अंग्रेज़ी (English)</string>

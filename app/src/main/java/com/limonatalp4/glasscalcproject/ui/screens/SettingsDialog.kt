@@ -215,9 +215,10 @@ fun SettingsDialog(
         mutableFloatStateOf(simulatedApiLevel.toFloat().coerceIn(sliderMin, sliderMax)) 
     }
 
-    // Accordion expansion states for Design tab
+    // Accordion expansion states for Design & Language tabs
     var themeAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var appIconAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var languageAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
     // Accordion expansion states for Info tab
     var apacheAccordionOpen by rememberSaveable { mutableStateOf(false) }
@@ -545,13 +546,14 @@ fun SettingsDialog(
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
+                                    languageAccordionOpen = isSearchActive || languageAccordionOpen,
+                                    onToggleLanguageAccordion = { languageAccordionOpen = !languageAccordionOpen },
                                     onSelectLanguage = onSelectLanguage,
                                     onDismiss = dialogTransition.dismiss,
                                     triggerHaptic = ::triggerHaptic,
                                     coroutineScope = coroutineScope,
                                     onSetDismissing = { if (it) dialogTransition.dismiss() },
-                                    visibleLanguages = searchVisibility.matchingLanguages,
-                                    showHeading = !isSearchActive
+                                    visibleLanguages = searchVisibility.matchingLanguages
                                 )
                             }
                         }
@@ -620,7 +622,7 @@ private fun AppearanceSection(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (visibleThemes.isNotEmpty()) {
-            AppearanceAccordionCard(
+            SettingsAccordionCard(
                 title = stringResource(id = R.string.theme_accordion_title),
                 expanded = themeAccordionOpen,
                 onToggle = onToggleThemeAccordion,
@@ -671,7 +673,7 @@ private fun AppearanceSection(
         }
 
         if (visibleAppIcons.isNotEmpty()) {
-            AppearanceAccordionCard(
+            SettingsAccordionCard(
                 title = stringResource(id = R.string.app_icon_accordion_title),
                 expanded = appIconAccordionOpen,
                 onToggle = onToggleAppIconAccordion,
@@ -701,7 +703,7 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun AppearanceAccordionCard(
+private fun SettingsAccordionCard(
     title: String,
     expanded: Boolean,
     onToggle: () -> Unit,
@@ -1725,24 +1727,29 @@ private fun LanguageSection(
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    languageAccordionOpen: Boolean,
+    onToggleLanguageAccordion: () -> Unit,
     onSelectLanguage: (String) -> Unit,
     onDismiss: () -> Unit,
     triggerHaptic: () -> Unit,
     coroutineScope: kotlinx.coroutines.CoroutineScope,
     onSetDismissing: (Boolean) -> Unit,
-    visibleLanguages: List<Language> = Language.entries,
-    showHeading: Boolean = true
+    visibleLanguages: List<Language> = Language.entries
 ) {
-    if (showHeading) {
-        Text(
-            text = stringResource(R.string.language_select_heading),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+    if (visibleLanguages.isEmpty()) return
+
+    SettingsAccordionCard(
+        title = stringResource(R.string.language_accordion_title),
+        expanded = languageAccordionOpen,
+        onToggle = onToggleLanguageAccordion,
+        isTiefschwarz = isTiefschwarz,
+        colorScheme = colorScheme,
+        glassProps = glassProps,
+        triggerHaptic = triggerHaptic,
+        cardTestTag = "card_language_accordion",
+        toggleButtonTestTag = "btn_toggle_language_accordion",
+        chevronLabel = "language_chevron_rotation"
+    ) {
         visibleLanguages.forEach { langOption ->
             val isSelected = when (langOption) {
                 Language.SYSTEM -> currentLanguage.isBlank() || currentLanguage.equals("SYSTEM", ignoreCase = true)
