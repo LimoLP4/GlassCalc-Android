@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.3.5)
+### 🔄 Intermediate Updates (v1.2.0 - v1.3.6)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
@@ -39,17 +39,15 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Graph System Overhaul (v1.3.0):** Completely rewrote the screen-to-math coordinate transformation for accurate point placement (P1/P2) and strict domain enforcement.
 *   **Keyboard Toggle & Landscape Fix (v1.3.0):** The keyboard button now opens and closes the keyboard. Fixed landscape layout where the keyboard covered the display.
 *   **UI Polish (v1.3.0):** Applied Liquid Glass pill styling to the graph's P1/P2 info panel, GitHub logo, and Apache License card.
-*   **Liquid Glass History Overhaul (v1.3.1):** Redesigned the History panel into a modern, floating pill-shaped container with seamless theme integration, an intuitive "X" close button with custom haptics, and outside-click (scrim) dismissal.
-*   **UI State Persistence & Rotation Fixes (v1.3.1):** Implemented `rememberSaveable` across the Hamburger Menu, History Panel, Settings Dialog, Unit Converter, and Graph Dialog to preserve active states during device rotation.
-*   **Landscape & Navigation Polish (v1.3.1):** Added smooth sizing transitions for landscape keyboards on narrow displays and ensured proper system window insets so the classic 3-button navigation bar never obscures header actions.
-*   **Robust Math & Engine Core (v1.3.1):** Integrated crash-proof `evaluateSafely` protection layers for integrals and expanded unit conversions down to the Planck length.
+*   **State Preservation (v1.3.1):** All dialogs (Settings, Graph, Unit Converter, History) and the Hamburger menu now remain open when the device is rotated.
+*   **History Panel Redesign (v1.3.1):** The history panel is now a floating Liquid Glass pill with an X-button and can be closed by tapping outside.
+*   **Performance Boost (v1.3.1):** Integrated Baseline Profiles, optimized Compose recomposition, and moved heavy calculations to background threads for smoother performance on all devices.
 *   **Theme Logic & Consistency (v1.3.2):** Renamed "Deep Black" to "AMOLED", removed the redundant theme, and unified all border strokes and card shapes (pill design) across the app.
 *   **Battery Saver Integration (v1.3.2):** The "Automatic" theme now automatically switches to the AMOLED theme when the device's battery saver is active (does not affect Material You).
-*   **UI Hotfix & Polish (v1.3.3):** Fixed pill shapes in settings (no more bulging), clipped rectangular ripples on pill buttons, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys (no more precise center-tapping required).
-*   **Unified Graph Controls (v1.3.4):** Zoom and pan buttons (Left, Right, Zoom In, Zoom Out, Reset) are grouped inside a cohesive, translucent Liquid Glass pill container below the graph canvas.
-*   **Smart Auto-Centering Pill Bars (v1.3.4):** Tab bars in Settings and category bars in Unit Conversion automatically center the active selection as far as possible within the viewport without layout clipping or edge gaps.
-*   **Responsive Motion (v1.3.4):** Fast, smoothly damped Compose animations (`NoBouncy` spring physics) ensure snappy interactions without overshooting.
-*   **Expanded Unit Categories (v1.3.5) (Latest):** Massively expanded the Unit Converter with new electrical (Voltage, Current, Power, Charge), extended volume (ml, cl, m³, tsp, fl oz, etc.), and additional units for length (cm, mm, nm), mass (metric ton), and temperature (Kelvin). All units are fully localized across all 10 languages.
+*   **UI Hotfix & Polish (v1.3.3):** Fixed pill shapes in settings, clipped rectangular ripples, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys.
+*   **Graph Control Pill (v1.3.4):** Wrapped the graph navigation and zoom buttons into a unified Liquid Glass pill container.
+*   **Expanded Unit Categories (v1.3.5):** Massively expanded the Unit Converter with new electrical (Voltage, Current, Power, Charge), extended volume (ml, cl, m³, tsp, fl oz, etc.), and additional units for length (cm, mm, nm), mass (metric ton), and temperature (Kelvin). All units are fully localized across all 10 languages.
+*   **Advanced Unit Categories & App Icons (v1.3.6) (Latest):** Added even more unit categories (Angle, Speed, Resistance, Frequency, Data Rate, Energy, Pressure). Introduced multiple selectable App Icons (including Material You support) via `activity-alias`. Implemented collapsible accordion menus for all settings tabs (Design, Language, Units) and the Unit Converter.
 
 ## 🌍 Localization / Sprache
 
@@ -59,6 +57,7 @@ Since **Version 1.2.8**, GlassCalc fully supports all these languages. The app a
 ## 🛠️ Tech Stack & App Information
 
 *   **Package Name / Application ID:** `com.limonatalp4.glasscalcproject`
+*   **Version:** 1.3.6
 *   **Language:** Kotlin
 *   **UI Framework:** Jetpack Compose (Material 3)
 *   **Architecture:** MVVM (Model-View-ViewModel)
@@ -67,7 +66,7 @@ Since **Version 1.2.8**, GlassCalc fully supports all these languages. The app a
 *   **Target SDK:** Android 17 (API 37)
 *   **Compile SDK:** Android 17 (API 37)
 *   **ABI Support:** `arm64-v8a` and `armeabi-v7a`
-*   **Optimization:** R8 Minification (ProGuard) enabled for release builds.
+*   **Optimization:** R8 Minification (ProGuard) and Baseline Profiles enabled for release builds.
 
 ## ⚠️ Experimental Disclaimer
 
