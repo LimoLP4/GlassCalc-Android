@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,6 +96,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.runtime.Composable
@@ -135,6 +138,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.window.core.layout.WindowSizeClass
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.BuildConfig
@@ -165,6 +169,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SettingsDialog(
     currentTheme: AppTheme,
+    currentAppIcon: AppIconOption = AppIconOption.CLASSIC,
     currentLanguage: String,
     effectiveApiLevel: Int,
     currentAngleMode: AngleMode,
@@ -177,6 +182,7 @@ fun SettingsDialog(
     autoResultEnabled: Boolean,
     lifecycleStatus: String,
     onSelectTheme: (AppTheme) -> Unit,
+    onSelectAppIcon: (AppIconOption) -> Unit = {},
     onSelectAngleMode: (AngleMode) -> Unit,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
     onToggleHapticFeedback: (Boolean) -> Unit,
@@ -466,13 +472,16 @@ fun SettingsDialog(
                             when (targetTab) {
                                 0 -> AppearanceSection(
                                     currentTheme = currentTheme,
+                                    currentAppIcon = currentAppIcon,
                                     effectiveApiLevel = effectiveApiLevel,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
                                     onSelectTheme = onSelectTheme,
+                                    onSelectAppIcon = onSelectAppIcon,
                                     triggerHaptic = ::triggerHaptic,
                                     visibleThemes = searchVisibility.matchingThemes,
+                                    visibleAppIcons = searchVisibility.matchingAppIcons,
                                     showHeading = !isSearchActive
                                 )
                                 1 -> UnitsSection(
@@ -584,18 +593,21 @@ fun SettingsDialog(
 @Composable
 private fun AppearanceSection(
     currentTheme: AppTheme,
+    currentAppIcon: AppIconOption,
     effectiveApiLevel: Int,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     onSelectTheme: (AppTheme) -> Unit,
+    onSelectAppIcon: (AppIconOption) -> Unit,
     triggerHaptic: () -> Unit,
     visibleThemes: List<AppTheme> = AppTheme.entries,
+    visibleAppIcons: List<AppIconOption> = AppIconOption.entries,
     showHeading: Boolean = true
 ) {
-    if (showHeading) {
+    if (showHeading && visibleThemes.isNotEmpty()) {
         Text(
-            text = androidx.compose.ui.res.stringResource(id = R.string.theme_select_heading),
+            text = stringResource(id = R.string.theme_select_heading),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
@@ -604,45 +616,200 @@ private fun AppearanceSection(
         Spacer(modifier = Modifier.height(10.dp))
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        visibleThemes.forEach { themeOption ->
-            val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
-            val isSupported = !isMaterialYou || effectiveApiLevel >= 31
-            val isSelected = currentTheme == themeOption && isSupported
+    if (visibleThemes.isNotEmpty()) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            visibleThemes.forEach { themeOption ->
+                val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
+                val isSupported = !isMaterialYou || effectiveApiLevel >= 31
+                val isSelected = currentTheme == themeOption && isSupported
 
-            val themeLabel = when (themeOption) {
-                AppTheme.MATERIAL_YOU -> stringResource(id = R.string.theme_material_you)
-                AppTheme.AUTOMATIC -> stringResource(id = R.string.theme_automatic)
-                AppTheme.WHITE_MODE -> stringResource(id = R.string.theme_white_mode)
-                AppTheme.STANDARD_DARK -> stringResource(id = R.string.theme_standard_dark)
-                AppTheme.DARK_MODE -> stringResource(id = R.string.theme_dark_mode)
+                val themeLabel = when (themeOption) {
+                    AppTheme.MATERIAL_YOU -> stringResource(id = R.string.theme_material_you)
+                    AppTheme.AUTOMATIC -> stringResource(id = R.string.theme_automatic)
+                    AppTheme.WHITE_MODE -> stringResource(id = R.string.theme_white_mode)
+                    AppTheme.STANDARD_DARK -> stringResource(id = R.string.theme_standard_dark)
+                    AppTheme.DARK_MODE -> stringResource(id = R.string.theme_dark_mode)
+                }
+                val amoledDesc = if (themeOption == AppTheme.DARK_MODE) {
+                    stringResource(id = R.string.theme_amoled_desc)
+                } else null
+                val unsupportedError = if (!isSupported) {
+                    stringResource(id = R.string.theme_material_you_unsupported, effectiveApiLevel)
+                } else null
+
+                SettingsPillOption(
+                    selected = isSelected,
+                    onClick = {
+                        triggerHaptic()
+                        onSelectTheme(themeOption)
+                    },
+                    title = themeLabel,
+                    description = amoledDesc,
+                    errorText = unsupportedError,
+                    enabled = isSupported,
+                    glassProps = glassProps,
+                    testTag = "radio_theme_${themeOption.name}",
+                    descriptionTestTag = if (amoledDesc != null) "text_theme_amoled_desc" else null,
+                    errorTestTag = if (unsupportedError != null) "text_material_you_unsupported" else null
+                )
             }
-            val amoledDesc = if (themeOption == AppTheme.DARK_MODE) {
-                stringResource(id = R.string.theme_amoled_desc)
-            } else null
-            val unsupportedError = if (!isSupported) {
-                stringResource(id = R.string.theme_material_you_unsupported, effectiveApiLevel)
-            } else null
-
-            SettingsPillOption(
-                selected = isSelected,
-                onClick = {
-                    triggerHaptic()
-                    onSelectTheme(themeOption)
-                },
-                title = themeLabel,
-                description = amoledDesc,
-                errorText = unsupportedError,
-                enabled = isSupported,
-                glassProps = glassProps,
-                testTag = "radio_theme_${themeOption.name}",
-                descriptionTestTag = if (amoledDesc != null) "text_theme_amoled_desc" else null,
-                errorTestTag = if (unsupportedError != null) "text_material_you_unsupported" else null
-            )
         }
+    }
+
+    if (visibleThemes.isNotEmpty() && visibleAppIcons.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(18.dp))
+    }
+
+    if (visibleAppIcons.isNotEmpty()) {
+        Text(
+            text = stringResource(id = R.string.app_icon_select_heading),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f),
+            modifier = Modifier.testTag("heading_app_icon")
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            visibleAppIcons.forEach { iconOption ->
+                val isSelected = currentAppIcon == iconOption
+                AppIconPillOption(
+                    iconOption = iconOption,
+                    selected = isSelected,
+                    onClick = {
+                        triggerHaptic()
+                        onSelectAppIcon(iconOption)
+                    },
+                    glassProps = glassProps
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppIconPillOption(
+    iconOption: AppIconOption,
+    selected: Boolean,
+    onClick: () -> Unit,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties
+) {
+    val label = stringResource(id = iconOption.labelResId)
+    val description = iconOption.descriptionResId?.let { stringResource(id = it) }
+
+    GlassPillOptionContainer(
+        selected = selected,
+        onClick = onClick,
+        glassProps = glassProps,
+        modifier = Modifier.testTag("radio_app_icon_${iconOption.name}"),
+        minHeight = GlassDialogDefaults.PillOptionExpandedMinHeight,
+        contentPadding = GlassDialogDefaults.PillOptionPadding,
+        animationLabel = "pill_app_icon_${iconOption.name}"
+    ) { textColor ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = selected,
+                onClick = null,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colorScheme.primary,
+                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            AppIconPreviewBadge(
+                iconOption = iconOption,
+                selected = selected,
+                glassProps = glassProps
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp, end = 4.dp)
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 14.5.sp,
+                    lineHeight = 18.sp,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                    color = textColor,
+                    maxLines = if (description != null) 1 else 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                if (description != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = description,
+                        fontSize = 11.5.sp,
+                        lineHeight = 14.sp,
+                        color = if (selected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppIconPreviewBadge(
+    iconOption: AppIconOption,
+    selected: Boolean,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties
+) {
+    val previewShape = RoundedCornerShape(12.dp)
+    val borderColor = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        glassProps.buttonBorderColor
+    }
+
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(previewShape)
+            .border(
+                width = if (selected) 1.5.dp else 1.dp,
+                color = borderColor,
+                shape = previewShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = iconOption.backgroundResId),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Image(
+            painter = painterResource(id = iconOption.foregroundResId),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = 1.45f
+                    scaleY = 1.45f
+                }
+        )
     }
 }
 

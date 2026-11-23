@@ -120,6 +120,7 @@ import androidx.compose.ui.res.stringResource
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.limonatalp4.glasscalcproject.ui.components.ButtonType
@@ -173,9 +174,11 @@ fun CalculatorScreen(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val appIconBitmap = remember(context) {
+    val currentAppIcon by viewModel.currentAppIcon.collectAsState()
+    val appIconBitmap = remember(context, currentAppIcon) {
         runCatching {
-            val drawable = context.packageManager.getApplicationIcon(context.packageName)
+            val drawable = ContextCompat.getDrawable(context, currentAppIcon.iconResId)
+                ?: context.packageManager.getApplicationIcon(context.packageName)
             drawable.toBitmap(128, 128).asImageBitmap()
         }.getOrNull()
     }
@@ -777,6 +780,7 @@ fun CalculatorScreen(
             val currentLanguage by viewModel.language.collectAsState()
             SettingsDialog(
                 currentTheme = currentTheme,
+                currentAppIcon = currentAppIcon,
                 currentLanguage = currentLanguage,
                 effectiveApiLevel = viewModel.getEffectiveApiLevel(),
                 currentAngleMode = angleMode,
@@ -788,6 +792,7 @@ fun CalculatorScreen(
                 hapticIntensity = hapticIntensity,
                 lifecycleStatus = lifecycleStatus,
                 onSelectTheme = { theme -> viewModel.setTheme(theme) },
+                onSelectAppIcon = { icon -> viewModel.setAppIcon(icon) },
                 onSelectAngleMode = { mode ->
                     if (mode != angleMode) viewModel.toggleAngleMode()
                 },

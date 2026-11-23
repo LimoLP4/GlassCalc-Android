@@ -286,6 +286,14 @@
     <string name="theme_dark_mode">AMOLED</string>
     <string name="theme_amoled_desc">Noir pur pour une économie de batterie maximale sur les écrans OLED.</string>
     <string name="theme_material_you_unsupported">Incompatible avec cette version d\'Android (API 31+ requise, active : API %d)</string>
+    <string name="app_icon_select_heading">Icône de l\'app :</string>
+    <string name="app_icon_classic">Classique (Sombre)</string>
+    <string name="app_icon_material_you">Material You (Monet)</string>
+    <string name="app_icon_material_you_desc">Icône monochrome : s\'adapte aux couleurs système dès Android 13.</string>
+    <string name="app_icon_blue">Bleu saphir</string>
+    <string name="app_icon_purple">Violet améthyste</string>
+    <string name="app_icon_green">Vert émeraude</string>
+    <string name="app_icon_red">Rouge rubis</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Mode d\'angle par défaut pour la trigonométrie :</string>
@@ -403,6 +411,13 @@
     <string name="settings_keywords_theme_white">clair,blanc,jour,lumière,light,white</string>
     <string name="settings_keywords_theme_standard_dark">sombre,nuit,gris,standard,dark</string>
     <string name="settings_keywords_theme_dark">amoled,sombre,noir,nuit,dark</string>
+    <string name="settings_keywords_app_icon">icône,app-icon,lanceur,accueil,symbole,couleur</string>
+    <string name="settings_keywords_app_icon_classic">classique,standard,sombre,noir</string>
+    <string name="settings_keywords_app_icon_material_you">material you,monet,monochrome,dynamique,couleurs système</string>
+    <string name="settings_keywords_app_icon_blue">bleu,saphir,cyan</string>
+    <string name="settings_keywords_app_icon_purple">violet,améthyste,pourpre</string>
+    <string name="settings_keywords_app_icon_green">vert,émeraude,menthe</string>
+    <string name="settings_keywords_app_icon_red">rouge,rubis,carmin</string>
     <string name="settings_keywords_units">unités,angle,angles,trigonométrie,conversion</string>
     <string name="settings_keywords_angle_deg">deg,degré,degrés,360</string>
     <string name="settings_keywords_angle_rad">rad,radian,radians,pi,2pi</string>

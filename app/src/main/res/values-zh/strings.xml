@@ -286,6 +286,14 @@
     <string name="theme_dark_mode">AMOLED</string>
     <string name="theme_amoled_desc">纯黑背景，可在 OLED 屏幕上实现最大程度省电。</string>
     <string name="theme_material_you_unsupported">当前 Android 版本不支持 (需要 API 31+，当前: API %d)</string>
+    <string name="app_icon_select_heading">应用图标:</string>
+    <string name="app_icon_classic">经典 (深色)</string>
+    <string name="app_icon_material_you">Material You (Monet)</string>
+    <string name="app_icon_material_you_desc">单色图标 — 在 Android 13+ 上自动适配系统动态配色。</string>
+    <string name="app_icon_blue">宝石蓝</string>
+    <string name="app_icon_purple">紫水晶</string>
+    <string name="app_icon_green">祖母绿</string>
+    <string name="app_icon_red">红宝石</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">三角函数默认角度模式:</string>
@@ -403,6 +411,13 @@
     <string name="settings_keywords_theme_white">浅色,白色,日间,明亮,light,white</string>
     <string name="settings_keywords_theme_standard_dark">深色,夜间,灰色,标准,dark</string>
     <string name="settings_keywords_theme_dark">amoled,深色,纯黑,夜间,极黑,dark</string>
+    <string name="settings_keywords_app_icon">应用图标,图标,icon,桌面,启动器,颜色</string>
+    <string name="settings_keywords_app_icon_classic">经典,默认,深色,黑色</string>
+    <string name="settings_keywords_app_icon_material_you">material you,monet,单色,动态配色,主题图标</string>
+    <string name="settings_keywords_app_icon_blue">蓝色,宝石蓝,青色,blue</string>
+    <string name="settings_keywords_app_icon_purple">紫色,紫水晶,紫罗兰,purple</string>
+    <string name="settings_keywords_app_icon_green">绿色,祖母绿,薄荷绿,green</string>
+    <string name="settings_keywords_app_icon_red">红色,红宝石,深红,red</string>
     <string name="settings_keywords_units">单位,角度,三角函数,角度制,弧度制,转换</string>
     <string name="settings_keywords_angle_deg">deg,度,角度,角度制,360</string>
     <string name="settings_keywords_angle_rad">rad,弧度,弧度制,pi,2pi</string>

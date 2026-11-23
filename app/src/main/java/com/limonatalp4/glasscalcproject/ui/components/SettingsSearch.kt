@@ -62,6 +62,7 @@ import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
@@ -75,6 +76,7 @@ enum class SettingsInfoCard { VERSION, GITHUB, OSS, APACHE }
 @Immutable
 data class SettingsSearchVisibility(
     val matchingThemes: List<AppTheme>,
+    val matchingAppIcons: List<AppIconOption> = AppIconOption.entries,
     val showDegCard: Boolean,
     val showRadCard: Boolean,
     val showUnitsSystemsCard: Boolean,
@@ -96,7 +98,7 @@ data class SettingsSearchVisibility(
     val bestTabIndex: Int? = null
 ) {
     val hasAnyAppearanceMatch: Boolean
-        get() = matchingThemes.isNotEmpty()
+        get() = matchingThemes.isNotEmpty() || matchingAppIcons.isNotEmpty()
 
     val hasAnyUnitsMatch: Boolean
         get() = showDegCard || showRadCard || showUnitsSystemsCard
@@ -164,6 +166,7 @@ fun rememberSettingsSearchVisibility(
     if (tokens.isEmpty()) {
         return SettingsSearchVisibility(
             matchingThemes = AppTheme.entries,
+            matchingAppIcons = AppIconOption.entries,
             showDegCard = true,
             showRadCard = true,
             showUnitsSystemsCard = true,
@@ -220,7 +223,39 @@ fun rememberSettingsSearchVisibility(
         Triple(theme, score, index)
     }.sortedWith(compareBy<Triple<AppTheme, Int, Int>> { it.second }.thenBy { it.third })
     val matchingThemes = scoredThemes.map { it.first }
-    val bestAppearanceScore = scoredThemes.minOfOrNull { it.second }
+    val bestThemeScore = scoredThemes.minOfOrNull { it.second }
+
+    val appIconHeading = stringResource(R.string.app_icon_select_heading)
+    val appIconKeywords = stringResource(R.string.settings_keywords_app_icon)
+    val appIconKwClassic = stringResource(R.string.settings_keywords_app_icon_classic)
+    val appIconKwMaterialYou = stringResource(R.string.settings_keywords_app_icon_material_you)
+    val appIconKwBlue = stringResource(R.string.settings_keywords_app_icon_blue)
+    val appIconKwPurple = stringResource(R.string.settings_keywords_app_icon_purple)
+    val appIconKwGreen = stringResource(R.string.settings_keywords_app_icon_green)
+    val appIconKwRed = stringResource(R.string.settings_keywords_app_icon_red)
+
+    val scoredAppIcons = AppIconOption.entries.mapIndexedNotNull { index, iconOption ->
+        val label = stringResource(iconOption.labelResId)
+        val extraDesc = iconOption.descriptionResId?.let { listOf(stringResource(it)) }.orEmpty()
+        val iconKw = when (iconOption) {
+            AppIconOption.CLASSIC -> appIconKwClassic
+            AppIconOption.MATERIAL_YOU -> appIconKwMaterialYou
+            AppIconOption.BLUE -> appIconKwBlue
+            AppIconOption.PURPLE -> appIconKwPurple
+            AppIconOption.GREEN -> appIconKwGreen
+            AppIconOption.RED -> appIconKwRed
+        }
+        val score = scoreSettingsEntry(
+            tokens = tokens,
+            primaryNames = listOf(label),
+            secondaryTexts = extraDesc + listOf(appIconHeading, appearanceTabTitle),
+            keywordStrings = listOf(iconKw, appIconKeywords, appearanceKeywords)
+        ) ?: return@mapIndexedNotNull null
+        Triple(iconOption, score, index)
+    }.sortedWith(compareBy<Triple<AppIconOption, Int, Int>> { it.second }.thenBy { it.third })
+    val matchingAppIcons = scoredAppIcons.map { it.first }
+    val bestAppIconScore = scoredAppIcons.minOfOrNull { it.second }
+    val bestAppearanceScore = listOfNotNull(bestThemeScore, bestAppIconScore).minOfOrNull { it }
 
     val unitsTabTitle = stringResource(R.string.title_units)
     val unitsHeading = stringResource(R.string.units_angle_heading)
@@ -415,6 +450,7 @@ fun rememberSettingsSearchVisibility(
 
     return SettingsSearchVisibility(
         matchingThemes = matchingThemes,
+        matchingAppIcons = matchingAppIcons,
         showDegCard = degScore != null,
         showRadCard = radScore != null,
         showUnitsSystemsCard = systemsScore != null,

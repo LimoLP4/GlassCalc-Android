@@ -20,9 +20,11 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
 import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
+import com.limonatalp4.glasscalcproject.ui.util.AppIconManager
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.domain.evaluator.EvaluationResult
 import com.limonatalp4.glasscalcproject.domain.evaluator.ExpressionEvaluator
@@ -235,6 +237,9 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             pref
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.AUTOMATIC)
+
+    val currentAppIcon: StateFlow<AppIconOption> = preferences.appIconFlow
+        .stateIn(viewModelScope, SharingStarted.Eagerly, AppIconOption.CLASSIC)
 
     private val _history = MutableStateFlow<List<CalculationHistoryItem>>(emptyList())
     val history: StateFlow<List<CalculationHistoryItem>> = _history.asStateFlow()
@@ -742,6 +747,13 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun setAppIcon(icon: AppIconOption) {
+        viewModelScope.launch {
+            preferences.setAppIcon(icon)
+            AppIconManager.applyAppIcon(appContext, icon)
+        }
+    }
+
     fun restoreHistoryItem(item: CalculationHistoryItem) {
         previewJob?.cancel()
         equalsJob?.cancel()
@@ -776,6 +788,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         HapticUtil.currentIntensityLevel = 5
         viewModelScope.launch {
             preferences.resetAll()
+            AppIconManager.applyAppIcon(appContext, AppIconOption.CLASSIC)
             _expression.value = ""
             _cursorPosition.value = 1
             _result.value = "0"

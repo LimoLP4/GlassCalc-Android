@@ -1,9 +1,12 @@
 package com.limonatalp4.glasscalcproject
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.pm.PackageManager
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -85,5 +88,59 @@ class CalculatorViewModelTest {
         assertFalse(vm.isGraphLocked.value)
         assertEquals("", vm.expression.value)
         assertEquals("0", vm.result.value)
+    }
+
+    @Test
+    fun testSetAppIconSwitchesLauncherAliasAndPersistsUntilReset() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val pm = app.packageManager
+        val vm = CalculatorViewModel(app)
+
+        assertEquals(AppIconOption.CLASSIC, vm.currentAppIcon.value)
+
+        vm.setAppIcon(AppIconOption.MATERIAL_YOU)
+        waitUntil {
+            vm.currentAppIcon.value == AppIconOption.MATERIAL_YOU &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.MATERIAL_YOU.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        }
+
+        AppIconOption.entries.forEach { option ->
+            val state = pm.getComponentEnabledSetting(ComponentName(app, option.aliasClassName))
+            if (option == AppIconOption.MATERIAL_YOU) {
+                assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED, state)
+            } else {
+                assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DISABLED, state)
+            }
+        }
+
+        vm.setAppIcon(AppIconOption.BLUE)
+        waitUntil {
+            vm.currentAppIcon.value == AppIconOption.BLUE &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.BLUE.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        }
+        assertEquals(
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            pm.getComponentEnabledSetting(
+                ComponentName(app, AppIconOption.MATERIAL_YOU.aliasClassName)
+            )
+        )
+
+        vm.resetApp()
+        waitUntil {
+            vm.currentAppIcon.value == AppIconOption.CLASSIC &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.CLASSIC.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        }
+        AppIconOption.entries.filter { it != AppIconOption.CLASSIC }.forEach { option ->
+            assertEquals(
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                pm.getComponentEnabledSetting(ComponentName(app, option.aliasClassName))
+            )
+        }
     }
 }

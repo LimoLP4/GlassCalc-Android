@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sapphire Liquid Glass Specular Reflection Arc -->
+    <path
+        android:fillColor="#4038BDF8"
+        android:pathData="M 42,27 L 66,27 C 75,27 81,33 81,42 L 81,48 C 65,40 43,40 27,48 L 27,42 C 27,33 33,27 42,27 Z" />
+
+    <!-- Outer Liquid Glass Lens Frame (Sapphire Blue) -->
+    <path
+        android:fillColor="#260EA5E9"
+        android:strokeColor="#FFBAE6FD"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 42,27 L 66,27 C 75,27 81,33 81,42 L 81,66 C 81,75 75,81 66,81 L 42,81 C 33,81 27,75 27,66 L 27,42 C 27,33 33,27 42,27 Z" />
+
+    <!-- Smooth Flowing "G" Monogram -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 50,44 C 41,43 36,48 36,54 C 36,60 41,64 47,64 C 51,64 51,64 51,54 L 46,54" />
+
+    <!-- Smooth Flowing "C" Monogram -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 71,44 C 62,43 57,48 57,54 C 57,60 62,64 71,64" />
+
+    <!-- Ice-Cyan Glass Accent Dot -->
+    <path
+        android:fillColor="#FF7DD3FC"
+        android:pathData="M 54,35 A 2.5,2.5 0 1,1 53.9,35 Z" />
+</vector>

@@ -286,6 +286,14 @@
     <string name="theme_dark_mode">AMOLED</string>
     <string name="theme_amoled_desc">Reines Schwarz für maximale Akku-Ersparnis auf OLED-Displays.</string>
     <string name="theme_material_you_unsupported">Nicht mit dieser Android-Version kompatibel (erfordert API 31+, aktiv: API %d)</string>
+    <string name="app_icon_select_heading">App-Icon:</string>
+    <string name="app_icon_classic">Klassisch (Dunkel)</string>
+    <string name="app_icon_material_you">Material You (Monet)</string>
+    <string name="app_icon_material_you_desc">Monochromes Symbol – passt sich ab Android 13 den Systemfarben an.</string>
+    <string name="app_icon_blue">Saphirblau</string>
+    <string name="app_icon_purple">Amethyst-Lila</string>
+    <string name="app_icon_green">Smaragdgrün</string>
+    <string name="app_icon_red">Rubinrot</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Standard-Winkelmodus für Trigonometrie:</string>
@@ -403,6 +411,13 @@
     <string name="settings_keywords_theme_white">hell,weiß,tag,tageslicht,light,white,klar</string>
     <string name="settings_keywords_theme_standard_dark">dunkel,dark,nacht,grau,standard</string>
     <string name="settings_keywords_theme_dark">amoled,dunkel,dark,tiefschwarz,nacht,schwarz</string>
+    <string name="settings_keywords_app_icon">app-icon,icon,symbol,launcher,homescreen,farbe,design</string>
+    <string name="settings_keywords_app_icon_classic">klassisch,standard,dunkel,schwarz,classic,default</string>
+    <string name="settings_keywords_app_icon_material_you">material you,monet,monochrom,dynamisch,systemfarben,themed icon</string>
+    <string name="settings_keywords_app_icon_blue">blau,saphir,saphirblau,blue,cyan,glas</string>
+    <string name="settings_keywords_app_icon_purple">lila,violett,amethyst,purple,lavender</string>
+    <string name="settings_keywords_app_icon_green">grün,smaragd,smaragdgrün,green,mint</string>
+    <string name="settings_keywords_app_icon_red">rot,rubin,rubinrot,red,crimson</string>
     <string name="settings_keywords_units">einheiten,winkel,winkelmodus,trigonometrie,umrechnung</string>
     <string name="settings_keywords_angle_deg">grad,deg,degree,degrees,360,altgrad</string>
     <string name="settings_keywords_angle_rad">bogenmaß,rad,radian,radians,pi,2pi</string>

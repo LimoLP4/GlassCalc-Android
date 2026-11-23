@@ -286,6 +286,14 @@
     <string name="theme_dark_mode">AMOLED</string>
     <string name="theme_amoled_desc">OLED डिस्प्ले पर अधिकतम बैटरी बचत के लिए शुद्ध काला रंग।</string>
     <string name="theme_material_you_unsupported">इस Android संस्करण के साथ संगत नहीं है (API 31+ आवश्यक, सक्रिय: API %d)</string>
+    <string name="app_icon_select_heading">ऐप आइकन:</string>
+    <string name="app_icon_classic">क्लासिक (डार्क)</string>
+    <string name="app_icon_material_you">Material You (Monet)</string>
+    <string name="app_icon_material_you_desc">मोनोक्रोम आइकन — Android 13+ पर सिस्टम रंगों के अनुसार बदलता है।</string>
+    <string name="app_icon_blue">नीलम नीला</string>
+    <string name="app_icon_purple">बैंगनी</string>
+    <string name="app_icon_green">पन्ना हरा</string>
+    <string name="app_icon_red">माणिक लाल</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड:</string>
@@ -403,6 +411,13 @@
     <string name="settings_keywords_theme_white">लाइट,सफ़ेद,दिन,उजाला,light,white</string>
     <string name="settings_keywords_theme_standard_dark">डार्क,रात,ग्रे,मानक,dark</string>
     <string name="settings_keywords_theme_dark">amoled,डार्क,गहरा काला,काला,रात,dark</string>
+    <string name="settings_keywords_app_icon">ऐप आइकन,आइकन,icon,लॉन्चर,रंग,प्रतीक</string>
+    <string name="settings_keywords_app_icon_classic">क्लासिक,डिफ़ॉल्ट,डार्क,काला</string>
+    <string name="settings_keywords_app_icon_material_you">material you,monet,मोनोक्रोम,डायनामिक,सिस्टम रंग</string>
+    <string name="settings_keywords_app_icon_blue">नीला,नीलम,blue</string>
+    <string name="settings_keywords_app_icon_purple">बैंगनी,जामुनी,purple</string>
+    <string name="settings_keywords_app_icon_green">हरा,पन्ना,green</string>
+    <string name="settings_keywords_app_icon_red">लाल,माणिक,red</string>
     <string name="settings_keywords_units">इकाइयाँ,कोण,त्रिकोणमिति,रूपांतरण</string>
     <string name="settings_keywords_angle_deg">deg,डिग्री,अंश,360</string>
     <string name="settings_keywords_angle_rad">rad,रेडियन,pi,2pi</string>

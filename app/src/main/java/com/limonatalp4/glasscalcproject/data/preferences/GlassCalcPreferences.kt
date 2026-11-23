@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
+import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,7 @@ class GlassCalcPreferences(private val context: Context) {
         val HAPTIC_INTENSITY = intPreferencesKey("haptic_intensity")
         val AUTO_RESULT_ENABLED = booleanPreferencesKey("auto_result_enabled")
         val LANGUAGE = stringPreferencesKey("language")
+        val APP_ICON = stringPreferencesKey("app_icon")
     }
 
     private val safeDataFlow: Flow<Preferences> = context.dataStore.data
@@ -118,6 +120,15 @@ class GlassCalcPreferences(private val context: Context) {
         }
     }
 
+    val appIconFlow: Flow<AppIconOption> = safeDataFlow.map { prefs ->
+        val name = prefs[PreferencesKeys.APP_ICON] ?: return@map AppIconOption.CLASSIC
+        try {
+            AppIconOption.valueOf(name)
+        } catch (_: Exception) {
+            AppIconOption.CLASSIC
+        }
+    }
+
     suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
         try {
             context.dataStore.edit { prefs ->
@@ -166,6 +177,16 @@ class GlassCalcPreferences(private val context: Context) {
         try {
             context.dataStore.edit { prefs ->
                 prefs[PreferencesKeys.APP_THEME] = theme.name
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+        }
+    }
+
+    suspend fun setAppIcon(icon: AppIconOption) {
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[PreferencesKeys.APP_ICON] = icon.name
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
@@ -251,6 +272,7 @@ class GlassCalcPreferences(private val context: Context) {
                 prefs[PreferencesKeys.HAPTIC_FEEDBACK_ENABLED] = true
                 prefs[PreferencesKeys.HAPTIC_INTENSITY] = 5
                 prefs[PreferencesKeys.AUTO_RESULT_ENABLED] = true
+                prefs[PreferencesKeys.APP_ICON] = AppIconOption.CLASSIC.name
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e

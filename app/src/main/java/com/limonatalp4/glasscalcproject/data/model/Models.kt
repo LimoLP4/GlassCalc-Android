@@ -36,3 +36,59 @@ data class CalculationHistoryItem(
     val result: String,
     val timestamp: Long = System.currentTimeMillis()
 )
+
+enum class AppIconOption(
+    val aliasClassName: String,
+    val labelResId: Int,
+    val descriptionResId: Int? = null,
+    val iconResId: Int,
+    val foregroundResId: Int,
+    val backgroundResId: Int,
+    val isMonochromeMaterialYou: Boolean = false
+) {
+    CLASSIC(
+        aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityClassic",
+        labelResId = R.string.app_icon_classic,
+        iconResId = R.mipmap.ic_launcher,
+        foregroundResId = R.drawable.ic_launcher_foreground,
+        backgroundResId = R.drawable.ic_launcher_background
+    ),
+    MATERIAL_YOU(
+        aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityMaterialYou",
+        labelResId = R.string.app_icon_material_you,
+        descriptionResId = R.string.app_icon_material_you_desc,
+        iconResId = R.mipmap.ic_launcher_material_you,
+        foregroundResId = R.drawable.ic_launcher_foreground_material_you,
+        backgroundResId = R.drawable.ic_launcher_background_material_you,
+        isMonochromeMaterialYou = true
+    ),
+    BLUE(
+        aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityBlue",
+        labelResId = R.string.app_icon_blue,
+        iconResId = R.mipmap.ic_launcher_blue,
+        foregroundResId = R.drawable.ic_launcher_foreground_blue,
+        backgroundResId = R.drawable.ic_launcher_background_blue
+    ),
+    PURPLE(
+        aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityPurple",
+        labelResId = R.string.app_icon_purple,
+        iconResId = R.mipmap.ic_launcher_purple,
+        foregroundResId = R.drawable.ic_launcher_foreground_purple,
+        backgroundResId = R.drawable.ic_launcher_background_purple
+    ),
+    GREEN(
+        aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityGreen",
+        labelResId = R.string.app_icon_green,
+        iconResId = R.mipmap.ic_launcher_green,
+        foregroundResId = R.drawable.ic_launcher_foreground_green,
+        backgroundResId = R.drawable.ic_launcher_background_green
+    ),
+    RED(
+        aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityRed",
+        labelResId = R.string.app_icon_red,
+        iconResId = R.mipmap.ic_launcher_red,
+        foregroundResId = R.drawable.ic_launcher_foreground_red,
+        backgroundResId = R.drawable.ic_launcher_background_red
+    )
+}
+
