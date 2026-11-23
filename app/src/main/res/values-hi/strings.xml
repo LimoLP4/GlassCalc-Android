@@ -294,6 +294,8 @@
     <string name="app_icon_purple">बैंगनी</string>
     <string name="app_icon_green">पन्ना हरा</string>
     <string name="app_icon_red">माणिक लाल</string>
+    <string name="theme_accordion_title">थीम चुनें</string>
+    <string name="app_icon_accordion_title">ऐप आइकन चुनें</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड:</string>

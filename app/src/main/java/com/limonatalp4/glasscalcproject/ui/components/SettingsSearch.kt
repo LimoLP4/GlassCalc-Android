@@ -190,6 +190,7 @@ fun rememberSettingsSearchVisibility(
     }
 
     val appearanceTabTitle = stringResource(R.string.title_appearance)
+    val themeAccordionTitle = stringResource(R.string.theme_accordion_title)
     val appearanceKeywords = stringResource(R.string.settings_keywords_appearance)
     val materialYouUnsupported = stringResource(R.string.theme_material_you_unsupported, effectiveApiLevel)
     val amoledDesc = stringResource(R.string.theme_amoled_desc)
@@ -217,7 +218,7 @@ fun rememberSettingsSearchVisibility(
         val score = scoreSettingsEntry(
             tokens = tokens,
             primaryNames = listOf(label),
-            secondaryTexts = extra + listOf(appearanceTabTitle),
+            secondaryTexts = extra + listOf(themeAccordionTitle, appearanceTabTitle),
             keywordStrings = listOf(themeKw, appearanceKeywords)
         ) ?: return@mapIndexedNotNull null
         Triple(theme, score, index)
@@ -225,6 +226,7 @@ fun rememberSettingsSearchVisibility(
     val matchingThemes = scoredThemes.map { it.first }
     val bestThemeScore = scoredThemes.minOfOrNull { it.second }
 
+    val appIconAccordionTitle = stringResource(R.string.app_icon_accordion_title)
     val appIconHeading = stringResource(R.string.app_icon_select_heading)
     val appIconKeywords = stringResource(R.string.settings_keywords_app_icon)
     val appIconKwClassic = stringResource(R.string.settings_keywords_app_icon_classic)
@@ -248,7 +250,7 @@ fun rememberSettingsSearchVisibility(
         val score = scoreSettingsEntry(
             tokens = tokens,
             primaryNames = listOf(label),
-            secondaryTexts = extraDesc + listOf(appIconHeading, appearanceTabTitle),
+            secondaryTexts = extraDesc + listOf(appIconAccordionTitle, appIconHeading, appearanceTabTitle),
             keywordStrings = listOf(iconKw, appIconKeywords, appearanceKeywords)
         ) ?: return@mapIndexedNotNull null
         Triple(iconOption, score, index)

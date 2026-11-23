@@ -294,6 +294,8 @@
     <string name="app_icon_purple">Roxo Ametista</string>
     <string name="app_icon_green">Verde Esmeralda</string>
     <string name="app_icon_red">Vermelho Rubi</string>
+    <string name="theme_accordion_title">Selecionar tema</string>
+    <string name="app_icon_accordion_title">Selecionar ícone do app</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Modo angular padrão para trigonometria:</string>

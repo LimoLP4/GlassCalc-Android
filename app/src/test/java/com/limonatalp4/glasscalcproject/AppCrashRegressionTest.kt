@@ -230,5 +230,47 @@ class AppCrashRegressionTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("calculator_display").assertIsDisplayed()
     }
+
+    @Test
+    fun testDesignTabAccordionsExpandAndSurviveRecreate() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Initially collapsed: accordion headers visible, inner radio pills hidden
+        composeTestRule.onNodeWithTag("card_theme_accordion").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("card_app_icon_accordion").assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("radio_theme_DARK_MODE").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithTag("radio_app_icon_BLUE").fetchSemanticsNodes().isEmpty())
+
+        // Expand Theme accordion
+        composeTestRule.onNodeWithTag("card_theme_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_theme_DARK_MODE").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_theme_DARK_MODE").performScrollTo().assertIsDisplayed()
+
+        // Expand App-Icon accordion
+        composeTestRule.onNodeWithTag("card_app_icon_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_app_icon_BLUE").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_app_icon_BLUE").performScrollTo().assertIsDisplayed()
+
+        // Recreate activity (simulates rotation / configuration change) -> both stay expanded
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.recreate()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_theme_DARK_MODE").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("radio_app_icon_BLUE").performScrollTo().assertIsDisplayed()
+    }
 }
+
 

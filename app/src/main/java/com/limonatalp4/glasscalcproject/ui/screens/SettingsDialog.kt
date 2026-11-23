@@ -215,6 +215,10 @@ fun SettingsDialog(
         mutableFloatStateOf(simulatedApiLevel.toFloat().coerceIn(sliderMin, sliderMax)) 
     }
 
+    // Accordion expansion states for Design tab
+    var themeAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var appIconAccordionOpen by rememberSaveable { mutableStateOf(false) }
+
     // Accordion expansion states for Info tab
     var apacheAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var mxparserAccordionOpen by rememberSaveable { mutableStateOf(false) }
@@ -477,12 +481,15 @@ fun SettingsDialog(
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
+                                    themeAccordionOpen = isSearchActive || themeAccordionOpen,
+                                    appIconAccordionOpen = isSearchActive || appIconAccordionOpen,
+                                    onToggleThemeAccordion = { themeAccordionOpen = !themeAccordionOpen },
+                                    onToggleAppIconAccordion = { appIconAccordionOpen = !appIconAccordionOpen },
                                     onSelectTheme = onSelectTheme,
                                     onSelectAppIcon = onSelectAppIcon,
                                     triggerHaptic = ::triggerHaptic,
                                     visibleThemes = searchVisibility.matchingThemes,
-                                    visibleAppIcons = searchVisibility.matchingAppIcons,
-                                    showHeading = !isSearchActive
+                                    visibleAppIcons = searchVisibility.matchingAppIcons
                                 )
                                 1 -> UnitsSection(
                                     currentAngleMode = currentAngleMode,
@@ -598,97 +605,191 @@ private fun AppearanceSection(
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    themeAccordionOpen: Boolean,
+    appIconAccordionOpen: Boolean,
+    onToggleThemeAccordion: () -> Unit,
+    onToggleAppIconAccordion: () -> Unit,
     onSelectTheme: (AppTheme) -> Unit,
     onSelectAppIcon: (AppIconOption) -> Unit,
     triggerHaptic: () -> Unit,
     visibleThemes: List<AppTheme> = AppTheme.entries,
-    visibleAppIcons: List<AppIconOption> = AppIconOption.entries,
-    showHeading: Boolean = true
+    visibleAppIcons: List<AppIconOption> = AppIconOption.entries
 ) {
-    if (showHeading && visibleThemes.isNotEmpty()) {
-        Text(
-            text = stringResource(id = R.string.theme_select_heading),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f)
-        )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (visibleThemes.isNotEmpty()) {
+            AppearanceAccordionCard(
+                title = stringResource(id = R.string.theme_accordion_title),
+                expanded = themeAccordionOpen,
+                onToggle = onToggleThemeAccordion,
+                isTiefschwarz = isTiefschwarz,
+                colorScheme = colorScheme,
+                glassProps = glassProps,
+                triggerHaptic = triggerHaptic,
+                cardTestTag = "card_theme_accordion",
+                toggleButtonTestTag = "btn_toggle_theme_accordion",
+                chevronLabel = "theme_chevron_rotation"
+            ) {
+                visibleThemes.forEach { themeOption ->
+                    val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
+                    val isSupported = !isMaterialYou || effectiveApiLevel >= 31
+                    val isSelected = currentTheme == themeOption && isSupported
 
-        Spacer(modifier = Modifier.height(10.dp))
-    }
+                    val themeLabel = when (themeOption) {
+                        AppTheme.MATERIAL_YOU -> stringResource(id = R.string.theme_material_you)
+                        AppTheme.AUTOMATIC -> stringResource(id = R.string.theme_automatic)
+                        AppTheme.WHITE_MODE -> stringResource(id = R.string.theme_white_mode)
+                        AppTheme.STANDARD_DARK -> stringResource(id = R.string.theme_standard_dark)
+                        AppTheme.DARK_MODE -> stringResource(id = R.string.theme_dark_mode)
+                    }
+                    val amoledDesc = if (themeOption == AppTheme.DARK_MODE) {
+                        stringResource(id = R.string.theme_amoled_desc)
+                    } else null
+                    val unsupportedError = if (!isSupported) {
+                        stringResource(id = R.string.theme_material_you_unsupported, effectiveApiLevel)
+                    } else null
 
-    if (visibleThemes.isNotEmpty()) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            visibleThemes.forEach { themeOption ->
-                val isMaterialYou = themeOption == AppTheme.MATERIAL_YOU
-                val isSupported = !isMaterialYou || effectiveApiLevel >= 31
-                val isSelected = currentTheme == themeOption && isSupported
-
-                val themeLabel = when (themeOption) {
-                    AppTheme.MATERIAL_YOU -> stringResource(id = R.string.theme_material_you)
-                    AppTheme.AUTOMATIC -> stringResource(id = R.string.theme_automatic)
-                    AppTheme.WHITE_MODE -> stringResource(id = R.string.theme_white_mode)
-                    AppTheme.STANDARD_DARK -> stringResource(id = R.string.theme_standard_dark)
-                    AppTheme.DARK_MODE -> stringResource(id = R.string.theme_dark_mode)
+                    SettingsPillOption(
+                        selected = isSelected,
+                        onClick = {
+                            triggerHaptic()
+                            onSelectTheme(themeOption)
+                        },
+                        title = themeLabel,
+                        description = amoledDesc,
+                        errorText = unsupportedError,
+                        enabled = isSupported,
+                        glassProps = glassProps,
+                        testTag = "radio_theme_${themeOption.name}",
+                        descriptionTestTag = if (amoledDesc != null) "text_theme_amoled_desc" else null,
+                        errorTestTag = if (unsupportedError != null) "text_material_you_unsupported" else null
+                    )
                 }
-                val amoledDesc = if (themeOption == AppTheme.DARK_MODE) {
-                    stringResource(id = R.string.theme_amoled_desc)
-                } else null
-                val unsupportedError = if (!isSupported) {
-                    stringResource(id = R.string.theme_material_you_unsupported, effectiveApiLevel)
-                } else null
+            }
+        }
 
-                SettingsPillOption(
-                    selected = isSelected,
-                    onClick = {
-                        triggerHaptic()
-                        onSelectTheme(themeOption)
-                    },
-                    title = themeLabel,
-                    description = amoledDesc,
-                    errorText = unsupportedError,
-                    enabled = isSupported,
-                    glassProps = glassProps,
-                    testTag = "radio_theme_${themeOption.name}",
-                    descriptionTestTag = if (amoledDesc != null) "text_theme_amoled_desc" else null,
-                    errorTestTag = if (unsupportedError != null) "text_material_you_unsupported" else null
-                )
+        if (visibleAppIcons.isNotEmpty()) {
+            AppearanceAccordionCard(
+                title = stringResource(id = R.string.app_icon_accordion_title),
+                expanded = appIconAccordionOpen,
+                onToggle = onToggleAppIconAccordion,
+                isTiefschwarz = isTiefschwarz,
+                colorScheme = colorScheme,
+                glassProps = glassProps,
+                triggerHaptic = triggerHaptic,
+                cardTestTag = "card_app_icon_accordion",
+                toggleButtonTestTag = "btn_toggle_app_icon_accordion",
+                chevronLabel = "app_icon_chevron_rotation"
+            ) {
+                visibleAppIcons.forEach { iconOption ->
+                    val isSelected = currentAppIcon == iconOption
+                    AppIconPillOption(
+                        iconOption = iconOption,
+                        selected = isSelected,
+                        onClick = {
+                            triggerHaptic()
+                            onSelectAppIcon(iconOption)
+                        },
+                        glassProps = glassProps
+                    )
+                }
             }
         }
     }
+}
 
-    if (visibleThemes.isNotEmpty() && visibleAppIcons.isNotEmpty()) {
-        Spacer(modifier = Modifier.height(18.dp))
-    }
+@Composable
+private fun AppearanceAccordionCard(
+    title: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    isTiefschwarz: Boolean,
+    colorScheme: androidx.compose.material3.ColorScheme,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    triggerHaptic: () -> Unit,
+    cardTestTag: String,
+    toggleButtonTestTag: String,
+    chevronLabel: String,
+    content: @Composable () -> Unit
+) {
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+        label = chevronLabel
+    )
+    val cardInteraction = remember { MutableInteractionSource() }
+    val pillInteraction = remember { MutableInteractionSource() }
 
-    if (visibleAppIcons.isNotEmpty()) {
-        Text(
-            text = stringResource(id = R.string.app_icon_select_heading),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurface.copy(alpha = 0.7f),
-            modifier = Modifier.testTag("heading_app_icon")
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            visibleAppIcons.forEach { iconOption ->
-                val isSelected = currentAppIcon == iconOption
-                AppIconPillOption(
-                    iconOption = iconOption,
-                    selected = isSelected,
-                    onClick = {
-                        triggerHaptic()
-                        onSelectAppIcon(iconOption)
-                    },
-                    glassProps = glassProps
+    SettingsGlassCard(
+        glassProps = glassProps,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        onClick = {
+            triggerHaptic()
+            onToggle()
+        },
+        role = Role.Button,
+        interactionSource = cardInteraction,
+        modifier = Modifier.testTag(cardTestTag)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp)
                 )
+                GlassSurface(
+                    shape = CircleShape,
+                    customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = glassProps.containerBorderStroke,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .pressScale(pillInteraction)
+                ) {
+                    IconButton(
+                        onClick = {
+                            triggerHaptic()
+                            onToggle()
+                        },
+                        interactionSource = pillInteraction,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .testTag(toggleButtonTestTag)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExpandMore,
+                            contentDescription = title,
+                            tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .graphicsLayer { rotationZ = chevronRotation }
+                        )
+                    }
+                }
+            }
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                ) {
+                    content()
+                }
             }
         }
     }
