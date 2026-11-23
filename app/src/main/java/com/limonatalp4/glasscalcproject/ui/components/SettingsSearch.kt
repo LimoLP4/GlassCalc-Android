@@ -67,7 +67,7 @@ import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 
-enum class SettingsUnitCard { DEG, RAD, SYSTEMS }
+enum class SettingsUnitCard { DEG, RAD }
 
 enum class SettingsDevCard { SCREEN, API, HAPTIC, AUTO_RESULT, LIFECYCLE, CLEAR_CACHE, RESET_STORAGE }
 
@@ -79,7 +79,6 @@ data class SettingsSearchVisibility(
     val matchingAppIcons: List<AppIconOption> = AppIconOption.entries,
     val showDegCard: Boolean,
     val showRadCard: Boolean,
-    val showUnitsSystemsCard: Boolean,
     val showDevScreenCard: Boolean,
     val showDevApiCard: Boolean,
     val showDevHapticCard: Boolean,
@@ -101,7 +100,7 @@ data class SettingsSearchVisibility(
         get() = matchingThemes.isNotEmpty() || matchingAppIcons.isNotEmpty()
 
     val hasAnyUnitsMatch: Boolean
-        get() = showDegCard || showRadCard || showUnitsSystemsCard
+        get() = showDegCard || showRadCard
 
     val hasAnyDeveloperMatch: Boolean
         get() = showDevScreenCard ||
@@ -169,7 +168,6 @@ fun rememberSettingsSearchVisibility(
             matchingAppIcons = AppIconOption.entries,
             showDegCard = true,
             showRadCard = true,
-            showUnitsSystemsCard = true,
             showDevScreenCard = true,
             showDevApiCard = true,
             showDevHapticCard = true,
@@ -286,16 +284,9 @@ fun rememberSettingsSearchVisibility(
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_angle_rad), unitsKeywords)
     )
-    val systemsScore = scoreSettingsEntry(
-        tokens = tokens,
-        primaryNames = listOf(stringResource(R.string.units_supported_systems)),
-        secondaryTexts = listOf(stringResource(R.string.units_systems_detail), unitsTabTitle),
-        keywordStrings = listOf(unitsKeywords)
-    )
     val scoredUnitCards = listOfNotNull(
         degScore?.let { Triple(SettingsUnitCard.DEG, it, 0) },
-        radScore?.let { Triple(SettingsUnitCard.RAD, it, 1) },
-        systemsScore?.let { Triple(SettingsUnitCard.SYSTEMS, it, 2) }
+        radScore?.let { Triple(SettingsUnitCard.RAD, it, 1) }
     ).sortedWith(compareBy<Triple<SettingsUnitCard, Int, Int>> { it.second }.thenBy { it.third })
     val orderedUnitCards = scoredUnitCards.map { it.first }
     val bestUnitsScore = scoredUnitCards.minOfOrNull { it.second }
@@ -467,7 +458,6 @@ fun rememberSettingsSearchVisibility(
         matchingAppIcons = matchingAppIcons,
         showDegCard = degScore != null,
         showRadCard = radScore != null,
-        showUnitsSystemsCard = systemsScore != null,
         showDevScreenCard = devScreenScore != null,
         showDevApiCard = devApiScore != null,
         showDevHapticCard = devHapticScore != null,

@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">naQ gho = 2π</string>
     <string name="units_supported_systems">patmey:</string>
     <string name="units_systems_detail">• Metric ↔ US (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• tuj (°C, °F, K)\n• bal (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• De\' (B, KB, MB, GB, TB)\n• poH (ms, s, min, h, d)\n• \'ul HoS (mV, V, kV)\n• \'ul He (µA, mA, A)\n• HoS (mW, W, kW, MW)\n• \'ul pol (mAh, Ah)\n• tajwI\' (°, rad, gon)\n• Do (m/s, km/h, mph, kn)\n• \'ul botwI\' (Ω, kΩ, MΩ)\n• pIj (Hz, kHz, MHz, GHz)\n• De\' Do (bps, kbps, Mbps, Gbps)\n• HoS\'a\' (J, kJ, cal, kcal, Wh, kWh)\n• ngaD (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">patmey \'ang</string>
+    <string name="converter_info_dialog_title">patmey</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">jIH tIn</string>

@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">円周 = 2π</string>
     <string name="units_supported_systems">対応する変換単位:</string>
     <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体積 (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)\n• 角度 (°, rad, gon)\n• 速度 (m/s, km/h, mph, kn)\n• 電気抵抗 (Ω, kΩ, MΩ)\n• 周波数 (Hz, kHz, MHz, GHz)\n• 通信速度 (bps, kbps, Mbps, Gbps)\n• エネルギー (J, kJ, cal, kcal, Wh, kWh)\n• 圧力 (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">対応する変換単位を表示</string>
+    <string name="converter_info_dialog_title">対応する変換単位</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">画面サイズとスケーリング</string>

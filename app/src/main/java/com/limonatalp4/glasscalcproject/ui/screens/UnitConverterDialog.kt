@@ -66,6 +66,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Opacity
@@ -206,6 +207,7 @@ fun UnitConverterDialog(
 
     var isForward by rememberSaveable { mutableStateOf(true) }
     var inputValue by rememberSaveable { mutableStateOf("1") }
+    var showSystemsInfoDialog by rememberSaveable { mutableStateOf(false) }
 
     fun selectUnitSuggestion(suggestion: LocalizedUnitSuggestion) {
         triggerHaptic()
@@ -333,31 +335,67 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.title_converter),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isPureBlack) Color.White else onSurfaceColor
+                                color = if (isPureBlack) Color.White else onSurfaceColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 8.dp)
                             )
-                            val closeBtnInteraction = remember { MutableInteractionSource() }
-                            GlassSurface(
-                                shape = GlassDialogDefaults.PillShape,
-                                customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                borderStroke = glassProps.containerBorderStroke,
-                                modifier = Modifier.pressScale(closeBtnInteraction)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                IconButton(
-                                    onClick = {
-                                        triggerHaptic()
-                                        dialogTransition.dismiss()
-                                    },
-                                    interactionSource = closeBtnInteraction,
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .testTag("btn_close_converter")
+                                val infoBtnInteraction = remember { MutableInteractionSource() }
+                                GlassSurface(
+                                    shape = GlassDialogDefaults.PillShape,
+                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    borderStroke = glassProps.containerBorderStroke,
+                                    modifier = Modifier.pressScale(infoBtnInteraction)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = stringResource(R.string.nav_close),
-                                        tint = if (isPureBlack) Color.White else onSurfaceColor,
-                                        modifier = Modifier.size(18.dp)
-                                    )
+                                    IconButton(
+                                        onClick = {
+                                            triggerHaptic()
+                                            showSystemsInfoDialog = true
+                                        },
+                                        interactionSource = infoBtnInteraction,
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .testTag("btn_converter_info")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Info,
+                                            contentDescription = stringResource(R.string.converter_info_button_desc),
+                                            tint = if (isPureBlack) Color.White else onSurfaceColor,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+
+                                val closeBtnInteraction = remember { MutableInteractionSource() }
+                                GlassSurface(
+                                    shape = GlassDialogDefaults.PillShape,
+                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    borderStroke = glassProps.containerBorderStroke,
+                                    modifier = Modifier.pressScale(closeBtnInteraction)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            triggerHaptic()
+                                            dialogTransition.dismiss()
+                                        },
+                                        interactionSource = closeBtnInteraction,
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .testTag("btn_close_converter")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.nav_close),
+                                            tint = if (isPureBlack) Color.White else onSurfaceColor,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -796,5 +834,200 @@ fun UnitConverterDialog(
             }
         }
     }
+    }
+
+    if (showSystemsInfoDialog) {
+        SupportedSystemsInfoDialog(
+            onDismiss = { showSystemsInfoDialog = false },
+            triggerHaptic = ::triggerHaptic
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SupportedSystemsInfoDialog(
+    onDismiss: () -> Unit,
+    triggerHaptic: () -> Unit
+) {
+    val glassProps = LocalGlassProperties.current
+    val colorScheme = MaterialTheme.colorScheme
+    val isPureBlack = glassProps.isTiefschwarz
+    val dialogBgColor = colorScheme.surfaceContainerHigh
+    val onSurfaceColor = colorScheme.onSurface
+    val primaryColor = colorScheme.primary
+    val dialogTransition = rememberDialogTransitionController(onDismiss)
+    val contentScrollState = rememberScrollState()
+
+    @Suppress("DEPRECATION")
+    BasicAlertDialog(
+        onDismissRequest = dialogTransition.dismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        ),
+        modifier = Modifier.testTag("dialog_converter_systems_info")
+    ) {
+        val dialogView = LocalView.current
+        SideEffect {
+            (dialogView.parent as? DialogWindowProvider)?.window?.let { dialogWindow ->
+                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        dialogTransition.dismiss()
+                    }
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .windowInsetsPadding(
+                        WindowInsets.statusBars
+                            .union(WindowInsets.displayCutout)
+                            .union(WindowInsets.navigationBars)
+                    )
+                    .padding(horizontal = 20.dp, vertical = 24.dp)
+            ) {
+                DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
+                    GlassSurface(
+                        modifier = Modifier
+                            .fillMaxWidth(0.92f)
+                            .widthIn(max = 400.dp)
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        awaitPointerEvent()
+                                    }
+                                }
+                            },
+                        shape = GlassDialogDefaults.DialogShellShape,
+                        customBgColor = if (isPureBlack) Color.Black else dialogBgColor,
+                        borderStroke = glassProps.containerBorderStroke
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = primaryColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.converter_info_dialog_title),
+                                        fontSize = 17.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isPureBlack) Color.White else onSurfaceColor
+                                    )
+                                }
+
+                                val closeInfoInteraction = remember { MutableInteractionSource() }
+                                GlassSurface(
+                                    shape = GlassDialogDefaults.PillShape,
+                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    borderStroke = glassProps.containerBorderStroke,
+                                    modifier = Modifier.pressScale(closeInfoInteraction)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            triggerHaptic()
+                                            dialogTransition.dismiss()
+                                        },
+                                        interactionSource = closeInfoInteraction,
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .testTag("btn_close_converter_info")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.nav_close),
+                                            tint = if (isPureBlack) Color.White else onSurfaceColor,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            GlassCardContainer(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.LargeCardShape,
+                                contentPadding = GlassDialogDefaults.CardContentPadding,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f, fill = false)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(contentScrollState)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.units_systems_detail),
+                                        fontSize = 13.5.sp,
+                                        lineHeight = 20.sp,
+                                        color = if (isPureBlack) Color.White.copy(alpha = 0.85f) else onSurfaceColor.copy(alpha = 0.82f),
+                                        modifier = Modifier.testTag("text_converter_systems_detail")
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            val closePillInteraction = remember { MutableInteractionSource() }
+                            Button(
+                                onClick = {
+                                    triggerHaptic()
+                                    dialogTransition.dismiss()
+                                },
+                                interactionSource = closePillInteraction,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .defaultMinSize(minHeight = GlassDialogDefaults.ActionButtonMinHeight)
+                                    .pressScale(closePillInteraction),
+                                contentPadding = PaddingValues(
+                                    horizontal = GlassDialogDefaults.PillHorizontalPadding,
+                                    vertical = 12.dp
+                                ),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = primaryColor,
+                                    contentColor = colorScheme.onPrimary
+                                ),
+                                shape = GlassDialogDefaults.PillShape
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.nav_close),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

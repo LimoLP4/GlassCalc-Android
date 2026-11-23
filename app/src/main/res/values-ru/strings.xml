@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">Полный круг = 2π</string>
     <string name="units_supported_systems">Поддерживаемые системы конвертации:</string>
     <string name="units_systems_detail">• Метрическая ↔ Имперская (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Температура (°C, °F, K)\n• Объем (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)\n• Угол (°, rad, gon)\n• Скорость (m/s, km/h, mph, kn)\n• Сопротивление (Ω, kΩ, MΩ)\n• Частота (Hz, kHz, MHz, GHz)\n• Скорость передачи (bps, kbps, Mbps, Gbps)\n• Энергия (J, kJ, cal, kcal, Wh, kWh)\n• Давление (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">Показать поддерживаемые системы конвертации</string>
+    <string name="converter_info_dialog_title">Поддерживаемые системы конвертации</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Размер экрана и масштабирование</string>

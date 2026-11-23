@@ -930,80 +930,51 @@ private fun UnitsSection(
     triggerHaptic: () -> Unit,
     orderedCards: List<SettingsUnitCard> = SettingsUnitCard.entries
 ) {
-    val angleCards = orderedCards.filter { it == SettingsUnitCard.DEG || it == SettingsUnitCard.RAD }
-    var angleAccordionRendered = false
+    if (orderedCards.isEmpty()) return
 
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        orderedCards.forEach { card ->
-            when (card) {
-                SettingsUnitCard.DEG, SettingsUnitCard.RAD -> {
-                    if (!angleAccordionRendered) {
-                        angleAccordionRendered = true
-                        SettingsAccordionCard(
-                            title = stringResource(id = R.string.angle_mode_accordion_title),
-                            expanded = angleModeAccordionOpen,
-                            onToggle = onToggleAngleModeAccordion,
-                            isTiefschwarz = isTiefschwarz,
-                            colorScheme = colorScheme,
+        SettingsAccordionCard(
+            title = stringResource(id = R.string.angle_mode_accordion_title),
+            expanded = angleModeAccordionOpen,
+            onToggle = onToggleAngleModeAccordion,
+            isTiefschwarz = isTiefschwarz,
+            colorScheme = colorScheme,
+            glassProps = glassProps,
+            triggerHaptic = triggerHaptic,
+            cardTestTag = "card_angle_mode_accordion",
+            toggleButtonTestTag = "btn_toggle_angle_mode_accordion",
+            chevronLabel = "angle_mode_chevron_rotation"
+        ) {
+            orderedCards.forEach { angleCard ->
+                when (angleCard) {
+                    SettingsUnitCard.DEG -> {
+                        SettingsPillOption(
+                            selected = currentAngleMode == AngleMode.DEG,
+                            onClick = {
+                                triggerHaptic()
+                                onSelectAngleMode(AngleMode.DEG)
+                            },
+                            title = stringResource(id = R.string.angle_deg_label),
+                            description = stringResource(id = R.string.angle_deg_desc),
                             glassProps = glassProps,
-                            triggerHaptic = triggerHaptic,
-                            cardTestTag = "card_angle_mode_accordion",
-                            toggleButtonTestTag = "btn_toggle_angle_mode_accordion",
-                            chevronLabel = "angle_mode_chevron_rotation"
-                        ) {
-                            angleCards.forEach { angleCard ->
-                                when (angleCard) {
-                                    SettingsUnitCard.DEG -> {
-                                        SettingsPillOption(
-                                            selected = currentAngleMode == AngleMode.DEG,
-                                            onClick = {
-                                                triggerHaptic()
-                                                onSelectAngleMode(AngleMode.DEG)
-                                            },
-                                            title = stringResource(id = R.string.angle_deg_label),
-                                            description = stringResource(id = R.string.angle_deg_desc),
-                                            glassProps = glassProps,
-                                            testTag = "radio_angle_deg"
-                                        )
-                                    }
-                                    SettingsUnitCard.RAD -> {
-                                        SettingsPillOption(
-                                            selected = currentAngleMode == AngleMode.RAD,
-                                            onClick = {
-                                                triggerHaptic()
-                                                onSelectAngleMode(AngleMode.RAD)
-                                            },
-                                            title = stringResource(id = R.string.angle_rad_label),
-                                            description = stringResource(id = R.string.angle_rad_desc),
-                                            glassProps = glassProps,
-                                            testTag = "radio_angle_rad"
-                                        )
-                                    }
-                                    SettingsUnitCard.SYSTEMS -> Unit
-                                }
-                            }
-                        }
+                            testTag = "radio_angle_deg"
+                        )
                     }
-                }
-                SettingsUnitCard.SYSTEMS -> {
-                    SettingsGlassCard(glassProps = glassProps) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = stringResource(id = R.string.units_supported_systems),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = stringResource(id = R.string.units_systems_detail),
-                                fontSize = 13.sp,
-                                color = colorScheme.onSurface.copy(alpha = 0.75f)
-                            )
-                        }
+                    SettingsUnitCard.RAD -> {
+                        SettingsPillOption(
+                            selected = currentAngleMode == AngleMode.RAD,
+                            onClick = {
+                                triggerHaptic()
+                                onSelectAngleMode(AngleMode.RAD)
+                            },
+                            title = stringResource(id = R.string.angle_rad_label),
+                            description = stringResource(id = R.string.angle_rad_desc),
+                            glassProps = glassProps,
+                            testTag = "radio_angle_rad"
+                        )
                     }
                 }
             }

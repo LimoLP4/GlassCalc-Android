@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">Círculo completo = 2π</string>
     <string name="units_supported_systems">Sistemas de conversão suportados:</string>
     <string name="units_systems_detail">• Métrico ↔ Imperial/US (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Temperatura (°C, °F, K)\n• Volume (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Armazenamento de dados (B, KB, MB, GB, TB)\n• Tempo (ms, s, min, h, d)\n• Tensão (mV, V, kV)\n• Corrente (µA, mA, A)\n• Potência (mW, W, kW, MW)\n• Carga (mAh, Ah)\n• Ângulo (°, rad, gon)\n• Velocidade (m/s, km/h, mph, kn)\n• Resistência (Ω, kΩ, MΩ)\n• Frequência (Hz, kHz, MHz, GHz)\n• Taxa de Dados (bps, kbps, Mbps, Gbps)\n• Energia (J, kJ, cal, kcal, Wh, kWh)\n• Pressão (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">Mostrar sistemas de conversão suportados</string>
+    <string name="converter_info_dialog_title">Sistemas de conversão suportados</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Tamanho da Tela e Escala</string>

@@ -110,6 +110,16 @@ class AppCrashRegressionTest {
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithTag("dialog_unit_converter").fetchSemanticsNodes().isNotEmpty()
         }
+        // Open and close Supported Conversion Systems info dialog
+        composeTestRule.onNodeWithTag("btn_converter_info").assertIsDisplayed().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_converter_systems_info").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("text_converter_systems_detail").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("btn_close_converter_info").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_converter_systems_info").fetchSemanticsNodes().isEmpty()
+        }
         composeTestRule.onNodeWithTag("converter_search_input").performTextInput("gig")
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("unit_suggestion_gigabyte").performClick()
@@ -279,6 +289,8 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("card_angle_mode_accordion").assertIsDisplayed()
         assert(composeTestRule.onAllNodesWithTag("radio_angle_deg").fetchSemanticsNodes().isEmpty())
         assert(composeTestRule.onAllNodesWithTag("radio_angle_rad").fetchSemanticsNodes().isEmpty())
+        val supportedSystemsTitle = composeTestRule.activity.getString(R.string.units_supported_systems)
+        assert(composeTestRule.onAllNodesWithText(supportedSystemsTitle).fetchSemanticsNodes().isEmpty())
 
         // Expand Angle mode accordion & select RAD
         composeTestRule.onNodeWithTag("card_angle_mode_accordion").performScrollTo().performClick()

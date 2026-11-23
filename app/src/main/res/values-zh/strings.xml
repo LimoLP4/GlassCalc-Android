@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">整圆 = 2π</string>
     <string name="units_supported_systems">支持的换算系统:</string>
     <string name="units_systems_detail">• 公制 ↔ 英制 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体积 (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• 数据存储 (B, KB, MB, GB, TB)\n• 时间 (ms, s, min, h, d)\n• 电压 (mV, V, kV)\n• 电流 (µA, mA, A)\n• 功率 (mW, W, kW, MW)\n• 电荷 (mAh, Ah)\n• 角度 (°, rad, gon)\n• 速度 (m/s, km/h, mph, kn)\n• 电阻 (Ω, kΩ, MΩ)\n• 频率 (Hz, kHz, MHz, GHz)\n• 数据速率 (bps, kbps, Mbps, Gbps)\n• 能量 (J, kJ, cal, kcal, Wh, kWh)\n• 压力 (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">显示支持的换算系统</string>
+    <string name="converter_info_dialog_title">支持的换算系统</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">屏幕尺寸与缩放</string>

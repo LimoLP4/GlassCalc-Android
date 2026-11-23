@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">Vollkreis = 2π</string>
     <string name="units_supported_systems">Unterstützte Umrechnungssysteme:</string>
     <string name="units_systems_detail">• Metrisch ↔ US/Imperial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Temperatur (°C, °F, K)\n• Volumen (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Datenmengen (B, KB, MB, GB, TB)\n• Zeit (ms, s, min, h, d)\n• Spannung (mV, V, kV)\n• Stromstärke (µA, mA, A)\n• Leistung (mW, W, kW, MW)\n• Ladung (mAh, Ah)\n• Winkel (°, rad, gon)\n• Geschwindigkeit (m/s, km/h, mph, kn)\n• Widerstand (Ω, kΩ, MΩ)\n• Frequenz (Hz, kHz, MHz, GHz)\n• Datenrate (bps, kbps, Mbps, Gbps)\n• Energie (J, kJ, cal, kcal, Wh, kWh)\n• Druck (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">Unterstützte Umrechnungssysteme anzeigen</string>
+    <string name="converter_info_dialog_title">Unterstützte Umrechnungssysteme</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Bildschirmgröße &amp; Skalierung</string>

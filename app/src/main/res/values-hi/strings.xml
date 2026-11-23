@@ -306,6 +306,8 @@
     <string name="angle_rad_desc">पूर्ण वृत्त = 2π</string>
     <string name="units_supported_systems">समर्थित रूपांतरण प्रणालियाँ:</string>
     <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• तापमान (°C, °F, K)\n• आयतन (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)\n• कोण (°, rad, gon)\n• गति (m/s, km/h, mph, kn)\n• प्रतिरोध (Ω, kΩ, MΩ)\n• आवृत्ति (Hz, kHz, MHz, GHz)\n• डेटा दर (bps, kbps, Mbps, Gbps)\n• ऊर्जा (J, kJ, cal, kcal, Wh, kWh)\n• दाब (Pa, bar, psi, atm)</string>
+    <string name="converter_info_button_desc">समर्थित रूपांतरण प्रणालियाँ दिखाएँ</string>
+    <string name="converter_info_dialog_title">समर्थित रूपांतरण प्रणालियाँ</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
