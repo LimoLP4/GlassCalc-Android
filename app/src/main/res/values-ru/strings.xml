@@ -299,6 +299,7 @@
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Режим углов для тригонометрии:</string>
+    <string name="angle_mode_accordion_title">Режим углов для тригонометрии</string>
     <string name="angle_deg_label">Градусы (DEG)</string>
     <string name="angle_deg_desc">Полный круг = 360°</string>
     <string name="angle_rad_label">Радианы (RAD)</string>

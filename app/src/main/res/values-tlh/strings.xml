@@ -299,6 +299,7 @@
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">tajwI\' juvmeH:</string>
+    <string name="angle_mode_accordion_title">tajwI\' juvmeH</string>
     <string name="angle_deg_label">DEG (360°)</string>
     <string name="angle_deg_desc">motlh gho = 360°</string>
     <string name="angle_rad_label">RAD (2π)</string>

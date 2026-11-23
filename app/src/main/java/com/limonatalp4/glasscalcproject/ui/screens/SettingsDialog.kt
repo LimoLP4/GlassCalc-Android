@@ -215,9 +215,10 @@ fun SettingsDialog(
         mutableFloatStateOf(simulatedApiLevel.toFloat().coerceIn(sliderMin, sliderMax)) 
     }
 
-    // Accordion expansion states for Design & Language tabs
+    // Accordion expansion states for Design, Units & Language tabs
     var themeAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var appIconAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var angleModeAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var languageAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
     // Accordion expansion states for Info tab
@@ -497,10 +498,11 @@ fun SettingsDialog(
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
+                                    angleModeAccordionOpen = isSearchActive || angleModeAccordionOpen,
+                                    onToggleAngleModeAccordion = { angleModeAccordionOpen = !angleModeAccordionOpen },
                                     onSelectAngleMode = onSelectAngleMode,
                                     triggerHaptic = ::triggerHaptic,
-                                    orderedCards = searchVisibility.orderedUnitCards,
-                                    showHeading = !isSearchActive
+                                    orderedCards = searchVisibility.orderedUnitCards
                                 )
                                 2 -> DeveloperOptionsSection(
                                     windowSizeClass = windowSizeClass,
@@ -922,21 +924,14 @@ private fun UnitsSection(
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    angleModeAccordionOpen: Boolean,
+    onToggleAngleModeAccordion: () -> Unit,
     onSelectAngleMode: (AngleMode) -> Unit,
     triggerHaptic: () -> Unit,
-    orderedCards: List<SettingsUnitCard> = SettingsUnitCard.entries,
-    showHeading: Boolean = true
+    orderedCards: List<SettingsUnitCard> = SettingsUnitCard.entries
 ) {
-    if (showHeading) {
-        Text(
-            text = stringResource(id = R.string.units_angle_heading),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-    }
+    val angleCards = orderedCards.filter { it == SettingsUnitCard.DEG || it == SettingsUnitCard.RAD }
+    var angleAccordionRendered = false
 
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -944,31 +939,54 @@ private fun UnitsSection(
     ) {
         orderedCards.forEach { card ->
             when (card) {
-                SettingsUnitCard.DEG -> {
-                    SettingsPillOption(
-                        selected = currentAngleMode == AngleMode.DEG,
-                        onClick = {
-                            triggerHaptic()
-                            onSelectAngleMode(AngleMode.DEG)
-                        },
-                        title = stringResource(id = R.string.angle_deg_label),
-                        description = stringResource(id = R.string.angle_deg_desc),
-                        glassProps = glassProps,
-                        testTag = "radio_angle_deg"
-                    )
-                }
-                SettingsUnitCard.RAD -> {
-                    SettingsPillOption(
-                        selected = currentAngleMode == AngleMode.RAD,
-                        onClick = {
-                            triggerHaptic()
-                            onSelectAngleMode(AngleMode.RAD)
-                        },
-                        title = stringResource(id = R.string.angle_rad_label),
-                        description = stringResource(id = R.string.angle_rad_desc),
-                        glassProps = glassProps,
-                        testTag = "radio_angle_rad"
-                    )
+                SettingsUnitCard.DEG, SettingsUnitCard.RAD -> {
+                    if (!angleAccordionRendered) {
+                        angleAccordionRendered = true
+                        SettingsAccordionCard(
+                            title = stringResource(id = R.string.angle_mode_accordion_title),
+                            expanded = angleModeAccordionOpen,
+                            onToggle = onToggleAngleModeAccordion,
+                            isTiefschwarz = isTiefschwarz,
+                            colorScheme = colorScheme,
+                            glassProps = glassProps,
+                            triggerHaptic = triggerHaptic,
+                            cardTestTag = "card_angle_mode_accordion",
+                            toggleButtonTestTag = "btn_toggle_angle_mode_accordion",
+                            chevronLabel = "angle_mode_chevron_rotation"
+                        ) {
+                            angleCards.forEach { angleCard ->
+                                when (angleCard) {
+                                    SettingsUnitCard.DEG -> {
+                                        SettingsPillOption(
+                                            selected = currentAngleMode == AngleMode.DEG,
+                                            onClick = {
+                                                triggerHaptic()
+                                                onSelectAngleMode(AngleMode.DEG)
+                                            },
+                                            title = stringResource(id = R.string.angle_deg_label),
+                                            description = stringResource(id = R.string.angle_deg_desc),
+                                            glassProps = glassProps,
+                                            testTag = "radio_angle_deg"
+                                        )
+                                    }
+                                    SettingsUnitCard.RAD -> {
+                                        SettingsPillOption(
+                                            selected = currentAngleMode == AngleMode.RAD,
+                                            onClick = {
+                                                triggerHaptic()
+                                                onSelectAngleMode(AngleMode.RAD)
+                                            },
+                                            title = stringResource(id = R.string.angle_rad_label),
+                                            description = stringResource(id = R.string.angle_rad_desc),
+                                            glassProps = glassProps,
+                                            testTag = "radio_angle_rad"
+                                        )
+                                    }
+                                    SettingsUnitCard.SYSTEMS -> Unit
+                                }
+                            }
+                        }
+                    }
                 }
                 SettingsUnitCard.SYSTEMS -> {
                     SettingsGlassCard(glassProps = glassProps) {

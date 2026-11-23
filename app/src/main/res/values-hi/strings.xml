@@ -299,6 +299,7 @@
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड:</string>
+    <string name="angle_mode_accordion_title">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड</string>
     <string name="angle_deg_label">डिग्री (DEG)</string>
     <string name="angle_deg_desc">मानक वृत्त = 360°</string>
     <string name="angle_rad_label">रेडियन (RAD)</string>

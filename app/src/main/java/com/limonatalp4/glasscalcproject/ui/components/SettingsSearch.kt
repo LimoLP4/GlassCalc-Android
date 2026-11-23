@@ -261,18 +261,29 @@ fun rememberSettingsSearchVisibility(
 
     val unitsTabTitle = stringResource(R.string.title_units)
     val unitsHeading = stringResource(R.string.units_angle_heading)
+    val angleModeAccordionTitle = stringResource(R.string.angle_mode_accordion_title)
     val unitsKeywords = stringResource(R.string.settings_keywords_units)
 
     val degScore = scoreSettingsEntry(
         tokens = tokens,
         primaryNames = listOf(stringResource(R.string.angle_deg_label)),
-        secondaryTexts = listOf(stringResource(R.string.angle_deg_desc), unitsHeading, unitsTabTitle),
+        secondaryTexts = listOf(
+            stringResource(R.string.angle_deg_desc),
+            angleModeAccordionTitle,
+            unitsHeading,
+            unitsTabTitle
+        ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_angle_deg), unitsKeywords)
     )
     val radScore = scoreSettingsEntry(
         tokens = tokens,
         primaryNames = listOf(stringResource(R.string.angle_rad_label)),
-        secondaryTexts = listOf(stringResource(R.string.angle_rad_desc), unitsHeading, unitsTabTitle),
+        secondaryTexts = listOf(
+            stringResource(R.string.angle_rad_desc),
+            angleModeAccordionTitle,
+            unitsHeading,
+            unitsTabTitle
+        ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_angle_rad), unitsKeywords)
     )
     val systemsScore = scoreSettingsEntry(

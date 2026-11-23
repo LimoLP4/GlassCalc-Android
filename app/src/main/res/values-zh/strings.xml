@@ -299,6 +299,7 @@
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">三角函数默认角度模式:</string>
+    <string name="angle_mode_accordion_title">三角函数默认角度模式</string>
     <string name="angle_deg_label">角度 (DEG)</string>
     <string name="angle_deg_desc">标准圆 = 360°</string>
     <string name="angle_rad_label">弧度 (RAD)</string>

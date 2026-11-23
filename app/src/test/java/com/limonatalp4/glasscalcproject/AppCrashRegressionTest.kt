@@ -271,6 +271,36 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("radio_theme_DARK_MODE").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("radio_app_icon_BLUE").performScrollTo().assertIsDisplayed()
 
+        // Switch to Units tab: angle mode accordion initially collapsed
+        composeTestRule.onNodeWithTag("tab_settings_1").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_angle_mode_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_angle_mode_accordion").assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("radio_angle_deg").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithTag("radio_angle_rad").fetchSemanticsNodes().isEmpty())
+
+        // Expand Angle mode accordion & select RAD
+        composeTestRule.onNodeWithTag("card_angle_mode_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_angle_deg").fetchSemanticsNodes().isNotEmpty() &&
+                composeTestRule.onAllNodesWithTag("radio_angle_rad").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_angle_deg").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("radio_angle_rad").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("radio_angle_rad").performClick()
+        composeTestRule.waitForIdle()
+
+        // Recreate activity -> Units tab and expanded Angle mode accordion stay preserved
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.recreate()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_angle_rad").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_angle_deg").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("radio_angle_rad").performScrollTo().assertIsDisplayed()
+
         // Switch to Language tab: accordion initially collapsed
         composeTestRule.onNodeWithTag("tab_settings_4").performScrollTo().performClick()
         composeTestRule.waitUntil(timeoutMillis = 3000) {

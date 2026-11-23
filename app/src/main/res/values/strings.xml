@@ -299,6 +299,7 @@
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Standard-Winkelmodus für Trigonometrie:</string>
+    <string name="angle_mode_accordion_title">Standard-Winkelmodus für Trigonometrie</string>
     <string name="angle_deg_label">Grad (DEG)</string>
     <string name="angle_deg_desc">Standardkreis = 360°</string>
     <string name="angle_rad_label">Bogenmaß (RAD)</string>

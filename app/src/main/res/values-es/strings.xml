@@ -299,6 +299,7 @@
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Modo angular predeterminado para trigonometría:</string>
+    <string name="angle_mode_accordion_title">Modo angular predeterminado para trigonometría</string>
     <string name="angle_deg_label">Grados (DEG)</string>
     <string name="angle_deg_desc">Círculo estándar = 360°</string>
     <string name="angle_rad_label">Radianes (RAD)</string>
