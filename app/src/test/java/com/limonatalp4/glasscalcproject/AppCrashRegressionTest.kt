@@ -120,6 +120,21 @@ class AppCrashRegressionTest {
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithTag("dialog_converter_systems_info").fetchSemanticsNodes().isEmpty()
         }
+        // Pairs accordion initially collapsed, expands on tap, and preserves state on recreate
+        composeTestRule.onNodeWithTag("card_converter_pairs_accordion").performScrollTo().assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("pair_m_ft").fetchSemanticsNodes().isEmpty())
+        composeTestRule.onNodeWithTag("card_converter_pairs_accordion").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("pair_m_ft").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("pair_m_ft").performScrollTo().assertIsDisplayed()
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.recreate()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("pair_m_ft").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("pair_m_ft").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("converter_search_input").performTextInput("gig")
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("unit_suggestion_gigabyte").performClick()

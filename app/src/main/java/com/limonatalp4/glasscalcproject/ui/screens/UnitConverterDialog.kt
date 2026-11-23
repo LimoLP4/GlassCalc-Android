@@ -2,6 +2,7 @@ package com.limonatalp4.glasscalcproject.ui.screens
 
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -11,8 +12,10 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -54,6 +57,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -64,6 +68,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ElectricalServices
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Info
@@ -116,6 +121,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -208,6 +214,7 @@ fun UnitConverterDialog(
     var isForward by rememberSaveable { mutableStateOf(true) }
     var inputValue by rememberSaveable { mutableStateOf("1") }
     var showSystemsInfoDialog by rememberSaveable { mutableStateOf(false) }
+    var pairsAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
     fun selectUnitSuggestion(suggestion: LocalizedUnitSuggestion) {
         triggerHaptic()
@@ -518,20 +525,17 @@ fun UnitConverterDialog(
                         },
                         label = "cat_transition"
                     ) { targetIndex ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            val catToDisplay = categories[targetIndex]
-                            val pairs = UnitConverter.CONVERSIONS.filter { it.category == catToDisplay }
+                        val catToDisplay = categories[targetIndex]
+                        val pairs = UnitConverter.CONVERSIONS.filter { it.category == catToDisplay }
 
-                            // Conversion Pairs in this category
-                            Text(
-                                text = stringResource(R.string.converter_select_pair),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
-                            )
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
+                        UnitPairsAccordionCard(
+                            title = stringResource(catToDisplay.stringResId),
+                            expanded = pairsAccordionOpen,
+                            onToggle = { pairsAccordionOpen = !pairsAccordionOpen },
+                            isPureBlack = isPureBlack,
+                            glassProps = glassProps,
+                            triggerHaptic = ::triggerHaptic
+                        ) {
                             LazyColumn(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier
@@ -841,6 +845,98 @@ fun UnitConverterDialog(
             onDismiss = { showSystemsInfoDialog = false },
             triggerHaptic = ::triggerHaptic
         )
+    }
+}
+
+@Composable
+private fun UnitPairsAccordionCard(
+    title: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    isPureBlack: Boolean,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    triggerHaptic: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+        label = "converter_pairs_chevron_rotation"
+    )
+    val cardInteraction = remember { MutableInteractionSource() }
+    val pillInteraction = remember { MutableInteractionSource() }
+
+    GlassCardContainer(
+        glassProps = glassProps,
+        shape = GlassDialogDefaults.SettingsCardShape,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        onClick = {
+            triggerHaptic()
+            onToggle()
+        },
+        role = Role.Button,
+        interactionSource = cardInteraction,
+        modifier = Modifier.testTag("card_converter_pairs_accordion")
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp)
+                )
+                GlassSurface(
+                    shape = CircleShape,
+                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = glassProps.containerBorderStroke,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .pressScale(pillInteraction)
+                ) {
+                    IconButton(
+                        onClick = {
+                            triggerHaptic()
+                            onToggle()
+                        },
+                        interactionSource = pillInteraction,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .testTag("btn_toggle_converter_pairs_accordion")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExpandMore,
+                            contentDescription = title,
+                            tint = if (isPureBlack) Color.White else colorScheme.onSurface,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .graphicsLayer { rotationZ = chevronRotation }
+                        )
+                    }
+                }
+            }
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                ) {
+                    content()
+                }
+            }
+        }
     }
 }
 
