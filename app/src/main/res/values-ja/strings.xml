@@ -56,6 +56,13 @@
     <string name="cat_current">電流</string>
     <string name="cat_power">電力</string>
     <string name="cat_charge">電荷</string>
+    <string name="cat_angle">角度</string>
+    <string name="cat_speed">速度</string>
+    <string name="cat_resistance">電気抵抗</string>
+    <string name="cat_frequency">周波数</string>
+    <string name="cat_data_rate">通信速度</string>
+    <string name="cat_energy">エネルギー</string>
+    <string name="cat_pressure">圧力</string>
     <string name="converter_select_pair">変換を選択:</string>
     <string name="converter_input_label">入力 (%s):</string>
     <string name="converter_swap_direction">方向を反転</string>
@@ -111,6 +118,45 @@
     <string name="unit_mw_kw">メガワット ↔ キロワット (MW ↔ kW)</string>
     <string name="unit_mw_w">メガワット ↔ ワット (MW ↔ W)</string>
     <string name="unit_mah_ah">ミリアンペア時 ↔ アンペア時 (mAh ↔ Ah)</string>
+    <string name="unit_deg_rad">度 ↔ ラジアン (° ↔ rad)</string>
+    <string name="unit_deg_gon">度 ↔ グラード (° ↔ gon)</string>
+    <string name="unit_rad_gon">ラジアン ↔ グラード (rad ↔ gon)</string>
+    <string name="unit_ms_kmh">メートル毎秒 ↔ キロメートル毎時 (m/s ↔ km/h)</string>
+    <string name="unit_kmh_mph">キロメートル毎時 ↔ マイル毎時 (km/h ↔ mph)</string>
+    <string name="unit_ms_mph">メートル毎秒 ↔ マイル毎時 (m/s ↔ mph)</string>
+    <string name="unit_kmh_kn">キロメートル毎時 ↔ ノット (km/h ↔ kn)</string>
+    <string name="unit_ms_kn">メートル毎秒 ↔ ノット (m/s ↔ kn)</string>
+    <string name="unit_mph_kn">マイル毎時 ↔ ノット (mph ↔ kn)</string>
+    <string name="unit_ohm_kohm">オーム ↔ キロオーム (Ω ↔ kΩ)</string>
+    <string name="unit_kohm_mohm">キロオーム ↔ メガオーム (kΩ ↔ MΩ)</string>
+    <string name="unit_ohm_mohm">オーム ↔ メガオーム (Ω ↔ MΩ)</string>
+    <string name="unit_hz_khz">ヘルツ ↔ キロヘルツ (Hz ↔ kHz)</string>
+    <string name="unit_khz_mhz">キロヘルツ ↔ メガヘルツ (kHz ↔ MHz)</string>
+    <string name="unit_mhz_ghz">メガヘルツ ↔ ギガヘルツ (MHz ↔ GHz)</string>
+    <string name="unit_hz_mhz">ヘルツ ↔ メガヘルツ (Hz ↔ MHz)</string>
+    <string name="unit_hz_ghz">ヘルツ ↔ ギガヘルツ (Hz ↔ GHz)</string>
+    <string name="unit_khz_ghz">キロヘルツ ↔ ギガヘルツ (kHz ↔ GHz)</string>
+    <string name="unit_bps_kbps">bps ↔ kbps</string>
+    <string name="unit_kbps_mbps">kbps ↔ Mbps</string>
+    <string name="unit_mbps_gbps">Mbps ↔ Gbps</string>
+    <string name="unit_bps_mbps">bps ↔ Mbps</string>
+    <string name="unit_bps_gbps">bps ↔ Gbps</string>
+    <string name="unit_kbps_gbps">kbps ↔ Gbps</string>
+    <string name="unit_j_kj">ジュール ↔ キロジュール (J ↔ kJ)</string>
+    <string name="unit_j_cal">ジュール ↔ カロリー (J ↔ cal)</string>
+    <string name="unit_kj_kcal">キロジュール ↔ キロカロリー (kJ ↔ kcal)</string>
+    <string name="unit_cal_kcal">カロリー ↔ キロカロリー (cal ↔ kcal)</string>
+    <string name="unit_j_wh">ジュール ↔ ワット時 (J ↔ Wh)</string>
+    <string name="unit_kj_kwh">キロジュール ↔ キロワット時 (kJ ↔ kWh)</string>
+    <string name="unit_wh_kwh">ワット時 ↔ キロワット時 (Wh ↔ kWh)</string>
+    <string name="unit_kcal_wh">キロカロリー ↔ ワット時 (kcal ↔ Wh)</string>
+    <string name="unit_kcal_kwh">キロカロリー ↔ キロワット時 (kcal ↔ kWh)</string>
+    <string name="unit_pa_bar">パスカル ↔ バール (Pa ↔ bar)</string>
+    <string name="unit_pa_psi">パスカル ↔ PSI (Pa ↔ psi)</string>
+    <string name="unit_pa_atm">パスカル ↔ 気圧 (Pa ↔ atm)</string>
+    <string name="unit_bar_psi">バール ↔ PSI (bar ↔ psi)</string>
+    <string name="unit_bar_atm">バール ↔ 気圧 (bar ↔ atm)</string>
+    <string name="unit_atm_psi">気圧 ↔ PSI (atm ↔ psi)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">メートル</string>
@@ -161,6 +207,34 @@
     <string name="unit_name_megawatt">メガワット</string>
     <string name="unit_name_milliampere_hour">ミリアンペア時</string>
     <string name="unit_name_ampere_hour">アンペア時</string>
+    <string name="unit_name_degree">度</string>
+    <string name="unit_name_radian">ラジアン</string>
+    <string name="unit_name_gradian">グラード</string>
+    <string name="unit_name_meter_per_second">メートル毎秒</string>
+    <string name="unit_name_kilometer_per_hour">キロメートル毎時</string>
+    <string name="unit_name_mile_per_hour">マイル毎時</string>
+    <string name="unit_name_knot">ノット</string>
+    <string name="unit_name_ohm">オーム</string>
+    <string name="unit_name_kiloohm">キロオーム</string>
+    <string name="unit_name_megaohm">メガオーム</string>
+    <string name="unit_name_hertz">ヘルツ</string>
+    <string name="unit_name_kilohertz">キロヘルツ</string>
+    <string name="unit_name_megahertz">メガヘルツ</string>
+    <string name="unit_name_gigahertz">ギガヘルツ</string>
+    <string name="unit_name_bps">ビット毎秒 (bps)</string>
+    <string name="unit_name_kbps">キロビット毎秒 (kbps)</string>
+    <string name="unit_name_mbps">メガビット毎秒 (Mbps)</string>
+    <string name="unit_name_gbps">ギガビット毎秒 (Gbps)</string>
+    <string name="unit_name_joule">ジュール</string>
+    <string name="unit_name_kilojoule">キロジュール</string>
+    <string name="unit_name_calorie">カロリー</string>
+    <string name="unit_name_kilocalorie">キロカロリー</string>
+    <string name="unit_name_watt_hour">ワット時</string>
+    <string name="unit_name_kilowatt_hour">キロワット時</string>
+    <string name="unit_name_pascal">パスカル</string>
+    <string name="unit_name_bar">バール</string>
+    <string name="unit_name_psi">PSI</string>
+    <string name="unit_name_atmosphere">気圧 (atm)</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">科学定数</string>
@@ -220,7 +294,7 @@
     <string name="angle_rad_label">ラジアン (RAD)</string>
     <string name="angle_rad_desc">円周 = 2π</string>
     <string name="units_supported_systems">対応する変換単位:</string>
-    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体積 (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)</string>
+    <string name="units_systems_detail">• メートル法 ↔ ヤード・ポンド法 (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• 温度 (°C, °F, K)\n• 体積 (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• データ容量 (B, KB, MB, GB, TB)\n• 時間 (ms, s, min, h, d)\n• 電圧 (mV, V, kV)\n• 電流 (µA, mA, A)\n• 電力 (mW, W, kW, MW)\n• 電荷 (mAh, Ah)\n• 角度 (°, rad, gon)\n• 速度 (m/s, km/h, mph, kn)\n• 電気抵抗 (Ω, kΩ, MΩ)\n• 周波数 (Hz, kHz, MHz, GHz)\n• 通信速度 (bps, kbps, Mbps, Gbps)\n• エネルギー (J, kJ, cal, kcal, Wh, kWh)\n• 圧力 (Pa, bar, psi, atm)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">画面サイズとスケーリング</string>
@@ -359,6 +433,13 @@
     <string name="converter_keywords_current">電流,アンペア,電気</string>
     <string name="converter_keywords_power">電力,仕事率,ワット,電気</string>
     <string name="converter_keywords_charge">電荷,電気量,バッテリー,容量</string>
+    <string name="converter_keywords_angle">角度,度,ラジアン,グラード,gon</string>
+    <string name="converter_keywords_speed">速度,速さ,時速,秒速,km/h,mph,ノット</string>
+    <string name="converter_keywords_resistance">抵抗,電気抵抗,オーム,電気</string>
+    <string name="converter_keywords_frequency">周波数,ヘルツ,振動数,クロック</string>
+    <string name="converter_keywords_data_rate">通信速度,ビットレート,帯域,回線速度,転送速度</string>
+    <string name="converter_keywords_energy">エネルギー,仕事,熱量,カロリー,電力量</string>
+    <string name="converter_keywords_pressure">圧力,気圧,パスカル,バール,psi</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">メートル,m,長さ,距離,メートル法</string>
@@ -409,4 +490,32 @@
     <string name="unit_keywords_megawatt">メガワット,mw,megawatt,電力</string>
     <string name="unit_keywords_milliampere_hour">ミリアンペア時,mah,電荷,電気量,バッテリー,電池,容量</string>
     <string name="unit_keywords_ampere_hour">アンペア時,ah,電荷,電気量,バッテリー,電池,容量</string>
+    <string name="unit_keywords_degree">度,度数,°,deg,degree,角度</string>
+    <string name="unit_keywords_radian">ラジアン,rad,radian,弧度,角度,pi</string>
+    <string name="unit_keywords_gradian">グラード,ゴン,gon,gradian,角度</string>
+    <string name="unit_keywords_meter_per_second">メートル毎秒,秒速,m/s,速度</string>
+    <string name="unit_keywords_kilometer_per_hour">キロメートル毎時,時速,km/h,kmh,速度</string>
+    <string name="unit_keywords_mile_per_hour">マイル毎時,mph,速度,ヤードポンド</string>
+    <string name="unit_keywords_knot">ノット,knot,kn,kt,海里,速度</string>
+    <string name="unit_keywords_ohm">オーム,ohm,ω,抵抗,電気抵抗,電気</string>
+    <string name="unit_keywords_kiloohm">キロオーム,kiloohm,kω,kohm,抵抗,電気</string>
+    <string name="unit_keywords_megaohm">メガオーム,megaohm,mω,mohm,抵抗,電気</string>
+    <string name="unit_keywords_hertz">ヘルツ,hertz,hz,周波数,振動数</string>
+    <string name="unit_keywords_kilohertz">キロヘルツ,kilohertz,khz,周波数</string>
+    <string name="unit_keywords_megahertz">メガヘルツ,megahertz,mhz,周波数,電波</string>
+    <string name="unit_keywords_gigahertz">ギガヘルツ,gigahertz,ghz,周波数,cpu,wifi</string>
+    <string name="unit_keywords_bps">ビット毎秒,bps,通信速度,ビットレート</string>
+    <string name="unit_keywords_kbps">キロビット毎秒,kbps,通信速度,ビットレート</string>
+    <string name="unit_keywords_mbps">メガビット毎秒,mbps,通信速度,回線速度</string>
+    <string name="unit_keywords_gbps">ギガビット毎秒,gbps,通信速度,光回線</string>
+    <string name="unit_keywords_joule">ジュール,joule,j,エネルギー,仕事</string>
+    <string name="unit_keywords_kilojoule">キロジュール,kilojoule,kj,エネルギー</string>
+    <string name="unit_keywords_calorie">カロリー,calorie,cal,エネルギー,熱量</string>
+    <string name="unit_keywords_kilocalorie">キロカロリー,kilocalorie,kcal,カロリー,エネルギー</string>
+    <string name="unit_keywords_watt_hour">ワット時,watt-hour,wh,エネルギー,電力量</string>
+    <string name="unit_keywords_kilowatt_hour">キロワット時,kilowatt-hour,kwh,エネルギー,電力量,電気代</string>
+    <string name="unit_keywords_pascal">パスカル,pascal,pa,圧力</string>
+    <string name="unit_keywords_bar">バール,bar,圧力</string>
+    <string name="unit_keywords_psi">psi,重量ポンド毎平方インチ,圧力,空気圧</string>
+    <string name="unit_keywords_atmosphere">気圧,標準気圧,atmosphere,atm,圧力</string>
 </resources>

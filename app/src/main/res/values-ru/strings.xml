@@ -56,6 +56,13 @@
     <string name="cat_current">Сила тока</string>
     <string name="cat_power">Мощность</string>
     <string name="cat_charge">Заряд</string>
+    <string name="cat_angle">Угол</string>
+    <string name="cat_speed">Скорость</string>
+    <string name="cat_resistance">Сопротивление</string>
+    <string name="cat_frequency">Частота</string>
+    <string name="cat_data_rate">Скорость сети</string>
+    <string name="cat_energy">Энергия</string>
+    <string name="cat_pressure">Давление</string>
     <string name="converter_select_pair">Выберите конвертацию:</string>
     <string name="converter_input_label">Ввод (%s):</string>
     <string name="converter_swap_direction">Поменять направление</string>
@@ -111,6 +118,45 @@
     <string name="unit_mw_kw">Мегаватт ↔ Киловатт (MW ↔ kW)</string>
     <string name="unit_mw_w">Мегаватт ↔ Ватт (MW ↔ W)</string>
     <string name="unit_mah_ah">Миллиампер-час ↔ Ампер-час (mAh ↔ Ah)</string>
+    <string name="unit_deg_rad">Градусы ↔ Радианы (° ↔ rad)</string>
+    <string name="unit_deg_gon">Градусы ↔ Грады (° ↔ gon)</string>
+    <string name="unit_rad_gon">Радианы ↔ Грады (rad ↔ gon)</string>
+    <string name="unit_ms_kmh">Метры/сек ↔ Километры/час (m/s ↔ km/h)</string>
+    <string name="unit_kmh_mph">Километры/час ↔ Мили/час (km/h ↔ mph)</string>
+    <string name="unit_ms_mph">Метры/сек ↔ Мили/час (m/s ↔ mph)</string>
+    <string name="unit_kmh_kn">Километры/час ↔ Узлы (km/h ↔ kn)</string>
+    <string name="unit_ms_kn">Метры/сек ↔ Узлы (m/s ↔ kn)</string>
+    <string name="unit_mph_kn">Мили/час ↔ Узлы (mph ↔ kn)</string>
+    <string name="unit_ohm_kohm">Ом ↔ Килоом (Ω ↔ kΩ)</string>
+    <string name="unit_kohm_mohm">Килоом ↔ Мегаом (kΩ ↔ MΩ)</string>
+    <string name="unit_ohm_mohm">Ом ↔ Мегаом (Ω ↔ MΩ)</string>
+    <string name="unit_hz_khz">Герц ↔ Килогерц (Hz ↔ kHz)</string>
+    <string name="unit_khz_mhz">Килогерц ↔ Мегагерц (kHz ↔ MHz)</string>
+    <string name="unit_mhz_ghz">Мегагерц ↔ Гигагерц (MHz ↔ GHz)</string>
+    <string name="unit_hz_mhz">Герц ↔ Мегагерц (Hz ↔ MHz)</string>
+    <string name="unit_hz_ghz">Герц ↔ Гигагерц (Hz ↔ GHz)</string>
+    <string name="unit_khz_ghz">Килогерц ↔ Гигагерц (kHz ↔ GHz)</string>
+    <string name="unit_bps_kbps">Бит/с ↔ Килобит/с (bps ↔ kbps)</string>
+    <string name="unit_kbps_mbps">Килобит/с ↔ Мегабит/с (kbps ↔ Mbps)</string>
+    <string name="unit_mbps_gbps">Мегабит/с ↔ Гигабит/с (Mbps ↔ Gbps)</string>
+    <string name="unit_bps_mbps">Бит/с ↔ Мегабит/с (bps ↔ Mbps)</string>
+    <string name="unit_bps_gbps">Бит/с ↔ Гигабит/с (bps ↔ Gbps)</string>
+    <string name="unit_kbps_gbps">Килобит/с ↔ Гигабит/с (kbps ↔ Gbps)</string>
+    <string name="unit_j_kj">Джоули ↔ Килоджоули (J ↔ kJ)</string>
+    <string name="unit_j_cal">Джоули ↔ Калории (J ↔ cal)</string>
+    <string name="unit_kj_kcal">Килоджоули ↔ Килокалории (kJ ↔ kcal)</string>
+    <string name="unit_cal_kcal">Калории ↔ Килокалории (cal ↔ kcal)</string>
+    <string name="unit_j_wh">Джоули ↔ Ватт-часы (J ↔ Wh)</string>
+    <string name="unit_kj_kwh">Килоджоули ↔ Киловатт-часы (kJ ↔ kWh)</string>
+    <string name="unit_wh_kwh">Ватт-часы ↔ Киловатт-часы (Wh ↔ kWh)</string>
+    <string name="unit_kcal_wh">Килокалории ↔ Ватт-часы (kcal ↔ Wh)</string>
+    <string name="unit_kcal_kwh">Килокалории ↔ Киловатт-часы (kcal ↔ kWh)</string>
+    <string name="unit_pa_bar">Паскаль ↔ Бар (Pa ↔ bar)</string>
+    <string name="unit_pa_psi">Паскаль ↔ PSI (Pa ↔ psi)</string>
+    <string name="unit_pa_atm">Паскаль ↔ Атмосфера (Pa ↔ atm)</string>
+    <string name="unit_bar_psi">Бар ↔ PSI (bar ↔ psi)</string>
+    <string name="unit_bar_atm">Бар ↔ Атмосфера (bar ↔ atm)</string>
+    <string name="unit_atm_psi">Атмосфера ↔ PSI (atm ↔ psi)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">Метр</string>
@@ -161,6 +207,34 @@
     <string name="unit_name_megawatt">Мегаватт</string>
     <string name="unit_name_milliampere_hour">Миллиампер-час</string>
     <string name="unit_name_ampere_hour">Ампер-час</string>
+    <string name="unit_name_degree">Градус</string>
+    <string name="unit_name_radian">Радиан</string>
+    <string name="unit_name_gradian">Град (гон)</string>
+    <string name="unit_name_meter_per_second">Метров в секунду</string>
+    <string name="unit_name_kilometer_per_hour">Километров в час</string>
+    <string name="unit_name_mile_per_hour">Миль в час</string>
+    <string name="unit_name_knot">Узел</string>
+    <string name="unit_name_ohm">Ом</string>
+    <string name="unit_name_kiloohm">Килоом</string>
+    <string name="unit_name_megaohm">Мегаом</string>
+    <string name="unit_name_hertz">Герц</string>
+    <string name="unit_name_kilohertz">Килогерц</string>
+    <string name="unit_name_megahertz">Мегагерц</string>
+    <string name="unit_name_gigahertz">Гигагерц</string>
+    <string name="unit_name_bps">Бит в секунду</string>
+    <string name="unit_name_kbps">Килобит в секунду</string>
+    <string name="unit_name_mbps">Мегабит в секунду</string>
+    <string name="unit_name_gbps">Гигабит в секунду</string>
+    <string name="unit_name_joule">Джоуль</string>
+    <string name="unit_name_kilojoule">Килоджоуль</string>
+    <string name="unit_name_calorie">Калория</string>
+    <string name="unit_name_kilocalorie">Килокалория</string>
+    <string name="unit_name_watt_hour">Ватт-час</string>
+    <string name="unit_name_kilowatt_hour">Киловатт-час</string>
+    <string name="unit_name_pascal">Паскаль</string>
+    <string name="unit_name_bar">Бар</string>
+    <string name="unit_name_psi">PSI</string>
+    <string name="unit_name_atmosphere">Атмосфера</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">Научные константы</string>
@@ -220,7 +294,7 @@
     <string name="angle_rad_label">Радианы (RAD)</string>
     <string name="angle_rad_desc">Полный круг = 2π</string>
     <string name="units_supported_systems">Поддерживаемые системы конвертации:</string>
-    <string name="units_systems_detail">• Метрическая ↔ Имперская (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Температура (°C, °F, K)\n• Объем (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)</string>
+    <string name="units_systems_detail">• Метрическая ↔ Имперская (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Температура (°C, °F, K)\n• Объем (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Хранение данных (B, KB, MB, GB, TB)\n• Время (ms, s, min, h, d)\n• Напряжение (mV, V, kV)\n• Сила тока (µA, mA, A)\n• Мощность (mW, W, kW, MW)\n• Заряд (mAh, Ah)\n• Угол (°, rad, gon)\n• Скорость (m/s, km/h, mph, kn)\n• Сопротивление (Ω, kΩ, MΩ)\n• Частота (Hz, kHz, MHz, GHz)\n• Скорость передачи (bps, kbps, Mbps, Gbps)\n• Энергия (J, kJ, cal, kcal, Wh, kWh)\n• Давление (Pa, bar, psi, atm)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Размер экрана и масштабирование</string>
@@ -359,6 +433,13 @@
     <string name="converter_keywords_current">сила тока,ток,ампер,электричество</string>
     <string name="converter_keywords_power">мощность,ватт,электричество</string>
     <string name="converter_keywords_charge">заряд,электрический заряд,емкость,аккумулятор</string>
+    <string name="converter_keywords_angle">угол,градус,радиан,град,гон</string>
+    <string name="converter_keywords_speed">скорость,темп,км/ч,миль/ч,узлы</string>
+    <string name="converter_keywords_resistance">сопротивление,электрическое сопротивление,ом,электричество</string>
+    <string name="converter_keywords_frequency">частота,герц,тактовая частота,колебания</string>
+    <string name="converter_keywords_data_rate">скорость передачи,скорость интернета,битрейт,пропускная способность</string>
+    <string name="converter_keywords_energy">энергия,работа,теплота,калории,электроэнергия</string>
+    <string name="converter_keywords_pressure">давление,атмосферное давление,бар,паскаль,psi,атмосфера</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">метр,метры,м,длина,расстояние,метрическая</string>
@@ -409,4 +490,32 @@
     <string name="unit_keywords_megawatt">мегаватт,мвт,mw,мощность</string>
     <string name="unit_keywords_milliampere_hour">миллиампер-час,мач,mah,заряд,емкость,аккумулятор,батарея</string>
     <string name="unit_keywords_ampere_hour">ампер-час,ач,ah,заряд,емкость,аккумулятор,батарея</string>
+    <string name="unit_keywords_degree">градус,градусы,°,deg,degree,угол</string>
+    <string name="unit_keywords_radian">радиан,радианы,rad,radian,угол,pi</string>
+    <string name="unit_keywords_gradian">град,грады,гон,gon,gradian,угол</string>
+    <string name="unit_keywords_meter_per_second">метр в секунду,метры в секунду,м/с,m/s,скорость</string>
+    <string name="unit_keywords_kilometer_per_hour">километр в час,километры в час,км/ч,km/h,kmh,скорость</string>
+    <string name="unit_keywords_mile_per_hour">миля в час,мили в час,mph,скорость</string>
+    <string name="unit_keywords_knot">узел,узлы,knot,kn,kt,скорость,морской</string>
+    <string name="unit_keywords_ohm">ом,омы,ohm,ω,сопротивление,электричество</string>
+    <string name="unit_keywords_kiloohm">килоом,ком,kiloohm,kω,kohm,сопротивление</string>
+    <string name="unit_keywords_megaohm">мегаом,мом,megaohm,mω,mohm,сопротивление</string>
+    <string name="unit_keywords_hertz">герц,гц,hertz,hz,частота</string>
+    <string name="unit_keywords_kilohertz">килогерц,кгц,kilohertz,khz,частота</string>
+    <string name="unit_keywords_megahertz">мегагерц,мгц,megahertz,mhz,частота</string>
+    <string name="unit_keywords_gigahertz">гигагерц,ггц,gigahertz,ghz,частота,процессор,wifi</string>
+    <string name="unit_keywords_bps">бит в секунду,бит/с,bps,скорость передачи,битрейт</string>
+    <string name="unit_keywords_kbps">килобит в секунду,кбит/с,kbps,скорость передачи</string>
+    <string name="unit_keywords_mbps">мегабит в секунду,мбит/с,mbps,скорость интернета</string>
+    <string name="unit_keywords_gbps">гигабит в секунду,гбит/с,gbps,скорость интернета,оптика</string>
+    <string name="unit_keywords_joule">джоуль,дж,joule,j,энергия,работа</string>
+    <string name="unit_keywords_kilojoule">килоджоуль,кдж,kilojoule,kj,энергия</string>
+    <string name="unit_keywords_calorie">калория,калории,кал,calorie,cal,энергия</string>
+    <string name="unit_keywords_kilocalorie">килокалория,килокалории,ккал,kilocalorie,kcal,калории,энергия</string>
+    <string name="unit_keywords_watt_hour">ватт-час,втч,watt-hour,wh,энергия</string>
+    <string name="unit_keywords_kilowatt_hour">киловатт-час,квтч,kilowatt-hour,kwh,энергия,электричество</string>
+    <string name="unit_keywords_pascal">паскаль,па,pascal,pa,давление</string>
+    <string name="unit_keywords_bar">бар,bar,давление</string>
+    <string name="unit_keywords_psi">psi,фунт на квадратный дюйм,давление</string>
+    <string name="unit_keywords_atmosphere">атмосфера,атм,atmosphere,atm,давление</string>
 </resources>

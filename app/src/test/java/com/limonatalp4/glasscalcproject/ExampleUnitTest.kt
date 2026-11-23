@@ -273,6 +273,145 @@ class ExampleUnitTest {
         val tbspToTsp = UnitConverter.CONVERSIONS.first { it.unitFrom == "tbsp" && it.unitTo == "tsp" }
         assertEquals("6", UnitConverter.convert(2.0, tbspToTsp, forward = true))
         assertEquals("3", UnitConverter.convert(9.0, tbspToTsp, forward = false))
+
+        // Angle: °, rad, gon in both directions
+        val degToRad = UnitConverter.CONVERSIONS.first { it.unitFrom == "°" && it.unitTo == "rad" }
+        assertEquals("3,141593", UnitConverter.convert(180.0, degToRad, forward = true))
+        assertEquals("180", UnitConverter.convert(Math.PI, degToRad, forward = false))
+
+        val degToGon = UnitConverter.CONVERSIONS.first { it.unitFrom == "°" && it.unitTo == "gon" }
+        assertEquals("100", UnitConverter.convert(90.0, degToGon, forward = true))
+        assertEquals("180", UnitConverter.convert(200.0, degToGon, forward = false))
+
+        val radToGon = UnitConverter.CONVERSIONS.first { it.unitFrom == "rad" && it.unitTo == "gon" }
+        assertEquals("200", UnitConverter.convert(Math.PI, radToGon, forward = true))
+        assertEquals("1,570796", UnitConverter.convert(100.0, radToGon, forward = false))
+
+        // Speed: m/s, km/h, mph, kn in both directions
+        val msToKmh = UnitConverter.CONVERSIONS.first { it.unitFrom == "m/s" && it.unitTo == "km/h" }
+        assertEquals("36", UnitConverter.convert(10.0, msToKmh, forward = true))
+        assertEquals("20", UnitConverter.convert(72.0, msToKmh, forward = false))
+
+        val kmhToMph = UnitConverter.CONVERSIONS.first { it.unitFrom == "km/h" && it.unitTo == "mph" }
+        assertEquals("100", UnitConverter.convert(160.9344, kmhToMph, forward = true))
+        assertEquals("160,9344", UnitConverter.convert(100.0, kmhToMph, forward = false))
+
+        val msToMph = UnitConverter.CONVERSIONS.first { it.unitFrom == "m/s" && it.unitTo == "mph" }
+        assertEquals("10", UnitConverter.convert(4.4704, msToMph, forward = true))
+        assertEquals("4,4704", UnitConverter.convert(10.0, msToMph, forward = false))
+
+        val kmhToKn = UnitConverter.CONVERSIONS.first { it.unitFrom == "km/h" && it.unitTo == "kn" }
+        assertEquals("100", UnitConverter.convert(185.2, kmhToKn, forward = true))
+        assertEquals("185,2", UnitConverter.convert(100.0, kmhToKn, forward = false))
+
+        val msToKn = UnitConverter.CONVERSIONS.first { it.unitFrom == "m/s" && it.unitTo == "kn" }
+        assertEquals("36", UnitConverter.convert(18.52, msToKn, forward = true))
+        assertEquals("18,52", UnitConverter.convert(36.0, msToKn, forward = false))
+
+        val mphToKn = UnitConverter.CONVERSIONS.first { it.unitFrom == "mph" && it.unitTo == "kn" }
+        assertEquals("1,150779", UnitConverter.convert(1.0, mphToKn, forward = false))
+        assertEquals("0,868976", UnitConverter.convert(1.0, mphToKn, forward = true))
+
+        // Resistance: Ω, kΩ, MΩ in both directions
+        val ohmToKohm = UnitConverter.CONVERSIONS.first { it.unitFrom == "Ω" && it.unitTo == "kΩ" }
+        assertEquals("4,7", UnitConverter.convert(4700.0, ohmToKohm, forward = true))
+        assertEquals("2200", UnitConverter.convert(2.2, ohmToKohm, forward = false))
+
+        val kohmToMohm = UnitConverter.CONVERSIONS.first { it.unitFrom == "kΩ" && it.unitTo == "MΩ" }
+        assertEquals("1,5", UnitConverter.convert(1500.0, kohmToMohm, forward = true))
+        assertEquals("1000", UnitConverter.convert(1.0, kohmToMohm, forward = false))
+
+        val ohmToMohm = UnitConverter.CONVERSIONS.first { it.unitFrom == "Ω" && it.unitTo == "MΩ" }
+        assertEquals("2", UnitConverter.convert(2_000_000.0, ohmToMohm, forward = true))
+        assertEquals("500000", UnitConverter.convert(0.5, ohmToMohm, forward = false))
+
+        // Frequency: Hz, kHz, MHz, GHz in both directions
+        val hzToKhz = UnitConverter.CONVERSIONS.first { it.unitFrom == "Hz" && it.unitTo == "kHz" }
+        assertEquals("2,5", UnitConverter.convert(2500.0, hzToKhz, forward = true))
+        assertEquals("1000", UnitConverter.convert(1.0, hzToKhz, forward = false))
+
+        val khzToMhz = UnitConverter.CONVERSIONS.first { it.unitFrom == "kHz" && it.unitTo == "MHz" }
+        assertEquals("1,2", UnitConverter.convert(1200.0, khzToMhz, forward = true))
+        assertEquals("88000", UnitConverter.convert(88.0, khzToMhz, forward = false))
+
+        val mhzToGhz = UnitConverter.CONVERSIONS.first { it.unitFrom == "MHz" && it.unitTo == "GHz" }
+        assertEquals("2,4", UnitConverter.convert(2400.0, mhzToGhz, forward = true))
+        assertEquals("5000", UnitConverter.convert(5.0, mhzToGhz, forward = false))
+
+        val hzToGhz = UnitConverter.CONVERSIONS.first { it.unitFrom == "Hz" && it.unitTo == "GHz" }
+        assertEquals("1E-9", UnitConverter.convert(1.0, hzToGhz, forward = true))
+        assertEquals("1000000000", UnitConverter.convert(1.0, hzToGhz, forward = false))
+
+        // Data Rate: bps, kbps, Mbps, Gbps in both directions
+        val bpsToKbps = UnitConverter.CONVERSIONS.first { it.unitFrom == "bps" && it.unitTo == "kbps" }
+        assertEquals("512", UnitConverter.convert(512_000.0, bpsToKbps, forward = true))
+        assertEquals("64000", UnitConverter.convert(64.0, bpsToKbps, forward = false))
+
+        val kbpsToMbps = UnitConverter.CONVERSIONS.first { it.unitFrom == "kbps" && it.unitTo == "Mbps" }
+        assertEquals("50", UnitConverter.convert(50_000.0, kbpsToMbps, forward = true))
+        assertEquals("100000", UnitConverter.convert(100.0, kbpsToMbps, forward = false))
+
+        val mbpsToGbps = UnitConverter.CONVERSIONS.first { it.unitFrom == "Mbps" && it.unitTo == "Gbps" }
+        assertEquals("2,5", UnitConverter.convert(2500.0, mbpsToGbps, forward = true))
+        assertEquals("1000", UnitConverter.convert(1.0, mbpsToGbps, forward = false))
+
+        val bpsToGbps = UnitConverter.CONVERSIONS.first { it.unitFrom == "bps" && it.unitTo == "Gbps" }
+        assertEquals("1", UnitConverter.convert(1_000_000_000.0, bpsToGbps, forward = true))
+        assertEquals("2000000000", UnitConverter.convert(2.0, bpsToGbps, forward = false))
+
+        // Energy: J, kJ, cal, kcal, Wh, kWh in both directions
+        val jToKj = UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "kJ" }
+        assertEquals("4,5", UnitConverter.convert(4500.0, jToKj, forward = true))
+        assertEquals("2000", UnitConverter.convert(2.0, jToKj, forward = false))
+
+        val jToCal = UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "cal" }
+        assertEquals("1", UnitConverter.convert(4.184, jToCal, forward = true))
+        assertEquals("41,84", UnitConverter.convert(10.0, jToCal, forward = false))
+
+        val kjToKcal = UnitConverter.CONVERSIONS.first { it.unitFrom == "kJ" && it.unitTo == "kcal" }
+        assertEquals("10", UnitConverter.convert(41.84, kjToKcal, forward = true))
+        assertEquals("4,184", UnitConverter.convert(1.0, kjToKcal, forward = false))
+
+        val calToKcal = UnitConverter.CONVERSIONS.first { it.unitFrom == "cal" && it.unitTo == "kcal" }
+        assertEquals("2,5", UnitConverter.convert(2500.0, calToKcal, forward = true))
+        assertEquals("1000", UnitConverter.convert(1.0, calToKcal, forward = false))
+
+        val jToWh = UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "Wh" }
+        assertEquals("1", UnitConverter.convert(3600.0, jToWh, forward = true))
+        assertEquals("7200", UnitConverter.convert(2.0, jToWh, forward = false))
+
+        val kjToKwh = UnitConverter.CONVERSIONS.first { it.unitFrom == "kJ" && it.unitTo == "kWh" }
+        assertEquals("1", UnitConverter.convert(3600.0, kjToKwh, forward = true))
+        assertEquals("3600", UnitConverter.convert(1.0, kjToKwh, forward = false))
+
+        val whToKwh = UnitConverter.CONVERSIONS.first { it.unitFrom == "Wh" && it.unitTo == "kWh" }
+        assertEquals("1,5", UnitConverter.convert(1500.0, whToKwh, forward = true))
+        assertEquals("2500", UnitConverter.convert(2.5, whToKwh, forward = false))
+
+        // Pressure: Pa, bar, psi, atm in both directions
+        val paToBar = UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "bar" }
+        assertEquals("1", UnitConverter.convert(100_000.0, paToBar, forward = true))
+        assertEquals("250000", UnitConverter.convert(2.5, paToBar, forward = false))
+
+        val paToAtm = UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "atm" }
+        assertEquals("1", UnitConverter.convert(101_325.0, paToAtm, forward = true))
+        assertEquals("101325", UnitConverter.convert(1.0, paToAtm, forward = false))
+
+        val paToPsi = UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "psi" }
+        assertEquals("1", UnitConverter.convert(6894.757293168361, paToPsi, forward = true))
+        assertEquals("6894,757293", UnitConverter.convert(1.0, paToPsi, forward = false))
+
+        val barToAtm = UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "atm" }
+        assertEquals("1", UnitConverter.convert(1.01325, barToAtm, forward = true))
+        assertEquals("1,01325", UnitConverter.convert(1.0, barToAtm, forward = false))
+
+        val barToPsi = UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "psi" }
+        assertEquals("14,503774", UnitConverter.convert(1.0, barToPsi, forward = true))
+        assertEquals("2,068427", UnitConverter.convert(30.0, barToPsi, forward = false))
+
+        val atmToPsi = UnitConverter.CONVERSIONS.first { it.unitFrom == "atm" && it.unitTo == "psi" }
+        assertEquals("14,695949", UnitConverter.convert(1.0, atmToPsi, forward = true))
+        assertEquals("1", UnitConverter.convert(14.69594877551345, atmToPsi, forward = false))
     }
 
     @Test
@@ -618,6 +757,45 @@ class ExampleUnitTest {
                 "KB" to "MB" -> "Kilobyte ↔ Megabyte (KB ↔ MB)"
                 "MB" to "GB" -> "Megabyte ↔ Gigabyte (MB ↔ GB)"
                 "GB" to "TB" -> "Gigabyte ↔ Terabyte (GB ↔ TB)"
+                "°" to "rad" -> "Grad ↔ Bogenmaß (° ↔ rad)"
+                "°" to "gon" -> "Grad ↔ Gon (° ↔ gon)"
+                "rad" to "gon" -> "Bogenmaß ↔ Gon (rad ↔ gon)"
+                "m/s" to "km/h" -> "Meter/Sekunde ↔ Kilometer/Stunde (m/s ↔ km/h)"
+                "km/h" to "mph" -> "Kilometer/Stunde ↔ Meilen/Stunde (km/h ↔ mph)"
+                "m/s" to "mph" -> "Meter/Sekunde ↔ Meilen/Stunde (m/s ↔ mph)"
+                "km/h" to "kn" -> "Kilometer/Stunde ↔ Knoten (km/h ↔ kn)"
+                "m/s" to "kn" -> "Meter/Sekunde ↔ Knoten (m/s ↔ kn)"
+                "mph" to "kn" -> "Meilen/Stunde ↔ Knoten (mph ↔ kn)"
+                "Ω" to "kΩ" -> "Ohm ↔ Kiloohm (Ω ↔ kΩ)"
+                "kΩ" to "MΩ" -> "Kiloohm ↔ Megaohm (kΩ ↔ MΩ)"
+                "Ω" to "MΩ" -> "Ohm ↔ Megaohm (Ω ↔ MΩ)"
+                "Hz" to "kHz" -> "Hertz ↔ Kilohertz (Hz ↔ kHz)"
+                "kHz" to "MHz" -> "Kilohertz ↔ Megahertz (kHz ↔ MHz)"
+                "MHz" to "GHz" -> "Megahertz ↔ Gigahertz (MHz ↔ GHz)"
+                "Hz" to "MHz" -> "Hertz ↔ Megahertz (Hz ↔ MHz)"
+                "Hz" to "GHz" -> "Hertz ↔ Gigahertz (Hz ↔ GHz)"
+                "kHz" to "GHz" -> "Kilohertz ↔ Gigahertz (kHz ↔ GHz)"
+                "bps" to "kbps" -> "Bit/s ↔ Kilobit/s (bps ↔ kbps)"
+                "kbps" to "Mbps" -> "Kilobit/s ↔ Megabit/s (kbps ↔ Mbps)"
+                "Mbps" to "Gbps" -> "Megabit/s ↔ Gigabit/s (Mbps ↔ Gbps)"
+                "bps" to "Mbps" -> "Bit/s ↔ Megabit/s (bps ↔ Mbps)"
+                "bps" to "Gbps" -> "Bit/s ↔ Gigabit/s (bps ↔ Gbps)"
+                "kbps" to "Gbps" -> "Kilobit/s ↔ Gigabit/s (kbps ↔ Gbps)"
+                "J" to "kJ" -> "Joule ↔ Kilojoule (J ↔ kJ)"
+                "J" to "cal" -> "Joule ↔ Kalorien (J ↔ cal)"
+                "kJ" to "kcal" -> "Kilojoule ↔ Kilokalorien (kJ ↔ kcal)"
+                "cal" to "kcal" -> "Kalorien ↔ Kilokalorien (cal ↔ kcal)"
+                "J" to "Wh" -> "Joule ↔ Wattstunden (J ↔ Wh)"
+                "kJ" to "kWh" -> "Kilojoule ↔ Kilowattstunden (kJ ↔ kWh)"
+                "Wh" to "kWh" -> "Wattstunden ↔ Kilowattstunden (Wh ↔ kWh)"
+                "kcal" to "Wh" -> "Kilokalorien ↔ Wattstunden (kcal ↔ Wh)"
+                "kcal" to "kWh" -> "Kilokalorien ↔ Kilowattstunden (kcal ↔ kWh)"
+                "Pa" to "bar" -> "Pascal ↔ Bar (Pa ↔ bar)"
+                "Pa" to "psi" -> "Pascal ↔ PSI (Pa ↔ psi)"
+                "Pa" to "atm" -> "Pascal ↔ Atmosphäre (Pa ↔ atm)"
+                "bar" to "psi" -> "Bar ↔ PSI (bar ↔ psi)"
+                "bar" to "atm" -> "Bar ↔ Atmosphäre (bar ↔ atm)"
+                "atm" to "psi" -> "Atmosphäre ↔ PSI (atm ↔ psi)"
                 else -> "${pair.unitFrom} ↔ ${pair.unitTo}"
             }
             val keywords = when (pair.category) {
@@ -631,6 +809,13 @@ class ExampleUnitTest {
                 UnitCategory.CURRENT -> listOf("stromstärke", "ampere", "milliampere", "mikroampere")
                 UnitCategory.POWER -> listOf("leistung", "watt", "milliwatt", "kilowatt", "megawatt")
                 UnitCategory.CHARGE -> listOf("ladung", "akku", "milliamperestunden", "amperestunden")
+                UnitCategory.ANGLE -> listOf("winkel", "grad", "bogenmaß", "gon")
+                UnitCategory.SPEED -> listOf("geschwindigkeit", "tempo", "km/h", "mph", "knoten")
+                UnitCategory.RESISTANCE -> listOf("widerstand", "ohm", "elektrik")
+                UnitCategory.FREQUENCY -> listOf("frequenz", "hertz", "takt")
+                UnitCategory.DATA_RATE -> listOf("datenrate", "bandbreite", "internet", "bps")
+                UnitCategory.ENERGY -> listOf("energie", "joule", "kalorien", "wattstunden")
+                UnitCategory.PRESSURE -> listOf("druck", "luftdruck", "pascal", "bar", "psi", "atmosphäre")
             }
             com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair(
                 pair = pair,
@@ -640,10 +825,16 @@ class ExampleUnitTest {
             )
         }
 
-        // "Meter" matches all meter-based length conversions as well as Kubikmeter (m³ ↔ l)
+        // "Meter" matches all meter-based length conversions, Kubikmeter (m³ ↔ l), and Meter/Sekunde / Kilometer/Stunde speed pairs
         val meterResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Meter", localizedGermanPairs)
         assertEquals(
-            listOf("m" to "ft", "m" to "cm", "m" to "mm", "m" to "nm", "cm" to "in", "km" to "mi", "m³" to "l"),
+            listOf(
+                "m" to "ft", "m" to "cm", "m" to "mm", "m" to "nm",
+                "m/s" to "km/h", "m/s" to "mph", "m/s" to "kn",
+                "cm" to "in", "km" to "mi",
+                "km/h" to "mph", "km/h" to "kn",
+                "m³" to "l"
+            ),
             meterResults.map { it.unitFrom to it.unitTo }
         )
 
@@ -652,9 +843,12 @@ class ExampleUnitTest {
         assertTrue(mResults.isNotEmpty())
         assertEquals("m", mResults.first().unitFrom)
 
-        // "GB" finds data pairs MB↔GB and GB↔TB across categories
+        // "GB" finds data pairs MB↔GB and GB↔TB first, followed by Gbps prefix matches
         val gbResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("GB", localizedGermanPairs)
-        assertEquals(listOf("MB" to "GB", "GB" to "TB"), gbResults.map { it.unitFrom to it.unitTo })
+        assertEquals(
+            listOf("MB" to "GB", "GB" to "TB", "Mbps" to "Gbps", "bps" to "Gbps", "kbps" to "Gbps"),
+            gbResults.map { it.unitFrom to it.unitTo }
+        )
 
         // "Gewicht" matches Mass pairs (kg↔lb, kg↔t) in German
         val weightResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Gewicht", localizedGermanPairs)
@@ -676,6 +870,15 @@ class ExampleUnitTest {
         assertTrue(flOzResults.any { it.unitFrom == "cup" && it.unitTo == "fl oz" })
         val tspResults = com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Teelöffel", localizedGermanPairs)
         assertTrue(tspResults.any { it.unitFrom == "ml" && it.unitTo == "tsp" })
+
+        // New v1.3.6 categories search in German ("Bogenmaß", "Knoten", "Ohm", "Gigahertz", "Mbps", "Kilokalorien", "PSI")
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Bogenmaß", localizedGermanPairs).any { it.unitFrom == "°" && it.unitTo == "rad" })
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Knoten", localizedGermanPairs).any { it.unitFrom == "km/h" && it.unitTo == "kn" })
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Ohm", localizedGermanPairs).any { it.unitFrom == "Ω" && it.unitTo == "kΩ" })
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Gigahertz", localizedGermanPairs).any { it.unitFrom == "MHz" && it.unitTo == "GHz" })
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Mbps", localizedGermanPairs).any { it.unitFrom == "kbps" && it.unitTo == "Mbps" })
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("Kilokalorien", localizedGermanPairs).any { it.unitFrom == "kJ" && it.unitTo == "kcal" })
+        assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("PSI", localizedGermanPairs).any { it.unitFrom == "bar" && it.unitTo == "psi" })
 
         // Empty search returns empty list (dialog switches back to active category view)
         assertTrue(com.limonatalp4.glasscalcproject.ui.components.filterConversionPairs("   ", localizedGermanPairs).isEmpty())
@@ -730,6 +933,34 @@ class ExampleUnitTest {
         // Charge (mAh ↔ Ah) -> index 9
         val chargePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.CHARGE }
         assertEquals(9, categories.indexOf(chargePair.category))
+
+        // Angle (° ↔ rad) -> index 10
+        val anglePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.ANGLE }
+        assertEquals(10, categories.indexOf(anglePair.category))
+
+        // Speed (m/s ↔ km/h) -> index 11
+        val speedPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.SPEED }
+        assertEquals(11, categories.indexOf(speedPair.category))
+
+        // Resistance (Ω ↔ kΩ) -> index 12
+        val resistancePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.RESISTANCE }
+        assertEquals(12, categories.indexOf(resistancePair.category))
+
+        // Frequency (Hz ↔ kHz) -> index 13
+        val frequencyPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.FREQUENCY }
+        assertEquals(13, categories.indexOf(frequencyPair.category))
+
+        // Data Rate (bps ↔ kbps) -> index 14
+        val dataRatePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.DATA_RATE }
+        assertEquals(14, categories.indexOf(dataRatePair.category))
+
+        // Energy (J ↔ kJ) -> index 15
+        val energyPair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.ENERGY }
+        assertEquals(15, categories.indexOf(energyPair.category))
+
+        // Pressure (Pa ↔ bar) -> index 16
+        val pressurePair = UnitConverter.CONVERSIONS.first { it.category == UnitCategory.PRESSURE }
+        assertEquals(16, categories.indexOf(pressurePair.category))
     }
 
     @Test
@@ -772,6 +1003,34 @@ class ExampleUnitTest {
                 "minute" -> "Minuten"
                 "hour" -> "Stunden"
                 "day" -> "Tage"
+                "degree" -> "Grad"
+                "radian" -> "Bogenmaß"
+                "gradian" -> "Gon"
+                "meter_per_second" -> "Meter pro Sekunde"
+                "kilometer_per_hour" -> "Kilometer pro Stunde"
+                "mile_per_hour" -> "Meilen pro Stunde"
+                "knot" -> "Knoten"
+                "ohm" -> "Ohm"
+                "kiloohm" -> "Kiloohm"
+                "megaohm" -> "Megaohm"
+                "hertz" -> "Hertz"
+                "kilohertz" -> "Kilohertz"
+                "megahertz" -> "Megahertz"
+                "gigahertz" -> "Gigahertz"
+                "bps" -> "Bit pro Sekunde"
+                "kbps" -> "Kilobit pro Sekunde"
+                "mbps" -> "Megabit pro Sekunde"
+                "gbps" -> "Gigabit pro Sekunde"
+                "joule" -> "Joule"
+                "kilojoule" -> "Kilojoule"
+                "calorie" -> "Kalorie"
+                "kilocalorie" -> "Kilokalorie"
+                "watt_hour" -> "Wattstunde"
+                "kilowatt_hour" -> "Kilowattstunde"
+                "pascal" -> "Pascal"
+                "bar" -> "Bar"
+                "psi" -> "PSI"
+                "atmosphere" -> "Atmosphäre"
                 else -> item.id
             }
             com.limonatalp4.glasscalcproject.ui.components.LocalizedUnitSuggestion(
@@ -781,16 +1040,17 @@ class ExampleUnitTest {
             )
         }
 
-        // 1. "gig" matches "Gigabyte"
+        // 1. "gig" matches "Gigabit pro Sekunde", "Gigabyte", and "Gigahertz"
         val gigResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("gig", germanSuggestions)
-        assertEquals(1, gigResults.size)
-        assertEquals("Gigabyte", gigResults.first().localizedName)
-        assertEquals(UnitCategory.DATA, gigResults.first().item.category)
+        assertEquals(3, gigResults.size)
+        assertTrue(gigResults.any { it.localizedName == "Gigabyte" && it.item.category == UnitCategory.DATA })
+        assertTrue(gigResults.any { it.localizedName == "Gigahertz" && it.item.category == UnitCategory.FREQUENCY })
+        assertTrue(gigResults.any { it.localizedName == "Gigabit pro Sekunde" && it.item.category == UnitCategory.DATA_RATE })
 
-        // 2. "giga" matches "Gigabyte"
-        val gigaResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("giga", germanSuggestions)
-        assertEquals(1, gigaResults.size)
-        assertEquals("Gigabyte", gigaResults.first().localizedName)
+        // 2. "gigab" narrows uniquely to "Gigabyte" (prefix match before "Gigabit")
+        val gigabyResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("gigaby", germanSuggestions)
+        assertEquals(1, gigabyResults.size)
+        assertEquals("Gigabyte", gigabyResults.first().localizedName)
 
         // 3. "m" prioritizes exact match / prefix (Meter, Meilen, Megabyte, etc.)
         val mResults = com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("m", germanSuggestions)
@@ -899,6 +1159,15 @@ class ExampleUnitTest {
         assertEquals(UnitCategory.MASS, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Тонна", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.TEMPERATURE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Кельвин", multiLangElectricalSuggestions).first().item.category)
         assertEquals(UnitCategory.VOLUME, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Миллилитр", multiLangElectricalSuggestions).first().item.category)
+
+        // 7. New v1.3.6 unit suggestions in German & multilingual contexts
+        assertEquals(UnitCategory.ANGLE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Bogenmaß", germanSuggestions).first().item.category)
+        assertEquals(UnitCategory.SPEED, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Knoten", germanSuggestions).first().item.category)
+        assertEquals(UnitCategory.RESISTANCE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Megaohm", germanSuggestions).first().item.category)
+        assertEquals(UnitCategory.FREQUENCY, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Gigahertz", germanSuggestions).first().item.category)
+        assertEquals(UnitCategory.DATA_RATE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Mbps", germanSuggestions).first().item.category)
+        assertEquals(UnitCategory.ENERGY, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Kilokalorie", germanSuggestions).first().item.category)
+        assertEquals(UnitCategory.PRESSURE, com.limonatalp4.glasscalcproject.ui.components.filterUnitSuggestions("Atmosphäre", germanSuggestions).first().item.category)
     }
 
     @Test

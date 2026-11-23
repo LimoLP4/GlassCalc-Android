@@ -61,12 +61,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.SettingsInputComponent
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -415,7 +422,14 @@ fun UnitConverterDialog(
                     Triple(UnitCategory.VOLTAGE, Icons.Default.Bolt, R.string.cat_voltage),
                     Triple(UnitCategory.CURRENT, Icons.Default.ElectricalServices, R.string.cat_current),
                     Triple(UnitCategory.POWER, Icons.Default.Power, R.string.cat_power),
-                    Triple(UnitCategory.CHARGE, Icons.Default.BatteryChargingFull, R.string.cat_charge)
+                    Triple(UnitCategory.CHARGE, Icons.Default.BatteryChargingFull, R.string.cat_charge),
+                    Triple(UnitCategory.ANGLE, Icons.Default.RotateRight, R.string.cat_angle),
+                    Triple(UnitCategory.SPEED, Icons.Default.Speed, R.string.cat_speed),
+                    Triple(UnitCategory.RESISTANCE, Icons.Default.SettingsInputComponent, R.string.cat_resistance),
+                    Triple(UnitCategory.FREQUENCY, Icons.Default.GraphicEq, R.string.cat_frequency),
+                    Triple(UnitCategory.DATA_RATE, Icons.Default.NetworkCheck, R.string.cat_data_rate),
+                    Triple(UnitCategory.ENERGY, Icons.Default.LocalFireDepartment, R.string.cat_energy),
+                    Triple(UnitCategory.PRESSURE, Icons.Default.Compress, R.string.cat_pressure)
                 )
                 val categoryPillItems = categoryTabs.map { (cat, icon, shortLabelRes) ->
                     GlassPillTabItem(

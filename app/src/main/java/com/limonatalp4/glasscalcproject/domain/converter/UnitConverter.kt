@@ -17,7 +17,14 @@ enum class UnitCategory(val stringResId: Int) {
     VOLTAGE(R.string.cat_voltage),
     CURRENT(R.string.cat_current),
     POWER(R.string.cat_power),
-    CHARGE(R.string.cat_charge)
+    CHARGE(R.string.cat_charge),
+    ANGLE(R.string.cat_angle),
+    SPEED(R.string.cat_speed),
+    RESISTANCE(R.string.cat_resistance),
+    FREQUENCY(R.string.cat_frequency),
+    DATA_RATE(R.string.cat_data_rate),
+    ENERGY(R.string.cat_energy),
+    PRESSURE(R.string.cat_pressure)
 }
 
 @Immutable
@@ -434,6 +441,325 @@ object UnitConverter {
             labelResId = R.string.unit_mah_ah,
             formulaFromTo = { it / 1000.0 },
             formulaToFrom = { it * 1000.0 }
+        ),
+        // Angle
+        ConversionPair(
+            category = UnitCategory.ANGLE,
+            unitFrom = "°",
+            unitTo = "rad",
+            labelResId = R.string.unit_deg_rad,
+            formulaFromTo = { it * Math.PI / 180.0 },
+            formulaToFrom = { it * 180.0 / Math.PI }
+        ),
+        ConversionPair(
+            category = UnitCategory.ANGLE,
+            unitFrom = "°",
+            unitTo = "gon",
+            labelResId = R.string.unit_deg_gon,
+            formulaFromTo = { it * 10.0 / 9.0 },
+            formulaToFrom = { it * 0.9 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ANGLE,
+            unitFrom = "rad",
+            unitTo = "gon",
+            labelResId = R.string.unit_rad_gon,
+            formulaFromTo = { it * 200.0 / Math.PI },
+            formulaToFrom = { it * Math.PI / 200.0 }
+        ),
+        // Speed
+        ConversionPair(
+            category = UnitCategory.SPEED,
+            unitFrom = "m/s",
+            unitTo = "km/h",
+            labelResId = R.string.unit_ms_kmh,
+            formulaFromTo = { it * 3.6 },
+            formulaToFrom = { it / 3.6 }
+        ),
+        ConversionPair(
+            category = UnitCategory.SPEED,
+            unitFrom = "km/h",
+            unitTo = "mph",
+            labelResId = R.string.unit_kmh_mph,
+            formulaFromTo = { it / 1.609344 },
+            formulaToFrom = { it * 1.609344 }
+        ),
+        ConversionPair(
+            category = UnitCategory.SPEED,
+            unitFrom = "m/s",
+            unitTo = "mph",
+            labelResId = R.string.unit_ms_mph,
+            formulaFromTo = { it / 0.44704 },
+            formulaToFrom = { it * 0.44704 }
+        ),
+        ConversionPair(
+            category = UnitCategory.SPEED,
+            unitFrom = "km/h",
+            unitTo = "kn",
+            labelResId = R.string.unit_kmh_kn,
+            formulaFromTo = { it / 1.852 },
+            formulaToFrom = { it * 1.852 }
+        ),
+        ConversionPair(
+            category = UnitCategory.SPEED,
+            unitFrom = "m/s",
+            unitTo = "kn",
+            labelResId = R.string.unit_ms_kn,
+            formulaFromTo = { it * 3.6 / 1.852 },
+            formulaToFrom = { it * 1.852 / 3.6 }
+        ),
+        ConversionPair(
+            category = UnitCategory.SPEED,
+            unitFrom = "mph",
+            unitTo = "kn",
+            labelResId = R.string.unit_mph_kn,
+            formulaFromTo = { it * 1.609344 / 1.852 },
+            formulaToFrom = { it * 1.852 / 1.609344 }
+        ),
+        // Resistance
+        ConversionPair(
+            category = UnitCategory.RESISTANCE,
+            unitFrom = "Ω",
+            unitTo = "kΩ",
+            labelResId = R.string.unit_ohm_kohm,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.RESISTANCE,
+            unitFrom = "kΩ",
+            unitTo = "MΩ",
+            labelResId = R.string.unit_kohm_mohm,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.RESISTANCE,
+            unitFrom = "Ω",
+            unitTo = "MΩ",
+            labelResId = R.string.unit_ohm_mohm,
+            formulaFromTo = { it / 1_000_000.0 },
+            formulaToFrom = { it * 1_000_000.0 }
+        ),
+        // Frequency
+        ConversionPair(
+            category = UnitCategory.FREQUENCY,
+            unitFrom = "Hz",
+            unitTo = "kHz",
+            labelResId = R.string.unit_hz_khz,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.FREQUENCY,
+            unitFrom = "kHz",
+            unitTo = "MHz",
+            labelResId = R.string.unit_khz_mhz,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.FREQUENCY,
+            unitFrom = "MHz",
+            unitTo = "GHz",
+            labelResId = R.string.unit_mhz_ghz,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.FREQUENCY,
+            unitFrom = "Hz",
+            unitTo = "MHz",
+            labelResId = R.string.unit_hz_mhz,
+            formulaFromTo = { it / 1_000_000.0 },
+            formulaToFrom = { it * 1_000_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.FREQUENCY,
+            unitFrom = "Hz",
+            unitTo = "GHz",
+            labelResId = R.string.unit_hz_ghz,
+            formulaFromTo = { it / 1_000_000_000.0 },
+            formulaToFrom = { it * 1_000_000_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.FREQUENCY,
+            unitFrom = "kHz",
+            unitTo = "GHz",
+            labelResId = R.string.unit_khz_ghz,
+            formulaFromTo = { it / 1_000_000.0 },
+            formulaToFrom = { it * 1_000_000.0 }
+        ),
+        // Data Rate (SI decimal: 1000)
+        ConversionPair(
+            category = UnitCategory.DATA_RATE,
+            unitFrom = "bps",
+            unitTo = "kbps",
+            labelResId = R.string.unit_bps_kbps,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA_RATE,
+            unitFrom = "kbps",
+            unitTo = "Mbps",
+            labelResId = R.string.unit_kbps_mbps,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA_RATE,
+            unitFrom = "Mbps",
+            unitTo = "Gbps",
+            labelResId = R.string.unit_mbps_gbps,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA_RATE,
+            unitFrom = "bps",
+            unitTo = "Mbps",
+            labelResId = R.string.unit_bps_mbps,
+            formulaFromTo = { it / 1_000_000.0 },
+            formulaToFrom = { it * 1_000_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA_RATE,
+            unitFrom = "bps",
+            unitTo = "Gbps",
+            labelResId = R.string.unit_bps_gbps,
+            formulaFromTo = { it / 1_000_000_000.0 },
+            formulaToFrom = { it * 1_000_000_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.DATA_RATE,
+            unitFrom = "kbps",
+            unitTo = "Gbps",
+            labelResId = R.string.unit_kbps_gbps,
+            formulaFromTo = { it / 1_000_000.0 },
+            formulaToFrom = { it * 1_000_000.0 }
+        ),
+        // Energy
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "J",
+            unitTo = "kJ",
+            labelResId = R.string.unit_j_kj,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "J",
+            unitTo = "cal",
+            labelResId = R.string.unit_j_cal,
+            formulaFromTo = { it / 4.184 },
+            formulaToFrom = { it * 4.184 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "kJ",
+            unitTo = "kcal",
+            labelResId = R.string.unit_kj_kcal,
+            formulaFromTo = { it / 4.184 },
+            formulaToFrom = { it * 4.184 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "cal",
+            unitTo = "kcal",
+            labelResId = R.string.unit_cal_kcal,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "J",
+            unitTo = "Wh",
+            labelResId = R.string.unit_j_wh,
+            formulaFromTo = { it / 3600.0 },
+            formulaToFrom = { it * 3600.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "kJ",
+            unitTo = "kWh",
+            labelResId = R.string.unit_kj_kwh,
+            formulaFromTo = { it / 3600.0 },
+            formulaToFrom = { it * 3600.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "Wh",
+            unitTo = "kWh",
+            labelResId = R.string.unit_wh_kwh,
+            formulaFromTo = { it / 1000.0 },
+            formulaToFrom = { it * 1000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "kcal",
+            unitTo = "Wh",
+            labelResId = R.string.unit_kcal_wh,
+            formulaFromTo = { it * 4.184 / 3.6 },
+            formulaToFrom = { it * 3.6 / 4.184 }
+        ),
+        ConversionPair(
+            category = UnitCategory.ENERGY,
+            unitFrom = "kcal",
+            unitTo = "kWh",
+            labelResId = R.string.unit_kcal_kwh,
+            formulaFromTo = { it * 4.184 / 3600.0 },
+            formulaToFrom = { it * 3600.0 / 4.184 }
+        ),
+        // Pressure
+        ConversionPair(
+            category = UnitCategory.PRESSURE,
+            unitFrom = "Pa",
+            unitTo = "bar",
+            labelResId = R.string.unit_pa_bar,
+            formulaFromTo = { it / 100_000.0 },
+            formulaToFrom = { it * 100_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.PRESSURE,
+            unitFrom = "Pa",
+            unitTo = "psi",
+            labelResId = R.string.unit_pa_psi,
+            formulaFromTo = { it / 6894.757293168361 },
+            formulaToFrom = { it * 6894.757293168361 }
+        ),
+        ConversionPair(
+            category = UnitCategory.PRESSURE,
+            unitFrom = "Pa",
+            unitTo = "atm",
+            labelResId = R.string.unit_pa_atm,
+            formulaFromTo = { it / 101_325.0 },
+            formulaToFrom = { it * 101_325.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.PRESSURE,
+            unitFrom = "bar",
+            unitTo = "psi",
+            labelResId = R.string.unit_bar_psi,
+            formulaFromTo = { it * 100_000.0 / 6894.757293168361 },
+            formulaToFrom = { it * 6894.757293168361 / 100_000.0 }
+        ),
+        ConversionPair(
+            category = UnitCategory.PRESSURE,
+            unitFrom = "bar",
+            unitTo = "atm",
+            labelResId = R.string.unit_bar_atm,
+            formulaFromTo = { it / 1.01325 },
+            formulaToFrom = { it * 1.01325 }
+        ),
+        ConversionPair(
+            category = UnitCategory.PRESSURE,
+            unitFrom = "atm",
+            unitTo = "psi",
+            labelResId = R.string.unit_atm_psi,
+            formulaFromTo = { it * 101_325.0 / 6894.757293168361 },
+            formulaToFrom = { it * 6894.757293168361 / 101_325.0 }
         )
     )
 

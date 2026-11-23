@@ -153,7 +153,49 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
 
         // Charge
         UnitItem("milliampere_hour", "mAh", UnitCategory.CHARGE, R.string.unit_name_milliampere_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }, R.string.unit_keywords_milliampere_hour),
-        UnitItem("ampere_hour", "Ah", UnitCategory.CHARGE, R.string.unit_name_ampere_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }, R.string.unit_keywords_ampere_hour)
+        UnitItem("ampere_hour", "Ah", UnitCategory.CHARGE, R.string.unit_name_ampere_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "mAh" && it.unitTo == "Ah" }, R.string.unit_keywords_ampere_hour),
+
+        // Angle
+        UnitItem("degree", "°", UnitCategory.ANGLE, R.string.unit_name_degree, UnitConverter.CONVERSIONS.first { it.unitFrom == "°" && it.unitTo == "rad" }, R.string.unit_keywords_degree),
+        UnitItem("radian", "rad", UnitCategory.ANGLE, R.string.unit_name_radian, UnitConverter.CONVERSIONS.first { it.unitFrom == "°" && it.unitTo == "rad" }, R.string.unit_keywords_radian),
+        UnitItem("gradian", "gon", UnitCategory.ANGLE, R.string.unit_name_gradian, UnitConverter.CONVERSIONS.first { it.unitFrom == "°" && it.unitTo == "gon" }, R.string.unit_keywords_gradian),
+
+        // Speed
+        UnitItem("meter_per_second", "m/s", UnitCategory.SPEED, R.string.unit_name_meter_per_second, UnitConverter.CONVERSIONS.first { it.unitFrom == "m/s" && it.unitTo == "km/h" }, R.string.unit_keywords_meter_per_second),
+        UnitItem("kilometer_per_hour", "km/h", UnitCategory.SPEED, R.string.unit_name_kilometer_per_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "m/s" && it.unitTo == "km/h" }, R.string.unit_keywords_kilometer_per_hour),
+        UnitItem("mile_per_hour", "mph", UnitCategory.SPEED, R.string.unit_name_mile_per_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "km/h" && it.unitTo == "mph" }, R.string.unit_keywords_mile_per_hour),
+        UnitItem("knot", "kn", UnitCategory.SPEED, R.string.unit_name_knot, UnitConverter.CONVERSIONS.first { it.unitFrom == "km/h" && it.unitTo == "kn" }, R.string.unit_keywords_knot),
+
+        // Resistance
+        UnitItem("ohm", "Ω", UnitCategory.RESISTANCE, R.string.unit_name_ohm, UnitConverter.CONVERSIONS.first { it.unitFrom == "Ω" && it.unitTo == "kΩ" }, R.string.unit_keywords_ohm),
+        UnitItem("kiloohm", "kΩ", UnitCategory.RESISTANCE, R.string.unit_name_kiloohm, UnitConverter.CONVERSIONS.first { it.unitFrom == "Ω" && it.unitTo == "kΩ" }, R.string.unit_keywords_kiloohm),
+        UnitItem("megaohm", "MΩ", UnitCategory.RESISTANCE, R.string.unit_name_megaohm, UnitConverter.CONVERSIONS.first { it.unitFrom == "kΩ" && it.unitTo == "MΩ" }, R.string.unit_keywords_megaohm),
+
+        // Frequency
+        UnitItem("hertz", "Hz", UnitCategory.FREQUENCY, R.string.unit_name_hertz, UnitConverter.CONVERSIONS.first { it.unitFrom == "Hz" && it.unitTo == "kHz" }, R.string.unit_keywords_hertz),
+        UnitItem("kilohertz", "kHz", UnitCategory.FREQUENCY, R.string.unit_name_kilohertz, UnitConverter.CONVERSIONS.first { it.unitFrom == "Hz" && it.unitTo == "kHz" }, R.string.unit_keywords_kilohertz),
+        UnitItem("megahertz", "MHz", UnitCategory.FREQUENCY, R.string.unit_name_megahertz, UnitConverter.CONVERSIONS.first { it.unitFrom == "kHz" && it.unitTo == "MHz" }, R.string.unit_keywords_megahertz),
+        UnitItem("gigahertz", "GHz", UnitCategory.FREQUENCY, R.string.unit_name_gigahertz, UnitConverter.CONVERSIONS.first { it.unitFrom == "MHz" && it.unitTo == "GHz" }, R.string.unit_keywords_gigahertz),
+
+        // Data Rate
+        UnitItem("bps", "bps", UnitCategory.DATA_RATE, R.string.unit_name_bps, UnitConverter.CONVERSIONS.first { it.unitFrom == "bps" && it.unitTo == "kbps" }, R.string.unit_keywords_bps),
+        UnitItem("kbps", "kbps", UnitCategory.DATA_RATE, R.string.unit_name_kbps, UnitConverter.CONVERSIONS.first { it.unitFrom == "bps" && it.unitTo == "kbps" }, R.string.unit_keywords_kbps),
+        UnitItem("mbps", "Mbps", UnitCategory.DATA_RATE, R.string.unit_name_mbps, UnitConverter.CONVERSIONS.first { it.unitFrom == "kbps" && it.unitTo == "Mbps" }, R.string.unit_keywords_mbps),
+        UnitItem("gbps", "Gbps", UnitCategory.DATA_RATE, R.string.unit_name_gbps, UnitConverter.CONVERSIONS.first { it.unitFrom == "Mbps" && it.unitTo == "Gbps" }, R.string.unit_keywords_gbps),
+
+        // Energy
+        UnitItem("joule", "J", UnitCategory.ENERGY, R.string.unit_name_joule, UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "kJ" }, R.string.unit_keywords_joule),
+        UnitItem("kilojoule", "kJ", UnitCategory.ENERGY, R.string.unit_name_kilojoule, UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "kJ" }, R.string.unit_keywords_kilojoule),
+        UnitItem("calorie", "cal", UnitCategory.ENERGY, R.string.unit_name_calorie, UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "cal" }, R.string.unit_keywords_calorie),
+        UnitItem("kilocalorie", "kcal", UnitCategory.ENERGY, R.string.unit_name_kilocalorie, UnitConverter.CONVERSIONS.first { it.unitFrom == "kJ" && it.unitTo == "kcal" }, R.string.unit_keywords_kilocalorie),
+        UnitItem("watt_hour", "Wh", UnitCategory.ENERGY, R.string.unit_name_watt_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "J" && it.unitTo == "Wh" }, R.string.unit_keywords_watt_hour),
+        UnitItem("kilowatt_hour", "kWh", UnitCategory.ENERGY, R.string.unit_name_kilowatt_hour, UnitConverter.CONVERSIONS.first { it.unitFrom == "Wh" && it.unitTo == "kWh" }, R.string.unit_keywords_kilowatt_hour),
+
+        // Pressure
+        UnitItem("pascal", "Pa", UnitCategory.PRESSURE, R.string.unit_name_pascal, UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "bar" }, R.string.unit_keywords_pascal),
+        UnitItem("bar", "bar", UnitCategory.PRESSURE, R.string.unit_name_bar, UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "bar" }, R.string.unit_keywords_bar),
+        UnitItem("psi", "psi", UnitCategory.PRESSURE, R.string.unit_name_psi, UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "psi" }, R.string.unit_keywords_psi),
+        UnitItem("atmosphere", "atm", UnitCategory.PRESSURE, R.string.unit_name_atmosphere, UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "atm" }, R.string.unit_keywords_atmosphere)
     )
 }
 
@@ -445,6 +487,13 @@ fun categoryKeywordsResId(category: UnitCategory): Int = when (category) {
     UnitCategory.CURRENT -> R.string.converter_keywords_current
     UnitCategory.POWER -> R.string.converter_keywords_power
     UnitCategory.CHARGE -> R.string.converter_keywords_charge
+    UnitCategory.ANGLE -> R.string.converter_keywords_angle
+    UnitCategory.SPEED -> R.string.converter_keywords_speed
+    UnitCategory.RESISTANCE -> R.string.converter_keywords_resistance
+    UnitCategory.FREQUENCY -> R.string.converter_keywords_frequency
+    UnitCategory.DATA_RATE -> R.string.converter_keywords_data_rate
+    UnitCategory.ENERGY -> R.string.converter_keywords_energy
+    UnitCategory.PRESSURE -> R.string.converter_keywords_pressure
 }
 
 fun filterConversionPairs(

@@ -56,6 +56,13 @@
     <string name="cat_current">Stromstärke</string>
     <string name="cat_power">Leistung</string>
     <string name="cat_charge">Ladung</string>
+    <string name="cat_angle">Winkel</string>
+    <string name="cat_speed">Geschw.</string>
+    <string name="cat_resistance">Widerstand</string>
+    <string name="cat_frequency">Frequenz</string>
+    <string name="cat_data_rate">Datenrate</string>
+    <string name="cat_energy">Energie</string>
+    <string name="cat_pressure">Druck</string>
     <string name="converter_select_pair">Umrechnung auswählen:</string>
     <string name="converter_input_label">Eingabe (%s):</string>
     <string name="converter_swap_direction">Richtung umkehren</string>
@@ -111,6 +118,45 @@
     <string name="unit_mw_kw">Megawatt ↔ Kilowatt (MW ↔ kW)</string>
     <string name="unit_mw_w">Megawatt ↔ Watt (MW ↔ W)</string>
     <string name="unit_mah_ah">Milliamperestunden ↔ Amperestunden (mAh ↔ Ah)</string>
+    <string name="unit_deg_rad">Grad ↔ Bogenmaß (° ↔ rad)</string>
+    <string name="unit_deg_gon">Grad ↔ Gon (° ↔ gon)</string>
+    <string name="unit_rad_gon">Bogenmaß ↔ Gon (rad ↔ gon)</string>
+    <string name="unit_ms_kmh">Meter/Sekunde ↔ Kilometer/Stunde (m/s ↔ km/h)</string>
+    <string name="unit_kmh_mph">Kilometer/Stunde ↔ Meilen/Stunde (km/h ↔ mph)</string>
+    <string name="unit_ms_mph">Meter/Sekunde ↔ Meilen/Stunde (m/s ↔ mph)</string>
+    <string name="unit_kmh_kn">Kilometer/Stunde ↔ Knoten (km/h ↔ kn)</string>
+    <string name="unit_ms_kn">Meter/Sekunde ↔ Knoten (m/s ↔ kn)</string>
+    <string name="unit_mph_kn">Meilen/Stunde ↔ Knoten (mph ↔ kn)</string>
+    <string name="unit_ohm_kohm">Ohm ↔ Kiloohm (Ω ↔ kΩ)</string>
+    <string name="unit_kohm_mohm">Kiloohm ↔ Megaohm (kΩ ↔ MΩ)</string>
+    <string name="unit_ohm_mohm">Ohm ↔ Megaohm (Ω ↔ MΩ)</string>
+    <string name="unit_hz_khz">Hertz ↔ Kilohertz (Hz ↔ kHz)</string>
+    <string name="unit_khz_mhz">Kilohertz ↔ Megahertz (kHz ↔ MHz)</string>
+    <string name="unit_mhz_ghz">Megahertz ↔ Gigahertz (MHz ↔ GHz)</string>
+    <string name="unit_hz_mhz">Hertz ↔ Megahertz (Hz ↔ MHz)</string>
+    <string name="unit_hz_ghz">Hertz ↔ Gigahertz (Hz ↔ GHz)</string>
+    <string name="unit_khz_ghz">Kilohertz ↔ Gigahertz (kHz ↔ GHz)</string>
+    <string name="unit_bps_kbps">Bit/s ↔ Kilobit/s (bps ↔ kbps)</string>
+    <string name="unit_kbps_mbps">Kilobit/s ↔ Megabit/s (kbps ↔ Mbps)</string>
+    <string name="unit_mbps_gbps">Megabit/s ↔ Gigabit/s (Mbps ↔ Gbps)</string>
+    <string name="unit_bps_mbps">Bit/s ↔ Megabit/s (bps ↔ Mbps)</string>
+    <string name="unit_bps_gbps">Bit/s ↔ Gigabit/s (bps ↔ Gbps)</string>
+    <string name="unit_kbps_gbps">Kilobit/s ↔ Gigabit/s (kbps ↔ Gbps)</string>
+    <string name="unit_j_kj">Joule ↔ Kilojoule (J ↔ kJ)</string>
+    <string name="unit_j_cal">Joule ↔ Kalorien (J ↔ cal)</string>
+    <string name="unit_kj_kcal">Kilojoule ↔ Kilokalorien (kJ ↔ kcal)</string>
+    <string name="unit_cal_kcal">Kalorien ↔ Kilokalorien (cal ↔ kcal)</string>
+    <string name="unit_j_wh">Joule ↔ Wattstunden (J ↔ Wh)</string>
+    <string name="unit_kj_kwh">Kilojoule ↔ Kilowattstunden (kJ ↔ kWh)</string>
+    <string name="unit_wh_kwh">Wattstunden ↔ Kilowattstunden (Wh ↔ kWh)</string>
+    <string name="unit_kcal_wh">Kilokalorien ↔ Wattstunden (kcal ↔ Wh)</string>
+    <string name="unit_kcal_kwh">Kilokalorien ↔ Kilowattstunden (kcal ↔ kWh)</string>
+    <string name="unit_pa_bar">Pascal ↔ Bar (Pa ↔ bar)</string>
+    <string name="unit_pa_psi">Pascal ↔ PSI (Pa ↔ psi)</string>
+    <string name="unit_pa_atm">Pascal ↔ Atmosphäre (Pa ↔ atm)</string>
+    <string name="unit_bar_psi">Bar ↔ PSI (bar ↔ psi)</string>
+    <string name="unit_bar_atm">Bar ↔ Atmosphäre (bar ↔ atm)</string>
+    <string name="unit_atm_psi">Atmosphäre ↔ PSI (atm ↔ psi)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">Meter</string>
@@ -161,6 +207,34 @@
     <string name="unit_name_megawatt">Megawatt</string>
     <string name="unit_name_milliampere_hour">Milliamperestunden</string>
     <string name="unit_name_ampere_hour">Amperestunden</string>
+    <string name="unit_name_degree">Grad</string>
+    <string name="unit_name_radian">Bogenmaß</string>
+    <string name="unit_name_gradian">Gon</string>
+    <string name="unit_name_meter_per_second">Meter pro Sekunde</string>
+    <string name="unit_name_kilometer_per_hour">Kilometer pro Stunde</string>
+    <string name="unit_name_mile_per_hour">Meilen pro Stunde</string>
+    <string name="unit_name_knot">Knoten</string>
+    <string name="unit_name_ohm">Ohm</string>
+    <string name="unit_name_kiloohm">Kiloohm</string>
+    <string name="unit_name_megaohm">Megaohm</string>
+    <string name="unit_name_hertz">Hertz</string>
+    <string name="unit_name_kilohertz">Kilohertz</string>
+    <string name="unit_name_megahertz">Megahertz</string>
+    <string name="unit_name_gigahertz">Gigahertz</string>
+    <string name="unit_name_bps">Bit pro Sekunde</string>
+    <string name="unit_name_kbps">Kilobit pro Sekunde</string>
+    <string name="unit_name_mbps">Megabit pro Sekunde</string>
+    <string name="unit_name_gbps">Gigabit pro Sekunde</string>
+    <string name="unit_name_joule">Joule</string>
+    <string name="unit_name_kilojoule">Kilojoule</string>
+    <string name="unit_name_calorie">Kalorien</string>
+    <string name="unit_name_kilocalorie">Kilokalorien</string>
+    <string name="unit_name_watt_hour">Wattstunden</string>
+    <string name="unit_name_kilowatt_hour">Kilowattstunden</string>
+    <string name="unit_name_pascal">Pascal</string>
+    <string name="unit_name_bar">Bar</string>
+    <string name="unit_name_psi">PSI</string>
+    <string name="unit_name_atmosphere">Atmosphäre</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">Wissenschaftliche Konstanten</string>
@@ -220,7 +294,7 @@
     <string name="angle_rad_label">Bogenmaß (RAD)</string>
     <string name="angle_rad_desc">Vollkreis = 2π</string>
     <string name="units_supported_systems">Unterstützte Umrechnungssysteme:</string>
-    <string name="units_systems_detail">• Metrisch ↔ US/Imperial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Temperatur (°C, °F, K)\n• Volumen (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Datenmengen (B, KB, MB, GB, TB)\n• Zeit (ms, s, min, h, d)\n• Spannung (mV, V, kV)\n• Stromstärke (µA, mA, A)\n• Leistung (mW, W, kW, MW)\n• Ladung (mAh, Ah)</string>
+    <string name="units_systems_detail">• Metrisch ↔ US/Imperial (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• Temperatur (°C, °F, K)\n• Volumen (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• Datenmengen (B, KB, MB, GB, TB)\n• Zeit (ms, s, min, h, d)\n• Spannung (mV, V, kV)\n• Stromstärke (µA, mA, A)\n• Leistung (mW, W, kW, MW)\n• Ladung (mAh, Ah)\n• Winkel (°, rad, gon)\n• Geschwindigkeit (m/s, km/h, mph, kn)\n• Widerstand (Ω, kΩ, MΩ)\n• Frequenz (Hz, kHz, MHz, GHz)\n• Datenrate (bps, kbps, Mbps, Gbps)\n• Energie (J, kJ, cal, kcal, Wh, kWh)\n• Druck (Pa, bar, psi, atm)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">Bildschirmgröße &amp; Skalierung</string>
@@ -359,6 +433,13 @@
     <string name="converter_keywords_current">stromstärke,strom,ampere,elektrizität</string>
     <string name="converter_keywords_power">leistung,watt,energiefluss,elektrizität</string>
     <string name="converter_keywords_charge">ladung,elektrische ladung,kapazität,akku,amperestunden</string>
+    <string name="converter_keywords_angle">winkel,grad,bogenmaß,gon,neugrad</string>
+    <string name="converter_keywords_speed">geschwindigkeit,tempo,km/h,mph,knoten</string>
+    <string name="converter_keywords_resistance">widerstand,elektrischer widerstand,ohm,elektrizität</string>
+    <string name="converter_keywords_frequency">frequenz,schwingung,hertz,takt,taktfrequenz</string>
+    <string name="converter_keywords_data_rate">datenrate,bandbreite,übertragungsrate,internet,geschwindigkeit</string>
+    <string name="converter_keywords_energy">energie,arbeit,wärme,kalorien,stromverbrauch</string>
+    <string name="converter_keywords_pressure">druck,luftdruck,bar,pascal,psi</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">meter,m,länge,strecke,entfernung,metrisch</string>
@@ -409,4 +490,32 @@
     <string name="unit_keywords_megawatt">megawatt,mw,leistung,energie,kraftwerk</string>
     <string name="unit_keywords_milliampere_hour">milliamperestunden,milliamperestunde,mah,ladung,akku,kapazität,batterie</string>
     <string name="unit_keywords_ampere_hour">amperestunden,amperestunde,ah,ladung,akku,kapazität,batterie</string>
+    <string name="unit_keywords_degree">grad,°,deg,degree,degrees,winkel</string>
+    <string name="unit_keywords_radian">bogenmaß,rad,radian,radians,winkel,pi</string>
+    <string name="unit_keywords_gradian">gon,neugrad,gradian,winkel,geodäsie</string>
+    <string name="unit_keywords_meter_per_second">meter pro sekunde,m/s,geschwindigkeit,si</string>
+    <string name="unit_keywords_kilometer_per_hour">kilometer pro stunde,km/h,kmh,stundenkilometer,geschwindigkeit,auto</string>
+    <string name="unit_keywords_mile_per_hour">meilen pro stunde,mph,geschwindigkeit,imperial</string>
+    <string name="unit_keywords_knot">knoten,kn,kt,seemeile,geschwindigkeit,schifffahrt,luftfahrt</string>
+    <string name="unit_keywords_ohm">ohm,ω,widerstand,elektrischer widerstand,elektrizität</string>
+    <string name="unit_keywords_kiloohm">kiloohm,kω,kohm,widerstand,elektrizität</string>
+    <string name="unit_keywords_megaohm">megaohm,mω,mohm,widerstand,elektrizität</string>
+    <string name="unit_keywords_hertz">hertz,hz,frequenz,schwingung,takt</string>
+    <string name="unit_keywords_kilohertz">kilohertz,khz,frequenz,audio</string>
+    <string name="unit_keywords_megahertz">megahertz,mhz,frequenz,funk</string>
+    <string name="unit_keywords_gigahertz">gigahertz,ghz,frequenz,prozessor,wlan</string>
+    <string name="unit_keywords_bps">bit pro sekunde,bps,bit/s,datenrate,bandbreite,netzwerk</string>
+    <string name="unit_keywords_kbps">kilobit pro sekunde,kbps,kbit/s,datenrate,bandbreite</string>
+    <string name="unit_keywords_mbps">megabit pro sekunde,mbps,mbit/s,datenrate,bandbreite,internet</string>
+    <string name="unit_keywords_gbps">gigabit pro sekunde,gbps,gbit/s,datenrate,bandbreite,glasfaser</string>
+    <string name="unit_keywords_joule">joule,j,energie,arbeit,si</string>
+    <string name="unit_keywords_kilojoule">kilojoule,kj,energie,nährwert</string>
+    <string name="unit_keywords_calorie">kalorien,kalorie,cal,energie,nährwert,wärme</string>
+    <string name="unit_keywords_kilocalorie">kilokalorien,kilokalorie,kcal,kalorien,energie,nährwert</string>
+    <string name="unit_keywords_watt_hour">wattstunden,wattstunde,wh,energie,strom,akku</string>
+    <string name="unit_keywords_kilowatt_hour">kilowattstunden,kilowattstunde,kwh,energie,stromverbrauch</string>
+    <string name="unit_keywords_pascal">pascal,pa,druck,si</string>
+    <string name="unit_keywords_bar">bar,druck,reifendruck,luftdruck</string>
+    <string name="unit_keywords_psi">psi,pfund pro quadratzoll,pound per square inch,druck,reifendruck</string>
+    <string name="unit_keywords_atmosphere">atmosphäre,atm,luftdruck,standarddruck,druck</string>
 </resources>

@@ -56,6 +56,13 @@
     <string name="cat_current">विद्युत धारा</string>
     <string name="cat_power">शक्ति</string>
     <string name="cat_charge">आवेश</string>
+    <string name="cat_angle">कोण</string>
+    <string name="cat_speed">गति</string>
+    <string name="cat_resistance">प्रतिरोध</string>
+    <string name="cat_frequency">आवृत्ति</string>
+    <string name="cat_data_rate">डेटा दर</string>
+    <string name="cat_energy">ऊर्जा</string>
+    <string name="cat_pressure">दाब</string>
     <string name="converter_select_pair">रूपांतरण चुनें:</string>
     <string name="converter_input_label">इनपुट (%s):</string>
     <string name="converter_swap_direction">दिशा बदलें</string>
@@ -111,6 +118,45 @@
     <string name="unit_mw_kw">मेगावाट ↔ किलोवाट (MW ↔ kW)</string>
     <string name="unit_mw_w">मेगावाट ↔ वाट (MW ↔ W)</string>
     <string name="unit_mah_ah">मिलीएम्पियर-घंटा ↔ एम्पियर-घंटा (mAh ↔ Ah)</string>
+    <string name="unit_deg_rad">डिग्री ↔ रेडियन (° ↔ rad)</string>
+    <string name="unit_deg_gon">डिग्री ↔ ग्रेडियन (° ↔ gon)</string>
+    <string name="unit_rad_gon">रेडियन ↔ ग्रेडियन (rad ↔ gon)</string>
+    <string name="unit_ms_kmh">मीटर/सेकंड ↔ किमी/घंटा (m/s ↔ km/h)</string>
+    <string name="unit_kmh_mph">किमी/घंटा ↔ मील/घंटा (km/h ↔ mph)</string>
+    <string name="unit_ms_mph">मीटर/सेकंड ↔ मील/घंटा (m/s ↔ mph)</string>
+    <string name="unit_kmh_kn">किमी/घंटा ↔ नॉट (km/h ↔ kn)</string>
+    <string name="unit_ms_kn">मीटर/सेकंड ↔ नॉट (m/s ↔ kn)</string>
+    <string name="unit_mph_kn">मील/घंटा ↔ नॉट (mph ↔ kn)</string>
+    <string name="unit_ohm_kohm">ओम ↔ किलोओम (Ω ↔ kΩ)</string>
+    <string name="unit_kohm_mohm">किलोओम ↔ मेगाओम (kΩ ↔ MΩ)</string>
+    <string name="unit_ohm_mohm">ओम ↔ मेगाओम (Ω ↔ MΩ)</string>
+    <string name="unit_hz_khz">हर्ट्ज़ ↔ किलोहर्ट्ज़ (Hz ↔ kHz)</string>
+    <string name="unit_khz_mhz">किलोहर्ट्ज़ ↔ मेगाहर्ट्ज़ (kHz ↔ MHz)</string>
+    <string name="unit_mhz_ghz">मेगाहर्ट्ज़ ↔ गीगाहर्ट्ज़ (MHz ↔ GHz)</string>
+    <string name="unit_hz_mhz">हर्ट्ज़ ↔ मेगाहर्ट्ज़ (Hz ↔ MHz)</string>
+    <string name="unit_hz_ghz">हर्ट्ज़ ↔ गीगाहर्ट्ज़ (Hz ↔ GHz)</string>
+    <string name="unit_khz_ghz">किलोहर्ट्ज़ ↔ गीगाहर्ट्ज़ (kHz ↔ GHz)</string>
+    <string name="unit_bps_kbps">बिट/से ↔ किलोबिट/से (bps ↔ kbps)</string>
+    <string name="unit_kbps_mbps">किलोबिट/से ↔ मेगाबिट/से (kbps ↔ Mbps)</string>
+    <string name="unit_mbps_gbps">मेगाबिट/से ↔ गीगाबिट/से (Mbps ↔ Gbps)</string>
+    <string name="unit_bps_mbps">बिट/से ↔ मेगाबिट/से (bps ↔ Mbps)</string>
+    <string name="unit_bps_gbps">बिट/से ↔ गीगाबिट/से (bps ↔ Gbps)</string>
+    <string name="unit_kbps_gbps">किलोबिट/से ↔ गीगाबिट/से (kbps ↔ Gbps)</string>
+    <string name="unit_j_kj">जूल ↔ किलोजूल (J ↔ kJ)</string>
+    <string name="unit_j_cal">जूल ↔ कैलोरी (J ↔ cal)</string>
+    <string name="unit_kj_kcal">किलोजूल ↔ किलोकैलोरी (kJ ↔ kcal)</string>
+    <string name="unit_cal_kcal">कैलोरी ↔ किलोकैलोरी (cal ↔ kcal)</string>
+    <string name="unit_j_wh">जूल ↔ वाट-घंटा (J ↔ Wh)</string>
+    <string name="unit_kj_kwh">किलोजूल ↔ किलोवाट-घंटा (kJ ↔ kWh)</string>
+    <string name="unit_wh_kwh">वाट-घंटा ↔ किलोवाट-घंटा (Wh ↔ kWh)</string>
+    <string name="unit_kcal_wh">किलोकैलोरी ↔ वाट-घंटा (kcal ↔ Wh)</string>
+    <string name="unit_kcal_kwh">किलोकैलोरी ↔ किलोवाट-घंटा (kcal ↔ kWh)</string>
+    <string name="unit_pa_bar">पास्कल ↔ बार (Pa ↔ bar)</string>
+    <string name="unit_pa_psi">पास्कल ↔ PSI (Pa ↔ psi)</string>
+    <string name="unit_pa_atm">पास्कल ↔ वायुमंडल (Pa ↔ atm)</string>
+    <string name="unit_bar_psi">बार ↔ PSI (bar ↔ psi)</string>
+    <string name="unit_bar_atm">बार ↔ वायुमंडल (bar ↔ atm)</string>
+    <string name="unit_atm_psi">वायुमंडल ↔ PSI (atm ↔ psi)</string>
 
     <!-- Unit Names (Singular / Standard Names for Search & Display) -->
     <string name="unit_name_meter">मीटर</string>
@@ -161,6 +207,34 @@
     <string name="unit_name_megawatt">मेगावाट</string>
     <string name="unit_name_milliampere_hour">मिलीएम्पियर-घंटा</string>
     <string name="unit_name_ampere_hour">एम्पियर-घंटा</string>
+    <string name="unit_name_degree">डिग्री</string>
+    <string name="unit_name_radian">रेडियन</string>
+    <string name="unit_name_gradian">ग्रेडियन (Gon)</string>
+    <string name="unit_name_meter_per_second">मीटर प्रति सेकंड</string>
+    <string name="unit_name_kilometer_per_hour">किलोमीटर प्रति घंटा</string>
+    <string name="unit_name_mile_per_hour">मील प्रति घंटा</string>
+    <string name="unit_name_knot">नॉट</string>
+    <string name="unit_name_ohm">ओम</string>
+    <string name="unit_name_kiloohm">किलोओम</string>
+    <string name="unit_name_megaohm">मेगाओम</string>
+    <string name="unit_name_hertz">हर्ट्ज़</string>
+    <string name="unit_name_kilohertz">किलोहर्ट्ज़</string>
+    <string name="unit_name_megahertz">मेगाहर्ट्ज़</string>
+    <string name="unit_name_gigahertz">गीगाहर्ट्ज़</string>
+    <string name="unit_name_bps">बिट्स प्रति सेकंड</string>
+    <string name="unit_name_kbps">किलोबिट्स प्रति सेकंड</string>
+    <string name="unit_name_mbps">मेगाबिट्स प्रति सेकंड</string>
+    <string name="unit_name_gbps">गीगाबिट्स प्रति सेकंड</string>
+    <string name="unit_name_joule">जूल</string>
+    <string name="unit_name_kilojoule">किलोजूल</string>
+    <string name="unit_name_calorie">कैलोरी</string>
+    <string name="unit_name_kilocalorie">किलोकैलोरी</string>
+    <string name="unit_name_watt_hour">वाट-घंटा</string>
+    <string name="unit_name_kilowatt_hour">किलोवाट-घंटा</string>
+    <string name="unit_name_pascal">पास्कल</string>
+    <string name="unit_name_bar">बार</string>
+    <string name="unit_name_psi">PSI</string>
+    <string name="unit_name_atmosphere">वायुमंडल (atm)</string>
 
     <!-- Constants Dialog -->
     <string name="title_constants">वैज्ञानिक स्थिरांक</string>
@@ -220,7 +294,7 @@
     <string name="angle_rad_label">रेडियन (RAD)</string>
     <string name="angle_rad_desc">पूर्ण वृत्त = 2π</string>
     <string name="units_supported_systems">समर्थित रूपांतरण प्रणालियाँ:</string>
-    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• तापमान (°C, °F, K)\n• आयतन (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)</string>
+    <string name="units_systems_detail">• मीट्रिक ↔ यूएस/इंपीरियल (m, cm, mm, nm, km ↔ ft, in, mi; kg, t ↔ lb)\n• तापमान (°C, °F, K)\n• आयतन (ml, cl, dl, l, m³ ↔ tsp, tbsp, fl oz, cup, pt, qt, gal)\n• डेटा संग्रहण (B, KB, MB, GB, TB)\n• समय (ms, s, min, h, d)\n• वोल्टेज (mV, V, kV)\n• विद्युत धारा (µA, mA, A)\n• शक्ति (mW, W, kW, MW)\n• आवेश (mAh, Ah)\n• कोण (°, rad, gon)\n• गति (m/s, km/h, mph, kn)\n• प्रतिरोध (Ω, kΩ, MΩ)\n• आवृत्ति (Hz, kHz, MHz, GHz)\n• डेटा दर (bps, kbps, Mbps, Gbps)\n• ऊर्जा (J, kJ, cal, kcal, Wh, kWh)\n• दाब (Pa, bar, psi, atm)</string>
 
     <!-- Settings: Developer Tab -->
     <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
@@ -359,6 +433,13 @@
     <string name="converter_keywords_current">विद्युत धारा,धारा,करंट,एम्पियर,बिजली</string>
     <string name="converter_keywords_power">शक्ति,पावर,वाट,बिजली</string>
     <string name="converter_keywords_charge">आवेश,विद्युत आवेश,चार्ज,बैटरी,क्षमता</string>
+    <string name="converter_keywords_angle">कोण,डिग्री,रेडियन,ग्रेडियन,gon</string>
+    <string name="converter_keywords_speed">गति,रफ्तार,चाल,km/h,mph,नॉट</string>
+    <string name="converter_keywords_resistance">प्रतिरोध,विद्युत प्रतिरोध,ओम,बिजली</string>
+    <string name="converter_keywords_frequency">आवृत्ति,हर्ट्ज़,फ्रीक्वेंसी,दोलन</string>
+    <string name="converter_keywords_data_rate">डेटा दर,बैंडविड्थ,बिटरेट,इंटरनेट स्पीड</string>
+    <string name="converter_keywords_energy">ऊर्जा,कार्य,ऊष्मा,कैलोरी,बिजली</string>
+    <string name="converter_keywords_pressure">दाब,दबाव,वायुदाब,पास्कल,बार,psi</string>
 
     <!-- Individual Unit Keywords -->
     <string name="unit_keywords_meter">मीटर,m,लंबाई,दूरी,मीट्रिक</string>
@@ -409,4 +490,32 @@
     <string name="unit_keywords_megawatt">मेगावाट,mw,megawatt,शक्ति,पावर</string>
     <string name="unit_keywords_milliampere_hour">मिलीएम्पियर-घंटा,mah,आवेश,चार्ज,बैटरी,क्षमता</string>
     <string name="unit_keywords_ampere_hour">एम्पियर-घंटा,ah,आवेश,चार्ज,बैटरी,क्षमता</string>
+    <string name="unit_keywords_degree">डिग्री,अंश,°,deg,degree,कोण</string>
+    <string name="unit_keywords_radian">रेडियन,rad,radian,कोण,pi</string>
+    <string name="unit_keywords_gradian">ग्रेडियन,गॉन,gon,gradian,कोण</string>
+    <string name="unit_keywords_meter_per_second">मीटर प्रति सेकंड,m/s,गति,चाल</string>
+    <string name="unit_keywords_kilometer_per_hour">किलोमीटर प्रति घंटा,km/h,kmh,गति,रफ्तार</string>
+    <string name="unit_keywords_mile_per_hour">मील प्रति घंटा,mph,गति</string>
+    <string name="unit_keywords_knot">नॉट,knot,kn,kt,गति</string>
+    <string name="unit_keywords_ohm">ओम,ohm,ω,प्रतिरोध,बिजली</string>
+    <string name="unit_keywords_kiloohm">किलोओम,kiloohm,kω,kohm,प्रतिरोध</string>
+    <string name="unit_keywords_megaohm">मेगाओम,megaohm,mω,mohm,प्रतिरोध</string>
+    <string name="unit_keywords_hertz">हर्ट्ज़,hertz,hz,आवृत्ति</string>
+    <string name="unit_keywords_kilohertz">किलोहर्ट्ज़,kilohertz,khz,आवृत्ति</string>
+    <string name="unit_keywords_megahertz">मेगाहर्ट्ज़,megahertz,mhz,आवृत्ति</string>
+    <string name="unit_keywords_gigahertz">गीगाहर्ट्ज़,gigahertz,ghz,आवृत्ति,cpu,wifi</string>
+    <string name="unit_keywords_bps">बिट्स प्रति सेकंड,bps,डेटा दर,बैंडविड्थ</string>
+    <string name="unit_keywords_kbps">किलोबिट्स प्रति सेकंड,kbps,डेटा दर</string>
+    <string name="unit_keywords_mbps">मेगाबिट्स प्रति सेकंड,mbps,डेटा दर,इंटरनेट</string>
+    <string name="unit_keywords_gbps">गीगाबिट्स प्रति सेकंड,gbps,डेटा दर</string>
+    <string name="unit_keywords_joule">जूल,joule,j,ऊर्जा,कार्य</string>
+    <string name="unit_keywords_kilojoule">किलोजूल,kilojoule,kj,ऊर्जा</string>
+    <string name="unit_keywords_calorie">कैलोरी,calorie,cal,ऊर्जा,पोषण</string>
+    <string name="unit_keywords_kilocalorie">किलोकैलोरी,kilocalorie,kcal,कैलोरी,ऊर्जा</string>
+    <string name="unit_keywords_watt_hour">वाट-घंटा,watt-hour,wh,ऊर्जा</string>
+    <string name="unit_keywords_kilowatt_hour">किलोवाट-घंटा,kilowatt-hour,kwh,ऊर्जा,बिजली</string>
+    <string name="unit_keywords_pascal">पास्कल,pascal,pa,दाब,दबाव</string>
+    <string name="unit_keywords_bar">बार,bar,दाब,दबाव</string>
+    <string name="unit_keywords_psi">psi,दाब,दबाव</string>
+    <string name="unit_keywords_atmosphere">वायुमंडल,एटीएम,atmosphere,atm,दाब,दबाव</string>
 </resources>
