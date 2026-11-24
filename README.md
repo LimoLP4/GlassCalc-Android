@@ -47,7 +47,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **UI Hotfix & Polish (v1.3.3):** Fixed pill shapes in settings, clipped rectangular ripples, styled Hamburger menu search suggestions as Liquid Glass pills, and expanded the touch targets for calculator keys.
 *   **Graph Control Pill (v1.3.4):** Wrapped the graph navigation and zoom buttons into a unified Liquid Glass pill container.
 *   **Expanded Unit Categories (v1.3.5):** Massively expanded the Unit Converter with new electrical (Voltage, Current, Power, Charge), extended volume (ml, cl, m³, tsp, fl oz, etc.), and additional units for length (cm, mm, nm), mass (metric ton), and temperature (Kelvin). All units are fully localized across all 10 languages.
-*   **Advanced Unit Categories & App Icons (v1.3.6) (Latest):** Added even more unit categories (Angle, Speed, Resistance, Frequency, Data Rate, Energy, Pressure). Introduced multiple selectable App Icons (including Material You support) via `activity-alias`. Implemented collapsible accordion menus for all settings tabs (Design, Language, Units) and the Unit Converter.
+*   **Advanced Units, App Icons & Accordions (v1.3.6) (Latest):** Added even more unit categories (Angle, Speed, Resistance, Frequency, Data Rate, Energy, Pressure). Introduced multiple selectable App Icons (including Material You support with API check) via `activity-alias` without restarting the app. Implemented collapsible accordion menus for all settings tabs and the Unit Converter.
 
 ## 🌍 Localization / Sprache
 
