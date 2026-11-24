@@ -220,6 +220,7 @@ fun SettingsDialog(
     var appIconAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var angleModeAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var languageAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var selectedAppIconPreview by rememberSaveable(currentAppIcon) { mutableStateOf(currentAppIcon) }
 
     // Accordion expansion states for Info tab
     var apacheAccordionOpen by rememberSaveable { mutableStateOf(false) }
@@ -478,7 +479,7 @@ fun SettingsDialog(
                             when (targetTab) {
                                 0 -> AppearanceSection(
                                     currentTheme = currentTheme,
-                                    currentAppIcon = currentAppIcon,
+                                    currentAppIcon = selectedAppIconPreview,
                                     effectiveApiLevel = effectiveApiLevel,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
@@ -488,7 +489,10 @@ fun SettingsDialog(
                                     onToggleThemeAccordion = { themeAccordionOpen = !themeAccordionOpen },
                                     onToggleAppIconAccordion = { appIconAccordionOpen = !appIconAccordionOpen },
                                     onSelectTheme = onSelectTheme,
-                                    onSelectAppIcon = onSelectAppIcon,
+                                    onSelectAppIcon = { icon ->
+                                        selectedAppIconPreview = icon
+                                        onSelectAppIcon(icon)
+                                    },
                                     triggerHaptic = ::triggerHaptic,
                                     visibleThemes = searchVisibility.matchingThemes,
                                     visibleAppIcons = searchVisibility.matchingAppIcons

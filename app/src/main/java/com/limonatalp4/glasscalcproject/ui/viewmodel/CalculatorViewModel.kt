@@ -238,16 +238,22 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.AUTOMATIC)
 
+    private val _selectedAppIconOverride = MutableStateFlow<AppIconOption?>(null)
+    @Volatile
+    private var pendingAppIconToApply: AppIconOption? = null
+
     val currentAppIcon: StateFlow<AppIconOption> = combine(
         preferences.appIconFlow,
+        _selectedAppIconOverride,
         simulatedApiEnabled,
         simulatedApiLevel
-    ) { savedIcon, simEnabled, simLevel ->
+    ) { savedIcon, overrideIcon, simEnabled, simLevel ->
+        val activeSelection = overrideIcon ?: savedIcon
         val effective = minOf(Build.VERSION.SDK_INT, if (simEnabled) simLevel else Build.VERSION.SDK_INT)
-        if (savedIcon.requiresMinApi > 0 && effective < savedIcon.requiresMinApi) {
+        if (activeSelection.requiresMinApi > 0 && effective < activeSelection.requiresMinApi) {
             AppIconOption.CLASSIC
         } else {
-            savedIcon
+            activeSelection
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, AppIconOption.CLASSIC)
 
@@ -346,21 +352,23 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
 
-        // Automatically fall back launcher alias to Classic when Material You icon is unsupported (API < 33)
+        // Automatically queue launcher alias fallback when Material You icon becomes unsupported (API < 33)
         viewModelScope.launch {
             var lastSyncedAppIcon: AppIconOption? = null
             combine(
                 preferences.appIconFlow,
+                _selectedAppIconOverride,
                 simulatedApiEnabled,
                 simulatedApiLevel
-            ) { savedIcon, simEnabled, simLevel ->
+            ) { savedIcon, overrideIcon, simEnabled, simLevel ->
+                val activeSelection = overrideIcon ?: savedIcon
                 val effective = minOf(Build.VERSION.SDK_INT, if (simEnabled) simLevel else Build.VERSION.SDK_INT)
-                val unsupported = savedIcon.requiresMinApi > 0 && effective < savedIcon.requiresMinApi
-                val resolved = if (unsupported) AppIconOption.CLASSIC else savedIcon
+                val unsupported = activeSelection.requiresMinApi > 0 && effective < activeSelection.requiresMinApi
+                val resolved = if (unsupported) AppIconOption.CLASSIC else activeSelection
                 resolved to unsupported
             }.collect { (resolved, unsupportedFallback) ->
                 if (unsupportedFallback || (lastSyncedAppIcon != null && lastSyncedAppIcon != resolved)) {
-                    AppIconManager.applyAppIcon(appContext, resolved)
+                    pendingAppIconToApply = resolved
                 }
                 lastSyncedAppIcon = resolved
             }
@@ -423,6 +431,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     override fun onCleared() {
+        flushPendingAppIconChange()
         super.onCleared()
         powerSaveReceiver?.let { receiver ->
             runCatching { appContext.unregisterReceiver(receiver) }
@@ -436,9 +445,17 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun onAppStop() {
         // Save current calculation state crash-safely on ON_STOP
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             preferences.saveCalculationState(_expression.value, _result.value)
         }
+        // Launcher-<activity-alias> erst im Hintergrund umschalten, damit die laufende Activity nicht zerstört wird
+        flushPendingAppIconChange()
+    }
+
+    private fun flushPendingAppIconChange() {
+        val iconToApply = pendingAppIconToApply ?: return
+        pendingAppIconToApply = null
+        AppIconManager.applyAppIconAsync(appContext, iconToApply)
     }
 
     fun onAppStart() {
@@ -784,9 +801,11 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         } else {
             icon
         }
-        viewModelScope.launch {
+        // UI-Vorschau & DataStore sofort aktualisieren; System-Icon wird beim Wechsel in den Hintergrund umgeschaltet
+        _selectedAppIconOverride.value = safeIcon
+        pendingAppIconToApply = safeIcon
+        viewModelScope.launch(Dispatchers.IO) {
             preferences.setAppIcon(safeIcon)
-            AppIconManager.applyAppIcon(appContext, safeIcon)
         }
     }
 
@@ -822,9 +841,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         _history.value = emptyList()
         _isGraphLocked.value = false
         HapticUtil.currentIntensityLevel = 5
+        _selectedAppIconOverride.value = AppIconOption.CLASSIC
+        pendingAppIconToApply = AppIconOption.CLASSIC
         viewModelScope.launch {
             preferences.resetAll()
-            AppIconManager.applyAppIcon(appContext, AppIconOption.CLASSIC)
             _expression.value = ""
             _cursorPosition.value = 1
             _result.value = "0"
