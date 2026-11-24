@@ -238,8 +238,18 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.AUTOMATIC)
 
-    val currentAppIcon: StateFlow<AppIconOption> = preferences.appIconFlow
-        .stateIn(viewModelScope, SharingStarted.Eagerly, AppIconOption.CLASSIC)
+    val currentAppIcon: StateFlow<AppIconOption> = combine(
+        preferences.appIconFlow,
+        simulatedApiEnabled,
+        simulatedApiLevel
+    ) { savedIcon, simEnabled, simLevel ->
+        val effective = minOf(Build.VERSION.SDK_INT, if (simEnabled) simLevel else Build.VERSION.SDK_INT)
+        if (savedIcon.requiresMinApi > 0 && effective < savedIcon.requiresMinApi) {
+            AppIconOption.CLASSIC
+        } else {
+            savedIcon
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, AppIconOption.CLASSIC)
 
     private val _history = MutableStateFlow<List<CalculationHistoryItem>>(emptyList())
     val history: StateFlow<List<CalculationHistoryItem>> = _history.asStateFlow()
@@ -333,6 +343,26 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             preferences.hapticIntensityFlow.collect { intensity ->
                 HapticUtil.currentIntensityLevel = intensity
+            }
+        }
+
+        // Automatically fall back launcher alias to Classic when Material You icon is unsupported (API < 33)
+        viewModelScope.launch {
+            var lastSyncedAppIcon: AppIconOption? = null
+            combine(
+                preferences.appIconFlow,
+                simulatedApiEnabled,
+                simulatedApiLevel
+            ) { savedIcon, simEnabled, simLevel ->
+                val effective = minOf(Build.VERSION.SDK_INT, if (simEnabled) simLevel else Build.VERSION.SDK_INT)
+                val unsupported = savedIcon.requiresMinApi > 0 && effective < savedIcon.requiresMinApi
+                val resolved = if (unsupported) AppIconOption.CLASSIC else savedIcon
+                resolved to unsupported
+            }.collect { (resolved, unsupportedFallback) ->
+                if (unsupportedFallback || (lastSyncedAppIcon != null && lastSyncedAppIcon != resolved)) {
+                    AppIconManager.applyAppIcon(appContext, resolved)
+                }
+                lastSyncedAppIcon = resolved
             }
         }
     }
@@ -748,9 +778,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun setAppIcon(icon: AppIconOption) {
+        val effective = minOf(Build.VERSION.SDK_INT, getEffectiveApiLevel())
+        val safeIcon = if (icon.requiresMinApi > 0 && effective < icon.requiresMinApi) {
+            AppIconOption.CLASSIC
+        } else {
+            icon
+        }
         viewModelScope.launch {
-            preferences.setAppIcon(icon)
-            AppIconManager.applyAppIcon(appContext, icon)
+            preferences.setAppIcon(safeIcon)
+            AppIconManager.applyAppIcon(appContext, safeIcon)
         }
     }
 

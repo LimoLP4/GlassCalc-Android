@@ -226,6 +226,10 @@ fun rememberSettingsSearchVisibility(
 
     val appIconAccordionTitle = stringResource(R.string.app_icon_accordion_title)
     val appIconHeading = stringResource(R.string.app_icon_select_heading)
+    val appIconMaterialYouUnsupported = stringResource(
+        R.string.app_icon_material_you_unsupported,
+        minOf(android.os.Build.VERSION.SDK_INT, effectiveApiLevel)
+    )
     val appIconKeywords = stringResource(R.string.settings_keywords_app_icon)
     val appIconKwClassic = stringResource(R.string.settings_keywords_app_icon_classic)
     val appIconKwMaterialYou = stringResource(R.string.settings_keywords_app_icon_material_you)
@@ -236,7 +240,12 @@ fun rememberSettingsSearchVisibility(
 
     val scoredAppIcons = AppIconOption.entries.mapIndexedNotNull { index, iconOption ->
         val label = stringResource(iconOption.labelResId)
-        val extraDesc = iconOption.descriptionResId?.let { listOf(stringResource(it)) }.orEmpty()
+        val extraDesc = buildList {
+            iconOption.descriptionResId?.let { add(stringResource(it)) }
+            if (iconOption.requiresMinApi > 0) {
+                add(appIconMaterialYouUnsupported)
+            }
+        }
         val iconKw = when (iconOption) {
             AppIconOption.CLASSIC -> appIconKwClassic
             AppIconOption.MATERIAL_YOU -> appIconKwMaterialYou

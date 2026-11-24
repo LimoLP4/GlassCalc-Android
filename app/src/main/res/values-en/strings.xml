@@ -290,6 +290,7 @@
     <string name="app_icon_classic">Classic (Dark)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">Monochrome icon – adapts dynamically to system colors on Android 13+.</string>
+    <string name="app_icon_material_you_unsupported">Not compatible with this Android version (requires API 33+, active: API %d)</string>
     <string name="app_icon_blue">Sapphire Blue</string>
     <string name="app_icon_purple">Amethyst Purple</string>
     <string name="app_icon_green">Emerald Green</string>

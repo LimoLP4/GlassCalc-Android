@@ -1,9 +1,13 @@
 package com.limonatalp4.glasscalcproject
 
+import android.app.Application
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -17,6 +21,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.test.core.app.ApplicationProvider
+import com.limonatalp4.glasscalcproject.data.model.AppIconOption
+import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
+import com.limonatalp4.glasscalcproject.ui.util.AppIconManager
+import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,6 +39,13 @@ class AppCrashRegressionTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @After
+    fun tearDown() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        GlassCalcPreferences(app).resetAll()
+        AppIconManager.applyAppIcon(app, AppIconOption.CLASSIC)
+    }
 
     @Test
     fun testLaunchCalculatorAndOpenAllDialogsAndSearchWithoutCrash() {
@@ -379,6 +396,92 @@ class AppCrashRegressionTest {
             composeTestRule.onAllNodesWithTag("radio_lang_GERMAN").fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNodeWithTag("radio_lang_GERMAN").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun testMaterialYouAppIconDisabledAndFallsBackBelowApi33() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Open App-Icon accordion on API 35 -> Material You is enabled & selectable
+        composeTestRule.onNodeWithTag("card_app_icon_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_app_icon_MATERIAL_YOU").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_app_icon_MATERIAL_YOU")
+            .performScrollTo()
+            .assertIsEnabled()
+            .performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_app_icon_MATERIAL_YOU")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Selected) == true
+        }
+        composeTestRule.onNodeWithTag("radio_app_icon_MATERIAL_YOU").assertIsSelected()
+        assert(
+            composeTestRule.onAllNodesWithTag("text_app_icon_material_you_unsupported")
+                .fetchSemanticsNodes()
+                .isEmpty()
+        )
+
+        // Enable Simulated API (default level 30 < 33) in Developer Options
+        composeTestRule.onNodeWithTag("tab_settings_2").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("switch_simulate_api").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("switch_simulate_api").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+
+        // Return to Design tab -> Material You icon is disabled with error text, CLASSIC is active fallback
+        composeTestRule.onNodeWithTag("tab_settings_0").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag(
+                "text_app_icon_material_you_unsupported",
+                useUnmergedTree = true
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_app_icon_CLASSIC")
+            .performScrollTo()
+            .assertIsSelected()
+        composeTestRule.onNodeWithTag("radio_app_icon_MATERIAL_YOU")
+            .performScrollTo()
+            .assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("text_app_icon_material_you_unsupported", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    @Config(sdk = [32])
+    fun testMaterialYouAppIconDisabledOnRealApi32() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("card_app_icon_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_app_icon_MATERIAL_YOU").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_app_icon_CLASSIC")
+            .performScrollTo()
+            .assertIsSelected()
+        composeTestRule.onNodeWithTag("radio_app_icon_MATERIAL_YOU")
+            .performScrollTo()
+            .assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("text_app_icon_material_you_unsupported", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 }
 

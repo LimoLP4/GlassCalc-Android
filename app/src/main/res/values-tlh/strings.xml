@@ -290,6 +290,7 @@
     <string name="app_icon_classic">motlh (qIj)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">wa\' nguv per — Android 13+Daq pat nguvmey choH.</string>
+    <string name="app_icon_material_you_unsupported">AndroidvamDaq Qapbe\' (API 33+ poQ, DaH: API %d)</string>
     <string name="app_icon_blue">SuD (Blue)</string>
     <string name="app_icon_purple">Doq \'ej SuD (Purple)</string>
     <string name="app_icon_green">SuD (Green)</string>

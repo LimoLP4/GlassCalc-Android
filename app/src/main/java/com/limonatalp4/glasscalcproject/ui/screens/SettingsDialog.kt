@@ -688,10 +688,20 @@ private fun AppearanceSection(
                 chevronLabel = "app_icon_chevron_rotation"
             ) {
                 visibleAppIcons.forEach { iconOption ->
-                    val isSelected = currentAppIcon == iconOption
+                    val minApi = iconOption.requiresMinApi
+                    val activeApi = minOf(Build.VERSION.SDK_INT, effectiveApiLevel)
+                    val isSupported = minApi == 0 || (Build.VERSION.SDK_INT >= minApi && effectiveApiLevel >= minApi)
+                    val isSelected = currentAppIcon == iconOption && isSupported
+                    val unsupportedError = if (!isSupported) {
+                        stringResource(id = R.string.app_icon_material_you_unsupported, activeApi)
+                    } else null
+
                     AppIconPillOption(
                         iconOption = iconOption,
                         selected = isSelected,
+                        enabled = isSupported,
+                        errorText = unsupportedError,
+                        errorTestTag = if (unsupportedError != null) "text_app_icon_material_you_unsupported" else null,
                         onClick = {
                             triggerHaptic()
                             onSelectAppIcon(iconOption)
@@ -804,16 +814,21 @@ private fun AppIconPillOption(
     iconOption: AppIconOption,
     selected: Boolean,
     onClick: () -> Unit,
-    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    enabled: Boolean = true,
+    errorText: String? = null,
+    errorTestTag: String? = null
 ) {
     val label = stringResource(id = iconOption.labelResId)
     val description = iconOption.descriptionResId?.let { stringResource(id = it) }
+    val hasSecondaryText = description != null || errorText != null
 
     GlassPillOptionContainer(
         selected = selected,
         onClick = onClick,
         glassProps = glassProps,
         modifier = Modifier.testTag("radio_app_icon_${iconOption.name}"),
+        enabled = enabled,
         minHeight = GlassDialogDefaults.PillOptionExpandedMinHeight,
         contentPadding = GlassDialogDefaults.PillOptionPadding,
         animationLabel = "pill_app_icon_${iconOption.name}"
@@ -828,7 +843,8 @@ private fun AppIconPillOption(
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colorScheme.primary,
                     unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                ),
+                enabled = enabled
             )
 
             Spacer(modifier = Modifier.width(10.dp))
@@ -850,7 +866,7 @@ private fun AppIconPillOption(
                     lineHeight = 18.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                     color = textColor,
-                    maxLines = if (description != null) 1 else 2,
+                    maxLines = if (hasSecondaryText) 1 else 2,
                     overflow = TextOverflow.Ellipsis
                 )
 
@@ -867,6 +883,19 @@ private fun AppIconPillOption(
                         },
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                if (errorText != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = errorText,
+                        fontSize = 11.5.sp,
+                        lineHeight = 14.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = if (errorTestTag != null) Modifier.testTag(errorTestTag) else Modifier
                     )
                 }
             }

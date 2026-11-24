@@ -7,10 +7,15 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppIconOption
+import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
+import com.limonatalp4.glasscalcproject.ui.util.AppIconManager
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
+import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -20,6 +25,20 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class CalculatorViewModelTest {
+
+    @Before
+    fun setUp() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        GlassCalcPreferences(app).resetAll()
+        AppIconManager.applyAppIcon(app, AppIconOption.CLASSIC)
+    }
+
+    @After
+    fun tearDown() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        GlassCalcPreferences(app).resetAll()
+        AppIconManager.applyAppIcon(app, AppIconOption.CLASSIC)
+    }
 
     private fun waitUntil(timeoutMs: Long = 5000L, condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + timeoutMs
@@ -142,5 +161,70 @@ class CalculatorViewModelTest {
                 pm.getComponentEnabledSetting(ComponentName(app, option.aliasClassName))
             )
         }
+    }
+
+    @Test
+    fun testMaterialYouAppIconFallsBackToClassicBelowApi33() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val pm = app.packageManager
+        val vm = CalculatorViewModel(app)
+
+        vm.setAppIcon(AppIconOption.MATERIAL_YOU)
+        waitUntil {
+            vm.currentAppIcon.value == AppIconOption.MATERIAL_YOU &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.MATERIAL_YOU.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        }
+
+        // Drop simulated API below 33 -> automatic fallback to CLASSIC in both state & PackageManager
+        vm.setSimulatedApi(enabled = true, level = 32)
+        waitUntil {
+            vm.currentAppIcon.value == AppIconOption.CLASSIC &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.CLASSIC.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.MATERIAL_YOU.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        }
+        assertEquals(AppIconOption.CLASSIC, vm.currentAppIcon.value)
+
+        // Calling setAppIcon(MATERIAL_YOU) while simulated API is 32 falls back to CLASSIC
+        vm.setAppIcon(AppIconOption.MATERIAL_YOU)
+        waitUntil { vm.currentAppIcon.value == AppIconOption.CLASSIC }
+
+        // Restore simulated API >= 33 -> Material You can be selected again
+        vm.setSimulatedApi(enabled = true, level = 33)
+        waitUntil { vm.simulatedApiLevel.value == 33 }
+        vm.setAppIcon(AppIconOption.MATERIAL_YOU)
+        waitUntil {
+            vm.currentAppIcon.value == AppIconOption.MATERIAL_YOU &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.MATERIAL_YOU.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        }
+    }
+
+    @Test
+    @Config(sdk = [32])
+    fun testMaterialYouAppIconRejectedOnRealDeviceBelowApi33() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val pm = app.packageManager
+        val vm = CalculatorViewModel(app)
+
+        vm.setAppIcon(AppIconOption.MATERIAL_YOU)
+        waitUntil {
+            val classicState = pm.getComponentEnabledSetting(
+                ComponentName(app, AppIconOption.CLASSIC.aliasClassName)
+            )
+            vm.currentAppIcon.value == AppIconOption.CLASSIC &&
+                (classicState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
+                    classicState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) &&
+                pm.getComponentEnabledSetting(
+                    ComponentName(app, AppIconOption.MATERIAL_YOU.aliasClassName)
+                ) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        }
+        assertEquals(AppIconOption.CLASSIC, vm.currentAppIcon.value)
     }
 }

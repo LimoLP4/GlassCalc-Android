@@ -290,6 +290,7 @@
     <string name="app_icon_classic">经典 (深色)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">单色图标 — 在 Android 13+ 上自动适配系统动态配色。</string>
+    <string name="app_icon_material_you_unsupported">当前 Android 版本不支持 (需要 API 33+，当前: API %d)</string>
     <string name="app_icon_blue">宝石蓝</string>
     <string name="app_icon_purple">紫水晶</string>
     <string name="app_icon_green">祖母绿</string>

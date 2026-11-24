@@ -290,6 +290,7 @@
     <string name="app_icon_classic">Классический (Тёмный)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">Монохромный значок — подстраивается под цвета системы в Android 13+.</string>
+    <string name="app_icon_material_you_unsupported">Не поддерживается этой версией Android (требуется API 33+, активен: API %d)</string>
     <string name="app_icon_blue">Сапфировый синий</string>
     <string name="app_icon_purple">Аметистовый фиолетовый</string>
     <string name="app_icon_green">Изумрудный зелёный</string>

@@ -290,6 +290,7 @@
     <string name="app_icon_classic">क्लासिक (डार्क)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">मोनोक्रोम आइकन — Android 13+ पर सिस्टम रंगों के अनुसार बदलता है।</string>
+    <string name="app_icon_material_you_unsupported">इस Android संस्करण के साथ संगत नहीं है (API 33+ आवश्यक, सक्रिय: API %d)</string>
     <string name="app_icon_blue">नीलम नीला</string>
     <string name="app_icon_purple">बैंगनी</string>
     <string name="app_icon_green">पन्ना हरा</string>

@@ -290,6 +290,7 @@
     <string name="app_icon_classic">クラシック (ダーク)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">モノクロアイコン — Android 13 以降でシステムカラーに自動適応します。</string>
+    <string name="app_icon_material_you_unsupported">この Android バージョンでは非対応 (API 33+ が必要、現在: API %d)</string>
     <string name="app_icon_blue">サファイアブルー</string>
     <string name="app_icon_purple">アメジストパープル</string>
     <string name="app_icon_green">エメラルドグリーン</string>

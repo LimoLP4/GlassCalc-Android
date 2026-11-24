@@ -290,6 +290,7 @@
     <string name="app_icon_classic">Clásico (Oscuro)</string>
     <string name="app_icon_material_you">Material You (Monet)</string>
     <string name="app_icon_material_you_desc">Icono monocromo: se adapta a los colores del sistema en Android 13+.</string>
+    <string name="app_icon_material_you_unsupported">No compatible con esta versión de Android (requiere API 33+, activa: API %d)</string>
     <string name="app_icon_blue">Azul zafiro</string>
     <string name="app_icon_purple">Púrpura amatista</string>
     <string name="app_icon_green">Verde esmeralda</string>

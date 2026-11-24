@@ -44,7 +44,8 @@ enum class AppIconOption(
     val iconResId: Int,
     val foregroundResId: Int,
     val backgroundResId: Int,
-    val isMonochromeMaterialYou: Boolean = false
+    val isMonochromeMaterialYou: Boolean = false,
+    val requiresMinApi: Int = 0
 ) {
     CLASSIC(
         aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityClassic",
@@ -60,7 +61,8 @@ enum class AppIconOption(
         iconResId = R.mipmap.ic_launcher_material_you,
         foregroundResId = R.drawable.ic_launcher_foreground_material_you,
         backgroundResId = R.drawable.ic_launcher_background_material_you,
-        isMonochromeMaterialYou = true
+        isMonochromeMaterialYou = true,
+        requiresMinApi = 33
     ),
     BLUE(
         aliasClassName = "com.limonatalp4.glasscalcproject.MainActivityBlue",
