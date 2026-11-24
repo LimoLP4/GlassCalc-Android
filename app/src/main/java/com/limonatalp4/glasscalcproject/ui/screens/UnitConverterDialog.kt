@@ -117,6 +117,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -172,6 +173,7 @@ fun UnitConverterDialog(
     val hapticIntensity = LocalHapticIntensity.current
     val context = LocalContext.current
     val view = LocalView.current
+    val focusManager = LocalFocusManager.current
 
     fun triggerHaptic() {
         HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
@@ -213,7 +215,7 @@ fun UnitConverterDialog(
 
     var isForward by rememberSaveable { mutableStateOf(true) }
     var inputValue by rememberSaveable { mutableStateOf("1") }
-    var showSystemsInfoDialog by rememberSaveable { mutableStateOf(false) }
+    var showSystemsInfo by rememberSaveable { mutableStateOf(false) }
     var pairsAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
     fun selectUnitSuggestion(suggestion: LocalizedUnitSuggestion) {
@@ -353,17 +355,42 @@ fun UnitConverterDialog(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                val infoBtnBg by animateColorAsState(
+                                    targetValue = if (showSystemsInfo) {
+                                        primaryContainerColor
+                                    } else {
+                                        colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    },
+                                    animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                                    label = "converter_info_btn_bg"
+                                )
+                                val infoBtnTint by animateColorAsState(
+                                    targetValue = if (showSystemsInfo) {
+                                        if (isPureBlack) Color.White else onPrimaryContainerColor
+                                    } else {
+                                        if (isPureBlack) Color.White else onSurfaceColor
+                                    },
+                                    animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                                    label = "converter_info_btn_tint"
+                                )
                                 val infoBtnInteraction = remember { MutableInteractionSource() }
                                 GlassSurface(
                                     shape = GlassDialogDefaults.PillShape,
-                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                    borderStroke = glassProps.containerBorderStroke,
+                                    customBgColor = infoBtnBg,
+                                    borderStroke = if (showSystemsInfo) {
+                                        BorderStroke(1.5.dp, primaryColor)
+                                    } else {
+                                        glassProps.containerBorderStroke
+                                    },
                                     modifier = Modifier.pressScale(infoBtnInteraction)
                                 ) {
                                     IconButton(
                                         onClick = {
                                             triggerHaptic()
-                                            showSystemsInfoDialog = true
+                                            if (!showSystemsInfo) {
+                                                focusManager.clearFocus()
+                                            }
+                                            showSystemsInfo = !showSystemsInfo
                                         },
                                         interactionSource = infoBtnInteraction,
                                         modifier = Modifier
@@ -373,7 +400,7 @@ fun UnitConverterDialog(
                                         Icon(
                                             imageVector = Icons.Default.Info,
                                             contentDescription = stringResource(R.string.converter_info_button_desc),
-                                            tint = if (isPureBlack) Color.White else onSurfaceColor,
+                                            tint = infoBtnTint,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }
@@ -409,39 +436,62 @@ fun UnitConverterDialog(
 
                         Spacer(modifier = Modifier.height(if (isImeVisible) 8.dp else 12.dp))
 
-                        // Liquid-Glass Einheiten-Suchleiste (direkt unter Titel und über Kategorie-Pill-Leiste)
-                        UnitConverterSearchBar(
-                            query = searchQuery,
-                            onQueryChange = { newValue ->
-                                searchQuery = newValue
+                        AnimatedContent(
+                            targetState = showSystemsInfo,
+                            transitionSpec = {
+                                (fadeIn(tween(200, easing = FastOutSlowInEasing)) +
+                                    expandVertically(tween(220, easing = FastOutSlowInEasing))).togetherWith(
+                                    fadeOut(tween(150, easing = FastOutLinearInEasing)) +
+                                        shrinkVertically(tween(180, easing = FastOutLinearInEasing))
+                                ).using(SizeTransform(clip = false))
                             },
-                            onClearClick = {
-                                HapticUtil.performAppHaptic(
-                                    context = context,
-                                    view = view,
-                                    enabled = hapticFeedbackEnabled,
-                                    intensityLevel = hapticIntensity
-                                )
-                                searchQuery = ""
-                            },
-                            onSearchSubmit = {
-                                val firstMatch = filteredUnitSuggestions.firstOrNull()
-                                if (firstMatch != null) {
-                                    selectUnitSuggestion(firstMatch)
-                                } else {
-                                    triggerHaptic()
-                                    searchQuery = ""
-                                }
-                            },
-                            isTiefschwarz = isTiefschwarz
-                        )
-
-                        Column(
+                            label = "converter_info_toggle",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f, fill = false)
-                                .verticalScroll(dialogScrollState)
-                        ) {
+                        ) { isInfoVisible ->
+                            if (isInfoVisible) {
+                                SupportedSystemsInfoCard(
+                                    isPureBlack = isPureBlack,
+                                    onSurfaceColor = onSurfaceColor,
+                                    primaryColor = primaryColor,
+                                    glassProps = glassProps
+                                )
+                            } else {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    // Liquid-Glass Einheiten-Suchleiste (direkt unter Titel und über Kategorie-Pill-Leiste)
+                                    UnitConverterSearchBar(
+                                        query = searchQuery,
+                                        onQueryChange = { newValue ->
+                                            searchQuery = newValue
+                                        },
+                                        onClearClick = {
+                                            HapticUtil.performAppHaptic(
+                                                context = context,
+                                                view = view,
+                                                enabled = hapticFeedbackEnabled,
+                                                intensityLevel = hapticIntensity
+                                            )
+                                            searchQuery = ""
+                                        },
+                                        onSearchSubmit = {
+                                            val firstMatch = filteredUnitSuggestions.firstOrNull()
+                                            if (firstMatch != null) {
+                                                selectUnitSuggestion(firstMatch)
+                                            } else {
+                                                triggerHaptic()
+                                                searchQuery = ""
+                                            }
+                                        },
+                                        isTiefschwarz = isTiefschwarz
+                                    )
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f, fill = false)
+                                            .verticalScroll(dialogScrollState)
+                                    ) {
                             // Dropdown-Vorschläge dezent direkt unter der Suchleiste
                             if (searchQuery.trim().isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -831,20 +881,16 @@ fun UnitConverterDialog(
                         text = stringResource(R.string.converter_import),
                         fontWeight = FontWeight.Bold
                     )
+                }
+                                    }
+                                }
+                            }
                         }
                     }
-                }
                 }
             }
         }
     }
-    }
-
-    if (showSystemsInfoDialog) {
-        SupportedSystemsInfoDialog(
-            onDismiss = { showSystemsInfoDialog = false },
-            triggerHaptic = ::triggerHaptic
-        )
     }
 }
 
@@ -940,189 +986,61 @@ private fun UnitPairsAccordionCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SupportedSystemsInfoDialog(
-    onDismiss: () -> Unit,
-    triggerHaptic: () -> Unit
+private fun SupportedSystemsInfoCard(
+    isPureBlack: Boolean,
+    onSurfaceColor: Color,
+    primaryColor: Color,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties
 ) {
-    val glassProps = LocalGlassProperties.current
-    val colorScheme = MaterialTheme.colorScheme
-    val isPureBlack = glassProps.isTiefschwarz
-    val dialogBgColor = colorScheme.surfaceContainerHigh
-    val onSurfaceColor = colorScheme.onSurface
-    val primaryColor = colorScheme.primary
-    val dialogTransition = rememberDialogTransitionController(onDismiss)
     val contentScrollState = rememberScrollState()
 
-    @Suppress("DEPRECATION")
-    BasicAlertDialog(
-        onDismissRequest = dialogTransition.dismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        ),
-        modifier = Modifier.testTag("dialog_converter_systems_info")
+    GlassCardContainer(
+        glassProps = glassProps,
+        shape = GlassDialogDefaults.SettingsCardShape,
+        contentPadding = GlassDialogDefaults.SettingsCardContentPadding,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("card_converter_systems_info")
     ) {
-        val dialogView = LocalView.current
-        SideEffect {
-            (dialogView.parent as? DialogWindowProvider)?.window?.let { dialogWindow ->
-                WindowCompat.setDecorFitsSystemWindows(dialogWindow, false)
-            }
-        }
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        dialogTransition.dismiss()
-                    }
-            )
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .windowInsetsPadding(
-                        WindowInsets.statusBars
-                            .union(WindowInsets.displayCutout)
-                            .union(WindowInsets.navigationBars)
-                    )
-                    .padding(horizontal = 20.dp, vertical = 24.dp)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
-                    GlassSurface(
-                        modifier = Modifier
-                            .fillMaxWidth(0.92f)
-                            .widthIn(max = 400.dp)
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        awaitPointerEvent()
-                                    }
-                                }
-                            },
-                        shape = GlassDialogDefaults.DialogShellShape,
-                        customBgColor = if (isPureBlack) Color.Black else dialogBgColor,
-                        borderStroke = glassProps.containerBorderStroke
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 8.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Info,
-                                        contentDescription = null,
-                                        tint = primaryColor,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.converter_info_dialog_title),
-                                        fontSize = 17.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isPureBlack) Color.White else onSurfaceColor
-                                    )
-                                }
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = primaryColor,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = stringResource(R.string.converter_info_dialog_title),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = primaryColor
+                )
+            }
 
-                                val closeInfoInteraction = remember { MutableInteractionSource() }
-                                GlassSurface(
-                                    shape = GlassDialogDefaults.PillShape,
-                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                    borderStroke = glassProps.containerBorderStroke,
-                                    modifier = Modifier.pressScale(closeInfoInteraction)
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            triggerHaptic()
-                                            dialogTransition.dismiss()
-                                        },
-                                        interactionSource = closeInfoInteraction,
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .testTag("btn_close_converter_info")
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = stringResource(R.string.nav_close),
-                                            tint = if (isPureBlack) Color.White else onSurfaceColor,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                }
-                            }
+            Spacer(modifier = Modifier.height(12.dp))
 
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            GlassCardContainer(
-                                glassProps = glassProps,
-                                shape = GlassDialogDefaults.LargeCardShape,
-                                contentPadding = GlassDialogDefaults.CardContentPadding,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f, fill = false)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .verticalScroll(contentScrollState)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.units_systems_detail),
-                                        fontSize = 13.5.sp,
-                                        lineHeight = 20.sp,
-                                        color = if (isPureBlack) Color.White.copy(alpha = 0.85f) else onSurfaceColor.copy(alpha = 0.82f),
-                                        modifier = Modifier.testTag("text_converter_systems_detail")
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            val closePillInteraction = remember { MutableInteractionSource() }
-                            Button(
-                                onClick = {
-                                    triggerHaptic()
-                                    dialogTransition.dismiss()
-                                },
-                                interactionSource = closePillInteraction,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .defaultMinSize(minHeight = GlassDialogDefaults.ActionButtonMinHeight)
-                                    .pressScale(closePillInteraction),
-                                contentPadding = PaddingValues(
-                                    horizontal = GlassDialogDefaults.PillHorizontalPadding,
-                                    vertical = 12.dp
-                                ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = primaryColor,
-                                    contentColor = colorScheme.onPrimary
-                                ),
-                                shape = GlassDialogDefaults.PillShape
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.nav_close),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(contentScrollState)
+            ) {
+                Text(
+                    text = stringResource(R.string.units_systems_detail),
+                    fontSize = 13.5.sp,
+                    lineHeight = 20.sp,
+                    color = if (isPureBlack) {
+                        Color.White.copy(alpha = 0.85f)
+                    } else {
+                        onSurfaceColor.copy(alpha = 0.82f)
+                    },
+                    modifier = Modifier.testTag("text_converter_systems_detail")
+                )
             }
         }
     }

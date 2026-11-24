@@ -110,15 +110,43 @@ class AppCrashRegressionTest {
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithTag("dialog_unit_converter").fetchSemanticsNodes().isNotEmpty()
         }
-        // Open and close Supported Conversion Systems info dialog
+        // Toggle Supported Conversion Systems info card via info button (no redundant close button inside)
         composeTestRule.onNodeWithTag("btn_converter_info").assertIsDisplayed().performClick()
         composeTestRule.waitUntil(timeoutMillis = 3000) {
-            composeTestRule.onAllNodesWithTag("dialog_converter_systems_info").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithTag("card_converter_systems_info").fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNodeWithTag("text_converter_systems_detail").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("btn_close_converter_info").performClick()
+        assert(composeTestRule.onAllNodesWithTag("btn_close_converter_info").fetchSemanticsNodes().isEmpty())
+        composeTestRule.onNodeWithTag("btn_close_converter").assertIsDisplayed()
+
+        // Tapping info button again toggles the info card closed
+        composeTestRule.onNodeWithTag("btn_converter_info").performClick()
         composeTestRule.waitUntil(timeoutMillis = 3000) {
-            composeTestRule.onAllNodesWithTag("dialog_converter_systems_info").fetchSemanticsNodes().isEmpty()
+            composeTestRule.onAllNodesWithTag("card_converter_systems_info").fetchSemanticsNodes().isEmpty()
+        }
+
+        // Open info card again, recreate activity -> remains open, then close entire popup with global X
+        composeTestRule.onNodeWithTag("btn_converter_info").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_converter_systems_info").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.recreate()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_converter_systems_info").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("btn_close_converter").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_unit_converter").fetchSemanticsNodes().isEmpty()
+        }
+
+        // Reopen Unit Converter and continue normal flow
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_converter").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_unit_converter").fetchSemanticsNodes().isNotEmpty()
         }
         // Pairs accordion initially collapsed, expands on tap, and preserves state on recreate
         composeTestRule.onNodeWithTag("card_converter_pairs_accordion").performScrollTo().assertIsDisplayed()
