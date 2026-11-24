@@ -8,37 +8,37 @@
     <!-- Emerald Liquid Glass Specular Reflection Arc -->
     <path
         android:fillColor="#4034D399"
-        android:pathData="M 42,27 L 66,27 C 75,27 81,33 81,42 L 81,48 C 65,40 43,40 27,48 L 27,42 C 27,33 33,27 42,27 Z" />
+        android:pathData="M 43,31 L 65,31 C 72.5,31 77,35.5 77,43 L 77,48 C 63,41.5 45,41.5 31,48 L 31,43 C 31,35.5 35.5,31 43,31 Z" />
 
     <!-- Outer Liquid Glass Lens Frame (Emerald Green) -->
     <path
         android:fillColor="#2610B981"
         android:strokeColor="#FFA7F3D0"
-        android:strokeWidth="3.2"
+        android:strokeWidth="2.6"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M 42,27 L 66,27 C 75,27 81,33 81,42 L 81,66 C 81,75 75,81 66,81 L 42,81 C 33,81 27,75 27,66 L 27,42 C 27,33 33,27 42,27 Z" />
+        android:pathData="M 43,31 L 65,31 C 72.5,31 77,35.5 77,43 L 77,65 C 77,72.5 72.5,77 65,77 L 43,77 C 35.5,77 31,72.5 31,65 L 31,43 C 31,35.5 35.5,31 43,31 Z" />
 
     <!-- Smooth Flowing "G" Monogram -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="4.5"
+        android:strokeWidth="3.0"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M 50,44 C 41,43 36,48 36,54 C 36,60 41,64 47,64 C 51,64 51,64 51,54 L 46,54" />
+        android:pathData="M 51.69,47.40 C 45.75,46.74 42.45,50.04 42.45,54.00 C 42.45,57.96 45.75,60.60 49.71,60.60 C 52.35,60.60 52.35,60.60 52.35,54.00 L 49.05,54.00" />
 
     <!-- Smooth Flowing "C" Monogram -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="4.5"
+        android:strokeWidth="3.0"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M 71,44 C 62,43 57,48 57,54 C 57,60 62,64 71,64" />
+        android:pathData="M 65.55,47.40 C 59.61,46.74 56.31,50.04 56.31,54.00 C 56.31,57.96 59.61,60.60 65.55,60.60" />
 
     <!-- Mint Glass Accent Dot -->
     <path
         android:fillColor="#FF6EE7B7"
-        android:pathData="M 54,35 A 2.5,2.5 0 1,1 53.9,35 Z" />
+        android:pathData="M 54,39.0 A 1.9,1.9 0 1,1 53.9,39.0 Z" />
 </vector>

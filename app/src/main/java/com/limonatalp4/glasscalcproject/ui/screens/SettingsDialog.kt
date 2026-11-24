@@ -944,8 +944,8 @@ private fun AppIconPreviewBadge(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    scaleX = 1.45f
-                    scaleY = 1.45f
+                    scaleX = 1.32f
+                    scaleY = 1.32f
                 }
         )
     }
