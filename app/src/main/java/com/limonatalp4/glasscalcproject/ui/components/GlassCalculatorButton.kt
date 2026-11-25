@@ -6,8 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -21,19 +20,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.*
-import androidx.compose.foundation.indication
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick as semanticsOnClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +50,11 @@ import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 enum class ButtonType {
@@ -75,22 +82,11 @@ fun GlassCalculatorButton(
     val context = LocalContext.current
     val glassProps = LocalGlassProperties.current
     val view = LocalView.current
-    val coroutineScope = rememberCoroutineScope()
     var isLongPressTriggered by remember { mutableStateOf(false) }
 
     val localHapticEnabled = LocalHapticFeedbackEnabled.current
     val localHapticIntensity = LocalHapticIntensity.current
     val isHapticActive = hapticFeedbackEnabled && localHapticEnabled
-
-    fun triggerHapticTap() {
-        if (!isHapticActive) return
-        HapticUtil.performAppHaptic(context, view, isHapticActive, localHapticIntensity)
-    }
-
-    fun triggerHapticLongPress() {
-        if (!isHapticActive) return
-        HapticUtil.performAppLongPressHaptic(context, view, isHapticActive, localHapticIntensity)
-    }
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -152,97 +148,140 @@ fun GlassCalculatorButton(
         }
     }
 
-    val touchModifier = when {
-        isRepeatable -> {
-            Modifier
-                .semantics {
-                    contentDescription = contentDesc
-                    role = Role.Button
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongClick by rememberUpdatedState(onLongClick)
+    val currentIsRepeatable by rememberUpdatedState(isRepeatable)
+    val currentHapticActive by rememberUpdatedState(isHapticActive)
+    val currentHapticIntensity by rememberUpdatedState(localHapticIntensity)
+
+    val touchModifier = Modifier
+        .semantics {
+            contentDescription = contentDesc
+            role = Role.Button
+            semanticsOnClick(label = contentDesc) {
+                currentOnClick()
+                if (currentHapticActive) {
+                    HapticUtil.performAppHaptic(context, view, true, currentHapticIntensity)
                 }
-                .pointerInput(onClick, isHapticActive) {
-                    detectTapGestures(
-                        onPress = { offset ->
-                            val press = PressInteraction.Press(offset)
-                            interactionSource.emit(press)
+                true
+            }
+        }
+        .pointerInput(Unit) {
+            coroutineScope {
+                awaitPointerEventScope {
+                    while (isActive) {
+                        var downChange: PointerInputChange? = null
+                        while (downChange == null && isActive) {
+                            val event = awaitPointerEvent(PointerEventPass.Main)
+                            downChange = event.changes.firstOrNull { change ->
+                                !change.isConsumed && change.changedToDownIgnoreConsumed()
+                            }
+                        }
+                        val activeDown = downChange ?: break
+                        val trackedId = activeDown.id
+                        val downPos = activeDown.position
+                        val press = PressInteraction.Press(downPos)
+                        interactionSource.tryEmit(press)
 
-                            // Execute first action immediately on press
-                            onClick()
-                            triggerHapticTap()
+                        if (currentIsRepeatable) {
+                            // Sofortige Ausführung vor asynchronem Haptik-Dispatch
+                            currentOnClick()
+                            if (currentHapticActive) {
+                                HapticUtil.performAppHaptic(context, view, true, currentHapticIntensity)
+                            }
+                        }
 
-                            val repeatJob = coroutineScope.launch {
-                                delay(450) // Wait for long press threshold
-                                while (true) {
-                                    onClick()
-                                    triggerHapticTap()
-                                    delay(90) // Repeat interval (50-100ms)
+                        var longPressTriggeredLocal = false
+                        var repeatJob: Job? = null
+                        var longPressJob: Job? = null
+
+                        if (currentIsRepeatable) {
+                            repeatJob = launch {
+                                delay(450L)
+                                while (isActive) {
+                                    currentOnClick()
+                                    if (currentHapticActive) {
+                                        HapticUtil.performAppHaptic(context, view, true, currentHapticIntensity)
+                                    }
+                                    delay(90L)
                                 }
                             }
-
-                            val released = try {
-                                awaitRelease()
-                                true
-                            } catch (c: Exception) {
-                                false
+                        } else if (currentOnLongClick != null) {
+                            val longPressTimeout = viewConfiguration.longPressTimeoutMillis
+                            longPressJob = launch {
+                                delay(longPressTimeout)
+                                longPressTriggeredLocal = true
+                                isLongPressTriggered = true
+                                if (currentHapticActive) {
+                                    HapticUtil.performAppLongPressHaptic(context, view, true, currentHapticIntensity)
+                                }
+                                launch {
+                                    delay(250L)
+                                    isLongPressTriggered = false
+                                }
+                                currentOnLongClick?.invoke()
                             }
-
-                            repeatJob.cancel()
-                            interactionSource.emit(if (released) PressInteraction.Release(press) else PressInteraction.Cancel(press))
                         }
-                    )
-                }
-        }
-        onLongClick != null -> {
-            Modifier
-                .semantics {
-                    contentDescription = contentDesc
-                    role = Role.Button
-                }
-                .pointerInput(onLongClick, onClick, isHapticActive) {
-                    detectTapGestures(
-                        onPress = { offset ->
-                            val press = PressInteraction.Press(offset)
-                            interactionSource.emit(press)
-                            val released = try {
-                                awaitRelease()
-                                true
-                            } catch (_: Exception) {
-                                false
+
+                        var isReleased = false
+                        var isCancelled = false
+                        val touchSlop = viewConfiguration.touchSlop
+                        val width = size.width.toFloat()
+                        val height = size.height.toFloat()
+
+                        try {
+                            while (!isReleased && !isCancelled && isActive) {
+                                val event = awaitPointerEvent(PointerEventPass.Main)
+                                val change = event.changes.firstOrNull { it.id == trackedId }
+                                if (change == null || change.isConsumed) {
+                                    isCancelled = true
+                                    break
+                                }
+                                if (change.changedToUpIgnoreConsumed()) {
+                                    change.consume()
+                                    isReleased = true
+                                    break
+                                }
+                                if (!change.pressed) {
+                                    isCancelled = true
+                                    break
+                                }
+                                val delta = change.position - downPos
+                                val outOfBounds = change.position.x < -touchSlop ||
+                                    change.position.x > width + touchSlop ||
+                                    change.position.y < -touchSlop ||
+                                    change.position.y > height + touchSlop
+                                if (outOfBounds || delta.getDistance() > touchSlop * 2.5f) {
+                                    isCancelled = true
+                                    break
+                                }
                             }
-                            interactionSource.emit(
-                                if (released) PressInteraction.Release(press)
-                                else PressInteraction.Cancel(press)
-                            )
-                        },
-                        onTap = {
-                            triggerHapticTap()
-                            onClick()
-                        },
-                        onLongPress = {
-                            isLongPressTriggered = true
-                            triggerHapticLongPress()
-                            coroutineScope.launch {
-                                delay(250)
-                                isLongPressTriggered = false
-                            }
-                            onLongClick()
+                        } catch (ce: CancellationException) {
+                            repeatJob?.cancel()
+                            longPressJob?.cancel()
+                            interactionSource.tryEmit(PressInteraction.Cancel(press))
+                            throw ce
                         }
-                    )
-                }
-        }
-        else -> {
-            Modifier
-                .semantics { contentDescription = contentDesc }
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    role = Role.Button,
-                    onClick = {
-                        triggerHapticTap()
-                        onClick()
+
+                        repeatJob?.cancel()
+                        longPressJob?.cancel()
+
+                        if (isReleased) {
+                            interactionSource.tryEmit(PressInteraction.Release(press))
+                            if (!currentIsRepeatable && !longPressTriggeredLocal) {
+                                // State sofort aktualisieren, Haptik non-blocking im Hintergrund
+                                currentOnClick()
+                                if (currentHapticActive) {
+                                    HapticUtil.performAppHaptic(context, view, true, currentHapticIntensity)
+                                }
+                            }
+                        } else {
+                            interactionSource.tryEmit(PressInteraction.Cancel(press))
+                        }
                     }
-                )
+                }
+            }
         }
-    }
 
     // Äußerer rechteckiger Touch-Container: umfasst die gesamte Tasten-Zelle inklusive Ecken und Rand
     Box(

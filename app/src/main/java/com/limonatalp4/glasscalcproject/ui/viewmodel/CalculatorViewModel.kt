@@ -14,6 +14,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.Immutable
 import androidx.core.content.ContextCompat
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
@@ -42,13 +43,23 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.abs
 import kotlin.math.round
+
+@Immutable
+data class CalculatorDisplayState(
+    val expression: String = "",
+    val cursorPosition: Int = 0,
+    val result: String = "0",
+    val errorMessage: String? = null
+)
 
 class CalculatorViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -62,35 +73,72 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private var powerSaveReceiver: BroadcastReceiver? = null
     private var powerSaveObserver: ContentObserver? = null
 
+    private val displayStateLock = Any()
+    private val inputRevision = AtomicLong(0L)
+
+    private val _displayState = MutableStateFlow(CalculatorDisplayState())
+    val displayState: StateFlow<CalculatorDisplayState> = _displayState.asStateFlow()
+
     private val _expression = MutableStateFlow("")
     val expression: StateFlow<String> = _expression.asStateFlow()
 
-    private val _cursorPosition = MutableStateFlow(1)
+    private val _cursorPosition = MutableStateFlow(0)
     val cursorPosition: StateFlow<Int> = _cursorPosition.asStateFlow()
 
     private val _result = MutableStateFlow("0")
     val result: StateFlow<String> = _result.asStateFlow()
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private fun updateDisplayState(
+        bumpRevision: Boolean = true,
+        transform: (CalculatorDisplayState) -> CalculatorDisplayState
+    ): Pair<CalculatorDisplayState, Long> {
+        return synchronized(displayStateLock) {
+            val next = transform(_displayState.value)
+            val rev = if (bumpRevision) inputRevision.incrementAndGet() else inputRevision.get()
+            publishDisplayStateLocked(next)
+            next to rev
+        }
+    }
+
+    private fun publishDisplayStateLocked(next: CalculatorDisplayState) {
+        _displayState.value = next
+        if (_expression.value != next.expression) {
+            _expression.value = next.expression
+        }
+        if (_cursorPosition.value != next.cursorPosition) {
+            _cursorPosition.value = next.cursorPosition
+        }
+        if (_result.value != next.result) {
+            _result.value = next.result
+        }
+        if (_errorMessage.value != next.errorMessage) {
+            _errorMessage.value = next.errorMessage
+        }
+    }
+
     fun setCursorPosition(position: Int) {
-        val maxLen = if (_expression.value.isEmpty()) 1 else _expression.value.length
-        _cursorPosition.value = position.coerceIn(0, maxLen)
+        updateDisplayState(bumpRevision = false) { current ->
+            val clamped = if (current.expression.isEmpty()) 0 else position.coerceIn(0, current.expression.length)
+            current.copy(cursorPosition = clamped)
+        }
     }
 
     fun onDirectExpressionChange(newExpression: String, newCursorPosition: Int) {
         equalsJob?.cancel()
-        _errorMessage.value = null
-        justCalculated = false
-        _expression.value = newExpression
-        _cursorPosition.value = if (newExpression.isEmpty()) {
-            1
-        } else {
-            newCursorPosition.coerceIn(0, newExpression.length)
+        val (snapshot, rev) = updateDisplayState { current ->
+            justCalculated = false
+            val clampedCursor = if (newExpression.isEmpty()) 0 else newCursorPosition.coerceIn(0, newExpression.length)
+            current.copy(
+                expression = newExpression,
+                cursorPosition = clampedCursor,
+                errorMessage = null
+            )
         }
-        tryLivePreview()
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
-
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     private val _isScientificExpanded = MutableStateFlow(false)
     val isScientificExpanded: StateFlow<Boolean> = _isScientificExpanded.asStateFlow()
@@ -106,11 +154,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         val cleaned = value.trim()
         if (cleaned.isEmpty()) return
         equalsJob?.cancel()
-        _errorMessage.value = null
-        justCalculated = false
-        _expression.value = cleaned
-        _cursorPosition.value = cleaned.length
-        tryLivePreview()
+        val (snapshot, rev) = updateDisplayState { current ->
+            justCalculated = false
+            current.copy(
+                expression = cleaned,
+                cursorPosition = cleaned.length,
+                errorMessage = null
+            )
+        }
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun applyGraphPointToCalculator(x: Double, y: Double) {
@@ -123,11 +175,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             "$xFormatted + $yFormatted"
         }
         equalsJob?.cancel()
-        _errorMessage.value = null
-        justCalculated = false
-        _expression.value = newExpr
-        _cursorPosition.value = newExpr.length
-        tryLivePreview()
+        val (snapshot, rev) = updateDisplayState { current ->
+            justCalculated = false
+            current.copy(
+                expression = newExpr,
+                cursorPosition = newExpr.length,
+                errorMessage = null
+            )
+        }
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     private fun formatGraphCoordinate(value: Double): String {
@@ -145,25 +201,29 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     fun insertFormula(formulaExpression: String) {
         if (formulaExpression.isBlank()) return
         equalsJob?.cancel()
-        _errorMessage.value = null
-        val curr = _expression.value
-        val pos = _cursorPosition.value.coerceIn(0, curr.length)
-        val shouldInsertAtCursor = !justCalculated &&
-            curr.isNotEmpty() &&
-            pos > 0 &&
-            curr[pos - 1] in "+-−*/×÷(;"
+        val (snapshot, rev) = updateDisplayState { current ->
+            val curr = current.expression
+            val pos = current.cursorPosition.coerceIn(0, curr.length)
+            val shouldInsertAtCursor = !justCalculated &&
+                curr.isNotEmpty() &&
+                pos > 0 &&
+                curr[pos - 1] in "+-−*/×÷(;"
 
-        val (updated, nextCursor) = if (shouldInsertAtCursor) {
-            val inserted = curr.substring(0, pos) + formulaExpression + curr.substring(pos)
-            inserted to (pos + formulaExpression.length)
-        } else {
-            formulaExpression to formulaExpression.length
+            val (updated, nextCursor) = if (shouldInsertAtCursor) {
+                val inserted = curr.substring(0, pos) + formulaExpression + curr.substring(pos)
+                inserted to (pos + formulaExpression.length)
+            } else {
+                formulaExpression to formulaExpression.length
+            }
+
+            justCalculated = false
+            current.copy(
+                expression = updated,
+                cursorPosition = nextCursor,
+                errorMessage = null
+            )
         }
-
-        justCalculated = false
-        _expression.value = updated
-        _cursorPosition.value = nextCursor
-        tryLivePreview()
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     val formulas: List<MathFormula> = FormulaCatalog.FORMULAS
@@ -315,10 +375,20 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             runCatching {
                 val (savedExpr, savedRes) = preferences.savedStateFlow.first()
-                if (_expression.value.isEmpty() && savedExpr.isNotEmpty()) {
-                    _expression.value = savedExpr
-                    _cursorPosition.value = savedExpr.length
-                    _result.value = savedRes
+                if (savedExpr.isNotEmpty()) {
+                    synchronized(displayStateLock) {
+                        if (_displayState.value.expression.isEmpty()) {
+                            inputRevision.incrementAndGet()
+                            publishDisplayStateLocked(
+                                CalculatorDisplayState(
+                                    expression = savedExpr,
+                                    cursorPosition = savedExpr.length,
+                                    result = savedRes,
+                                    errorMessage = null
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -445,8 +515,9 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun onAppStop() {
         // Save current calculation state crash-safely on ON_STOP
+        val snapshot = synchronized(displayStateLock) { _displayState.value }
         viewModelScope.launch(Dispatchers.IO) {
-            preferences.saveCalculationState(_expression.value, _result.value)
+            preferences.saveCalculationState(snapshot.expression, snapshot.result)
         }
         // Launcher-<activity-alias> erst im Hintergrund umschalten, damit die laufende Activity nicht zerstört wird
         flushPendingAppIconChange()
@@ -475,15 +546,16 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun testCrashProtection() {
         // Save state immediately first so the test succeeds on restart
+        val snapshot = synchronized(displayStateLock) { _displayState.value }
         viewModelScope.launch {
-            preferences.saveCalculationState(_expression.value, _result.value)
+            preferences.saveCalculationState(snapshot.expression, snapshot.result)
             throw RuntimeException("Künstlicher Test-Absturz zur Überprüfung des Zustandserhalts!")
         }
     }
 
-    private fun getValidChainingResult(): String? {
-        val res = _result.value
-        if (res.isNotEmpty() && _errorMessage.value == null && res != "Error") {
+    private fun getValidChainingResultLocked(current: CalculatorDisplayState): String? {
+        val res = current.result
+        if (res.isNotEmpty() && current.errorMessage == null && res != "Error") {
             return res
         }
         return null
@@ -491,242 +563,288 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     fun onCharacterInput(char: String) {
         equalsJob?.cancel()
-        _errorMessage.value = null
+        val (snapshot, rev) = updateDisplayState { current ->
+            var curr = current.expression
+            var pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        var curr = _expression.value
-        var pos = _cursorPosition.value.coerceIn(0, curr.length)
-
-        if (justCalculated) {
-            val chainingRes = getValidChainingResult()
-            if (chainingRes != null && (isOperator(char) || char == "²" || char == "³" || char == "^" || char == "!" || char == "%")) {
-                curr = chainingRes
-                pos = curr.length
-            } else {
-                curr = ""
-                pos = 0
+            if (justCalculated) {
+                val chainingRes = getValidChainingResultLocked(current)
+                if (chainingRes != null && (isOperator(char) || char == "²" || char == "³" || char == "^" || char == "!" || char == "%")) {
+                    curr = chainingRes
+                    pos = curr.length
+                } else {
+                    curr = ""
+                    pos = 0
+                }
             }
-        }
-        justCalculated = false
+            justCalculated = false
 
-        val updated = curr.substring(0, pos) + char + curr.substring(pos)
-        _expression.value = updated
-        _cursorPosition.value = pos + char.length
-        tryLivePreview()
+            val updated = curr.substring(0, pos) + char + curr.substring(pos)
+            current.copy(
+                expression = updated,
+                cursorPosition = pos + char.length,
+                errorMessage = null
+            )
+        }
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onScientificFunction(fnName: String) {
         equalsJob?.cancel()
-        _errorMessage.value = null
+        val (snapshot, rev) = updateDisplayState { current ->
+            var curr = current.expression
+            var pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        var curr = _expression.value
-        var pos = _cursorPosition.value.coerceIn(0, curr.length)
-
-        if (justCalculated) {
-            val chainingRes = getValidChainingResult()
-            if (chainingRes != null) {
-                val expr = "$fnName($chainingRes)"
-                _expression.value = expr
-                _cursorPosition.value = expr.length
-                justCalculated = false
-                tryLivePreview()
-                return
-            } else {
-                curr = ""
-                pos = 0
+            if (justCalculated) {
+                val chainingRes = getValidChainingResultLocked(current)
+                if (chainingRes != null) {
+                    val expr = "$fnName($chainingRes)"
+                    justCalculated = false
+                    return@updateDisplayState current.copy(
+                        expression = expr,
+                        cursorPosition = expr.length,
+                        errorMessage = null
+                    )
+                } else {
+                    curr = ""
+                    pos = 0
+                }
             }
-        }
-        justCalculated = false
+            justCalculated = false
 
-        val insertStr = "$fnName("
-        val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
-        _expression.value = updated
-        _cursorPosition.value = pos + insertStr.length
-        tryLivePreview()
+            val insertStr = "$fnName("
+            val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
+            current.copy(
+                expression = updated,
+                cursorPosition = pos + insertStr.length,
+                errorMessage = null
+            )
+        }
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onConstant(constant: String) {
         equalsJob?.cancel()
-        _errorMessage.value = null
+        val (snapshot, rev) = updateDisplayState { current ->
+            var curr = current.expression
+            var pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        var curr = _expression.value
-        var pos = _cursorPosition.value.coerceIn(0, curr.length)
+            if (justCalculated) {
+                curr = ""
+                pos = 0
+            }
+            justCalculated = false
 
-        if (justCalculated) {
-            curr = ""
-            pos = 0
+            val updated = curr.substring(0, pos) + constant + curr.substring(pos)
+            current.copy(
+                expression = updated,
+                cursorPosition = pos + constant.length,
+                errorMessage = null
+            )
         }
-        justCalculated = false
-
-        val updated = curr.substring(0, pos) + constant + curr.substring(pos)
-        _expression.value = updated
-        _cursorPosition.value = pos + constant.length
-        tryLivePreview()
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onPower(exponent: String) {
         equalsJob?.cancel()
-        _errorMessage.value = null
+        val (snapshot, rev) = updateDisplayState { current ->
+            var curr = current.expression
+            var pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        var curr = _expression.value
-        var pos = _cursorPosition.value.coerceIn(0, curr.length)
-
-        if (justCalculated) {
-            val chainingRes = getValidChainingResult()
-            if (chainingRes != null) {
-                curr = chainingRes
-                pos = curr.length
-            } else {
-                curr = ""
-                pos = 0
+            if (justCalculated) {
+                val chainingRes = getValidChainingResultLocked(current)
+                if (chainingRes != null) {
+                    curr = chainingRes
+                    pos = curr.length
+                } else {
+                    curr = ""
+                    pos = 0
+                }
             }
-        }
-        justCalculated = false
+            justCalculated = false
 
-        val insertStr = when (exponent) {
-            "2" -> "^2"
-            "3" -> "^3"
-            else -> "^"
+            val insertStr = when (exponent) {
+                "2" -> "^2"
+                "3" -> "^3"
+                else -> "^"
+            }
+            val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
+            current.copy(
+                expression = updated,
+                cursorPosition = pos + insertStr.length,
+                errorMessage = null
+            )
         }
-        val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
-        _expression.value = updated
-        _cursorPosition.value = pos + insertStr.length
-        tryLivePreview()
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onFractionSlash() {
         equalsJob?.cancel()
-        _errorMessage.value = null
+        val (snapshot, rev) = updateDisplayState { current ->
+            var curr = current.expression
+            var pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        var curr = _expression.value
-        var pos = _cursorPosition.value.coerceIn(0, curr.length)
-
-        if (justCalculated) {
-            val chainingRes = getValidChainingResult()
-            if (chainingRes != null) {
-                curr = chainingRes
-                pos = curr.length
-            } else {
-                curr = ""
-                pos = 0
+            if (justCalculated) {
+                val chainingRes = getValidChainingResultLocked(current)
+                if (chainingRes != null) {
+                    curr = chainingRes
+                    pos = curr.length
+                } else {
+                    curr = ""
+                    pos = 0
+                }
             }
-        }
-        justCalculated = false
+            justCalculated = false
 
-        val updated = curr.substring(0, pos) + "/" + curr.substring(pos)
-        _expression.value = updated
-        _cursorPosition.value = pos + 1
-        tryLivePreview()
+            val updated = curr.substring(0, pos) + "/" + curr.substring(pos)
+            current.copy(
+                expression = updated,
+                cursorPosition = pos + 1,
+                errorMessage = null
+            )
+        }
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onNthRoot() {
         equalsJob?.cancel()
-        _errorMessage.value = null
+        val (snapshot, rev) = updateDisplayState { current ->
+            var curr = current.expression
+            var pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        var curr = _expression.value
-        var pos = _cursorPosition.value.coerceIn(0, curr.length)
-
-        if (justCalculated) {
-            val chainingRes = getValidChainingResult()
-            if (chainingRes != null) {
-                curr = chainingRes
-                pos = curr.length
-            } else {
-                curr = ""
-                pos = 0
+            if (justCalculated) {
+                val chainingRes = getValidChainingResultLocked(current)
+                if (chainingRes != null) {
+                    curr = chainingRes
+                    pos = curr.length
+                } else {
+                    curr = ""
+                    pos = 0
+                }
             }
-        }
-        justCalculated = false
+            justCalculated = false
 
-        val insertStr = "ⁿ√("
-        val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
-        _expression.value = updated
-        _cursorPosition.value = pos + insertStr.length
-        tryLivePreview()
+            val insertStr = "ⁿ√("
+            val updated = curr.substring(0, pos) + insertStr + curr.substring(pos)
+            current.copy(
+                expression = updated,
+                cursorPosition = pos + insertStr.length,
+                errorMessage = null
+            )
+        }
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onToggleSign() {
         equalsJob?.cancel()
-        _errorMessage.value = null
-        justCalculated = false
-        val curr = _expression.value
-        val pos = _cursorPosition.value.coerceIn(0, curr.length)
+        val (snapshot, rev) = updateDisplayState { current ->
+            justCalculated = false
+            val curr = current.expression
+            val pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        if (curr.isEmpty()) {
-            _expression.value = "−"
-            _cursorPosition.value = 1
-        } else if (curr.startsWith("−") || curr.startsWith("-")) {
-            _expression.value = curr.substring(1)
-            _cursorPosition.value = (pos - 1).coerceAtLeast(0)
-        } else {
-            _expression.value = "−$curr"
-            _cursorPosition.value = pos + 1
+            val (nextExpr, nextPos) = if (curr.isEmpty()) {
+                "−" to 1
+            } else if (curr.startsWith("−") || curr.startsWith("-")) {
+                curr.substring(1) to (pos - 1).coerceAtLeast(0)
+            } else {
+                "−$curr" to (pos + 1)
+            }
+            current.copy(
+                expression = nextExpr,
+                cursorPosition = nextPos,
+                errorMessage = null
+            )
         }
-        tryLivePreview()
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onDelete() {
         equalsJob?.cancel()
-        _errorMessage.value = null
-        justCalculated = false
-        val curr = _expression.value
-        val pos = _cursorPosition.value.coerceIn(0, curr.length)
+        val (snapshot, rev) = updateDisplayState { current ->
+            justCalculated = false
+            val curr = current.expression
+            val pos = current.cursorPosition.coerceIn(0, curr.length)
 
-        if (curr.isNotEmpty() && pos > 0) {
-            val textBeforeCursor = curr.substring(0, pos)
-            val textAfterCursor = curr.substring(pos)
+            if (curr.isNotEmpty() && pos > 0) {
+                val textBeforeCursor = curr.substring(0, pos)
+                val textAfterCursor = curr.substring(pos)
 
-            val funcs = listOf(
-                "arcsin(", "arccos(", "arctan(",
-                "sinh(", "cosh(", "tanh(",
-                "d/dx(", "der(", "int(", "∫(", "abs(", "mod(", "log(", "ln(",
-                "sin(", "cos(", "tan(", "³√(", "ⁿ√(", "√("
-            )
-            var deletedLen = 1
-            for (f in funcs) {
-                if (textBeforeCursor.endsWith(f)) {
-                    deletedLen = f.length
-                    break
+                val funcs = listOf(
+                    "arcsin(", "arccos(", "arctan(",
+                    "sinh(", "cosh(", "tanh(",
+                    "d/dx(", "der(", "int(", "∫(", "abs(", "mod(", "log(", "ln(",
+                    "sin(", "cos(", "tan(", "³√(", "ⁿ√(", "√("
+                )
+                var deletedLen = 1
+                for (f in funcs) {
+                    if (textBeforeCursor.endsWith(f)) {
+                        deletedLen = f.length
+                        break
+                    }
                 }
-            }
 
-            val newTextBefore = textBeforeCursor.dropLast(deletedLen)
-            _expression.value = newTextBefore + textAfterCursor
-            _cursorPosition.value = pos - deletedLen
+                val newTextBefore = textBeforeCursor.dropLast(deletedLen)
+                current.copy(
+                    expression = newTextBefore + textAfterCursor,
+                    cursorPosition = pos - deletedLen,
+                    errorMessage = null
+                )
+            } else {
+                current.copy(errorMessage = null)
+            }
         }
-        tryLivePreview()
+        tryLivePreview(expr = snapshot.expression, targetRevision = rev)
     }
 
     fun onClearAll() {
         previewJob?.cancel()
         equalsJob?.cancel()
-        _expression.value = ""
-        _cursorPosition.value = 1
-        _result.value = "0"
-        _errorMessage.value = null
-        justCalculated = false
-        viewModelScope.launch {
+        updateDisplayState {
+            justCalculated = false
+            CalculatorDisplayState(
+                expression = "",
+                cursorPosition = 0,
+                result = "0",
+                errorMessage = null
+            )
+        }
+        viewModelScope.launch(Dispatchers.IO) {
             preferences.saveCalculationState("", "0")
         }
     }
 
     fun onEquals() {
-        val expr = _expression.value.trim()
+        val (expr, targetRev) = synchronized(displayStateLock) {
+            _displayState.value.expression.trim() to inputRevision.get()
+        }
         if (expr.isEmpty()) return
         val mode = angleMode.value
 
         previewJob?.cancel()
         equalsJob?.cancel()
-        equalsJob = viewModelScope.launch {
+        equalsJob = viewModelScope.launch(Dispatchers.Default) {
             val eval = evaluator.evaluateCancellable(expr, mode)
-            if (_expression.value.trim() != expr) return@launch
+            if (!isActive) return@launch
 
             when (eval) {
                 is EvaluationResult.Success -> {
                     val formatted = eval.formatted
-                    _result.value = formatted
-                    _errorMessage.value = null
-                    justCalculated = true
-                    _cursorPosition.value = _expression.value.length
+                    var committed = false
+                    synchronized(displayStateLock) {
+                        if (inputRevision.get() == targetRev && _displayState.value.expression.trim() == expr) {
+                            justCalculated = true
+                            val currentExpr = _displayState.value.expression
+                            publishDisplayStateLocked(
+                                _displayState.value.copy(
+                                    result = formatted,
+                                    errorMessage = null,
+                                    cursorPosition = currentExpr.length
+                                )
+                            )
+                            committed = true
+                        }
+                    }
+                    if (!committed) return@launch
 
                     val historyItem = CalculationHistoryItem(
                         expression = expr,
@@ -734,38 +852,54 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                     )
                     isHistoryCleared = false
                     _history.value = (listOf(historyItem) + _history.value).take(20)
-                    withContext(Dispatchers.Default) {
+                    withContext(Dispatchers.IO) {
                         preferences.addHistoryItem(historyItem)
                         preferences.saveCalculationState(expr, formatted)
                     }
                 }
                 is EvaluationResult.Error -> {
-                    _result.value = "Error"
-                    _errorMessage.value = getApplication<Application>().getString(eval.messageResId)
+                    val msg = appContext.getString(eval.messageResId)
+                    synchronized(displayStateLock) {
+                        if (inputRevision.get() == targetRev && _displayState.value.expression.trim() == expr) {
+                            publishDisplayStateLocked(
+                                _displayState.value.copy(
+                                    result = "Error",
+                                    errorMessage = msg
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    private fun tryLivePreview(overrideAngleMode: AngleMode = angleMode.value) {
+    private fun tryLivePreview(
+        expr: String = _displayState.value.expression,
+        targetRevision: Long = inputRevision.get(),
+        overrideAngleMode: AngleMode = angleMode.value
+    ) {
         previewJob?.cancel()
-        val expr = _expression.value.trim()
-        if (expr.isEmpty()) {
-            _result.value = "0"
+        val trimmedExpr = expr.trim()
+        if (trimmedExpr.isEmpty()) {
+            synchronized(displayStateLock) {
+                if (inputRevision.get() == targetRevision) {
+                    publishDisplayStateLocked(_displayState.value.copy(result = "0"))
+                }
+            }
             return
         }
-        // Live preview only if expression has operators/functions/constants
-        val hasOp = expr.any { it in "+-−*÷×/⁄^%!scl∫√ⁿeπdat;²³" }
+        // Live preview only if expression has operators/functions/constants (evaluated asynchronously on Dispatchers.Default)
+        val hasOp = trimmedExpr.any { it in "+-−*÷×/⁄^%!scl∫√ⁿeπdat;²³" }
         if (hasOp && _isAutoResultEnabled.value) {
-            previewJob = viewModelScope.launch {
-                when (val eval = evaluator.evaluateCancellable(expr, overrideAngleMode)) {
-                    is EvaluationResult.Success -> {
-                        if (_expression.value.trim() == expr) {
-                            _result.value = eval.formatted
+            previewJob = viewModelScope.launch(Dispatchers.Default) {
+                val eval = evaluator.evaluateCancellable(trimmedExpr, overrideAngleMode)
+                if (!isActive) return@launch
+                if (eval is EvaluationResult.Success) {
+                    synchronized(displayStateLock) {
+                        if (inputRevision.get() == targetRevision && _displayState.value.expression.trim() == trimmedExpr) {
+                            publishDisplayStateLocked(_displayState.value.copy(result = eval.formatted))
                         }
-                    }
-                    is EvaluationResult.Error -> {
-                        // Do not show errors during typing preview
                     }
                 }
             }
@@ -785,7 +919,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             preferences.setAngleMode(next)
         }
-        tryLivePreview(overrideAngleMode = next)
+        val (expr, rev) = synchronized(displayStateLock) {
+            _displayState.value.expression to inputRevision.get()
+        }
+        tryLivePreview(expr = expr, targetRevision = rev, overrideAngleMode = next)
     }
 
     fun setTheme(theme: AppTheme) {
@@ -812,11 +949,15 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     fun restoreHistoryItem(item: CalculationHistoryItem) {
         previewJob?.cancel()
         equalsJob?.cancel()
-        _expression.value = item.expression
-        _cursorPosition.value = item.expression.length
-        _result.value = item.result
-        _errorMessage.value = null
-        justCalculated = false
+        updateDisplayState {
+            justCalculated = false
+            CalculatorDisplayState(
+                expression = item.expression,
+                cursorPosition = item.expression.length,
+                result = item.result,
+                errorMessage = null
+            )
+        }
     }
 
     fun clearHistory() {
@@ -837,19 +978,23 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         previewJob?.cancel()
         equalsJob?.cancel()
         isHistoryCleared = true
-        justCalculated = false
         _history.value = emptyList()
         _isGraphLocked.value = false
         HapticUtil.currentIntensityLevel = 5
         _selectedAppIconOverride.value = AppIconOption.CLASSIC
         pendingAppIconToApply = AppIconOption.CLASSIC
+        updateDisplayState {
+            justCalculated = false
+            CalculatorDisplayState(
+                expression = "",
+                cursorPosition = 0,
+                result = "0",
+                errorMessage = null
+            )
+        }
+        _isScientificExpanded.value = false
         viewModelScope.launch {
             preferences.resetAll()
-            _expression.value = ""
-            _cursorPosition.value = 1
-            _result.value = "0"
-            _errorMessage.value = null
-            _isScientificExpanded.value = false
         }
     }
 

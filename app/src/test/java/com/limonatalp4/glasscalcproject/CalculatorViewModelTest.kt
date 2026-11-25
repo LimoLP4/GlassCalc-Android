@@ -253,4 +253,37 @@ class CalculatorViewModelTest {
         }
         assertEquals(AppIconOption.CLASSIC, vm.currentAppIcon.value)
     }
+
+    @Test
+    fun testRapidSequentialCharacterInputDoesNotDropKeysAndEvaluatesAsynchronously() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val vm = CalculatorViewModel(app)
+        vm.setAutoResultEnabled(true)
+        waitUntil { vm.isAutoResultEnabled.value }
+
+        // Rapid "17" input must commit immediately and synchronously to state
+        vm.onCharacterInput("1")
+        vm.onCharacterInput("7")
+        assertEquals("17", vm.expression.value)
+        assertEquals("17", vm.displayState.value.expression)
+        assertEquals(2, vm.displayState.value.cursorPosition)
+
+        // Rapid "486+4586" input must keep all characters without blocking or dropping
+        vm.onClearAll()
+        assertEquals("", vm.expression.value)
+        listOf("4", "8", "6", "+", "4", "5", "8", "6").forEach { key ->
+            vm.onCharacterInput(key)
+        }
+        assertEquals("486+4586", vm.expression.value)
+        assertEquals("486+4586", vm.displayState.value.expression)
+        waitUntil { vm.result.value == "5072" }
+        assertEquals("5072", vm.result.value)
+
+        // Rapid "17" immediately after '=' must cleanly replace previous expression with both digits
+        vm.onEquals()
+        waitUntil { vm.history.value.isNotEmpty() }
+        vm.onCharacterInput("1")
+        vm.onCharacterInput("7")
+        assertEquals("17", vm.expression.value)
+    }
 }

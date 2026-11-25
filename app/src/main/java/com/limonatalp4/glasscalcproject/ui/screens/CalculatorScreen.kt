@@ -134,6 +134,7 @@ import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
+import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorDisplayState
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
 import io.github.nadeemiqbal.liquidglass.liquidGlassSource
 
@@ -391,20 +392,14 @@ fun CalculatorScreen(
                 ) {
                     if (isDualPane) {
                         LandscapeCalculatorLayout(
-                            expressionFlow = viewModel.expression,
-                            resultFlow = viewModel.result,
-                            cursorPositionFlow = viewModel.cursorPosition,
-                            errorMessageFlow = viewModel.errorMessage,
+                            displayStateFlow = viewModel.displayState,
                             actions = keypadActions,
                             angleMode = angleMode,
                             glassState = glassState
                         )
                     } else {
                         PortraitCalculatorLayout(
-                            expressionFlow = viewModel.expression,
-                            resultFlow = viewModel.result,
-                            cursorPositionFlow = viewModel.cursorPosition,
-                            errorMessageFlow = viewModel.errorMessage,
+                            displayStateFlow = viewModel.displayState,
                             actions = keypadActions,
                             angleMode = angleMode,
                             isScientificExpanded = isScientificExpanded,
@@ -854,10 +849,7 @@ fun CalculatorScreen(
 
 @Composable
 private fun PortraitCalculatorLayout(
-    expressionFlow: StateFlow<String>,
-    resultFlow: StateFlow<String>,
-    cursorPositionFlow: StateFlow<Int>,
-    errorMessageFlow: StateFlow<String?>,
+    displayStateFlow: StateFlow<CalculatorDisplayState>,
     actions: CalculatorKeypadActions,
     angleMode: AngleMode,
     isScientificExpanded: Boolean,
@@ -891,10 +883,7 @@ private fun PortraitCalculatorLayout(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             GlassDisplay(
-                expressionFlow = expressionFlow,
-                resultFlow = resultFlow,
-                cursorPositionFlow = cursorPositionFlow,
-                errorMessageFlow = errorMessageFlow,
+                displayStateFlow = displayStateFlow,
                 angleMode = angleMode,
                 isScientificExpanded = isScientificExpanded,
                 onCursorPositionChanged = actions.onCursorPositionChanged,
@@ -1058,10 +1047,7 @@ private fun PortraitCalculatorLayout(
 
 @Composable
 private fun LandscapeCalculatorLayout(
-    expressionFlow: StateFlow<String>,
-    resultFlow: StateFlow<String>,
-    cursorPositionFlow: StateFlow<Int>,
-    errorMessageFlow: StateFlow<String?>,
+    displayStateFlow: StateFlow<CalculatorDisplayState>,
     actions: CalculatorKeypadActions,
     angleMode: AngleMode,
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null
@@ -1155,10 +1141,7 @@ private fun LandscapeCalculatorLayout(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     GlassDisplay(
-                        expressionFlow = expressionFlow,
-                        resultFlow = resultFlow,
-                        cursorPositionFlow = cursorPositionFlow,
-                        errorMessageFlow = errorMessageFlow,
+                        displayStateFlow = displayStateFlow,
                         angleMode = angleMode,
                         isScientificExpanded = true,
                         onCursorPositionChanged = actions.onCursorPositionChanged,

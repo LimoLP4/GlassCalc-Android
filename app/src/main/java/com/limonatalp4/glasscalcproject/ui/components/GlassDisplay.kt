@@ -97,6 +97,7 @@ import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
+import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorDisplayState
 import io.github.nadeemiqbal.liquidglass.LiquidGlassState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -131,6 +132,40 @@ internal fun filterCalculatorExpression(
         }
     }
     return sb.toString() to newCursor
+}
+
+/**
+ * Isolated GlassDisplay collecting from a single atomic display StateFlow.
+ * Displays cursor navigation for precise editing with robust crash protection.
+ */
+@Composable
+fun GlassDisplay(
+    displayStateFlow: StateFlow<CalculatorDisplayState>,
+    angleMode: AngleMode,
+    isScientificExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    onCursorPositionChanged: (Int) -> Unit = {},
+    onExpressionChange: (String, Int) -> Unit = { _, newCursor -> onCursorPositionChanged(newCursor) },
+    onEvaluate: () -> Unit = {},
+    isCompact: Boolean = false,
+    glassState: LiquidGlassState? = null
+) {
+    val state by displayStateFlow.collectAsState()
+
+    GlassDisplayContent(
+        expression = state.expression,
+        result = state.result,
+        cursorPosition = state.cursorPosition,
+        angleMode = angleMode,
+        isScientificExpanded = isScientificExpanded,
+        errorMessage = state.errorMessage,
+        onCursorPositionChanged = onCursorPositionChanged,
+        onExpressionChange = onExpressionChange,
+        onEvaluate = onEvaluate,
+        isCompact = isCompact,
+        modifier = modifier,
+        glassState = glassState
+    )
 }
 
 /**
@@ -240,6 +275,13 @@ private fun GlassDisplayContent(
         runCatching { focusRequester.requestFocus() }
     }
 
+    LaunchedEffect(expression, cursorPosition) {
+        if (!isTextFieldFocused && !isKeyboardActive) {
+            withFrameNanos { }
+            runCatching { focusRequester.requestFocus() }
+        }
+    }
+
     LaunchedEffect(keyboardRequestToken) {
         if (keyboardRequestToken > 0 && isKeyboardActive) {
             withFrameNanos { }
@@ -249,6 +291,8 @@ private fun GlassDisplayContent(
     }
 
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+    val isKeyboardOpen = isKeyboardActive || isImeVisible
+    val currentKeyboardOpen by rememberUpdatedState(isKeyboardOpen)
     var wasImeVisible by remember { mutableStateOf(false) }
     LaunchedEffect(isImeVisible) {
         if (isImeVisible) {
@@ -476,7 +520,6 @@ private fun GlassDisplayContent(
                     }
 
                     // Keyboard button in corner (Pill Glass Design - toggles system keyboard open/closed)
-                    val isKeyboardOpen = isKeyboardActive || isImeVisible
                     val keyboardBtnInteraction = remember { MutableInteractionSource() }
                     GlassSurface(
                         shape = RoundedCornerShape(50),
@@ -594,12 +637,26 @@ private fun GlassDisplayContent(
                         text = newValue.text,
                         cursorPosition = newValue.selection.start
                     )
+                    if (!currentKeyboardOpen) {
+                        // Bei geschlossenem System-Keyboard dürfen veraltete TextField-Callbacks den Keypad-Input nicht überschreiben
+                        if (filteredText == currentExpression && filteredCursor != currentCursorPosition) {
+                            currentOnCursorPositionChanged(filteredCursor)
+                        }
+                        return@remember
+                    }
                     if (filteredText != currentExpression) {
                         currentOnExpressionChange(filteredText, filteredCursor)
                     } else if (filteredCursor != currentCursorPosition) {
                         currentOnCursorPositionChanged(filteredCursor)
                     }
                 }
+            }
+
+            val textFieldValue = remember(expression, safeSelection) {
+                TextFieldValue(
+                    text = expression,
+                    selection = TextRange(safeSelection)
+                )
             }
 
             InterceptPlatformTextInput(
@@ -611,10 +668,7 @@ private fun GlassDisplayContent(
                 }
             ) {
                 BasicTextField(
-                    value = TextFieldValue(
-                        text = expression,
-                        selection = TextRange(safeSelection)
-                    ),
+                    value = textFieldValue,
                     onValueChange = onTextValueChange,
                     singleLine = true,
                     keyboardOptions = keyboardOptions,

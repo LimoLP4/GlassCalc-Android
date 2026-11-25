@@ -16,11 +16,13 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.text.TextRange
 import androidx.test.core.app.ApplicationProvider
 import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
@@ -577,5 +579,50 @@ class AppCrashRegressionTest {
 
         composeTestRule.onNodeWithTag("card_oss_licenses").performClick()
         composeTestRule.waitForIdle()
+    }
+
+    @Test
+    fun testRapidKeypadTapsAndOverlappingMultiPointerTapsDoNotDropInput() {
+        composeTestRule.waitForIdle()
+
+        // 1. Overlapping multi-pointer rollover: touch '1', then touch '7' BEFORE '1' lifts
+        val center1 = composeTestRule.onNodeWithTag("btn_1").fetchSemanticsNode().boundsInRoot.center
+        val center7 = composeTestRule.onNodeWithTag("btn_7").fetchSemanticsNode().boundsInRoot.center
+        composeTestRule.onRoot().performTouchInput {
+            down(0, center1)
+            down(1, center7)
+            up(0)
+            up(1)
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            val node = composeTestRule.onAllNodesWithTag("display_expression_text")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+            node?.config?.getOrNull(SemanticsProperties.EditableText)?.text == "17" &&
+                node.config.getOrNull(SemanticsProperties.Focused) == true &&
+                node.config.getOrNull(SemanticsProperties.TextSelectionRange) == TextRange(2)
+        }
+
+        // 2. Rapid sequential taps without intermediate waitForIdle(): "486+4586" -> "5072"
+        composeTestRule.onNodeWithTag("btn_clear").performClick()
+        composeTestRule.waitForIdle()
+        listOf("btn_4", "btn_8", "btn_6", "btn_add", "btn_4", "btn_5", "btn_8", "btn_6").forEach { tag ->
+            composeTestRule.onNodeWithTag(tag).performClick()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            val exprNode = composeTestRule.onAllNodesWithTag("display_expression_text")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+            val expr = exprNode?.config?.getOrNull(SemanticsProperties.EditableText)?.text
+            val focused = exprNode?.config?.getOrNull(SemanticsProperties.Focused) == true
+            val selection = exprNode?.config?.getOrNull(SemanticsProperties.TextSelectionRange)
+            val res = composeTestRule.onAllNodesWithTag("display_result_text")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Text)
+                ?.joinToString("")
+            expr == "486+4586" && focused && selection == TextRange(8) && res == "5072"
+        }
     }
 }
