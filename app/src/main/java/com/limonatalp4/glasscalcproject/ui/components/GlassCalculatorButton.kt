@@ -143,7 +143,7 @@ fun GlassCalculatorButton(
                         colorScheme.surfaceVariant.copy(alpha = alpha)
                     )
                 )
-                Triple(brush, colorScheme.onSurface, glassProps.buttonBorderColor)
+                Triple(brush, colorScheme.primary, glassProps.buttonBorderColor)
             }
         }
     }

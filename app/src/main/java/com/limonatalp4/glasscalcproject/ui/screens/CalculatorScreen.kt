@@ -335,7 +335,7 @@ fun CalculatorScreen(
                                 Text(
                                     text = "GlassCalc",
                                     fontWeight = FontWeight.Bold,
-                                    color = colorScheme.onSurface,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontSize = 16.sp,
                                     modifier = Modifier.padding(start = 6.dp, end = 14.dp)
                                 )
@@ -517,7 +517,7 @@ fun CalculatorScreen(
                                     text = "GlassCalc",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isPureBlack) Color.White else onSurfaceColor
+                                    color = colorScheme.primary
                                 )
                                 Text(
                                     text = stringResource(R.string.app_version_tag, BuildConfig.VERSION_NAME),
