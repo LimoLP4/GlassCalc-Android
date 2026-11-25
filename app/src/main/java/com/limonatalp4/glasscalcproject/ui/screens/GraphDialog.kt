@@ -154,7 +154,7 @@ fun GraphDialog(
                                 val closeBtnInteraction = remember { MutableInteractionSource() }
                                 GlassSurface(
                                     shape = RoundedCornerShape(50),
-                                    customBgColor = if (isTiefschwarz) Color(0xFF141414).copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                     borderStroke = glassProps.containerBorderStroke,
                                     modifier = Modifier.pressScale(closeBtnInteraction)
                                 ) {
@@ -171,7 +171,7 @@ fun GraphDialog(
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = stringResource(R.string.nav_close),
-                                            tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
+                                            tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }

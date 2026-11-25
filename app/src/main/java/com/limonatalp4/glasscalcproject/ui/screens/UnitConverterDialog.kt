@@ -426,7 +426,7 @@ fun UnitConverterDialog(
                                         Icon(
                                             imageVector = Icons.Default.Close,
                                             contentDescription = stringResource(R.string.nav_close),
-                                            tint = if (isPureBlack) Color.White else onSurfaceColor,
+                                            tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(18.dp)
                                         )
                                     }
@@ -961,7 +961,7 @@ private fun UnitPairsAccordionCard(
                         Icon(
                             imageVector = Icons.Default.ExpandMore,
                             contentDescription = title,
-                            tint = if (isPureBlack) Color.White else colorScheme.onSurface,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .size(18.dp)
                                 .graphicsLayer { rotationZ = chevronRotation }

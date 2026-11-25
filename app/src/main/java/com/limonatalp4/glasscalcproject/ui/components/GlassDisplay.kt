@@ -565,7 +565,7 @@ private fun GlassDisplayContent(
                             Icon(
                                 imageVector = Icons.Default.Keyboard,
                                 contentDescription = stringResource(R.string.btn_open_keyboard),
-                                tint = if (isKeyboardOpen) colorScheme.primary else colorScheme.onSurface,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -602,7 +602,7 @@ private fun GlassDisplayContent(
                             Icon(
                                 imageVector = Icons.Default.ContentCopy,
                                 contentDescription = stringResource(R.string.btn_copy_clipboard),
-                                tint = colorScheme.onSurface,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                         }

@@ -129,21 +129,29 @@ fun ConstantsDialog(
                         }
 
                         val closeBtnInteraction = remember { MutableInteractionSource() }
-                        IconButton(
-                            onClick = {
-                                triggerHaptic()
-                                dialogTransition.dismiss()
-                            },
-                            interactionSource = closeBtnInteraction,
-                            modifier = Modifier
-                                .pressScale(closeBtnInteraction)
-                                .testTag("btn_close_constants")
+                        GlassSurface(
+                            shape = RoundedCornerShape(50),
+                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            borderStroke = glassProps.containerBorderStroke,
+                            modifier = Modifier.pressScale(closeBtnInteraction)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.nav_close),
-                                tint = if (isTiefschwarz) Color.White else colorScheme.onSurface
-                            )
+                            IconButton(
+                                onClick = {
+                                    triggerHaptic()
+                                    dialogTransition.dismiss()
+                                },
+                                interactionSource = closeBtnInteraction,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .testTag("btn_close_constants")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.nav_close),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
 

@@ -408,7 +408,7 @@ fun SettingsDialog(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = stringResource(R.string.nav_close),
-                                        tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -1201,10 +1201,8 @@ private fun AccentColorHexInput(
                             contentDescription = stringResource(id = R.string.accent_color_hex_clear),
                             tint = if (isInvalid) {
                                 colorScheme.error
-                            } else if (isTiefschwarz) {
-                                Color.White.copy(alpha = 0.8f)
                             } else {
-                                colorScheme.onSurfaceVariant
+                                MaterialTheme.colorScheme.primary
                             },
                             modifier = Modifier.size(16.dp)
                         )
@@ -1300,7 +1298,7 @@ private fun SettingsAccordionCard(
                         Icon(
                             imageVector = Icons.Default.ExpandMore,
                             contentDescription = title,
-                            tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .size(18.dp)
                                 .graphicsLayer { rotationZ = chevronRotation }
@@ -2460,7 +2458,7 @@ private fun InformationSection(
                             Icon(
                                 imageVector = Icons.Default.ExpandMore,
                                 contentDescription = "Apache License 2.0",
-                                tint = if (isTiefschwarz) Color.White else colorScheme.onSurface,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .size(18.dp)
                                     .graphicsLayer { rotationZ = apacheChevronRotation }

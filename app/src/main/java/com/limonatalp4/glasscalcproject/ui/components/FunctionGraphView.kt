@@ -1910,7 +1910,7 @@ fun FunctionGraphView(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = stringResource(R.string.nav_close),
-                                        tint = colorScheme.onSurface,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(15.dp)
                                     )
                                 }
