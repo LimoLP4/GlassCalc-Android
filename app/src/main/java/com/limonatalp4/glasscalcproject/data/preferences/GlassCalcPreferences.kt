@@ -39,6 +39,7 @@ class GlassCalcPreferences(private val context: Context) {
         val AUTO_RESULT_ENABLED = booleanPreferencesKey("auto_result_enabled")
         val LANGUAGE = stringPreferencesKey("language")
         val APP_ICON = stringPreferencesKey("app_icon")
+        val CUSTOM_ACCENT_COLOR = intPreferencesKey("custom_accent_color")
     }
 
     private val safeDataFlow: Flow<Preferences> = context.dataStore.data
@@ -129,6 +130,10 @@ class GlassCalcPreferences(private val context: Context) {
         }
     }
 
+    val customAccentColorFlow: Flow<Int?> = safeDataFlow.map { prefs ->
+        prefs[PreferencesKeys.CUSTOM_ACCENT_COLOR]
+    }
+
     suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
         try {
             context.dataStore.edit { prefs ->
@@ -187,6 +192,20 @@ class GlassCalcPreferences(private val context: Context) {
         try {
             context.dataStore.edit { prefs ->
                 prefs[PreferencesKeys.APP_ICON] = icon.name
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+        }
+    }
+
+    suspend fun setCustomAccentColor(colorArgb: Int?) {
+        try {
+            context.dataStore.edit { prefs ->
+                if (colorArgb == null) {
+                    prefs.remove(PreferencesKeys.CUSTOM_ACCENT_COLOR)
+                } else {
+                    prefs[PreferencesKeys.CUSTOM_ACCENT_COLOR] = colorArgb
+                }
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e

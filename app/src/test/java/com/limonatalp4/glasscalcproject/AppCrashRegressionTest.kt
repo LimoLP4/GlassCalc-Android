@@ -7,7 +7,9 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -624,5 +626,115 @@ class AppCrashRegressionTest {
                 ?.joinToString("")
             expr == "486+4586" && focused && selection == TextRange(8) && res == "5072"
         }
+    }
+
+    @Test
+    fun testCustomAccentColorHiddenForMaterialYouAndReactiveAcrossThemes() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Default on API 35 is Material You -> Custom Accent Color card must NOT be visible
+        composeTestRule.onNodeWithTag("card_theme_accordion").performScrollTo().assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("card_accent_color_accordion").fetchSemanticsNodes().isEmpty())
+
+        // Expand Theme accordion and switch to White Mode -> Custom Accent Color card appears
+        composeTestRule.onNodeWithTag("card_theme_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_theme_WHITE_MODE").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_theme_WHITE_MODE").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_accent_color_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Expand Custom Accent Color accordion and pick PURPLE
+        composeTestRule.onNodeWithTag("card_accent_color_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("accent_color_PURPLE").fetchSemanticsNodes().isNotEmpty()
+        }
+        // Tap PURPLE circle -> Hex field populates with #9333EA
+        composeTestRule.onNodeWithTag("accent_color_DEFAULT").performScrollTo().assertIsSelected()
+        composeTestRule.onNodeWithTag("accent_color_PURPLE").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("accent_color_PURPLE")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Selected) == true
+        }
+        composeTestRule.onNodeWithTag("accent_color_PURPLE").assertIsSelected()
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().assertTextContains("#9333EA")
+
+        // Enter partial hex "#FF5" -> error text appears
+        composeTestRule.onNodeWithTag("btn_clear_accent_hex").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().performTextInput("#FF5")
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("text_accent_hex_error").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("text_accent_hex_error").assertIsDisplayed()
+
+        // Enter custom hex with invalid chars filtered ("#ff57Z22g" -> "#FF5722") -> applies immediately, clears error, deselects presets
+        composeTestRule.onNodeWithTag("btn_clear_accent_hex").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().performTextInput("ff57Z22g")
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("text_accent_hex_error").fetchSemanticsNodes().isEmpty()
+        }
+        composeTestRule.onNodeWithTag("input_accent_hex").assertTextContains("#FF5722")
+        composeTestRule.onNodeWithTag("text_active_accent_color").assertTextContains("#FF5722", substring = true)
+        composeTestRule.onNodeWithTag("accent_color_DEFAULT").assertIsNotSelected()
+        composeTestRule.onNodeWithTag("accent_color_PURPLE").assertIsNotSelected()
+
+        // Recreate Activity -> custom hex #FF5722 stays active and persisted
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.recreate()
+        }
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("input_accent_hex").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().assertTextContains("#FF5722")
+        composeTestRule.onNodeWithTag("accent_color_DEFAULT").assertIsNotSelected()
+
+        // Switch back to Material You -> both circles & hex input hide
+        composeTestRule.onNodeWithTag("radio_theme_MATERIAL_YOU").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_accent_color_accordion").fetchSemanticsNodes().isEmpty() &&
+                composeTestRule.onAllNodesWithTag("input_accent_hex").fetchSemanticsNodes().isEmpty()
+        }
+
+        // Switch to AMOLED (DARK_MODE) -> Custom Accent Color reappears with #FF5722 preserved
+        composeTestRule.onNodeWithTag("radio_theme_DARK_MODE").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("input_accent_hex").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().assertTextContains("#FF5722")
+
+        // Typing preset hex "#9333EA" automatically re-selects PURPLE circle
+        composeTestRule.onNodeWithTag("btn_clear_accent_hex").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().performTextInput("#9333EA")
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("accent_color_PURPLE")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Selected) == true
+        }
+        composeTestRule.onNodeWithTag("accent_color_PURPLE").assertIsSelected()
+
+        // Tap DEFAULT to restore standard blue and sync hex field to dark default (#4FC3F7)
+        composeTestRule.onNodeWithTag("accent_color_DEFAULT").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("accent_color_DEFAULT")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Selected) == true
+        }
+        composeTestRule.onNodeWithTag("accent_color_DEFAULT").assertIsSelected()
+        composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().assertTextContains("#4FC3F7")
     }
 }

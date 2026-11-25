@@ -62,6 +62,7 @@ import com.limonatalp4.glasscalcproject.ui.util.LocalHapticFeedbackEnabled
 import com.limonatalp4.glasscalcproject.ui.util.LocalHapticIntensity
 import com.limonatalp4.glasscalcproject.BuildConfig
 import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.data.model.AccentColorOption
 import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.Language
@@ -76,6 +77,7 @@ enum class SettingsInfoCard { VERSION, GITHUB, OSS, APACHE }
 @Immutable
 data class SettingsSearchVisibility(
     val matchingThemes: List<AppTheme>,
+    val showAccentColorCard: Boolean = true,
     val matchingAppIcons: List<AppIconOption> = AppIconOption.entries,
     val showDegCard: Boolean,
     val showRadCard: Boolean,
@@ -97,7 +99,7 @@ data class SettingsSearchVisibility(
     val bestTabIndex: Int? = null
 ) {
     val hasAnyAppearanceMatch: Boolean
-        get() = matchingThemes.isNotEmpty() || matchingAppIcons.isNotEmpty()
+        get() = matchingThemes.isNotEmpty() || showAccentColorCard || matchingAppIcons.isNotEmpty()
 
     val hasAnyUnitsMatch: Boolean
         get() = showDegCard || showRadCard
@@ -159,12 +161,14 @@ private fun scoreSettingsEntry(
 @Composable
 fun rememberSettingsSearchVisibility(
     query: String,
-    effectiveApiLevel: Int
+    effectiveApiLevel: Int,
+    isMaterialYouActive: Boolean = false
 ): SettingsSearchVisibility {
     val tokens = tokenizeSearchQuery(query)
     if (tokens.isEmpty()) {
         return SettingsSearchVisibility(
             matchingThemes = AppTheme.entries,
+            showAccentColorCard = !isMaterialYouActive,
             matchingAppIcons = AppIconOption.entries,
             showDegCard = true,
             showRadCard = true,
@@ -264,7 +268,24 @@ fun rememberSettingsSearchVisibility(
     }.sortedWith(compareBy<Triple<AppIconOption, Int, Int>> { it.second }.thenBy { it.third })
     val matchingAppIcons = scoredAppIcons.map { it.first }
     val bestAppIconScore = scoredAppIcons.minOfOrNull { it.second }
-    val bestAppearanceScore = listOfNotNull(bestThemeScore, bestAppIconScore).minOfOrNull { it }
+
+    val accentColorAccordionTitle = stringResource(R.string.accent_color_accordion_title)
+    val accentColorDesc = stringResource(R.string.accent_color_desc)
+    val accentColorHexLabel = stringResource(R.string.accent_color_hex_label)
+    val accentColorKeywords = stringResource(R.string.settings_keywords_accent_color)
+    val accentColorNames = AccentColorOption.entries.map { stringResource(it.labelResId) }
+    val accentColorScore = if (!isMaterialYouActive) {
+        scoreSettingsEntry(
+            tokens = tokens,
+            primaryNames = listOf(accentColorAccordionTitle),
+            secondaryTexts = accentColorNames + listOf(accentColorDesc, accentColorHexLabel, appearanceTabTitle),
+            keywordStrings = listOf(accentColorKeywords, appearanceKeywords)
+        )
+    } else {
+        null
+    }
+
+    val bestAppearanceScore = listOfNotNull(bestThemeScore, accentColorScore, bestAppIconScore).minOfOrNull { it }
 
     val unitsTabTitle = stringResource(R.string.title_units)
     val unitsHeading = stringResource(R.string.units_angle_heading)
@@ -473,6 +494,7 @@ fun rememberSettingsSearchVisibility(
 
     return SettingsSearchVisibility(
         matchingThemes = matchingThemes,
+        showAccentColorCard = accentColorScore != null,
         matchingAppIcons = matchingAppIcons,
         showDegCard = degScore != null,
         showRadCard = radScore != null,

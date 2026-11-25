@@ -94,3 +94,53 @@ enum class AppIconOption(
     )
 }
 
+enum class AccentColorOption(
+    val colorArgb: Int?,
+    val labelResId: Int
+) {
+    DEFAULT(
+        colorArgb = null,
+        labelResId = R.string.accent_color_default
+    ),
+    INDIGO(
+        colorArgb = 0xFF4F46E5.toInt(),
+        labelResId = R.string.accent_color_indigo
+    ),
+    PURPLE(
+        colorArgb = 0xFF9333EA.toInt(),
+        labelResId = R.string.accent_color_purple
+    ),
+    TEAL(
+        colorArgb = 0xFF0D9488.toInt(),
+        labelResId = R.string.accent_color_teal
+    ),
+    GREEN(
+        colorArgb = 0xFF16A34A.toInt(),
+        labelResId = R.string.accent_color_green
+    ),
+    AMBER(
+        colorArgb = 0xFFD97706.toInt(),
+        labelResId = R.string.accent_color_amber
+    ),
+    CORAL(
+        colorArgb = 0xFFEA580C.toInt(),
+        labelResId = R.string.accent_color_coral
+    ),
+    PINK(
+        colorArgb = 0xFFDB2777.toInt(),
+        labelResId = R.string.accent_color_pink
+    );
+
+    companion object {
+        fun fromArgb(argb: Int?): AccentColorOption {
+            if (argb == null) return DEFAULT
+            return entries.firstOrNull { it.colorArgb == argb } ?: DEFAULT
+        }
+
+        fun findPresetOrNull(argb: Int?): AccentColorOption? {
+            if (argb == null) return DEFAULT
+            return entries.firstOrNull { it.colorArgb == argb }
+        }
+    }
+}
+

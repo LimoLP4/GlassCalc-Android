@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 fun GlassCalcAppRoot() {
     val viewModel: CalculatorViewModel = viewModel()
     val currentTheme by viewModel.currentTheme.collectAsState()
+    val customAccentColor by viewModel.customAccentColor.collectAsState()
     val isPowerSaveMode by viewModel.isPowerSaveMode.collectAsState()
     val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
     val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
@@ -99,7 +100,8 @@ fun GlassCalcAppRoot() {
     GlassCalcTheme(
         selectedTheme = currentTheme,
         simulatedApiLevel = effectiveApi,
-        powerSaveModeOverride = isPowerSaveMode
+        powerSaveModeOverride = isPowerSaveMode,
+        customAccentColorArgb = customAccentColor
     ) {
         CalculatorScreen(
             viewModel = viewModel,

@@ -301,6 +301,17 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val _selectedAppIconOverride = MutableStateFlow<AppIconOption?>(null)
     @Volatile
     private var pendingAppIconToApply: AppIconOption? = null
+    @Volatile
+    private var hasLocalAccentChange = false
+
+    private val _customAccentColor = MutableStateFlow<Int?>(null)
+    val customAccentColor: StateFlow<Int?> = _customAccentColor.asStateFlow()
+
+    private val _accentHexInput = MutableStateFlow("")
+    val accentHexInput: StateFlow<String> = _accentHexInput.asStateFlow()
+
+    private val _isAccentHexInvalid = MutableStateFlow(false)
+    val isAccentHexInvalid: StateFlow<Boolean> = _isAccentHexInvalid.asStateFlow()
 
     val currentAppIcon: StateFlow<AppIconOption> = combine(
         preferences.appIconFlow,
@@ -419,6 +430,20 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             preferences.hapticIntensityFlow.collect { intensity ->
                 HapticUtil.currentIntensityLevel = intensity
+            }
+        }
+
+        // Load saved custom accent color from DataStore without overwriting immediate user selections
+        viewModelScope.launch {
+            runCatching {
+                val savedColor = preferences.customAccentColorFlow.first()
+                if (!hasLocalAccentChange) {
+                    _customAccentColor.value = savedColor
+                    if (savedColor != null) {
+                        _accentHexInput.value = formatAccentHex(savedColor)
+                    }
+                    _isAccentHexInvalid.value = false
+                }
             }
         }
 
@@ -931,6 +956,34 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun setCustomAccentColor(colorArgb: Int?, defaultDisplayHexArgb: Int? = null) {
+        hasLocalAccentChange = true
+        _customAccentColor.value = colorArgb
+        _isAccentHexInvalid.value = false
+        _accentHexInput.value = when {
+            colorArgb != null -> formatAccentHex(colorArgb)
+            defaultDisplayHexArgb != null -> formatAccentHex(defaultDisplayHexArgb)
+            else -> ""
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            preferences.setCustomAccentColor(colorArgb)
+        }
+    }
+
+    fun onAccentHexInput(rawInput: String) {
+        val sanitized = sanitizeAccentHexInput(rawInput)
+        _accentHexInput.value = sanitized
+        val parsedArgb = parseValidAccentHexOrNull(sanitized)
+        _isAccentHexInvalid.value = sanitized.isNotEmpty() && parsedArgb == null
+        if (parsedArgb != null) {
+            hasLocalAccentChange = true
+            _customAccentColor.value = parsedArgb
+            viewModelScope.launch(Dispatchers.IO) {
+                preferences.setCustomAccentColor(parsedArgb)
+            }
+        }
+    }
+
     fun setAppIcon(icon: AppIconOption) {
         val effective = minOf(Build.VERSION.SDK_INT, getEffectiveApiLevel())
         val safeIcon = if (icon.requiresMinApi > 0 && effective < icon.requiresMinApi) {
@@ -981,6 +1034,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         _history.value = emptyList()
         _isGraphLocked.value = false
         HapticUtil.currentIntensityLevel = 5
+        hasLocalAccentChange = true
+        _customAccentColor.value = null
+        _accentHexInput.value = ""
+        _isAccentHexInvalid.value = false
         _selectedAppIconOverride.value = AppIconOption.CLASSIC
         pendingAppIconToApply = AppIconOption.CLASSIC
         updateDisplayState {
@@ -1055,6 +1112,40 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             } catch (_: Throwable) {
                 Locale.getDefault()
             }
+        }
+
+        fun sanitizeAccentHexInput(rawInput: String): String {
+            if (rawInput.isEmpty()) return ""
+            val hexDigits = buildString {
+                for (ch in rawInput) {
+                    when (ch) {
+                        in '0'..'9', in 'A'..'F' -> append(ch)
+                        in 'a'..'f' -> append(ch.uppercaseChar())
+                    }
+                    if (length == 6) break
+                }
+            }
+            return when {
+                hexDigits.isNotEmpty() -> "#$hexDigits"
+                rawInput.contains('#') -> "#"
+                else -> ""
+            }
+        }
+
+        fun parseValidAccentHexOrNull(hexText: String): Int? {
+            val normalized = hexText.trim()
+            if (normalized.length != 7 || normalized[0] != '#') return null
+            for (i in 1 until 7) {
+                val c = normalized[i]
+                val isHex = (c in '0'..'9') || (c in 'A'..'F') || (c in 'a'..'f')
+                if (!isHex) return null
+            }
+            val rgb = normalized.substring(1).toIntOrNull(16) ?: return null
+            return (0xFF000000.toInt() or rgb)
+        }
+
+        fun formatAccentHex(colorArgb: Int): String {
+            return String.format(Locale.ROOT, "#%06X", colorArgb and 0xFFFFFF)
         }
     }
 }

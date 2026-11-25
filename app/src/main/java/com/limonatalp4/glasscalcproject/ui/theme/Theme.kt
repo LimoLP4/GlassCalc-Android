@@ -12,6 +12,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -28,9 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -170,11 +173,132 @@ internal fun resolveEffectiveTheme(
     }
 }
 
+internal fun resolveAccentSwatchColor(
+    colorArgb: Int?,
+    isDark: Boolean
+): Color {
+    if (colorArgb == null) {
+        return if (isDark) DarkPrimaryBlue else PrimaryBlue
+    }
+    return derivePrimaryColor(colorArgb = colorArgb, isDark = isDark)
+}
+
+private fun derivePrimaryColor(
+    colorArgb: Int,
+    isDark: Boolean
+): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(colorArgb, hsl)
+    val hue = hsl[0]
+    val baseSat = hsl[1]
+
+    if (isDark) {
+        val sat = baseSat.coerceIn(0.60f, 0.90f)
+        val argb = ColorUtils.HSLToColor(floatArrayOf(hue, sat, 0.72f))
+        return Color(argb)
+    }
+
+    val sat = baseSat.coerceIn(0.58f, 0.92f)
+    var lightness = 0.38f
+    var argb = ColorUtils.HSLToColor(floatArrayOf(hue, sat, lightness))
+    val whiteArgb = android.graphics.Color.WHITE
+    while (lightness > 0.22f && ColorUtils.calculateContrast(whiteArgb, argb) < 4.5) {
+        lightness -= 0.03f
+        argb = ColorUtils.HSLToColor(floatArrayOf(hue, sat, lightness))
+    }
+    return Color(argb)
+}
+
+internal fun applyCustomAccentColor(
+    baseScheme: ColorScheme,
+    customAccentArgb: Int?,
+    isDark: Boolean
+): ColorScheme {
+    if (customAccentArgb == null) return baseScheme
+
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(customAccentArgb, hsl)
+    val hue = hsl[0]
+    val baseSat = hsl[1]
+
+    val primaryColor = derivePrimaryColor(colorArgb = customAccentArgb, isDark = isDark)
+    val primaryArgb = primaryColor.toArgb()
+
+    if (isDark) {
+        var onPrimaryArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.85f).coerceIn(0.35f, 0.90f), 0.14f)
+        )
+        if (ColorUtils.calculateContrast(onPrimaryArgb, primaryArgb) < 4.5) {
+            val darkFallback = 0xFF0A0A0A.toInt()
+            val lightFallback = android.graphics.Color.WHITE
+            onPrimaryArgb = if (
+                ColorUtils.calculateContrast(darkFallback, primaryArgb) >=
+                ColorUtils.calculateContrast(lightFallback, primaryArgb)
+            ) {
+                darkFallback
+            } else {
+                lightFallback
+            }
+        }
+
+        val containerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.75f).coerceIn(0.35f, 0.80f), 0.28f)
+        )
+        var onContainerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.65f).coerceIn(0.30f, 0.85f), 0.90f)
+        )
+        if (ColorUtils.calculateContrast(onContainerArgb, containerArgb) < 4.5) {
+            onContainerArgb = android.graphics.Color.WHITE
+        }
+        val inversePrimaryArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, baseSat.coerceIn(0.55f, 0.88f), 0.40f)
+        )
+
+        return baseScheme.copy(
+            primary = primaryColor,
+            onPrimary = Color(onPrimaryArgb),
+            primaryContainer = Color(containerArgb),
+            onPrimaryContainer = Color(onContainerArgb),
+            inversePrimary = Color(inversePrimaryArgb)
+        )
+    } else {
+        val whiteArgb = android.graphics.Color.WHITE
+        val darkFallback = 0xFF0F172A.toInt()
+        val onPrimaryColor = if (ColorUtils.calculateContrast(whiteArgb, primaryArgb) >= 4.5) {
+            Color.White
+        } else {
+            Color(darkFallback)
+        }
+
+        val containerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.65f).coerceIn(0.30f, 0.85f), 0.89f)
+        )
+        var onContainerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.85f).coerceIn(0.40f, 0.90f), 0.14f)
+        )
+        if (ColorUtils.calculateContrast(onContainerArgb, containerArgb) < 4.5) {
+            onContainerArgb = darkFallback
+        }
+        val inversePrimaryArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, baseSat.coerceIn(0.55f, 0.90f), 0.74f)
+        )
+
+        return baseScheme.copy(
+            primary = primaryColor,
+            onPrimary = onPrimaryColor,
+            primaryContainer = Color(containerArgb),
+            onPrimaryContainer = Color(onContainerArgb),
+            inversePrimary = Color(inversePrimaryArgb)
+        )
+    }
+}
+
 @Composable
 fun GlassCalcTheme(
     selectedTheme: AppTheme = AppTheme.AUTOMATIC,
     simulatedApiLevel: Int = Build.VERSION.SDK_INT,
     powerSaveModeOverride: Boolean? = null,
+    customAccentColorArgb: Int? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -301,14 +425,30 @@ fun GlassCalcTheme(
                 if (systemDark) DarkColorScheme else LightColorScheme
             }
         }
-        isTiefschwarz -> TiefschwarzColorScheme
-        resolvedTheme == AppTheme.STANDARD_DARK -> DarkColorScheme.copy(
-            background = Color(0xFF1A1C1E),
-            surface = Color(0xFF1C1B1F),
-            surfaceVariant = Color(0xFF44474E)
+        isTiefschwarz -> applyCustomAccentColor(
+            baseScheme = TiefschwarzColorScheme,
+            customAccentArgb = customAccentColorArgb,
+            isDark = true
         )
-        isDark -> DarkColorScheme
-        else -> LightColorScheme
+        resolvedTheme == AppTheme.STANDARD_DARK -> applyCustomAccentColor(
+            baseScheme = DarkColorScheme.copy(
+                background = Color(0xFF1A1C1E),
+                surface = Color(0xFF1C1B1F),
+                surfaceVariant = Color(0xFF44474E)
+            ),
+            customAccentArgb = customAccentColorArgb,
+            isDark = true
+        )
+        isDark -> applyCustomAccentColor(
+            baseScheme = DarkColorScheme,
+            customAccentArgb = customAccentColorArgb,
+            isDark = true
+        )
+        else -> applyCustomAccentColor(
+            baseScheme = LightColorScheme,
+            customAccentArgb = customAccentColorArgb,
+            isDark = false
+        )
     }
 
     // Adaptive background gradient according to theme

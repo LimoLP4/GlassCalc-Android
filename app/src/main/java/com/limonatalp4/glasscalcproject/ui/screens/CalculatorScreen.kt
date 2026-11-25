@@ -768,6 +768,9 @@ fun CalculatorScreen(
 
         if (isSettingsOpen) {
             val currentTheme by viewModel.currentTheme.collectAsState()
+            val currentAccentColor by viewModel.customAccentColor.collectAsState()
+            val accentHexInput by viewModel.accentHexInput.collectAsState()
+            val isAccentHexInvalid by viewModel.isAccentHexInvalid.collectAsState()
             val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
             val simulatedApiLevel by viewModel.simulatedApiLevel.collectAsState()
             val autoResultEnabled by viewModel.isAutoResultEnabled.collectAsState()
@@ -775,6 +778,9 @@ fun CalculatorScreen(
             val currentLanguage by viewModel.language.collectAsState()
             SettingsDialog(
                 currentTheme = currentTheme,
+                currentAccentColor = currentAccentColor,
+                accentHexInput = accentHexInput,
+                isAccentHexInvalid = isAccentHexInvalid,
                 currentAppIcon = currentAppIcon,
                 currentLanguage = currentLanguage,
                 effectiveApiLevel = viewModel.getEffectiveApiLevel(),
@@ -787,6 +793,10 @@ fun CalculatorScreen(
                 hapticIntensity = hapticIntensity,
                 lifecycleStatus = lifecycleStatus,
                 onSelectTheme = { theme -> viewModel.setTheme(theme) },
+                onSelectAccentColor = { colorArgb, defaultDisplayHexArgb ->
+                    viewModel.setCustomAccentColor(colorArgb, defaultDisplayHexArgb)
+                },
+                onAccentHexChanged = { rawHex -> viewModel.onAccentHexInput(rawHex) },
                 onSelectAppIcon = { icon -> viewModel.setAppIcon(icon) },
                 onSelectAngleMode = { mode ->
                     if (mode != angleMode) viewModel.toggleAngleMode()

@@ -297,6 +297,21 @@
     <string name="app_icon_red">Rubinrot</string>
     <string name="theme_accordion_title">Theme auswählen</string>
     <string name="app_icon_accordion_title">App-Icon auswählen</string>
+    <string name="accent_color_accordion_title">Akzentfarbe anpassen</string>
+    <string name="accent_color_desc">Wähle eine individuelle Akzentfarbe für Tasten, Schalter und Hervorhebungen.</string>
+    <string name="accent_color_selected">Aktiv: %s</string>
+    <string name="accent_color_default">Standard (Blau)</string>
+    <string name="accent_color_indigo">Indigo</string>
+    <string name="accent_color_purple">Amethyst-Lila</string>
+    <string name="accent_color_teal">Türkis</string>
+    <string name="accent_color_green">Smaragdgrün</string>
+    <string name="accent_color_amber">Bernstein</string>
+    <string name="accent_color_coral">Korallenorange</string>
+    <string name="accent_color_pink">Magenta-Pink</string>
+    <string name="accent_color_hex_label">Hex-Farbcode</string>
+    <string name="accent_color_hex_placeholder">#FF5722</string>
+    <string name="accent_color_hex_invalid">Ungültiger Hex-Code (6 Zeichen: 0–9, A–F, z. B. #FF5722)</string>
+    <string name="accent_color_hex_clear">Hex-Code löschen</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Standard-Winkelmodus für Trigonometrie:</string>
@@ -422,6 +437,7 @@
     <string name="settings_keywords_theme_white">hell,weiß,tag,tageslicht,light,white,klar</string>
     <string name="settings_keywords_theme_standard_dark">dunkel,dark,nacht,grau,standard</string>
     <string name="settings_keywords_theme_dark">amoled,dunkel,dark,tiefschwarz,nacht,schwarz</string>
+    <string name="settings_keywords_accent_color">akzentfarbe,akzent,farbe,farben,farbpalette,primary,hex,hexcode,rgb,indigo,lila,violett,türkis,teal,grün,bernstein,amber,orange,koralle,pink,rosa,magenta,blau,standard,custom</string>
     <string name="settings_keywords_app_icon">app-icon,icon,symbol,launcher,homescreen,farbe,design</string>
     <string name="settings_keywords_app_icon_classic">klassisch,standard,dunkel,schwarz,classic,default</string>
     <string name="settings_keywords_app_icon_material_you">material you,monet,monochrom,dynamisch,systemfarben,themed icon</string>

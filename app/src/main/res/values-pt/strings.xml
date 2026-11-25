@@ -297,6 +297,21 @@
     <string name="app_icon_red">Vermelho Rubi</string>
     <string name="theme_accordion_title">Selecionar tema</string>
     <string name="app_icon_accordion_title">Selecionar ícone do app</string>
+    <string name="accent_color_accordion_title">Cor de destaque personalizada</string>
+    <string name="accent_color_desc">Escolha uma cor de destaque personalizada para botões, seletores e realces.</string>
+    <string name="accent_color_selected">Ativo: %s</string>
+    <string name="accent_color_default">Padrão (Azul)</string>
+    <string name="accent_color_indigo">Índigo</string>
+    <string name="accent_color_purple">Roxo Ametista</string>
+    <string name="accent_color_teal">Azul-petróleo</string>
+    <string name="accent_color_green">Verde Esmeralda</string>
+    <string name="accent_color_amber">Âmbar</string>
+    <string name="accent_color_coral">Laranja Coral</string>
+    <string name="accent_color_pink">Rosa Magenta</string>
+    <string name="accent_color_hex_label">Código hexadecimal</string>
+    <string name="accent_color_hex_placeholder">#FF5722</string>
+    <string name="accent_color_hex_invalid">Código hex inválido (6 dígitos: 0–9, A–F, ex.: #FF5722)</string>
+    <string name="accent_color_hex_clear">Limpar código hex</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Modo angular padrão para trigonometria:</string>
@@ -422,6 +437,7 @@
     <string name="settings_keywords_theme_white">claro,branco,dia,luz,light,white</string>
     <string name="settings_keywords_theme_standard_dark">escuro,noite,cinza,padrão,dark</string>
     <string name="settings_keywords_theme_dark">amoled,escuro,preto,noite,dark</string>
+    <string name="settings_keywords_accent_color">destaque,cor de destaque,cor personalizada,paleta,primária,hex,hexadecimal,rgb,índigo,roxo,verde,âmbar,coral,rosa,azul</string>
     <string name="settings_keywords_app_icon">ícone,app-icon,launcher,tela inicial,símbolo,cor</string>
     <string name="settings_keywords_app_icon_classic">clássico,padrão,escuro,preto</string>
     <string name="settings_keywords_app_icon_material_you">material you,monet,monocromático,dinâmico,cores do sistema</string>

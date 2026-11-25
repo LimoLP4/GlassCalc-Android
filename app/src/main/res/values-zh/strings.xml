@@ -297,6 +297,21 @@
     <string name="app_icon_red">红宝石</string>
     <string name="theme_accordion_title">选择主题</string>
     <string name="app_icon_accordion_title">选择应用图标</string>
+    <string name="accent_color_accordion_title">自定义强调色</string>
+    <string name="accent_color_desc">为按键、开关和高亮元素选择自定义强调色。</string>
+    <string name="accent_color_selected">当前: %s</string>
+    <string name="accent_color_default">默认 (蓝色)</string>
+    <string name="accent_color_indigo">靛蓝</string>
+    <string name="accent_color_purple">紫水晶</string>
+    <string name="accent_color_teal">青色</string>
+    <string name="accent_color_green">祖母绿</string>
+    <string name="accent_color_amber">琥珀</string>
+    <string name="accent_color_coral">珊瑚橙</string>
+    <string name="accent_color_pink">洋红粉</string>
+    <string name="accent_color_hex_label">十六进制颜色代码 (Hex)</string>
+    <string name="accent_color_hex_placeholder">#FF5722</string>
+    <string name="accent_color_hex_invalid">无效的十六进制代码（6位：0–9, A–F，例如 #FF5722）</string>
+    <string name="accent_color_hex_clear">清除 Hex 代码</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">三角函数默认角度模式:</string>
@@ -422,6 +437,7 @@
     <string name="settings_keywords_theme_white">浅色,白色,日间,明亮,light,white</string>
     <string name="settings_keywords_theme_standard_dark">深色,夜间,灰色,标准,dark</string>
     <string name="settings_keywords_theme_dark">amoled,深色,纯黑,夜间,极黑,dark</string>
+    <string name="settings_keywords_accent_color">强调色,主题色,自定义颜色,调色板,颜色,十六进制,hex,rgb,accent,color,indigo,purple,teal,green,amber,coral,pink</string>
     <string name="settings_keywords_app_icon">应用图标,图标,icon,桌面,启动器,颜色</string>
     <string name="settings_keywords_app_icon_classic">经典,默认,深色,黑色</string>
     <string name="settings_keywords_app_icon_material_you">material you,monet,单色,动态配色,主题图标</string>

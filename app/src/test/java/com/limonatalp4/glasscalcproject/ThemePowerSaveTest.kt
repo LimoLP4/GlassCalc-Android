@@ -5,13 +5,19 @@ import android.content.Intent
 import android.os.PowerManager
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.core.graphics.ColorUtils
 import androidx.test.core.app.ApplicationProvider
+import com.limonatalp4.glasscalcproject.data.model.AccentColorOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
+import com.limonatalp4.glasscalcproject.ui.theme.DarkPrimaryBlue
 import com.limonatalp4.glasscalcproject.ui.theme.GlassCalcTheme
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
+import com.limonatalp4.glasscalcproject.ui.theme.PrimaryBlue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -313,6 +319,88 @@ class ThemePowerSaveTest {
 
         assertFalse(latestIsTiefschwarz)
         assertFalse(latestIsDark)
+    }
+
+    @Test
+    fun customAccentColorOverridesNonMaterialYouThemesWithAccessibleContrast() {
+        val customPurple = AccentColorOption.PURPLE.colorArgb!!
+
+        var defaultLightPrimary = Color.Unspecified
+        var customLightPrimary = Color.Unspecified
+        var customLightOnPrimary = Color.Unspecified
+        var customLightContainer = Color.Unspecified
+        var customLightOnContainer = Color.Unspecified
+
+        var defaultDarkPrimary = Color.Unspecified
+        var customDarkPrimary = Color.Unspecified
+        var customDarkOnPrimary = Color.Unspecified
+        var customAmoledPrimary = Color.Unspecified
+
+        composeTestRule.setContent {
+            GlassCalcTheme(selectedTheme = AppTheme.WHITE_MODE, customAccentColorArgb = null) {
+                defaultLightPrimary = MaterialTheme.colorScheme.primary
+            }
+            GlassCalcTheme(selectedTheme = AppTheme.WHITE_MODE, customAccentColorArgb = customPurple) {
+                customLightPrimary = MaterialTheme.colorScheme.primary
+                customLightOnPrimary = MaterialTheme.colorScheme.onPrimary
+                customLightContainer = MaterialTheme.colorScheme.primaryContainer
+                customLightOnContainer = MaterialTheme.colorScheme.onPrimaryContainer
+            }
+            GlassCalcTheme(selectedTheme = AppTheme.STANDARD_DARK, customAccentColorArgb = null) {
+                defaultDarkPrimary = MaterialTheme.colorScheme.primary
+            }
+            GlassCalcTheme(selectedTheme = AppTheme.STANDARD_DARK, customAccentColorArgb = customPurple) {
+                customDarkPrimary = MaterialTheme.colorScheme.primary
+                customDarkOnPrimary = MaterialTheme.colorScheme.onPrimary
+            }
+            GlassCalcTheme(selectedTheme = AppTheme.DARK_MODE, customAccentColorArgb = customPurple) {
+                customAmoledPrimary = MaterialTheme.colorScheme.primary
+            }
+        }
+        composeTestRule.waitForIdle()
+
+        assertEquals(PrimaryBlue, defaultLightPrimary)
+        assertEquals(DarkPrimaryBlue, defaultDarkPrimary)
+        assertNotEquals(defaultLightPrimary, customLightPrimary)
+        assertNotEquals(defaultDarkPrimary, customDarkPrimary)
+        assertEquals(customDarkPrimary, customAmoledPrimary)
+
+        assertTrue(
+            ColorUtils.calculateContrast(customLightOnPrimary.toArgb(), customLightPrimary.toArgb()) >= 4.5
+        )
+        assertTrue(
+            ColorUtils.calculateContrast(customLightOnContainer.toArgb(), customLightContainer.toArgb()) >= 4.5
+        )
+        assertTrue(
+            ColorUtils.calculateContrast(customDarkOnPrimary.toArgb(), customDarkPrimary.toArgb()) >= 4.5
+        )
+    }
+
+    @Test
+    fun materialYouThemeIgnoresCustomAccentColor() {
+        val customCoral = AccentColorOption.CORAL.colorArgb!!
+        var materialYouDefaultPrimary = Color.Unspecified
+        var materialYouWithCustomPrimary = Color.Unspecified
+
+        composeTestRule.setContent {
+            GlassCalcTheme(
+                selectedTheme = AppTheme.MATERIAL_YOU,
+                simulatedApiLevel = 35,
+                customAccentColorArgb = null
+            ) {
+                materialYouDefaultPrimary = MaterialTheme.colorScheme.primary
+            }
+            GlassCalcTheme(
+                selectedTheme = AppTheme.MATERIAL_YOU,
+                simulatedApiLevel = 35,
+                customAccentColorArgb = customCoral
+            ) {
+                materialYouWithCustomPrimary = MaterialTheme.colorScheme.primary
+            }
+        }
+        composeTestRule.waitForIdle()
+
+        assertEquals(materialYouDefaultPrimary, materialYouWithCustomPrimary)
     }
 }
 

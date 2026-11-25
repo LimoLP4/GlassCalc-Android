@@ -297,6 +297,21 @@
     <string name="app_icon_red">माणिक लाल</string>
     <string name="theme_accordion_title">थीम चुनें</string>
     <string name="app_icon_accordion_title">ऐप आइकन चुनें</string>
+    <string name="accent_color_accordion_title">कस्टम एक्सेंट रंग</string>
+    <string name="accent_color_desc">बटन, स्विच और हाइलाइट्स के लिए एक कस्टम एक्सेंट रंग चुनें।</string>
+    <string name="accent_color_selected">सक्रिय: %s</string>
+    <string name="accent_color_default">डिफ़ॉल्ट (नीला)</string>
+    <string name="accent_color_indigo">इंडिगो</string>
+    <string name="accent_color_purple">बैंगनी</string>
+    <string name="accent_color_teal">फ़िरोज़ा</string>
+    <string name="accent_color_green">पन्ना हरा</string>
+    <string name="accent_color_amber">अम्बर</string>
+    <string name="accent_color_coral">कोरल नारंगी</string>
+    <string name="accent_color_pink">मैजेंटा गुलाबी</string>
+    <string name="accent_color_hex_label">हेक्स रंग कोड</string>
+    <string name="accent_color_hex_placeholder">#FF5722</string>
+    <string name="accent_color_hex_invalid">अमान्य हेक्स कोड (6 अक्षर: 0–9, A–F, जैसे #FF5722)</string>
+    <string name="accent_color_hex_clear">हेक्स कोड साफ़ करें</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">त्रिकोणमिति के लिए डिफ़ॉल्ट कोण मोड:</string>
@@ -422,6 +437,7 @@
     <string name="settings_keywords_theme_white">लाइट,सफ़ेद,दिन,उजाला,light,white</string>
     <string name="settings_keywords_theme_standard_dark">डार्क,रात,ग्रे,मानक,dark</string>
     <string name="settings_keywords_theme_dark">amoled,डार्क,गहरा काला,काला,रात,dark</string>
+    <string name="settings_keywords_accent_color">एक्सेंट,रंग,कस्टम रंग,पसंदीदा रंग,हेक्स,accent,color,hex,rgb,indigo,purple,teal,green,amber,coral,pink</string>
     <string name="settings_keywords_app_icon">ऐप आइकन,आइकन,icon,लॉन्चर,रंग,प्रतीक</string>
     <string name="settings_keywords_app_icon_classic">क्लासिक,डिफ़ॉल्ट,डार्क,काला</string>
     <string name="settings_keywords_app_icon_material_you">material you,monet,मोनोक्रोम,डायनामिक,सिस्टम रंग</string>

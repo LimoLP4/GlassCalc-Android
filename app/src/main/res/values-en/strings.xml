@@ -297,6 +297,21 @@
     <string name="app_icon_red">Ruby Red</string>
     <string name="theme_accordion_title">Select Theme</string>
     <string name="app_icon_accordion_title">Select App Icon</string>
+    <string name="accent_color_accordion_title">Custom Accent Color</string>
+    <string name="accent_color_desc">Choose a custom accent color for buttons, switches, and highlights.</string>
+    <string name="accent_color_selected">Active: %s</string>
+    <string name="accent_color_default">Default (Blue)</string>
+    <string name="accent_color_indigo">Indigo</string>
+    <string name="accent_color_purple">Amethyst Purple</string>
+    <string name="accent_color_teal">Teal</string>
+    <string name="accent_color_green">Emerald Green</string>
+    <string name="accent_color_amber">Amber</string>
+    <string name="accent_color_coral">Coral Orange</string>
+    <string name="accent_color_pink">Magenta Pink</string>
+    <string name="accent_color_hex_label">Hex Color Code</string>
+    <string name="accent_color_hex_placeholder">#FF5722</string>
+    <string name="accent_color_hex_invalid">Invalid hex code (6 digits: 0–9, A–F, e.g. #FF5722)</string>
+    <string name="accent_color_hex_clear">Clear hex code</string>
 
     <!-- Settings: Units Tab -->
     <string name="units_angle_heading">Default angle mode for trigonometry:</string>
@@ -422,6 +437,7 @@
     <string name="settings_keywords_theme_white">light,white,day,bright,daylight</string>
     <string name="settings_keywords_theme_standard_dark">dark,night,grey,gray,standard</string>
     <string name="settings_keywords_theme_dark">amoled,dark,pitch black,black,night</string>
+    <string name="settings_keywords_accent_color">accent,accent color,custom color,color picker,palette,primary,hex,hex code,rgb,indigo,purple,teal,green,amber,coral,orange,pink,blue,default</string>
     <string name="settings_keywords_app_icon">app icon,icon,launcher,home screen,symbol,badge,color</string>
     <string name="settings_keywords_app_icon_classic">classic,default,dark,black,anthracite</string>
     <string name="settings_keywords_app_icon_material_you">material you,monet,monochrome,dynamic,system colors,themed icon</string>

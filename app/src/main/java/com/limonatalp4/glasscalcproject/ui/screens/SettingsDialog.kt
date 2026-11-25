@@ -51,6 +51,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import android.view.WindowManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -62,13 +63,19 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.core.view.WindowCompat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DeveloperMode
@@ -121,15 +128,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -137,7 +160,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.graphics.ColorUtils
 import androidx.window.core.layout.WindowSizeClass
+import com.limonatalp4.glasscalcproject.data.model.AccentColorOption
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
@@ -158,18 +183,22 @@ import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchEmptyState
 import com.limonatalp4.glasscalcproject.ui.components.SettingsSearchVisibility
 import com.limonatalp4.glasscalcproject.ui.components.SettingsUnitCard
 import com.limonatalp4.glasscalcproject.ui.components.pressScale
-import kotlin.math.roundToInt
 import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.components.rememberSettingsSearchVisibility
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
+import com.limonatalp4.glasscalcproject.ui.theme.resolveAccentSwatchColor
 import com.limonatalp4.glasscalcproject.ui.util.HapticMotorType
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
+import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsDialog(
     currentTheme: AppTheme,
+    currentAccentColor: Int? = null,
+    accentHexInput: String = "",
+    isAccentHexInvalid: Boolean = false,
     currentAppIcon: AppIconOption = AppIconOption.CLASSIC,
     currentLanguage: String,
     effectiveApiLevel: Int,
@@ -183,6 +212,8 @@ fun SettingsDialog(
     autoResultEnabled: Boolean,
     lifecycleStatus: String,
     onSelectTheme: (AppTheme) -> Unit,
+    onSelectAccentColor: (Int?, Int?) -> Unit = { _, _ -> },
+    onAccentHexChanged: (String) -> Unit = {},
     onSelectAppIcon: (AppIconOption) -> Unit = {},
     onSelectAngleMode: (AngleMode) -> Unit,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
@@ -218,6 +249,7 @@ fun SettingsDialog(
 
     // Accordion expansion states for Design, Units & Language tabs
     var themeAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var accentColorAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var appIconAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var angleModeAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var languageAccordionOpen by rememberSaveable { mutableStateOf(false) }
@@ -237,7 +269,8 @@ fun SettingsDialog(
     val isTiefschwarz = glassProps.isTiefschwarz
     val searchVisibility = rememberSettingsSearchVisibility(
         query = searchQuery,
-        effectiveApiLevel = effectiveApi
+        effectiveApiLevel = effectiveApi,
+        isMaterialYouActive = glassProps.isMaterialYou
     )
     val isSearchActive = searchQuery.trim().isNotEmpty()
     var preSearchTab by remember { mutableIntStateOf(0) }
@@ -486,22 +519,31 @@ fun SettingsDialog(
                             when (targetTab) {
                                 0 -> AppearanceSection(
                                     currentTheme = currentTheme,
+                                    currentAccentColor = currentAccentColor,
+                                    accentHexInput = accentHexInput,
+                                    isAccentHexInvalid = isAccentHexInvalid,
                                     currentAppIcon = selectedAppIconPreview,
                                     effectiveApiLevel = effectiveApiLevel,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
                                     glassProps = glassProps,
                                     themeAccordionOpen = isSearchActive || themeAccordionOpen,
+                                    accentColorAccordionOpen = isSearchActive || accentColorAccordionOpen,
                                     appIconAccordionOpen = isSearchActive || appIconAccordionOpen,
                                     onToggleThemeAccordion = { themeAccordionOpen = !themeAccordionOpen },
+                                    onToggleAccentColorAccordion = { accentColorAccordionOpen = !accentColorAccordionOpen },
                                     onToggleAppIconAccordion = { appIconAccordionOpen = !appIconAccordionOpen },
                                     onSelectTheme = onSelectTheme,
+                                    onSelectAccentColor = onSelectAccentColor,
+                                    onAccentHexChanged = onAccentHexChanged,
                                     onSelectAppIcon = { icon ->
                                         selectedAppIconPreview = icon
                                         onSelectAppIcon(icon)
                                     },
                                     triggerHaptic = ::triggerHaptic,
                                     visibleThemes = searchVisibility.matchingThemes,
+                                    showAccentColorCard = searchVisibility.showAccentColorCard && !glassProps.isMaterialYou,
+                                    isMaterialYouActive = glassProps.isMaterialYou,
                                     visibleAppIcons = searchVisibility.matchingAppIcons
                                 )
                                 1 -> UnitsSection(
@@ -620,24 +662,39 @@ fun SettingsDialog(
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AppearanceSection(
     currentTheme: AppTheme,
+    currentAccentColor: Int?,
+    accentHexInput: String,
+    isAccentHexInvalid: Boolean,
     currentAppIcon: AppIconOption,
     effectiveApiLevel: Int,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
     glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
     themeAccordionOpen: Boolean,
+    accentColorAccordionOpen: Boolean,
     appIconAccordionOpen: Boolean,
     onToggleThemeAccordion: () -> Unit,
+    onToggleAccentColorAccordion: () -> Unit,
     onToggleAppIconAccordion: () -> Unit,
     onSelectTheme: (AppTheme) -> Unit,
+    onSelectAccentColor: (Int?, Int?) -> Unit,
+    onAccentHexChanged: (String) -> Unit,
     onSelectAppIcon: (AppIconOption) -> Unit,
     triggerHaptic: () -> Unit,
     visibleThemes: List<AppTheme> = AppTheme.entries,
+    showAccentColorCard: Boolean = true,
+    isMaterialYouActive: Boolean = false,
     visibleAppIcons: List<AppIconOption> = AppIconOption.entries
 ) {
+    val matchedPreset = AccentColorOption.findPresetOrNull(currentAccentColor)
+    val defaultSwatchColorArgb = remember(glassProps.isDark) {
+        resolveAccentSwatchColor(colorArgb = null, isDark = glassProps.isDark).toArgb()
+    }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth()
@@ -693,6 +750,101 @@ private fun AppearanceSection(
             }
         }
 
+        AnimatedVisibility(
+            visible = !isMaterialYouActive && showAccentColorCard,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            SettingsAccordionCard(
+                title = stringResource(id = R.string.accent_color_accordion_title),
+                expanded = accentColorAccordionOpen,
+                onToggle = onToggleAccentColorAccordion,
+                isTiefschwarz = isTiefschwarz,
+                colorScheme = colorScheme,
+                glassProps = glassProps,
+                triggerHaptic = triggerHaptic,
+                cardTestTag = "card_accent_color_accordion",
+                toggleButtonTestTag = "btn_toggle_accent_color_accordion",
+                chevronLabel = "accent_color_chevron_rotation"
+            ) {
+                Text(
+                    text = stringResource(id = R.string.accent_color_desc),
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    color = colorScheme.onSurfaceVariant
+                )
+
+                val activeAccentLabel = if (matchedPreset != null) {
+                    stringResource(id = matchedPreset.labelResId)
+                } else {
+                    CalculatorViewModel.formatAccentHex(currentAccentColor!!)
+                }
+                Text(
+                    text = stringResource(id = R.string.accent_color_selected, activeAccentLabel),
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.primary,
+                    modifier = Modifier.testTag("text_active_accent_color")
+                )
+
+                SettingsGlassCard(
+                    glassProps = glassProps,
+                    shape = GlassDialogDefaults.NestedPanelShape,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 12.dp,
+                        vertical = 12.dp
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            AccentColorOption.entries.forEach { option ->
+                                val isSelected = matchedPreset == option
+                                val label = stringResource(id = option.labelResId)
+                                val swatchColor = resolveAccentSwatchColor(
+                                    colorArgb = option.colorArgb,
+                                    isDark = glassProps.isDark
+                                )
+
+                                AccentColorPillButton(
+                                    option = option,
+                                    swatchColor = swatchColor,
+                                    label = label,
+                                    isSelected = isSelected,
+                                    isTiefschwarz = isTiefschwarz,
+                                    glassProps = glassProps,
+                                    onClick = {
+                                        triggerHaptic()
+                                        onSelectAccentColor(
+                                            option.colorArgb,
+                                            if (option.colorArgb == null) defaultSwatchColorArgb else null
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        AccentColorHexInput(
+                            hexInput = accentHexInput,
+                            isInvalid = isAccentHexInvalid,
+                            currentAccentColor = currentAccentColor,
+                            defaultHexPlaceholder = CalculatorViewModel.formatAccentHex(defaultSwatchColorArgb),
+                            isTiefschwarz = isTiefschwarz,
+                            glassProps = glassProps,
+                            triggerHaptic = triggerHaptic,
+                            onHexInputChanged = onAccentHexChanged
+                        )
+                    }
+                }
+            }
+        }
+
         if (visibleAppIcons.isNotEmpty()) {
             SettingsAccordionCard(
                 title = stringResource(id = R.string.app_icon_accordion_title),
@@ -729,6 +881,352 @@ private fun AppearanceSection(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AccentColorPillButton(
+    option: AccentColorOption,
+    swatchColor: Color,
+    label: String,
+    isSelected: Boolean,
+    isTiefschwarz: Boolean,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val ringColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            if (isTiefschwarz) Color.White else MaterialTheme.colorScheme.onSurface
+        } else {
+            glassProps.buttonBorderColor
+        },
+        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+        label = "accent_ring_${option.name}"
+    )
+    val ringWidth by animateDpAsState(
+        targetValue = if (isSelected) 2.5.dp else 1.dp,
+        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+        label = "accent_ring_width_${option.name}"
+    )
+    val checkTint = remember(swatchColor) {
+        if (ColorUtils.calculateContrast(android.graphics.Color.WHITE, swatchColor.toArgb()) >= 3.0) {
+            Color.White
+        } else {
+            Color(0xFF0A0A0A)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .pressScale(interactionSource)
+            .clip(CircleShape)
+            .semantics {
+                selected = isSelected
+                contentDescription = label
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true),
+                role = Role.RadioButton,
+                onClick = onClick
+            )
+            .testTag("accent_color_${option.name}"),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .border(
+                    width = ringWidth,
+                    color = ringColor,
+                    shape = CircleShape
+                )
+                .padding(if (isSelected) 3.dp else 0.dp)
+                .clip(CircleShape)
+                .background(swatchColor)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.34f),
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.14f)
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = checkTint,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccentColorHexInput(
+    hexInput: String,
+    isInvalid: Boolean,
+    currentAccentColor: Int?,
+    defaultHexPlaceholder: String,
+    isTiefschwarz: Boolean,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    triggerHaptic: () -> Unit,
+    onHexInputChanged: (String) -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val shape = GlassDialogDefaults.PillShape
+    val bgColor = GlassDialogDefaults.searchBarBackgroundColor(isTiefschwarz)
+    val density = LocalDensity.current
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    val pillInteractionSource = remember { MutableInteractionSource() }
+    val textFieldInteractionSource = remember { MutableInteractionSource() }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+
+    var hexFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = hexInput,
+                selection = TextRange(hexInput.length)
+            )
+        )
+    }
+
+    LaunchedEffect(hexInput) {
+        if (hexFieldValue.text != hexInput) {
+            hexFieldValue = TextFieldValue(
+                text = hexInput,
+                selection = TextRange(hexInput.length)
+            )
+        }
+    }
+
+    LaunchedEffect(isFocused, imeBottomPx) {
+        if (isFocused) {
+            delay(80)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
+
+    val currentTriggerHaptic by rememberUpdatedState(triggerHaptic)
+    LaunchedEffect(textFieldInteractionSource) {
+        textFieldInteractionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) {
+                currentTriggerHaptic()
+            }
+        }
+    }
+
+    val borderColor by animateColorAsState(
+        targetValue = if (isInvalid) colorScheme.error else glassProps.buttonBorderColor,
+        animationSpec = tween(durationMillis = 160, easing = FastOutSlowInEasing),
+        label = "accent_hex_border_color"
+    )
+    val borderWidth by animateDpAsState(
+        targetValue = if (isInvalid) 1.5.dp else 1.dp,
+        animationSpec = tween(durationMillis = 160, easing = FastOutSlowInEasing),
+        label = "accent_hex_border_width"
+    )
+
+    val parsedValidArgb = CalculatorViewModel.parseValidAccentHexOrNull(hexFieldValue.text)
+    val previewColor = parsedValidArgb?.let { Color(it) }
+        ?: resolveAccentSwatchColor(colorArgb = currentAccentColor, isDark = glassProps.isDark)
+
+    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
+    val hintColor = if (isTiefschwarz) {
+        Color.White.copy(alpha = 0.55f)
+    } else {
+        colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+    }
+    val hexLabel = stringResource(id = R.string.accent_color_hex_label)
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = hexLabel,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isInvalid) colorScheme.error else colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 6.dp, bottom = 6.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .bringIntoViewRequester(bringIntoViewRequester)
+                .clip(shape)
+                .background(bgColor)
+                .border(width = borderWidth, color = borderColor, shape = shape)
+                .clickable(
+                    interactionSource = pillInteractionSource,
+                    indication = null
+                ) {
+                    triggerHaptic()
+                    focusRequester.requestFocus()
+                }
+                .padding(
+                    start = 12.dp,
+                    end = if (hexFieldValue.text.isNotEmpty()) 4.dp else 14.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(previewColor)
+                    .border(
+                        width = 1.dp,
+                        color = glassProps.buttonBorderColor,
+                        shape = CircleShape
+                    )
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BasicTextField(
+                    value = hexFieldValue,
+                    onValueChange = { nextValue ->
+                        val sanitized = CalculatorViewModel.sanitizeAccentHexInput(nextValue.text)
+                        val cursorEnd = nextValue.selection.end.coerceIn(0, nextValue.text.length)
+                        val hexCountBeforeCursor = nextValue.text.substring(0, cursorEnd).count {
+                            it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F'
+                        }
+                        val nextSelectionPos = if (sanitized.isEmpty()) {
+                            0
+                        } else {
+                            (1 + hexCountBeforeCursor).coerceIn(
+                                if (sanitized.startsWith("#")) 1 else 0,
+                                sanitized.length
+                            )
+                        }
+                        hexFieldValue = TextFieldValue(
+                            text = sanitized,
+                            selection = TextRange(nextSelectionPos)
+                        )
+                        onHexInputChanged(sanitized)
+                    },
+                    singleLine = true,
+                    interactionSource = textFieldInteractionSource,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Characters,
+                        autoCorrectEnabled = false,
+                        keyboardType = KeyboardType.Ascii,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { focusManager.clearFocus() }
+                    ),
+                    textStyle = TextStyle(
+                        color = textColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    cursorBrush = SolidColor(colorScheme.primary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { state -> isFocused = state.isFocused }
+                        .semantics { contentDescription = hexLabel }
+                        .testTag("input_accent_hex"),
+                    decorationBox = { innerTextField ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (hexFieldValue.text.isEmpty()) {
+                                Text(
+                                    text = defaultHexPlaceholder,
+                                    color = hintColor,
+                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+            }
+
+            if (hexFieldValue.text.isNotEmpty()) {
+                val clearInteraction = remember { MutableInteractionSource() }
+                val clearPillShape = RoundedCornerShape(50)
+                val clearPillBorder = BorderStroke(
+                    width = 1.dp,
+                    color = if (isInvalid) {
+                        colorScheme.error.copy(alpha = 0.45f)
+                    } else {
+                        colorScheme.outline.copy(alpha = 0.3f)
+                    }
+                )
+                IconButton(
+                    onClick = {
+                        triggerHaptic()
+                        hexFieldValue = TextFieldValue(text = "", selection = TextRange(0))
+                        onHexInputChanged("")
+                    },
+                    interactionSource = clearInteraction,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .pressScale(clearInteraction)
+                        .testTag("btn_clear_accent_hex")
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(clearPillShape)
+                            .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .border(border = clearPillBorder, shape = clearPillShape)
+                            .padding(6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(id = R.string.accent_color_hex_clear),
+                            tint = if (isInvalid) {
+                                colorScheme.error
+                            } else if (isTiefschwarz) {
+                                Color.White.copy(alpha = 0.8f)
+                            } else {
+                                colorScheme.onSurfaceVariant
+                            },
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isInvalid,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Text(
+                text = stringResource(id = R.string.accent_color_hex_invalid),
+                fontSize = 11.5.sp,
+                lineHeight = 15.sp,
+                color = colorScheme.error,
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 5.dp)
+                    .testTag("text_accent_hex_error")
+            )
         }
     }
 }

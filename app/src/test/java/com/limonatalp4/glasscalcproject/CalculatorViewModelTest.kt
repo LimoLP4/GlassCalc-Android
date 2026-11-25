@@ -5,15 +5,18 @@ import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.limonatalp4.glasscalcproject.data.model.AccentColorOption
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
 import com.limonatalp4.glasscalcproject.ui.util.AppIconManager
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -285,5 +288,85 @@ class CalculatorViewModelTest {
         vm.onCharacterInput("1")
         vm.onCharacterInput("7")
         assertEquals("17", vm.expression.value)
+    }
+
+    @Test
+    fun testCustomAccentColorPersistsInDataStoreAndResets() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val prefs = GlassCalcPreferences(app)
+        val vm = CalculatorViewModel(app)
+
+        assertNull(vm.customAccentColor.value)
+        assertNull(prefs.customAccentColorFlow.first())
+
+        val teal = AccentColorOption.TEAL.colorArgb!!
+        vm.setCustomAccentColor(teal)
+        assertEquals(teal, vm.customAccentColor.value)
+        waitUntil { runBlocking { prefs.customAccentColorFlow.first() == teal } }
+
+        // Fresh ViewModel loads persisted custom accent color
+        val restoredVm = CalculatorViewModel(app)
+        waitUntil { restoredVm.customAccentColor.value == teal }
+        assertEquals(teal, restoredVm.customAccentColor.value)
+
+        // Resetting to null removes custom accent override
+        restoredVm.setCustomAccentColor(null)
+        assertNull(restoredVm.customAccentColor.value)
+        waitUntil { runBlocking { prefs.customAccentColorFlow.first() == null } }
+
+        // Selecting Coral then calling resetApp() clears it cleanly
+        val coral = AccentColorOption.CORAL.colorArgb!!
+        restoredVm.setCustomAccentColor(coral)
+        assertEquals(coral, restoredVm.customAccentColor.value)
+        waitUntil { runBlocking { prefs.customAccentColorFlow.first() == coral } }
+
+        restoredVm.resetApp()
+        assertNull(restoredVm.customAccentColor.value)
+        assertEquals("", restoredVm.accentHexInput.value)
+        assertFalse(restoredVm.isAccentHexInvalid.value)
+        waitUntil { runBlocking { prefs.customAccentColorFlow.first() == null } }
+    }
+
+    @Test
+    fun testCustomAccentHexInputSanitizationValidationAndPersistence() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val prefs = GlassCalcPreferences(app)
+        val vm = CalculatorViewModel(app)
+
+        // Filters non-hex characters, uppercases hex, and clamps to 6 hex digits
+        assertEquals("", CalculatorViewModel.sanitizeAccentHexInput("xyz"))
+        assertEquals("#", CalculatorViewModel.sanitizeAccentHexInput("#"))
+        assertEquals("#FF5722", CalculatorViewModel.sanitizeAccentHexInput("ff57z22g99"))
+
+        // Selecting a preset circle updates hex input cleanly
+        val purple = AccentColorOption.PURPLE.colorArgb!!
+        vm.setCustomAccentColor(purple)
+        assertEquals("#9333EA", vm.accentHexInput.value)
+        assertFalse(vm.isAccentHexInvalid.value)
+
+        // Partial/incomplete hex triggers invalid flag without overwriting last valid persisted color
+        vm.onAccentHexInput("#FF5")
+        assertEquals("#FF5", vm.accentHexInput.value)
+        assertTrue(vm.isAccentHexInvalid.value)
+        assertEquals(purple, vm.customAccentColor.value)
+
+        // Valid 6-digit hex immediately clears error, updates color, and persists via DataStore
+        vm.onAccentHexInput("ff5722")
+        assertEquals("#FF5722", vm.accentHexInput.value)
+        assertFalse(vm.isAccentHexInvalid.value)
+        val orangeArgb = 0xFFFF5722.toInt()
+        assertEquals(orangeArgb, vm.customAccentColor.value)
+        assertNull(AccentColorOption.findPresetOrNull(orangeArgb))
+        waitUntil { runBlocking { prefs.customAccentColorFlow.first() == orangeArgb } }
+
+        // Fresh ViewModel restores custom hex color and fills accentHexInput
+        val restoredVm = CalculatorViewModel(app)
+        waitUntil { restoredVm.customAccentColor.value == orangeArgb }
+        assertEquals("#FF5722", restoredVm.accentHexInput.value)
+        assertFalse(restoredVm.isAccentHexInvalid.value)
+
+        // Typing preset hex automatically matches preset enum
+        restoredVm.onAccentHexInput("#9333EA")
+        assertEquals(AccentColorOption.PURPLE, AccentColorOption.findPresetOrNull(restoredVm.customAccentColor.value))
     }
 }
