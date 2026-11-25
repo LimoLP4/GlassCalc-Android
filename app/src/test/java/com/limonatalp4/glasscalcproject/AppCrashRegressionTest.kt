@@ -434,6 +434,10 @@ class AppCrashRegressionTest {
         // Enable Simulated API (default level 30 < 33) in Developer Options
         composeTestRule.onNodeWithTag("tab_settings_2").performScrollTo().performClick()
         composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_dev_system_api_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_dev_system_api_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithTag("switch_simulate_api").fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNodeWithTag("switch_simulate_api").performScrollTo().performClick()
@@ -483,6 +487,69 @@ class AppCrashRegressionTest {
             .performScrollTo()
             .assertIsDisplayed()
     }
+
+    @Test
+    fun testDeveloperTabAccordionsCollapseExpandAndPersistAcrossRecreation() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Open Developer tab
+        composeTestRule.onNodeWithTag("tab_settings_2").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_dev_system_api_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // All 4 accordions start collapsed
+        composeTestRule.onNodeWithTag("card_dev_system_api_accordion").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("card_dev_haptic_accordion").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("card_dev_behavior_accordion").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("card_dev_storage_accordion").performScrollTo().assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("switch_simulate_api").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithTag("switch_haptic_feedback").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithTag("switch_auto_result").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithTag("btn_clear_cache").fetchSemanticsNodes().isEmpty())
+
+        // Expand System & API + App Behavior + Storage & Cache
+        composeTestRule.onNodeWithTag("card_dev_system_api_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("switch_simulate_api").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_dev_behavior_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("switch_auto_result").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("btn_simulate_background").performScrollTo().assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag("card_dev_storage_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("btn_clear_cache").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("btn_reset_storage").performScrollTo().assertIsDisplayed()
+
+        // Expand and re-collapse Haptics & Feedback
+        composeTestRule.onNodeWithTag("card_dev_haptic_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("switch_haptic_feedback").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("slider_haptic_intensity").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("card_dev_haptic_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("switch_haptic_feedback").fetchSemanticsNodes().isEmpty()
+        }
+
+        // Recreate Activity and verify expanded/collapsed states persist via rememberSaveable
+        composeTestRule.activityRule.scenario.recreate()
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithTag("card_dev_system_api_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("switch_simulate_api").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("switch_auto_result").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("btn_clear_cache").performScrollTo().assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("switch_haptic_feedback").fetchSemanticsNodes().isEmpty())
+    }
 }
-
-

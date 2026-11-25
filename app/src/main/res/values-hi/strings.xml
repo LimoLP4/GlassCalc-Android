@@ -311,6 +311,10 @@
     <string name="converter_info_dialog_title">समर्थित रूपांतरण प्रणालियाँ</string>
 
     <!-- Settings: Developer Tab -->
+    <string name="dev_accordion_system_api">सिस्टम और API</string>
+    <string name="dev_accordion_haptic_feedback">हैप्टिक्स और फ़ीडबैक</string>
+    <string name="dev_accordion_app_behavior">ऐप व्यवहार</string>
+    <string name="dev_accordion_storage_cache">स्टोरेज और कैश</string>
     <string name="dev_screen_scaling">स्क्रीन आकार और स्केलिंग</string>
     <string name="dev_resolution">रिज़ॉल्यूशन: %1$ddp x %2$ddp</string>
     <string name="dev_simulated_api_title">नकली Android संस्करण</string>

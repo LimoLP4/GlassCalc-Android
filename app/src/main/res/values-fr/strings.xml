@@ -311,6 +311,10 @@
     <string name="converter_info_dialog_title">Systèmes de conversion pris en charge</string>
 
     <!-- Settings: Developer Tab -->
+    <string name="dev_accordion_system_api">Système &amp; API</string>
+    <string name="dev_accordion_haptic_feedback">Haptique &amp; retours</string>
+    <string name="dev_accordion_app_behavior">Comportement de l\'app</string>
+    <string name="dev_accordion_storage_cache">Stockage &amp; cache</string>
     <string name="dev_screen_scaling">Taille d\'écran &amp; mise à l\'échelle</string>
     <string name="dev_resolution">Résolution : %1$ddp x %2$ddp</string>
     <string name="dev_simulated_api_title">Version d\'Android simulée</string>

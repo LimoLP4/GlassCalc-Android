@@ -301,10 +301,14 @@ fun rememberSettingsSearchVisibility(
     val bestUnitsScore = scoredUnitCards.minOfOrNull { it.second }
 
     val devTabTitle = stringResource(R.string.title_dev_options)
+    val devAccordionSystemApi = stringResource(R.string.dev_accordion_system_api)
+    val devAccordionHapticFeedback = stringResource(R.string.dev_accordion_haptic_feedback)
+    val devAccordionAppBehavior = stringResource(R.string.dev_accordion_app_behavior)
+    val devAccordionStorageCache = stringResource(R.string.dev_accordion_storage_cache)
     val devScreenScore = scoreSettingsEntry(
         tokens = tokens,
         primaryNames = listOf(stringResource(R.string.dev_screen_scaling)),
-        secondaryTexts = listOf("WindowSizeClass", devTabTitle),
+        secondaryTexts = listOf("WindowSizeClass", devAccordionSystemApi, devTabTitle),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_screen))
     )
     val devApiScore = scoreSettingsEntry(
@@ -317,6 +321,7 @@ fun rememberSettingsSearchVisibility(
             stringResource(R.string.dev_feature_material_you),
             stringResource(R.string.dev_feature_blur_effect),
             stringResource(R.string.dev_feature_swipe_gestures),
+            devAccordionSystemApi,
             devTabTitle
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_api))
@@ -328,6 +333,7 @@ fun rememberSettingsSearchVisibility(
             stringResource(R.string.dev_haptic_desc),
             stringResource(R.string.dev_haptic_detected_motor),
             stringResource(R.string.dev_haptic_intensity_label),
+            devAccordionHapticFeedback,
             devTabTitle
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_haptic))
@@ -335,7 +341,7 @@ fun rememberSettingsSearchVisibility(
     val devAutoResultScore = scoreSettingsEntry(
         tokens = tokens,
         primaryNames = listOf(stringResource(R.string.dev_auto_result_title)),
-        secondaryTexts = listOf(stringResource(R.string.dev_auto_result_desc), devTabTitle),
+        secondaryTexts = listOf(stringResource(R.string.dev_auto_result_desc), devAccordionAppBehavior, devTabTitle),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_auto_result))
     )
     val devLifecycleScore = scoreSettingsEntry(
@@ -344,6 +350,7 @@ fun rememberSettingsSearchVisibility(
         secondaryTexts = listOf(
             stringResource(R.string.dev_btn_background),
             stringResource(R.string.dev_btn_crash_test),
+            devAccordionAppBehavior,
             devTabTitle
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_lifecycle))
@@ -354,6 +361,7 @@ fun rememberSettingsSearchVisibility(
         secondaryTexts = listOf(
             stringResource(R.string.dev_clear_cache_desc),
             stringResource(R.string.dev_btn_clear_cache),
+            devAccordionStorageCache,
             devTabTitle
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_cache))
@@ -364,6 +372,7 @@ fun rememberSettingsSearchVisibility(
         secondaryTexts = listOf(
             stringResource(R.string.dev_reset_storage_desc),
             stringResource(R.string.dev_btn_reset_storage),
+            devAccordionStorageCache,
             devTabTitle
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_reset))

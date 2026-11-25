@@ -311,6 +311,10 @@
     <string name="converter_info_dialog_title">対応する変換単位</string>
 
     <!-- Settings: Developer Tab -->
+    <string name="dev_accordion_system_api">システムと API</string>
+    <string name="dev_accordion_haptic_feedback">触覚とフィードバック</string>
+    <string name="dev_accordion_app_behavior">アプリの動作</string>
+    <string name="dev_accordion_storage_cache">ストレージとキャッシュ</string>
     <string name="dev_screen_scaling">画面サイズとスケーリング</string>
     <string name="dev_resolution">解像度: %1$ddp x %2$ddp</string>
     <string name="dev_simulated_api_title">シミュレート Android バージョン</string>

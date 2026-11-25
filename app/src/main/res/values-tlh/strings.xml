@@ -311,6 +311,10 @@
     <string name="converter_info_dialog_title">patmey</string>
 
     <!-- Settings: Developer Tab -->
+    <string name="dev_accordion_system_api">pat &amp; API</string>
+    <string name="dev_accordion_haptic_feedback">vIH &amp; Hot</string>
+    <string name="dev_accordion_app_behavior">jan mIw</string>
+    <string name="dev_accordion_storage_cache">polwI\' &amp; Cache</string>
     <string name="dev_screen_scaling">jIH tIn</string>
     <string name="dev_resolution">jIH: %1$ddp x %2$ddp</string>
     <string name="dev_simulated_api_title">Android API ngeb</string>

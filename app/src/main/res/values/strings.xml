@@ -311,6 +311,10 @@
     <string name="converter_info_dialog_title">Unterstützte Umrechnungssysteme</string>
 
     <!-- Settings: Developer Tab -->
+    <string name="dev_accordion_system_api">System &amp; API</string>
+    <string name="dev_accordion_haptic_feedback">Haptik &amp; Feedback</string>
+    <string name="dev_accordion_app_behavior">App-Verhalten</string>
+    <string name="dev_accordion_storage_cache">Speicher &amp; Cache</string>
     <string name="dev_screen_scaling">Bildschirmgröße &amp; Skalierung</string>
     <string name="dev_resolution">Auflösung: %1$ddp x %2$ddp</string>
     <string name="dev_simulated_api_title">Simulierte Android-Version</string>

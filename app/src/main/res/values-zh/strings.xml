@@ -311,6 +311,10 @@
     <string name="converter_info_dialog_title">支持的换算系统</string>
 
     <!-- Settings: Developer Tab -->
+    <string name="dev_accordion_system_api">系统与 API</string>
+    <string name="dev_accordion_haptic_feedback">触觉与反馈</string>
+    <string name="dev_accordion_app_behavior">应用行为</string>
+    <string name="dev_accordion_storage_cache">存储与缓存</string>
     <string name="dev_screen_scaling">屏幕尺寸与缩放</string>
     <string name="dev_resolution">分辨率: %1$ddp x %2$ddp</string>
     <string name="dev_simulated_api_title">模拟 Android 版本</string>

@@ -226,6 +226,12 @@ fun SettingsDialog(
     var apacheAccordionOpen by rememberSaveable { mutableStateOf(false) }
     var mxparserAccordionOpen by rememberSaveable { mutableStateOf(false) }
 
+    // Accordion expansion states for Developer tab
+    var devSystemApiAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var devHapticAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var devBehaviorAccordionOpen by rememberSaveable { mutableStateOf(false) }
+    var devStorageAccordionOpen by rememberSaveable { mutableStateOf(false) }
+
     val effectiveApi = if (simulatedApiEnabled) simulatedApiLevel else Build.VERSION.SDK_INT
     val isTiefschwarz = glassProps.isTiefschwarz
     val searchVisibility = rememberSettingsSearchVisibility(
@@ -523,6 +529,14 @@ fun SettingsDialog(
                                     lifecycleStatus = lifecycleStatus,
                                     isTiefschwarz = isTiefschwarz,
                                     colorScheme = colorScheme,
+                                    systemApiAccordionOpen = isSearchActive || devSystemApiAccordionOpen,
+                                    hapticAccordionOpen = isSearchActive || devHapticAccordionOpen,
+                                    behaviorAccordionOpen = isSearchActive || devBehaviorAccordionOpen,
+                                    storageAccordionOpen = isSearchActive || devStorageAccordionOpen,
+                                    onToggleSystemApiAccordion = { devSystemApiAccordionOpen = !devSystemApiAccordionOpen },
+                                    onToggleHapticAccordion = { devHapticAccordionOpen = !devHapticAccordionOpen },
+                                    onToggleBehaviorAccordion = { devBehaviorAccordionOpen = !devBehaviorAccordionOpen },
+                                    onToggleStorageAccordion = { devStorageAccordionOpen = !devStorageAccordionOpen },
                                     onSetSimulatedApi = onSetSimulatedApi,
                                     onToggleHapticFeedback = onToggleHapticFeedback,
                                     onSetHapticIntensity = onSetHapticIntensity,
@@ -1015,6 +1029,20 @@ private fun UnitsSection(
     }
 }
 
+private enum class SettingsDevGroup {
+    SYSTEM_API,
+    HAPTIC_FEEDBACK,
+    APP_BEHAVIOR,
+    STORAGE_CACHE
+}
+
+private fun SettingsDevCard.group(): SettingsDevGroup = when (this) {
+    SettingsDevCard.SCREEN, SettingsDevCard.API -> SettingsDevGroup.SYSTEM_API
+    SettingsDevCard.HAPTIC -> SettingsDevGroup.HAPTIC_FEEDBACK
+    SettingsDevCard.AUTO_RESULT, SettingsDevCard.LIFECYCLE -> SettingsDevGroup.APP_BEHAVIOR
+    SettingsDevCard.CLEAR_CACHE, SettingsDevCard.RESET_STORAGE -> SettingsDevGroup.STORAGE_CACHE
+}
+
 @Composable
 private fun DeveloperOptionsSection(
     windowSizeClass: WindowSizeClass?,
@@ -1031,6 +1059,14 @@ private fun DeveloperOptionsSection(
     lifecycleStatus: String,
     isTiefschwarz: Boolean,
     colorScheme: androidx.compose.material3.ColorScheme,
+    systemApiAccordionOpen: Boolean,
+    hapticAccordionOpen: Boolean,
+    behaviorAccordionOpen: Boolean,
+    storageAccordionOpen: Boolean,
+    onToggleSystemApiAccordion: () -> Unit,
+    onToggleHapticAccordion: () -> Unit,
+    onToggleBehaviorAccordion: () -> Unit,
+    onToggleStorageAccordion: () -> Unit,
     onSetSimulatedApi: (Boolean, Int) -> Unit,
     onToggleHapticFeedback: (Boolean) -> Unit,
     onSetHapticIntensity: (Int) -> Unit,
@@ -1051,483 +1087,624 @@ private fun DeveloperOptionsSection(
     val screenHeightDp = with(density) { containerSize.height.toDp().value.roundToInt() }
     val glassProps = LocalGlassProperties.current
 
+    val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
+    val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
+    val isSupportedBySimulatedApi = effectiveApi >= 26
+    val isHapticUsable = hasVibratorMotor && isSupportedBySimulatedApi
+    val isIntensitySliderEnabled = hapticMotorType != HapticMotorType.NONE && isSupportedBySimulatedApi && hapticFeedbackEnabled
+    var sliderIntensity by remember(hapticIntensity) {
+        mutableFloatStateOf(hapticIntensity.toFloat().coerceIn(1f, 10f))
+    }
+
     val orderedDevCards = searchVisibility?.orderedDevCards ?: SettingsDevCard.entries
+    if (orderedDevCards.isEmpty()) return
+
+    val groupedCards = orderedDevCards.groupBy { it.group() }
+    val orderedGroups = orderedDevCards.map { it.group() }.distinct()
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        orderedDevCards.forEach { devCard ->
-            when (devCard) {
-                SettingsDevCard.SCREEN -> {
-        // Card 1: Screen & WindowSizeClass
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.dev_screen_scaling),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                @Suppress("DEPRECATION")
-                val widthClassName = windowSizeClass?.windowWidthSizeClass ?: "Compact"
-                Text(
-                    text = "WindowSizeClass: $widthClassName",
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = if (isTiefschwarz) Color.White else colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.dev_resolution, screenWidthDp, screenHeightDp),
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = colorScheme.onSurfaceVariant
-                )
+        orderedGroups.forEach { group ->
+            val cardsInGroup = groupedCards[group].orEmpty()
+            val title = when (group) {
+                SettingsDevGroup.SYSTEM_API -> stringResource(R.string.dev_accordion_system_api)
+                SettingsDevGroup.HAPTIC_FEEDBACK -> stringResource(R.string.dev_accordion_haptic_feedback)
+                SettingsDevGroup.APP_BEHAVIOR -> stringResource(R.string.dev_accordion_app_behavior)
+                SettingsDevGroup.STORAGE_CACHE -> stringResource(R.string.dev_accordion_storage_cache)
             }
-        }
-                }
-                SettingsDevCard.API -> {
-        // Card 2: Simulated API Level
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.dev_simulated_api_title),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.dev_effective_ui_api, effectiveApi),
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = if (effectiveApi < 31) colorScheme.error else colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.dev_simulate_api_switch),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = if (isTiefschwarz) Color.White else colorScheme.onSurface
-                    )
-                    Switch(
-                        checked = simulatedApiEnabled,
-                        onCheckedChange = { checked ->
-                            triggerHaptic()
-                            onSetSimulatedApi(checked, currentSliderApi.toInt())
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = colorScheme.onPrimary,
-                            checkedTrackColor = colorScheme.primary,
-                            uncheckedThumbColor = colorScheme.outline,
-                            uncheckedTrackColor = colorScheme.surfaceVariant
-                        ),
-                        modifier = Modifier.testTag("switch_simulate_api")
-                    )
-                }
-
-                if (simulatedApiEnabled) {
-                    val apiSliderPillShape = GlassDialogDefaults.NestedPanelShape
-                    val apiSliderPillBg = GlassDialogDefaults.cardBackgroundColor()
-                    val apiSliderPillBorder = glassProps.containerBorderStroke
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp)
-                            .clip(apiSliderPillShape)
-                            .background(apiSliderPillBg)
-                            .border(apiSliderPillBorder, shape = apiSliderPillShape)
-                            .padding(horizontal = 20.dp, vertical = 16.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.dev_api_level_slider, currentSliderApi.roundToInt()),
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Slider(
-                            value = currentSliderApi,
-                            onValueChange = { newValue ->
-                                val newApi = newValue.roundToInt()
-                                val previousApi = currentSliderApi.roundToInt()
-                                onSliderValueChange(newApi.toFloat())
-                                if (newApi != previousApi && hapticFeedbackEnabled) {
-                                    HapticUtil.performAppHaptic(
-                                        context = context,
-                                        view = view,
-                                        enabled = hapticFeedbackEnabled,
-                                        intensityLevel = hapticIntensity
-                                    )
-                                }
-                            },
-                            onValueChangeFinished = {
-                                onSetSimulatedApi(true, currentSliderApi.roundToInt())
-                            },
-                            valueRange = sliderMin..sliderMax,
-                            steps = sliderSteps,
-                            colors = SliderDefaults.colors(
-                                thumbColor = MaterialTheme.colorScheme.primary,
-                                activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
-                                inactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("slider_simulated_api")
-                        )
-                    }
-                }
-
-                // Dynamic API Feature Legend
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(R.string.dev_api_feature_compatibility, realDeviceApi),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-
-                val apiFeatures = remember {
-                    listOf(
-                        R.string.dev_feature_vibration_effect to 26,
-                        R.string.dev_feature_edge_to_edge to 29,
-                        R.string.dev_feature_material_you to 31,
-                        R.string.dev_feature_blur_effect to 31,
-                        R.string.dev_feature_swipe_gestures to 33
-                    )
-                }
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    apiFeatures.forEach { (nameResId, minApi) ->
-                        val isAvailable = effectiveApi >= minApi
-                        val pillBg = if (isAvailable) colorScheme.primaryContainer.copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        val textColor = if (isAvailable) colorScheme.onPrimaryContainer else colorScheme.onSurface.copy(alpha = 0.35f)
-                        val featureName = stringResource(nameResId)
-                        val apiSuffix = stringResource(R.string.dev_api_level_plus, minApi)
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(percent = 50))
-                                .background(pillBg)
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                modifier = Modifier.wrapContentWidth()
-                            ) {
-                                Icon(
-                                    imageVector = if (isAvailable) Icons.Default.Check else Icons.Default.Close,
-                                    contentDescription = null,
-                                    tint = if (isAvailable) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.35f),
-                                    modifier = Modifier.size(13.dp)
-                                )
-                                Text(
-                                    text = "$featureName ($apiSuffix)",
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isAvailable) FontWeight.Bold else FontWeight.Medium,
-                                    color = textColor,
-                                    softWrap = true,
-                                    lineHeight = 13.sp
-                                )
-                            }
-                        }
-                    }
-                }
+            val expanded = when (group) {
+                SettingsDevGroup.SYSTEM_API -> systemApiAccordionOpen
+                SettingsDevGroup.HAPTIC_FEEDBACK -> hapticAccordionOpen
+                SettingsDevGroup.APP_BEHAVIOR -> behaviorAccordionOpen
+                SettingsDevGroup.STORAGE_CACHE -> storageAccordionOpen
             }
-        }
-                }
-                SettingsDevCard.HAPTIC -> {
-        // Card 3: Haptic Feedback with hardware motor detection
-        val hasVibratorMotor = remember(context) { HapticUtil.hasVibrator(context) }
-        val hapticMotorType = remember(context) { HapticUtil.getHapticMotorType(context) }
-        val isSupportedBySimulatedApi = effectiveApi >= 26
-        val isHapticUsable = hasVibratorMotor && isSupportedBySimulatedApi
-        val isIntensitySliderEnabled = hapticMotorType != HapticMotorType.NONE && isSupportedBySimulatedApi && hapticFeedbackEnabled
-        var sliderIntensity by remember(hapticIntensity) {
-            mutableFloatStateOf(hapticIntensity.toFloat().coerceIn(1f, 10f))
-        }
-
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .alpha(if (isHapticUsable) 1.0f else 0.5f)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.dev_haptic_title),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorScheme.primary
-                        )
-                        Text(
-                            text = stringResource(R.string.dev_haptic_desc),
-                            fontSize = 12.sp,
-                            color = colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = if (isHapticUsable) hapticFeedbackEnabled else false,
-                        onCheckedChange = if (isHapticUsable) {
-                            { enabled ->
-                                onToggleHapticFeedback(enabled)
-                                if (enabled) {
-                                    HapticUtil.performAppHaptic(
-                                        context,
-                                        view,
-                                        true,
-                                        sliderIntensity.roundToInt().coerceIn(1, 10)
-                                    )
-                                }
-                            }
-                        } else null,
-                        enabled = isHapticUsable,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = colorScheme.onPrimary,
-                            checkedTrackColor = colorScheme.primary,
-                            uncheckedThumbColor = colorScheme.outline,
-                            uncheckedTrackColor = colorScheme.surfaceVariant,
-                            disabledCheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
-                            disabledCheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.38f),
-                            disabledUncheckedThumbColor = colorScheme.outline.copy(alpha = 0.38f),
-                            disabledUncheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.24f)
-                        ),
-                        modifier = Modifier.testTag("switch_haptic_feedback")
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                val motorLabel = when (hapticMotorType) {
-                    HapticMotorType.LRA -> "LRA (Linear Resonant Actuator)"
-                    HapticMotorType.ERM -> "ERM (Eccentric Rotating Mass)"
-                    else -> "NONE"
-                }
-
-                Text(
-                    text = "${stringResource(R.string.dev_haptic_detected_motor)}: $motorLabel",
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = colorScheme.primary.copy(alpha = 0.8f)
-                )
-
-                // Haptic Intensity Slider Pill (10 levels: 1..10, default 5)
-                val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
-                val sliderPillShape = RoundedCornerShape(28.dp)
-                val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                val sliderPillBorder = glassProps.containerBorderStroke
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp)
-                        .clip(sliderPillShape)
-                        .background(sliderPillBg)
-                        .border(sliderPillBorder, shape = sliderPillShape)
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(if (isIntensitySliderEnabled) 1.0f else 0.45f),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.dev_haptic_intensity_label),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = stringResource(R.string.dev_haptic_intensity_level, currentLevel),
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isIntensitySliderEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.testTag("text_haptic_intensity_level")
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Slider(
-                        value = sliderIntensity,
-                        onValueChange = { newValue ->
-                            val newLevel = newValue.roundToInt().coerceIn(1, 10)
-                            val previousLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
-                            sliderIntensity = newLevel.toFloat()
-                            if (newLevel != previousLevel) {
-                                onSetHapticIntensity(newLevel)
-                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, newLevel)
-                            }
-                        },
-                        onValueChangeFinished = {
-                            onSetHapticIntensity(sliderIntensity.roundToInt().coerceIn(1, 10))
-                        },
-                        valueRange = 1f..10f,
-                        steps = 8,
-                        enabled = isIntensitySliderEnabled,
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                            activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
-                            inactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
-                            disabledThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                            disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                            disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                            disabledActiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("slider_haptic_intensity")
-                    )
-                }
-
-                if (!hasVibratorMotor) {
-                    Text(
-                        text = stringResource(R.string.dev_haptic_unsupported_device),
-                        fontSize = 12.sp,
-                        color = colorScheme.error,
-                        modifier = Modifier.padding(top = 6.dp)
-                    )
-                } else if (effectiveApi < 26) {
-                    Text(
-                        text = stringResource(R.string.dev_haptic_unsupported_api),
-                        fontSize = 12.sp,
-                        color = colorScheme.error,
-                        modifier = Modifier.padding(top = 6.dp)
-                    )
-                }
+            val onToggle = when (group) {
+                SettingsDevGroup.SYSTEM_API -> onToggleSystemApiAccordion
+                SettingsDevGroup.HAPTIC_FEEDBACK -> onToggleHapticAccordion
+                SettingsDevGroup.APP_BEHAVIOR -> onToggleBehaviorAccordion
+                SettingsDevGroup.STORAGE_CACHE -> onToggleStorageAccordion
             }
-        }
-                }
-                SettingsDevCard.AUTO_RESULT -> {
-        // Card 4: Auto Result Switch (Pill-Option)
-        SettingsGlassCard(
-            glassProps = glassProps,
-            shape = RoundedCornerShape(percent = 50),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = 24.dp,
-                vertical = 14.dp
-            ),
-            modifier = Modifier.defaultMinSize(minHeight = 56.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            val cardTestTag = when (group) {
+                SettingsDevGroup.SYSTEM_API -> "card_dev_system_api_accordion"
+                SettingsDevGroup.HAPTIC_FEEDBACK -> "card_dev_haptic_accordion"
+                SettingsDevGroup.APP_BEHAVIOR -> "card_dev_behavior_accordion"
+                SettingsDevGroup.STORAGE_CACHE -> "card_dev_storage_accordion"
+            }
+            val toggleButtonTestTag = when (group) {
+                SettingsDevGroup.SYSTEM_API -> "btn_toggle_dev_system_api_accordion"
+                SettingsDevGroup.HAPTIC_FEEDBACK -> "btn_toggle_dev_haptic_accordion"
+                SettingsDevGroup.APP_BEHAVIOR -> "btn_toggle_dev_behavior_accordion"
+                SettingsDevGroup.STORAGE_CACHE -> "btn_toggle_dev_storage_accordion"
+            }
+            val chevronLabel = when (group) {
+                SettingsDevGroup.SYSTEM_API -> "dev_system_api_chevron_rotation"
+                SettingsDevGroup.HAPTIC_FEEDBACK -> "dev_haptic_chevron_rotation"
+                SettingsDevGroup.APP_BEHAVIOR -> "dev_behavior_chevron_rotation"
+                SettingsDevGroup.STORAGE_CACHE -> "dev_storage_chevron_rotation"
+            }
+
+            SettingsAccordionCard(
+                title = title,
+                expanded = expanded,
+                onToggle = onToggle,
+                isTiefschwarz = isTiefschwarz,
+                colorScheme = colorScheme,
+                glassProps = glassProps,
+                triggerHaptic = triggerHaptic,
+                cardTestTag = cardTestTag,
+                toggleButtonTestTag = toggleButtonTestTag,
+                chevronLabel = chevronLabel
             ) {
-                Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                    Text(text = stringResource(R.string.dev_auto_result_title), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                    Text(text = stringResource(R.string.dev_auto_result_desc), fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
-                }
-                Switch(checked = autoResultEnabled, onCheckedChange = { triggerHaptic(); onToggleAutoResult(it) }, modifier = Modifier.testTag("switch_auto_result"))
-            }
-        }
-                }
-                SettingsDevCard.LIFECYCLE -> {
-        // Card 5: Lifecycle & State
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(R.string.dev_lifecycle_title), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                Text(text = "Status: $lifecycleStatus", fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = colorScheme.primary)
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = { triggerHaptic(); onSimulateBackground() },
-                        shape = RoundedCornerShape(percent = 50),
-                        modifier = Modifier.weight(1f).testTag("btn_simulate_background")
-                    ) {
-                        Text(stringResource(R.string.dev_btn_background), fontSize = 11.sp, maxLines = 1)
-                    }
-                    Button(
-                        onClick = { triggerHaptic(); onTestCrashProtection() },
-                        shape = RoundedCornerShape(percent = 50),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error),
-                        modifier = Modifier.weight(1f).testTag("btn_test_crash_protection")
-                    ) {
-                        Text(stringResource(R.string.dev_btn_crash_test), fontSize = 11.sp, maxLines = 1)
-                    }
-                }
-            }
-        }
-                }
-                SettingsDevCard.CLEAR_CACHE -> {
-        // Card 6: Cache leeren (Eigene Karte)
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.dev_clear_cache_title),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.dev_clear_cache_desc),
-                    fontSize = 12.sp,
-                    color = colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = {
-                        triggerHaptic()
-                        coroutineScope.launch {
-                            val success = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    context.cacheDir.listFiles()?.forEach { it.deleteRecursively() }
-                                }.isSuccess
+                cardsInGroup.forEach { devCard ->
+                    when (devCard) {
+                        SettingsDevCard.SCREEN -> {
+                            // Card 1: Screen & WindowSizeClass
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = stringResource(R.string.dev_screen_scaling),
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    @Suppress("DEPRECATION")
+                                    val widthClassName = windowSizeClass?.windowWidthSizeClass ?: "Compact"
+                                    Text(
+                                        text = "WindowSizeClass: $widthClassName",
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = if (isTiefschwarz) Color.White else colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.dev_resolution, screenWidthDp, screenHeightDp),
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                            val msgRes = if (success) R.string.toast_cache_cleared else R.string.toast_cache_error
-                            Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth().testTag("btn_clear_cache"),
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-                ) {
-                    Text(stringResource(R.string.dev_btn_clear_cache), fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-                }
-                SettingsDevCard.RESET_STORAGE -> {
-        // Card 7: App-Speicher zurücksetzen
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(R.string.dev_reset_storage_title), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.error)
-                Text(text = stringResource(R.string.dev_reset_storage_desc), fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
-                Button(
-                    onClick = { triggerHaptic(); onResetAppRequest() },
-                    shape = RoundedCornerShape(percent = 50),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error),
-                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp).testTag("btn_reset_storage")
-                ) {
-                    Text(stringResource(R.string.dev_btn_reset_storage), fontWeight = FontWeight.Bold)
-                }
-            }
-        }
+                        SettingsDevCard.API -> {
+                            // Card 2: Simulated API Level
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = stringResource(R.string.dev_simulated_api_title),
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.dev_effective_ui_api, effectiveApi),
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (effectiveApi < 31) colorScheme.error else colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.dev_simulate_api_switch),
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = if (isTiefschwarz) Color.White else colorScheme.onSurface
+                                        )
+                                        Switch(
+                                            checked = simulatedApiEnabled,
+                                            onCheckedChange = { checked ->
+                                                triggerHaptic()
+                                                onSetSimulatedApi(checked, currentSliderApi.toInt())
+                                            },
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = colorScheme.onPrimary,
+                                                checkedTrackColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.outline,
+                                                uncheckedTrackColor = colorScheme.surfaceVariant
+                                            ),
+                                            modifier = Modifier.testTag("switch_simulate_api")
+                                        )
+                                    }
+
+                                    if (simulatedApiEnabled) {
+                                        val apiSliderPillShape = GlassDialogDefaults.NestedPanelShape
+                                        val apiSliderPillBg = GlassDialogDefaults.cardBackgroundColor()
+                                        val apiSliderPillBorder = glassProps.containerBorderStroke
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 10.dp)
+                                                .clip(apiSliderPillShape)
+                                                .background(apiSliderPillBg)
+                                                .border(apiSliderPillBorder, shape = apiSliderPillShape)
+                                                .padding(horizontal = 20.dp, vertical = 16.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.dev_api_level_slider, currentSliderApi.roundToInt()),
+                                                fontSize = 12.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Slider(
+                                                value = currentSliderApi,
+                                                onValueChange = { newValue ->
+                                                    val newApi = newValue.roundToInt()
+                                                    val previousApi = currentSliderApi.roundToInt()
+                                                    onSliderValueChange(newApi.toFloat())
+                                                    if (newApi != previousApi && hapticFeedbackEnabled) {
+                                                        HapticUtil.performAppHaptic(
+                                                            context = context,
+                                                            view = view,
+                                                            enabled = hapticFeedbackEnabled,
+                                                            intensityLevel = hapticIntensity
+                                                        )
+                                                    }
+                                                },
+                                                onValueChangeFinished = {
+                                                    onSetSimulatedApi(true, currentSliderApi.roundToInt())
+                                                },
+                                                valueRange = sliderMin..sliderMax,
+                                                steps = sliderSteps,
+                                                colors = SliderDefaults.colors(
+                                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                                    inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                                    activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                                                    inactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
+                                                ),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .testTag("slider_simulated_api")
+                                            )
+                                        }
+                                    }
+
+                                    // Dynamic API Feature Legend
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Text(
+                                        text = stringResource(R.string.dev_api_feature_compatibility, realDeviceApi),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+
+                                    val apiFeatures = remember {
+                                        listOf(
+                                            R.string.dev_feature_vibration_effect to 26,
+                                            R.string.dev_feature_edge_to_edge to 29,
+                                            R.string.dev_feature_material_you to 31,
+                                            R.string.dev_feature_blur_effect to 31,
+                                            R.string.dev_feature_swipe_gestures to 33
+                                        )
+                                    }
+
+                                    FlowRow(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        apiFeatures.forEach { (nameResId, minApi) ->
+                                            val isAvailable = effectiveApi >= minApi
+                                            val pillBg = if (isAvailable) colorScheme.primaryContainer.copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                            val textColor = if (isAvailable) colorScheme.onPrimaryContainer else colorScheme.onSurface.copy(alpha = 0.35f)
+                                            val featureName = stringResource(nameResId)
+                                            val apiSuffix = stringResource(R.string.dev_api_level_plus, minApi)
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(percent = 50))
+                                                    .background(pillBg)
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                                    modifier = Modifier.wrapContentWidth()
+                                                ) {
+                                                    Icon(
+                                                        imageVector = if (isAvailable) Icons.Default.Check else Icons.Default.Close,
+                                                        contentDescription = null,
+                                                        tint = if (isAvailable) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.35f),
+                                                        modifier = Modifier.size(13.dp)
+                                                    )
+                                                    Text(
+                                                        text = "$featureName ($apiSuffix)",
+                                                        fontSize = 11.sp,
+                                                        fontWeight = if (isAvailable) FontWeight.Bold else FontWeight.Medium,
+                                                        color = textColor,
+                                                        softWrap = true,
+                                                        lineHeight = 13.sp
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        SettingsDevCard.HAPTIC -> {
+                            // Card 3: Haptic Feedback with hardware motor detection
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .alpha(if (isHapticUsable) 1.0f else 0.5f)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.dev_haptic_title),
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colorScheme.primary
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.dev_haptic_desc),
+                                                fontSize = 12.sp,
+                                                color = colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Switch(
+                                            checked = if (isHapticUsable) hapticFeedbackEnabled else false,
+                                            onCheckedChange = if (isHapticUsable) {
+                                                { enabled ->
+                                                    onToggleHapticFeedback(enabled)
+                                                    if (enabled) {
+                                                        HapticUtil.performAppHaptic(
+                                                            context,
+                                                            view,
+                                                            true,
+                                                            sliderIntensity.roundToInt().coerceIn(1, 10)
+                                                        )
+                                                    }
+                                                }
+                                            } else null,
+                                            enabled = isHapticUsable,
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = colorScheme.onPrimary,
+                                                checkedTrackColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.outline,
+                                                uncheckedTrackColor = colorScheme.surfaceVariant,
+                                                disabledCheckedThumbColor = colorScheme.onSurface.copy(alpha = 0.38f),
+                                                disabledCheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.38f),
+                                                disabledUncheckedThumbColor = colorScheme.outline.copy(alpha = 0.38f),
+                                                disabledUncheckedTrackColor = colorScheme.surfaceVariant.copy(alpha = 0.24f)
+                                            ),
+                                            modifier = Modifier.testTag("switch_haptic_feedback")
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(6.dp))
+
+                                    val motorLabel = when (hapticMotorType) {
+                                        HapticMotorType.LRA -> "LRA (Linear Resonant Actuator)"
+                                        HapticMotorType.ERM -> "ERM (Eccentric Rotating Mass)"
+                                        else -> "NONE"
+                                    }
+
+                                    Text(
+                                        text = "${stringResource(R.string.dev_haptic_detected_motor)}: $motorLabel",
+                                        fontSize = 11.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = colorScheme.primary.copy(alpha = 0.8f)
+                                    )
+
+                                    // Haptic Intensity Slider Pill (10 levels: 1..10, default 5)
+                                    val currentLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
+                                    val sliderPillShape = RoundedCornerShape(28.dp)
+                                    val sliderPillBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                    val sliderPillBorder = glassProps.containerBorderStroke
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 12.dp)
+                                            .clip(sliderPillShape)
+                                            .background(sliderPillBg)
+                                            .border(sliderPillBorder, shape = sliderPillShape)
+                                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .alpha(if (isIntensitySliderEnabled) 1.0f else 0.45f),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.dev_haptic_intensity_label),
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.dev_haptic_intensity_level, currentLevel),
+                                                fontSize = 12.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isIntensitySliderEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.testTag("text_haptic_intensity_level")
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Slider(
+                                            value = sliderIntensity,
+                                            onValueChange = { newValue ->
+                                                val newLevel = newValue.roundToInt().coerceIn(1, 10)
+                                                val previousLevel = sliderIntensity.roundToInt().coerceIn(1, 10)
+                                                sliderIntensity = newLevel.toFloat()
+                                                if (newLevel != previousLevel) {
+                                                    onSetHapticIntensity(newLevel)
+                                                    HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, newLevel)
+                                                }
+                                            },
+                                            onValueChangeFinished = {
+                                                onSetHapticIntensity(sliderIntensity.roundToInt().coerceIn(1, 10))
+                                            },
+                                            valueRange = 1f..10f,
+                                            steps = 8,
+                                            enabled = isIntensitySliderEnabled,
+                                            colors = SliderDefaults.colors(
+                                                thumbColor = MaterialTheme.colorScheme.primary,
+                                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                                inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                                activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                                                inactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                                                disabledThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                                disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                                                disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                                disabledActiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                                disabledInactiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f)
+                                            ),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .testTag("slider_haptic_intensity")
+                                        )
+                                    }
+
+                                    if (!hasVibratorMotor) {
+                                        Text(
+                                            text = stringResource(R.string.dev_haptic_unsupported_device),
+                                            fontSize = 12.sp,
+                                            color = colorScheme.error,
+                                            modifier = Modifier.padding(top = 6.dp)
+                                        )
+                                    } else if (effectiveApi < 26) {
+                                        Text(
+                                            text = stringResource(R.string.dev_haptic_unsupported_api),
+                                            fontSize = 12.sp,
+                                            color = colorScheme.error,
+                                            modifier = Modifier.padding(top = 6.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        SettingsDevCard.AUTO_RESULT -> {
+                            // Card 4: Auto Result Switch (Pill-Option)
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = RoundedCornerShape(percent = 50),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                    horizontal = 24.dp,
+                                    vertical = 14.dp
+                                ),
+                                modifier = Modifier.defaultMinSize(minHeight = 56.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.dev_auto_result_title),
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colorScheme.primary
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.dev_auto_result_desc),
+                                            fontSize = 12.sp,
+                                            color = colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Switch(
+                                        checked = autoResultEnabled,
+                                        onCheckedChange = {
+                                            triggerHaptic()
+                                            onToggleAutoResult(it)
+                                        },
+                                        modifier = Modifier.testTag("switch_auto_result")
+                                    )
+                                }
+                            }
+                        }
+                        SettingsDevCard.LIFECYCLE -> {
+                            // Card 5: Lifecycle & State
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = stringResource(R.string.dev_lifecycle_title),
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Status: $lifecycleStatus",
+                                        fontSize = 13.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = colorScheme.primary
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 10.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                triggerHaptic()
+                                                onSimulateBackground()
+                                            },
+                                            shape = RoundedCornerShape(percent = 50),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .testTag("btn_simulate_background")
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.dev_btn_background),
+                                                fontSize = 11.sp,
+                                                maxLines = 1
+                                            )
+                                        }
+                                        Button(
+                                            onClick = {
+                                                triggerHaptic()
+                                                onTestCrashProtection()
+                                            },
+                                            shape = RoundedCornerShape(percent = 50),
+                                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .testTag("btn_test_crash_protection")
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.dev_btn_crash_test),
+                                                fontSize = 11.sp,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        SettingsDevCard.CLEAR_CACHE -> {
+                            // Card 6: Cache leeren (Eigene Karte)
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = stringResource(R.string.dev_clear_cache_title),
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.primary
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.dev_clear_cache_desc),
+                                        fontSize = 12.sp,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Button(
+                                        onClick = {
+                                            triggerHaptic()
+                                            coroutineScope.launch {
+                                                val success = withContext(Dispatchers.IO) {
+                                                    runCatching {
+                                                        context.cacheDir.listFiles()?.forEach { it.deleteRecursively() }
+                                                    }.isSuccess
+                                                }
+                                                val msgRes = if (success) R.string.toast_cache_cleared else R.string.toast_cache_error
+                                                Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .testTag("btn_clear_cache"),
+                                        shape = RoundedCornerShape(50),
+                                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                                    ) {
+                                        Text(stringResource(R.string.dev_btn_clear_cache), fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                        SettingsDevCard.RESET_STORAGE -> {
+                            // Card 7: App-Speicher zurücksetzen
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = stringResource(R.string.dev_reset_storage_title),
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorScheme.error
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.dev_reset_storage_desc),
+                                        fontSize = 12.sp,
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                    Button(
+                                        onClick = {
+                                            triggerHaptic()
+                                            onResetAppRequest()
+                                        },
+                                        shape = RoundedCornerShape(percent = 50),
+                                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.error),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 10.dp)
+                                            .testTag("btn_reset_storage")
+                                    ) {
+                                        Text(stringResource(R.string.dev_btn_reset_storage), fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
