@@ -327,7 +327,7 @@ fun CalculatorScreen(
                                     Icon(
                                         imageVector = Icons.Default.Menu,
                                         contentDescription = stringResource(R.string.nav_open_menu),
-                                        tint = colorScheme.onSurface,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -370,7 +370,7 @@ fun CalculatorScreen(
                                 Icon(
                                     imageVector = Icons.Default.History,
                                     contentDescription = stringResource(R.string.nav_history_show),
-                                    tint = colorScheme.onSurface,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -906,7 +906,7 @@ private fun PortraitCalculatorLayout(
             // Bar with DEG/RAD Toggle & Scientific Switch
             val angleButtonBorder = glassProps.containerBorderStroke
             val scientificButtonBorder = if (isScientificExpanded) {
-                BorderStroke(width = 1.dp, color = colorScheme.tertiary)
+                BorderStroke(width = 1.dp, color = colorScheme.primary)
             } else {
                 glassProps.containerBorderStroke
             }
@@ -978,7 +978,7 @@ private fun PortraitCalculatorLayout(
                             Icon(
                                 imageVector = Icons.Default.Science,
                                 contentDescription = null,
-                                tint = if (isScientificExpanded) colorScheme.tertiary else colorScheme.onSurface,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
@@ -988,7 +988,7 @@ private fun PortraitCalculatorLayout(
                                 maxLines = 1,
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis,
-                                color = if (isScientificExpanded) colorScheme.tertiary else colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
