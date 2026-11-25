@@ -16,7 +16,7 @@ Here is a comprehensive overview of all features included in GlassCalc, categori
 *   **Scientific Mode (SCI):** Toggleable scientific keypad including trigonometry, inverse functions, logarithms, roots, powers, and physical constants.
 *   **Interactive Graphing:** Plot mathematical functions dynamically with a responsive coordinate system.
 
-### 🔄 Intermediate Updates (v1.2.0 - v1.3.6)
+### 🔄 Intermediate Updates (v1.2.0 - v1.3.7)
 *   **Developer Options (v1.2.0):** Built-in debug menu for testing API levels, layout sizes, and cache management.
 *   **Unit Conversion (v1.2.0):** Seamlessly convert between Metric and US/Imperial units.
 *   **Information & Licensing Hub (v1.2.0):** View the GitHub repository, app license, and third-party licenses.
