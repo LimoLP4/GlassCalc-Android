@@ -58,7 +58,6 @@ Since **Version 1.2.8**, GlassCalc fully supports all these languages. The app a
 ## 🛠️ Tech Stack & App Information
 
 *   **Package Name / Application ID:** `com.limonatalp4.glasscalcproject`
-*   **Version:** 1.3.6
 *   **Language:** Kotlin
 *   **UI Framework:** Jetpack Compose (Material 3)
 *   **Architecture:** MVVM (Model-View-ViewModel)
