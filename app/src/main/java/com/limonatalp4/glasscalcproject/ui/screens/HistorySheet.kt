@@ -382,14 +382,16 @@ fun HistorySheet(
                                     Icon(
                                         imageVector = Icons.Default.History,
                                         contentDescription = null,
-                                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                                        tint = colorScheme.primary.copy(alpha = 0.65f),
                                         modifier = Modifier.size(36.dp)
                                     )
                                     Text(
                                         text = stringResource(R.string.history_empty),
                                         fontSize = 15.sp,
-                                        color = colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center
+                                        fontWeight = FontWeight.Medium,
+                                        color = colorScheme.primary,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.testTag("text_history_empty")
                                     )
                                 }
                             }
