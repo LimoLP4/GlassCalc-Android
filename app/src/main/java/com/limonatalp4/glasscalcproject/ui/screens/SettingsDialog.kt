@@ -70,6 +70,7 @@ import androidx.core.view.WindowCompat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
@@ -1733,12 +1734,39 @@ private fun InformationSection(
         orderedInfoCards.forEach { infoCard ->
             when (infoCard) {
                 SettingsInfoCard.VERSION -> {
-        // App Version Card
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "GlassCalc v${BuildConfig.VERSION_NAME}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary, textAlign = TextAlign.Center)
-                Text(text = stringResource(R.string.app_version_subtitle), fontSize = 12.sp, color = colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                Text(text = stringResource(R.string.copyright_notice), fontSize = 11.sp, color = colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
+        // App Version Card (Pill-Design)
+        SettingsGlassCard(
+            glassProps = glassProps,
+            shape = RoundedCornerShape(percent = 50),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+                .testTag("card_app_version")
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = "GlassCalc v${BuildConfig.VERSION_NAME}",
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.app_version_subtitle),
+                    fontSize = 12.sp,
+                    color = colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.copyright_notice),
+                    fontSize = 11.sp,
+                    color = colorScheme.onSurface.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center
+                )
             }
         }
                 }
@@ -1810,26 +1838,69 @@ private fun InformationSection(
         }
                 }
                 SettingsInfoCard.OSS -> {
-        // Third-Party OSS Licenses Button
-        SettingsGlassCard(glassProps = glassProps) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(R.string.info_oss_licenses), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                Text(text = stringResource(R.string.info_oss_licenses_desc), fontSize = 12.sp, color = colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
-                Button(
-                    onClick = {
-                        triggerHaptic()
-                        try {
-                            @Suppress("DEPRECATION")
-                            val intent = Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
-                            context.startActivity(intent)
-                        } catch (_: Exception) {
-                            Toast.makeText(context, context.getString(R.string.error_calculation), Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    shape = RoundedCornerShape(percent = 50),
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(48.dp).testTag("btn_oss_licenses")
+        // Third-Party OSS Licenses Card (Pill-Design)
+        val ossCardInteraction = remember { MutableInteractionSource() }
+
+        SettingsGlassCard(
+            glassProps = glassProps,
+            shape = RoundedCornerShape(percent = 50),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+            onClick = {
+                triggerHaptic()
+                try {
+                    @Suppress("DEPRECATION")
+                    val intent = Intent(context, com.google.android.gms.oss.licenses.OssLicensesMenuActivity::class.java)
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    Toast.makeText(context, context.getString(R.string.error_calculation), Toast.LENGTH_SHORT).show()
+                }
+            },
+            role = Role.Button,
+            interactionSource = ossCardInteraction,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+                .pressScale(ossCardInteraction)
+                .testTag("card_oss_licenses")
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp)
                 ) {
-                    Text(stringResource(R.string.info_btn_oss_licenses), fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(R.string.info_oss_licenses),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                    Text(
+                        text = stringResource(R.string.info_oss_licenses_desc),
+                        fontSize = 12.sp,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
+                GlassSurface(
+                    shape = CircleShape,
+                    customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = glassProps.containerBorderStroke,
+                    modifier = Modifier.testTag("oss_licenses_icon_pill")
+                ) {
+                    Box(
+                        modifier = Modifier.padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Description,
+                            contentDescription = stringResource(R.string.info_oss_licenses),
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

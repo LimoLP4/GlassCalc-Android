@@ -552,4 +552,30 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("btn_clear_cache").performScrollTo().assertIsDisplayed()
         assert(composeTestRule.onAllNodesWithTag("switch_haptic_feedback").fetchSemanticsNodes().isEmpty())
     }
+
+    @Test
+    fun testInfoTabOssLicensesCardMatchesCompactPillLayout() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("tab_settings_3").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_oss_licenses").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("card_app_version").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("card_oss_licenses").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("oss_licenses_icon_pill", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("btn_oss_licenses").fetchSemanticsNodes().isEmpty())
+
+        composeTestRule.onNodeWithTag("card_oss_licenses").performClick()
+        composeTestRule.waitForIdle()
+    }
 }
