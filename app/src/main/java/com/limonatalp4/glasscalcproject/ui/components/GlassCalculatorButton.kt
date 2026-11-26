@@ -97,6 +97,15 @@ fun GlassCalculatorButton(
     )
 
     val colorScheme = MaterialTheme.colorScheme
+    val primaryColor = colorScheme.primary
+    val onPrimaryColor = colorScheme.onPrimary
+    val primaryContainerColor = colorScheme.primaryContainer
+    val onPrimaryContainerColor = colorScheme.onPrimaryContainer
+    val tertiaryColor = colorScheme.tertiary
+    val tertiaryContainerColor = colorScheme.tertiaryContainer
+    val onTertiaryContainerColor = colorScheme.onTertiaryContainer
+    val surfaceVariantColor = colorScheme.surfaceVariant
+    val onErrorColor = colorScheme.onError
 
     val flashColor by animateColorAsState(
         targetValue = if (isLongPressTriggered) colorScheme.error.copy(alpha = 0.85f) else Color.Transparent,
@@ -105,45 +114,55 @@ fun GlassCalculatorButton(
     )
 
     val (bgBrush, textColor, borderColor) = remember(
-        type, glassProps.isDark, glassProps.isTiefschwarz, glassProps.isMaterialYou, colorScheme, glassProps.buttonBackgroundAlpha, glassProps.buttonBorderColor
+        type,
+        primaryColor,
+        onPrimaryColor,
+        primaryContainerColor,
+        onPrimaryContainerColor,
+        tertiaryColor,
+        tertiaryContainerColor,
+        onTertiaryContainerColor,
+        surfaceVariantColor,
+        glassProps.buttonBackgroundAlpha,
+        glassProps.buttonBorderColor
     ) {
         when (type) {
             ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> {
                 val gradient = Brush.linearGradient(
                     listOf(
-                        colorScheme.primary,
-                        colorScheme.primary.copy(alpha = 0.8f)
+                        primaryColor,
+                        primaryColor.copy(alpha = 0.8f)
                     )
                 )
-                Triple(gradient, colorScheme.onPrimary, colorScheme.primary)
+                Triple(gradient, onPrimaryColor, primaryColor)
             }
             ButtonType.OPERATOR -> {
                 val brush = Brush.verticalGradient(
                     listOf(
-                        colorScheme.primaryContainer.copy(alpha = 0.80f),
-                        colorScheme.primaryContainer.copy(alpha = 0.60f)
+                        primaryContainerColor.copy(alpha = 0.80f),
+                        primaryContainerColor.copy(alpha = 0.60f)
                     )
                 )
-                Triple(brush, colorScheme.onPrimaryContainer, colorScheme.primary.copy(alpha = 0.50f))
+                Triple(brush, onPrimaryContainerColor, primaryColor.copy(alpha = 0.50f))
             }
             ButtonType.FUNCTION -> {
                 val brush = Brush.verticalGradient(
                     listOf(
-                        colorScheme.tertiaryContainer.copy(alpha = 0.80f),
-                        colorScheme.tertiaryContainer.copy(alpha = 0.60f)
+                        tertiaryContainerColor.copy(alpha = 0.80f),
+                        tertiaryContainerColor.copy(alpha = 0.60f)
                     )
                 )
-                Triple(brush, colorScheme.onTertiaryContainer, colorScheme.tertiary.copy(alpha = 0.50f))
+                Triple(brush, onTertiaryContainerColor, tertiaryColor.copy(alpha = 0.50f))
             }
             ButtonType.NUMBER -> {
                 val alpha = glassProps.buttonBackgroundAlpha
                 val brush = Brush.verticalGradient(
                     listOf(
-                        colorScheme.surfaceVariant.copy(alpha = alpha + 0.10f),
-                        colorScheme.surfaceVariant.copy(alpha = alpha)
+                        surfaceVariantColor.copy(alpha = alpha + 0.10f),
+                        surfaceVariantColor.copy(alpha = alpha)
                     )
                 )
-                Triple(brush, colorScheme.primary, glassProps.buttonBorderColor)
+                Triple(brush, primaryColor, glassProps.buttonBorderColor)
             }
         }
     }
@@ -358,7 +377,7 @@ fun GlassCalculatorButton(
             fontSize = calculatedFontSize,
             lineHeight = (calculatedFontSize.value * 1.15f).sp,
             fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR || type == ButtonType.ACTION_CLEAR) FontWeight.Bold else FontWeight.Medium,
-            color = if (isLongPressTriggered) Color.White else textColor,
+            color = if (isLongPressTriggered) onErrorColor else textColor,
             textAlign = TextAlign.Center,
             maxLines = if (allowWrap) 2 else 1,
             softWrap = allowWrap,

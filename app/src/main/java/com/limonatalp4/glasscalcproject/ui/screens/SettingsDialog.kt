@@ -391,7 +391,7 @@ fun SettingsDialog(
                                 text = stringResource(R.string.title_settings),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isTiefschwarz) Color.White else colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
@@ -948,7 +948,7 @@ private fun AccentColorPillButton(
     val interactionSource = remember { MutableInteractionSource() }
     val ringColor by animateColorAsState(
         targetValue = if (isSelected) {
-            if (isTiefschwarz) Color.White else MaterialTheme.colorScheme.onSurface
+            MaterialTheme.colorScheme.onSurface
         } else {
             glassProps.buttonBorderColor
         },
@@ -1034,7 +1034,7 @@ private fun RecentAccentColorMiniButton(
     val interactionSource = remember { MutableInteractionSource() }
     val ringColor by animateColorAsState(
         targetValue = if (isSelected) {
-            if (isTiefschwarz) Color.White else MaterialTheme.colorScheme.onSurface
+            MaterialTheme.colorScheme.onSurface
         } else {
             glassProps.buttonBorderColor
         },
@@ -1174,12 +1174,8 @@ private fun AccentColorHexInput(
     val previewColor = parsedValidArgb?.let { Color(it) }
         ?: resolveAccentSwatchColor(colorArgb = currentAccentColor, isDark = glassProps.isDark)
 
-    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
-    val hintColor = if (isTiefschwarz) {
-        Color.White.copy(alpha = 0.55f)
-    } else {
-        colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
-    }
+    val textColor = colorScheme.onSurface
+    val hintColor = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
     val hexLabel = stringResource(id = R.string.accent_color_hex_label)
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -1403,7 +1399,7 @@ private fun SettingsAccordionCard(
                     text = title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 12.dp)
@@ -1807,7 +1803,7 @@ private fun DeveloperOptionsSection(
                                         text = "WindowSizeClass: $widthClassName",
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
-                                        color = if (isTiefschwarz) Color.White else colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = stringResource(R.string.dev_resolution, screenWidthDp, screenHeightDp),
@@ -1967,7 +1963,7 @@ private fun DeveloperOptionsSection(
                                             text = stringResource(R.string.dev_simulate_api_switch),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
-                                            color = if (isTiefschwarz) Color.White else colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Switch(
                                             checked = simulatedApiEnabled,
@@ -3005,9 +3001,9 @@ private fun SettingsTabBar(
         minTabHeight = 36.dp,
         tabPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp, horizontal = 10.dp),
         labelFontSize = 12.sp,
-        activeIndicatorColor = colorScheme.primaryContainer,
-        activeContentColor = if (isTiefschwarz) Color.White else colorScheme.onPrimaryContainer,
-        inactiveContentColor = if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
+        activeIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
+        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         animationLabelPrefix = "settings_tab"
     )
 }

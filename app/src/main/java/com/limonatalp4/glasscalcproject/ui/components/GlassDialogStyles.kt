@@ -245,8 +245,8 @@ fun GlassAutoCenterPillTabBar(
     labelFontSize: TextUnit = 12.sp,
     tabSpacing: Dp = 4.dp,
     activeIndicatorColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    activeContentColor: Color = if (isTiefschwarz) Color.White else MaterialTheme.colorScheme.onPrimaryContainer,
-    inactiveContentColor: Color = if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant,
+    activeContentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    inactiveContentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     animationLabelPrefix: String = "pill_tab"
 ) {
     if (items.isEmpty()) return

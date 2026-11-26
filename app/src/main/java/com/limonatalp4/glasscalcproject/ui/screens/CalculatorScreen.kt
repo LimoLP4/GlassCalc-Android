@@ -480,9 +480,10 @@ fun CalculatorScreen(
                         )
                     ) {
                         val isPureBlack = glassProps.isTiefschwarz
-                        val drawerBgColor = colorScheme.surfaceContainerHigh
-                        val primaryTint = colorScheme.primary
-                        val onSurfaceColor = colorScheme.onSurface
+                        val drawerColorScheme = MaterialTheme.colorScheme
+                        val drawerBgColor = drawerColorScheme.surfaceContainerHigh
+                        val primaryTint = drawerColorScheme.primary
+                        val onSurfaceColor = drawerColorScheme.onSurface
                         val view = LocalView.current
                         
                         val drawerBorder = glassProps.containerBorderStroke
@@ -523,7 +524,7 @@ fun CalculatorScreen(
                                     text = "GlassCalc",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
                                     text = stringResource(R.string.app_version_tag, BuildConfig.VERSION_NAME),
@@ -533,7 +534,7 @@ fun CalculatorScreen(
                                     maxLines = 1
                                 )
                             }
-                            HorizontalDivider(color = (if (isPureBlack) Color.White else onSurfaceColor).copy(alpha = 0.08f))
+                            HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
                             Spacer(modifier = Modifier.height(12.dp))
 
                             DrawerFormulaSearch(
@@ -621,7 +622,7 @@ fun CalculatorScreen(
                                 label = "drawer_pill_height"
                             )
                             val activePillBgColor by animateColorAsState(
-                                targetValue = colorScheme.primaryContainer,
+                                targetValue = drawerColorScheme.primaryContainer,
                                 animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                                 label = "drawer_active_pill_bg"
                             )
@@ -663,18 +664,18 @@ fun CalculatorScreen(
                                         val menuItemInteraction = remember { MutableInteractionSource() }
                                         val iconTint by animateColorAsState(
                                             targetValue = if (isSelected) {
-                                                colorScheme.onPrimaryContainer
+                                                drawerColorScheme.onPrimaryContainer
                                             } else {
-                                                if (isPureBlack) Color.White.copy(alpha = 0.7f) else onSurfaceColor.copy(alpha = 0.7f)
+                                                onSurfaceColor.copy(alpha = 0.7f)
                                             },
                                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                             label = "nav_icon_tint_$tag"
                                         )
                                         val labelColor by animateColorAsState(
                                             targetValue = if (isSelected) {
-                                                colorScheme.onPrimaryContainer
+                                                drawerColorScheme.onPrimaryContainer
                                             } else {
-                                                if (isPureBlack) Color.White.copy(alpha = 0.85f) else onSurfaceColor.copy(alpha = 0.85f)
+                                                onSurfaceColor.copy(alpha = 0.85f)
                                             },
                                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                             label = "nav_label_color_$tag"

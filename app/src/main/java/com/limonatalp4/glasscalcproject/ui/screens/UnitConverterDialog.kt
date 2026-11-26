@@ -361,7 +361,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.title_converter),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isPureBlack) Color.White else onSurfaceColor,
+                                color = onSurfaceColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier
@@ -383,9 +383,9 @@ fun UnitConverterDialog(
                                 )
                                 val infoBtnTint by animateColorAsState(
                                     targetValue = if (showSystemsInfo) {
-                                        if (isPureBlack) Color.White else onPrimaryContainerColor
+                                        onPrimaryContainerColor
                                     } else {
-                                        if (isPureBlack) Color.White else onSurfaceColor
+                                        onSurfaceColor
                                     },
                                     animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
                                     label = "converter_info_btn_tint"
@@ -569,8 +569,8 @@ fun UnitConverterDialog(
                     tabPadding = PaddingValues(vertical = 9.dp, horizontal = 12.dp),
                     labelFontSize = 11.5.sp,
                     activeIndicatorColor = primaryContainerColor,
-                    activeContentColor = if (isPureBlack) Color.White else onPrimaryContainerColor,
-                    inactiveContentColor = if (isPureBlack) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
+                    activeContentColor = onPrimaryContainerColor,
+                    inactiveContentColor = colorScheme.onSurfaceVariant,
                     animationLabelPrefix = "cat"
                 )
 
@@ -658,7 +658,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.converter_input_label, fromUnit),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (isPureBlack) Color.White.copy(alpha = 0.72f) else onSurfaceColor.copy(alpha = 0.75f),
+                                color = onSurfaceColor.copy(alpha = 0.75f),
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(end = 12.dp)
@@ -725,7 +725,7 @@ fun UnitConverterDialog(
 
                         val inputBorderColor by animateColorAsState(
                             targetValue = if (isInputFocused) {
-                                if (isPureBlack) Color.White else primaryColor
+                                primaryColor
                             } else {
                                 glassProps.buttonBorderColor
                             },
@@ -733,7 +733,7 @@ fun UnitConverterDialog(
                             label = "converter_input_border"
                         )
                         val inputBgColor = GlassDialogDefaults.searchBarBackgroundColor(isPureBlack)
-                        val inputTextColor = if (isPureBlack) Color.White else onSurfaceColor
+                        val inputTextColor = onSurfaceColor
 
                         Row(
                             modifier = Modifier
@@ -792,7 +792,7 @@ fun UnitConverterDialog(
                                 text = fromUnit,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isPureBlack) Color.White.copy(alpha = 0.72f) else colorScheme.onSurfaceVariant,
+                                color = colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 softWrap = false
                             )
@@ -804,7 +804,7 @@ fun UnitConverterDialog(
                             text = stringResource(R.string.converter_result_label, toUnit),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isPureBlack) Color.White.copy(alpha = 0.72f) else onSurfaceColor.copy(alpha = 0.75f)
+                            color = onSurfaceColor.copy(alpha = 0.75f)
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -1069,11 +1069,7 @@ private fun SupportedSystemsInfoCard(
                     text = stringResource(R.string.units_systems_detail),
                     fontSize = 13.5.sp,
                     lineHeight = 20.sp,
-                    color = if (isPureBlack) {
-                        Color.White.copy(alpha = 0.85f)
-                    } else {
-                        onSurfaceColor.copy(alpha = 0.82f)
-                    },
+                    color = onSurfaceColor.copy(alpha = 0.85f),
                     modifier = Modifier.testTag("text_converter_systems_detail")
                 )
             }
@@ -1099,11 +1095,7 @@ private fun CurrencyRateStatusPill(
     } else {
         colorScheme.surfaceVariant.copy(alpha = 0.4f)
     }
-    val statusTextColor = if (isPureBlack) {
-        Color.White.copy(alpha = 0.78f)
-    } else {
-        colorScheme.onSurfaceVariant
-    }
+    val statusTextColor = colorScheme.onSurfaceVariant
 
     GlassSurface(
         shape = GlassDialogDefaults.NestedPanelShape,

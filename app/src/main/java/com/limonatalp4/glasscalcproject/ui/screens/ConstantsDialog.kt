@@ -124,7 +124,7 @@ fun ConstantsDialog(
                                 text = stringResource(R.string.title_constants),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isTiefschwarz) Color.White else colorScheme.onSurface
+                                color = colorScheme.onSurface
                             )
                         }
 
@@ -160,7 +160,7 @@ fun ConstantsDialog(
                     Text(
                         text = stringResource(R.string.constants_select_heading),
                         fontSize = 13.sp,
-                        color = if (isTiefschwarz) Color.White.copy(alpha = 0.7f) else colorScheme.onSurfaceVariant
+                        color = colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))

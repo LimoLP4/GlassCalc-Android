@@ -256,12 +256,8 @@ fun UnitConverterSearchBar(
     val shape = GlassDialogDefaults.PillShape
     val searchBarBgColor = GlassDialogDefaults.searchBarBackgroundColor(isTiefschwarz)
     val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
-    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
-    val hintColor = if (isTiefschwarz) {
-        Color.White.copy(alpha = 0.6f)
-    } else {
-        colorScheme.onSurfaceVariant
-    }
+    val textColor = colorScheme.onSurface
+    val hintColor = colorScheme.onSurfaceVariant
 
     val context = LocalContext.current
     val view = LocalView.current
@@ -409,8 +405,8 @@ fun UnitSuggestionsDropdown(
     val colorScheme = MaterialTheme.colorScheme
     val density = LocalDensity.current
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
-    val textColor = if (isTiefschwarz) Color.White else colorScheme.onSurface
-    val dividerColor = if (isTiefschwarz) Color.White.copy(alpha = 0.08f) else colorScheme.outline.copy(alpha = 0.12f)
+    val textColor = colorScheme.onSurface
+    val dividerColor = colorScheme.outline.copy(alpha = 0.12f)
 
     GlassSurface(
         modifier = modifier
@@ -437,7 +433,7 @@ fun UnitSuggestionsDropdown(
                     ) {
                         Text(
                             text = stringResource(R.string.converter_search_empty),
-                            color = if (isTiefschwarz) Color.White.copy(alpha = 0.6f) else colorScheme.onSurfaceVariant,
+                            color = colorScheme.onSurfaceVariant,
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -559,11 +555,7 @@ fun ConverterSearchEmptyState(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = if (isTiefschwarz) {
-                    Color.White.copy(alpha = 0.6f)
-                } else {
-                    colorScheme.onSurfaceVariant
-                },
+                tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(26.dp)
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -571,11 +563,7 @@ fun ConverterSearchEmptyState(
                 text = stringResource(R.string.converter_search_empty),
                 fontSize = 13.5.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (isTiefschwarz) {
-                    Color.White.copy(alpha = 0.75f)
-                } else {
-                    colorScheme.onSurfaceVariant
-                },
+                color = colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
