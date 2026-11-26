@@ -70,7 +70,7 @@ import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 
 enum class SettingsUnitCard { DEG, RAD }
 
-enum class SettingsDevCard { SCREEN, API, QUICK_SETTINGS_TILE, HAPTIC, AUTO_RESULT, LIFECYCLE, CLEAR_CACHE, RESET_STORAGE }
+enum class SettingsDevCard { SCREEN, QUICK_SETTINGS_TILE, API, HAPTIC, AUTO_RESULT, LIFECYCLE, CLEAR_CACHE, RESET_STORAGE }
 
 enum class SettingsInfoCard { VERSION, GITHUB, FRANKFURTER_API, OSS, APACHE }
 
@@ -423,8 +423,8 @@ fun rememberSettingsSearchVisibility(
     )
     val scoredDevCards = listOfNotNull(
         devScreenScore?.let { Triple(SettingsDevCard.SCREEN, it, 0) },
-        devApiScore?.let { Triple(SettingsDevCard.API, it, 1) },
-        devQsTileScore?.let { Triple(SettingsDevCard.QUICK_SETTINGS_TILE, it, 2) },
+        devQsTileScore?.let { Triple(SettingsDevCard.QUICK_SETTINGS_TILE, it, 1) },
+        devApiScore?.let { Triple(SettingsDevCard.API, it, 2) },
         devHapticScore?.let { Triple(SettingsDevCard.HAPTIC, it, 3) },
         devAutoResultScore?.let { Triple(SettingsDevCard.AUTO_RESULT, it, 4) },
         devLifecycleScore?.let { Triple(SettingsDevCard.LIFECYCLE, it, 5) },

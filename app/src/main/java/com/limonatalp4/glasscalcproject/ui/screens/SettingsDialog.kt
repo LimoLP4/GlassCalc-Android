@@ -1665,7 +1665,7 @@ private enum class SettingsDevGroup {
 }
 
 private fun SettingsDevCard.group(): SettingsDevGroup = when (this) {
-    SettingsDevCard.SCREEN, SettingsDevCard.API, SettingsDevCard.QUICK_SETTINGS_TILE -> SettingsDevGroup.SYSTEM_API
+    SettingsDevCard.SCREEN, SettingsDevCard.QUICK_SETTINGS_TILE, SettingsDevCard.API -> SettingsDevGroup.SYSTEM_API
     SettingsDevCard.HAPTIC -> SettingsDevGroup.HAPTIC_FEEDBACK
     SettingsDevCard.AUTO_RESULT, SettingsDevCard.LIFECYCLE -> SettingsDevGroup.APP_BEHAVIOR
     SettingsDevCard.CLEAR_CACHE, SettingsDevCard.RESET_STORAGE -> SettingsDevGroup.STORAGE_CACHE
@@ -1818,8 +1818,126 @@ private fun DeveloperOptionsSection(
                                 }
                             }
                         }
+                        SettingsDevCard.QUICK_SETTINGS_TILE -> {
+                            // Card 2: Quick Settings Tile (StatusBarManager Android 13+)
+                            val qsTileBtnInteraction = remember { MutableInteractionSource() }
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape,
+                                modifier = Modifier.testTag("card_qs_tile")
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.info_qs_tile_title),
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colorScheme.primary
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.info_qs_tile_desc),
+                                                fontSize = 12.sp,
+                                                lineHeight = 16.sp,
+                                                color = colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        GlassSurface(
+                                            shape = CircleShape,
+                                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                            borderStroke = glassProps.containerBorderStroke
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.padding(10.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_qs_tile_gc),
+                                                    contentDescription = stringResource(R.string.info_qs_tile_title),
+                                                    tint = colorScheme.primary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    GlassSurface(
+                                        shape = GlassDialogDefaults.PillShape,
+                                        customBgColor = colorScheme.primaryContainer.copy(alpha = if (isTiefschwarz) 0.55f else 0.72f),
+                                        borderStroke = glassProps.containerBorderStroke,
+                                        onClick = {
+                                            triggerHaptic()
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                val statusBarManager = context.getSystemService(StatusBarManager::class.java)
+                                                if (statusBarManager != null) {
+                                                    statusBarManager.requestAddTileService(
+                                                        ComponentName(context, GlassCalcTileService::class.java),
+                                                        context.getString(R.string.app_name),
+                                                        Icon.createWithResource(context, R.drawable.ic_qs_tile_gc),
+                                                        context.mainExecutor
+                                                    ) { resultCode ->
+                                                        val msgRes = when (resultCode) {
+                                                            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED -> R.string.qs_tile_added
+                                                            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> R.string.qs_tile_already_added
+                                                            else -> R.string.qs_tile_not_added
+                                                        }
+                                                        Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_SHORT).show()
+                                                    }
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        context.getString(R.string.qs_tile_not_added),
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.qs_tile_requires_android_13),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        },
+                                        role = Role.Button,
+                                        interactionSource = qsTileBtnInteraction,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .defaultMinSize(minHeight = 48.dp)
+                                            .pressScale(qsTileBtnInteraction)
+                                            .testTag("btn_add_qs_tile")
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.info_qs_tile_btn),
+                                                fontSize = 13.5.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = colorScheme.onPrimaryContainer,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         SettingsDevCard.API -> {
-                            // Card 2: Simulated API Level
+                            // Card 3: Simulated API Level
                             SettingsGlassCard(
                                 glassProps = glassProps,
                                 shape = GlassDialogDefaults.NestedPanelShape
@@ -1981,124 +2099,6 @@ private fun DeveloperOptionsSection(
                                                     )
                                                 }
                                             }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        SettingsDevCard.QUICK_SETTINGS_TILE -> {
-                            // Card 3: Quick Settings Tile (StatusBarManager Android 13+)
-                            val qsTileBtnInteraction = remember { MutableInteractionSource() }
-                            SettingsGlassCard(
-                                glassProps = glassProps,
-                                shape = GlassDialogDefaults.NestedPanelShape,
-                                modifier = Modifier.testTag("card_qs_tile")
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 12.dp),
-                                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.info_qs_tile_title),
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = colorScheme.primary
-                                            )
-                                            Text(
-                                                text = stringResource(R.string.info_qs_tile_desc),
-                                                fontSize = 12.sp,
-                                                lineHeight = 16.sp,
-                                                color = colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                        GlassSurface(
-                                            shape = CircleShape,
-                                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                            borderStroke = glassProps.containerBorderStroke
-                                        ) {
-                                            Box(
-                                                modifier = Modifier.padding(10.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(id = R.drawable.ic_qs_tile_gc),
-                                                    contentDescription = stringResource(R.string.info_qs_tile_title),
-                                                    tint = colorScheme.primary,
-                                                    modifier = Modifier.size(20.dp)
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    GlassSurface(
-                                        shape = GlassDialogDefaults.PillShape,
-                                        customBgColor = colorScheme.primaryContainer.copy(alpha = if (isTiefschwarz) 0.55f else 0.72f),
-                                        borderStroke = glassProps.containerBorderStroke,
-                                        onClick = {
-                                            triggerHaptic()
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                val statusBarManager = context.getSystemService(StatusBarManager::class.java)
-                                                if (statusBarManager != null) {
-                                                    statusBarManager.requestAddTileService(
-                                                        ComponentName(context, GlassCalcTileService::class.java),
-                                                        context.getString(R.string.app_name),
-                                                        Icon.createWithResource(context, R.drawable.ic_qs_tile_gc),
-                                                        context.mainExecutor
-                                                    ) { resultCode ->
-                                                        val msgRes = when (resultCode) {
-                                                            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED -> R.string.qs_tile_added
-                                                            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> R.string.qs_tile_already_added
-                                                            else -> R.string.qs_tile_not_added
-                                                        }
-                                                        Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_SHORT).show()
-                                                    }
-                                                } else {
-                                                    Toast.makeText(
-                                                        context,
-                                                        context.getString(R.string.qs_tile_not_added),
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                }
-                                            } else {
-                                                Toast.makeText(
-                                                    context,
-                                                    context.getString(R.string.qs_tile_requires_android_13),
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                        },
-                                        role = Role.Button,
-                                        interactionSource = qsTileBtnInteraction,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .defaultMinSize(minHeight = 48.dp)
-                                            .pressScale(qsTileBtnInteraction)
-                                            .testTag("btn_add_qs_tile")
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.info_qs_tile_btn),
-                                                fontSize = 13.5.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = colorScheme.onPrimaryContainer,
-                                                textAlign = TextAlign.Center
-                                            )
                                         }
                                     }
                                 }
