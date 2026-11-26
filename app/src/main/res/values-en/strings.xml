@@ -560,4 +560,73 @@
     <string name="unit_keywords_bar">bar,bars,pressure,tire pressure</string>
     <string name="unit_keywords_psi">psi,pounds per square inch,pressure,tire pressure</string>
     <string name="unit_keywords_atmosphere">atmosphere,atmospheres,atm,air pressure,pressure</string>
+
+    <!-- v1.3.8: Currency Converter (Live Rates) -->
+    <string name="cat_currency">Currency</string>
+    <string name="converter_keywords_currency">currency,currencies,money,exchange rate,forex,rate,euro,dollar,pound,yen,franc</string>
+    <string name="currency_loading">Loading live exchange rates…</string>
+    <string name="currency_rate_info">1 %1$s = %2$s %3$s • Updated: %4$s</string>
+    <string name="currency_cached_offline">1 %1$s = %2$s %3$s • Offline cache (%4$s)</string>
+    <string name="currency_error">Unable to load exchange rates. Tap refresh to retry.</string>
+    <string name="currency_refresh_desc">Refresh exchange rates</string>
+    <string name="unit_eur_usd">Euro ↔ US Dollar (EUR ↔ USD)</string>
+    <string name="unit_eur_gbp">Euro ↔ British Pound (EUR ↔ GBP)</string>
+    <string name="unit_eur_chf">Euro ↔ Swiss Franc (EUR ↔ CHF)</string>
+    <string name="unit_eur_jpy">Euro ↔ Japanese Yen (EUR ↔ JPY)</string>
+    <string name="unit_usd_gbp">US Dollar ↔ British Pound (USD ↔ GBP)</string>
+    <string name="unit_usd_jpy">US Dollar ↔ Japanese Yen (USD ↔ JPY)</string>
+    <string name="unit_usd_chf">US Dollar ↔ Swiss Franc (USD ↔ CHF)</string>
+    <string name="unit_eur_cad">Euro ↔ Canadian Dollar (EUR ↔ CAD)</string>
+    <string name="unit_eur_aud">Euro ↔ Australian Dollar (EUR ↔ AUD)</string>
+    <string name="unit_eur_cny">Euro ↔ Chinese Yuan (EUR ↔ CNY)</string>
+    <string name="unit_usd_cny">US Dollar ↔ Chinese Yuan (USD ↔ CNY)</string>
+    <string name="unit_eur_pln">Euro ↔ Polish Złoty (EUR ↔ PLN)</string>
+    <string name="unit_eur_sek">Euro ↔ Swedish Krona (EUR ↔ SEK)</string>
+    <string name="unit_eur_nok">Euro ↔ Norwegian Krone (EUR ↔ NOK)</string>
+    <string name="unit_eur_inr">Euro ↔ Indian Rupee (EUR ↔ INR)</string>
+    <string name="unit_name_eur">Euro</string>
+    <string name="unit_name_usd">US Dollar</string>
+    <string name="unit_name_gbp">British Pound</string>
+    <string name="unit_name_chf">Swiss Franc</string>
+    <string name="unit_name_jpy">Japanese Yen</string>
+    <string name="unit_name_cad">Canadian Dollar</string>
+    <string name="unit_name_aud">Australian Dollar</string>
+    <string name="unit_name_cny">Chinese Yuan</string>
+    <string name="unit_name_pln">Polish Złoty</string>
+    <string name="unit_name_sek">Swedish Krona</string>
+    <string name="unit_name_nok">Norwegian Krone</string>
+    <string name="unit_name_inr">Indian Rupee</string>
+    <string name="unit_keywords_eur">euro,eur,€,currency,europe</string>
+    <string name="unit_keywords_usd">dollar,us dollar,usd,$,currency,usa</string>
+    <string name="unit_keywords_gbp">pound,british pound,gbp,£,sterling,currency</string>
+    <string name="unit_keywords_chf">franc,swiss franc,chf,currency,switzerland</string>
+    <string name="unit_keywords_jpy">yen,japanese yen,jpy,¥,currency,japan</string>
+    <string name="unit_keywords_cad">canadian dollar,cad,currency,canada</string>
+    <string name="unit_keywords_aud">australian dollar,aud,currency,australia</string>
+    <string name="unit_keywords_cny">yuan,renminbi,cny,rmb,currency,china</string>
+    <string name="unit_keywords_pln">zloty,złoty,pln,currency,poland</string>
+    <string name="unit_keywords_sek">krona,swedish krona,sek,currency,sweden</string>
+    <string name="unit_keywords_nok">krone,norwegian krone,nok,currency,norway</string>
+    <string name="unit_keywords_inr">rupee,indian rupee,inr,₹,currency,india</string>
+
+    <!-- v1.3.8: Recent Accent Colors -->
+    <string name="accent_color_recent_label">Recently used</string>
+
+    <!-- v1.3.8: Quick Settings Tile & Widget -->
+    <string name="qs_tile_desc">Launch GlassCalc quickly from the status bar</string>
+    <string name="info_qs_tile_title">Quick Settings Tile</string>
+    <string name="info_qs_tile_desc">Open GlassCalc directly from the Android Quick Settings panel with the GC icon.</string>
+    <string name="info_qs_tile_btn">Add tile to Quick Settings</string>
+    <string name="qs_tile_added">Tile added to Quick Settings</string>
+    <string name="qs_tile_already_added">Tile is already in Quick Settings</string>
+    <string name="qs_tile_not_added">Could not add Quick Settings tile</string>
+    <string name="qs_tile_requires_android_13">On Android versions below 13, please add the tile via the Quick Settings edit menu.</string>
+    <string name="settings_keywords_info_qs_tile">tile,quick settings,status bar,shortcut</string>
+    <string name="widget_quick_calc_name">GlassCalc Quick Calculator</string>
+    <string name="widget_quick_calc_desc">Compact Liquid-Glass calculator widget for your home screen.</string>
+    <string name="widget_open_app_desc">Open GlassCalc</string>
+    <string name="info_oss_frankfurter_title">Frankfurter API</string>
+    <string name="info_frankfurter_desc">Live exchange rates provided by the Frankfurter API</string>
+    <string name="info_oss_frankfurter_license">License: Open Source (MIT) - Free to use (ECB reference rates)</string>
+    <string name="currency_api_disclaimer">Note: Live exchange rates are fetched from the external Frankfurter API (frankfurter.app).</string>
 </resources>

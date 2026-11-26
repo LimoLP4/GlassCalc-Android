@@ -80,6 +80,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -88,6 +89,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.Modifier
@@ -395,6 +400,7 @@ fun CalculatorScreen(
                             displayStateFlow = viewModel.displayState,
                             actions = keypadActions,
                             angleMode = angleMode,
+                            isScientificExpanded = isScientificExpanded,
                             glassState = glassState
                         )
                     } else {
@@ -769,6 +775,7 @@ fun CalculatorScreen(
         if (isSettingsOpen) {
             val currentTheme by viewModel.currentTheme.collectAsState()
             val currentAccentColor by viewModel.customAccentColor.collectAsState()
+            val recentAccentColors by viewModel.recentAccentColors.collectAsState()
             val accentHexInput by viewModel.accentHexInput.collectAsState()
             val isAccentHexInvalid by viewModel.isAccentHexInvalid.collectAsState()
             val simulatedApiEnabled by viewModel.simulatedApiEnabled.collectAsState()
@@ -779,6 +786,7 @@ fun CalculatorScreen(
             SettingsDialog(
                 currentTheme = currentTheme,
                 currentAccentColor = currentAccentColor,
+                recentAccentColors = recentAccentColors,
                 accentHexInput = accentHexInput,
                 isAccentHexInvalid = isAccentHexInvalid,
                 currentAppIcon = currentAppIcon,
@@ -818,7 +826,10 @@ fun CalculatorScreen(
         }
 
         if (isUnitConverterOpen) {
+            val currencyRatesState by viewModel.currencyRatesState.collectAsState()
             UnitConverterDialog(
+                currencyRatesState = currencyRatesState,
+                onEnsureCurrencyRates = { force -> viewModel.ensureCurrencyRatesLoaded(force) },
                 onImportToCalculator = { value ->
                     viewModel.importConvertedValue(value)
                 },
@@ -1060,6 +1071,7 @@ private fun LandscapeCalculatorLayout(
     displayStateFlow: StateFlow<CalculatorDisplayState>,
     actions: CalculatorKeypadActions,
     angleMode: AngleMode,
+    isScientificExpanded: Boolean,
     glassState: io.github.nadeemiqbal.liquidglass.LiquidGlassState? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -1093,7 +1105,7 @@ private fun LandscapeCalculatorLayout(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 14.dp, vertical = animatedOuterVerticalPadding)
+            .padding(horizontal = 16.dp, vertical = animatedOuterVerticalPadding)
     ) {
         val availableWidth = maxWidth
         val availableHeight = maxHeight
@@ -1104,13 +1116,23 @@ private fun LandscapeCalculatorLayout(
             stableKeypadHeight = availableHeight
         }
 
-        val rightHalfWidth = (availableWidth - 14.dp) / 2f
+        val rightHalfWidth = (availableWidth - 16.dp) / 2f
         val interKeypadSpacing = 8.dp
 
-        val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.6.dp * 9)) / 9.2f)
-        val maxButtonHeight = ((stableKeypadHeight - 20.dp) / 6.3f)
-
-        val buttonSize = minOf(maxButtonWidth, maxButtonHeight).coerceIn(28.dp, 62.dp)
+        val targetButtonSize = if (isScientificExpanded) {
+            val maxButtonWidth = ((rightHalfWidth - interKeypadSpacing - (3.6.dp * 9)) / 9.2f)
+            val maxButtonHeight = ((stableKeypadHeight - 20.dp) / 6.3f)
+            minOf(maxButtonWidth, maxButtonHeight).coerceIn(28.dp, 62.dp)
+        } else {
+            val maxButtonWidth = ((rightHalfWidth - (4.dp * 4)) / 4.4f)
+            val maxButtonHeight = ((stableKeypadHeight - 20.dp) / 5.4f)
+            minOf(maxButtonWidth, maxButtonHeight).coerceIn(34.dp, 68.dp)
+        }
+        val buttonSize by animateDpAsState(
+            targetValue = targetButtonSize,
+            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+            label = "landscape_button_size"
+        )
         val spacing = (buttonSize * 0.08f).coerceIn(2.5.dp, 6.dp)
 
         val leftContentHeightDp = with(density) { leftContentHeightPx.toDp() }
@@ -1127,10 +1149,10 @@ private fun LandscapeCalculatorLayout(
 
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // LINKS (ca. 50% der Breite): Display + DEG/RAD-Button
+            // LINKS (ca. 50% der Breite): Zentriertes Display + DEG/RAD & Wissenschaftlich-Schalter
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -1141,7 +1163,8 @@ private fun LandscapeCalculatorLayout(
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(0.88f)
+                        .widthIn(max = 420.dp)
                         .padding(top = animatedLeftTopPadding)
                         .onSizeChanged { leftContentHeightPx = it.height }
                         .animateContentSize(
@@ -1153,7 +1176,7 @@ private fun LandscapeCalculatorLayout(
                     GlassDisplay(
                         displayStateFlow = displayStateFlow,
                         angleMode = angleMode,
-                        isScientificExpanded = true,
+                        isScientificExpanded = isScientificExpanded,
                         onCursorPositionChanged = actions.onCursorPositionChanged,
                         onExpressionChange = actions.onExpressionChange,
                         onEvaluate = actions.onEquals,
@@ -1163,7 +1186,18 @@ private fun LandscapeCalculatorLayout(
                     )
 
                     val landscapeAngleBorder = glassProps.containerBorderStroke
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                    val landscapeSciBorder = if (isScientificExpanded) {
+                        BorderStroke(width = 1.dp, color = colorScheme.primary)
+                    } else {
+                        glassProps.containerBorderStroke
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         val landscapeAngleInteraction = remember { MutableInteractionSource() }
                         GlassSurface(
                             shape = CircleShape,
@@ -1175,12 +1209,9 @@ private fun LandscapeCalculatorLayout(
                             role = Role.Button,
                             interactionSource = landscapeAngleInteraction,
                             modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .size(
-                                    width = (buttonSize * 1.8f).coerceIn(68.dp, 96.dp),
-                                    height = (buttonSize * 0.75f).coerceIn(28.dp, 38.dp)
-                                )
+                                .size(width = 76.dp, height = 36.dp)
                                 .pressScale(landscapeAngleInteraction)
+                                .testTag("btn_toggle_angle_mode")
                         ) {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -1194,11 +1225,57 @@ private fun LandscapeCalculatorLayout(
                                 )
                             }
                         }
+
+                        val landscapeSciInteraction = remember { MutableInteractionSource() }
+                        GlassSurface(
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .widthIn(min = 108.dp)
+                                .height(36.dp)
+                                .pressScale(landscapeSciInteraction)
+                                .testTag("btn_toggle_scientific"),
+                            shape = CircleShape,
+                            borderStroke = landscapeSciBorder,
+                            onClick = {
+                                HapticUtil.performAppHaptic(localContext, localView, hapticFeedbackEnabled, hapticIntensity)
+                                actions.onToggleScientificPanel()
+                            },
+                            role = Role.Button,
+                            interactionSource = landscapeSciInteraction
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Science,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = if (isScientificExpanded) stringResource(R.string.mode_standard) else stringResource(R.string.mode_scientific),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            // RECHTS (ca. 50% der Breite): Wissenschaftliche Tasten & Ziffernblock NEBENEINANDER
+            // RECHTS (ca. 50% der Breite): Ziffernblock, optional mit Wissenschafts-Panel links daneben
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -1212,15 +1289,27 @@ private fun LandscapeCalculatorLayout(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ScientificKeyboardGrid(
-                        actions = actions,
-                        glassState = glassState,
-                        buttonSize = buttonSize,
-                        spacing = spacing,
-                        modifier = Modifier.width((buttonSize + spacing) * 5)
-                    )
+                    AnimatedVisibility(
+                        visible = isScientificExpanded,
+                        enter = expandHorizontally(
+                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(durationMillis = 180)),
+                        exit = shrinkHorizontally(
+                            animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                        ) + fadeOut(animationSpec = tween(durationMillis = 150))
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            ScientificKeyboardGrid(
+                                actions = actions,
+                                glassState = glassState,
+                                buttonSize = buttonSize,
+                                spacing = spacing,
+                                modifier = Modifier.width((buttonSize + spacing) * 5)
+                            )
 
-                    Spacer(modifier = Modifier.width(interKeypadSpacing))
+                            Spacer(modifier = Modifier.width(interKeypadSpacing))
+                        }
+                    }
 
                     MainKeyboardGrid(
                         actions = actions,

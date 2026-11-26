@@ -560,4 +560,73 @@
     <string name="unit_keywords_bar">бар,bar,давление</string>
     <string name="unit_keywords_psi">psi,фунт на квадратный дюйм,давление</string>
     <string name="unit_keywords_atmosphere">атмосфера,атм,atmosphere,atm,давление</string>
+
+    <!-- v1.3.8: Currency Converter (Live Rates) -->
+    <string name="cat_currency">Валюта</string>
+    <string name="converter_keywords_currency">валюта,валюты,деньги,курс,обмен,евро,доллар,фунт,иена,франк,currency</string>
+    <string name="currency_loading">Загрузка курсов валют…</string>
+    <string name="currency_rate_info">1 %1$s = %2$s %3$s • Дата: %4$s</string>
+    <string name="currency_cached_offline">1 %1$s = %2$s %3$s • Офлайн-кэш (%4$s)</string>
+    <string name="currency_error">Не удалось загрузить курсы валют. Нажмите обновить.</string>
+    <string name="currency_refresh_desc">Обновить курсы валют</string>
+    <string name="unit_eur_usd">Евро ↔ Доллар США (EUR ↔ USD)</string>
+    <string name="unit_eur_gbp">Евро ↔ Фунт стерлингов (EUR ↔ GBP)</string>
+    <string name="unit_eur_chf">Евро ↔ Швейцарский франк (EUR ↔ CHF)</string>
+    <string name="unit_eur_jpy">Евро ↔ Японская иена (EUR ↔ JPY)</string>
+    <string name="unit_usd_gbp">Доллар США ↔ Фунт стерлингов (USD ↔ GBP)</string>
+    <string name="unit_usd_jpy">Доллар США ↔ Японская иена (USD ↔ JPY)</string>
+    <string name="unit_usd_chf">Доллар США ↔ Швейцарский франк (USD ↔ CHF)</string>
+    <string name="unit_eur_cad">Евро ↔ Канадский доллар (EUR ↔ CAD)</string>
+    <string name="unit_eur_aud">Евро ↔ Австралийский доллар (EUR ↔ AUD)</string>
+    <string name="unit_eur_cny">Евро ↔ Китайский юань (EUR ↔ CNY)</string>
+    <string name="unit_usd_cny">Доллар США ↔ Китайский юань (USD ↔ CNY)</string>
+    <string name="unit_eur_pln">Евро ↔ Польский злотый (EUR ↔ PLN)</string>
+    <string name="unit_eur_sek">Евро ↔ Шведская крона (EUR ↔ SEK)</string>
+    <string name="unit_eur_nok">Евро ↔ Норвежская крона (EUR ↔ NOK)</string>
+    <string name="unit_eur_inr">Евро ↔ Индийская рупия (EUR ↔ INR)</string>
+    <string name="unit_name_eur">Евро</string>
+    <string name="unit_name_usd">Доллар США</string>
+    <string name="unit_name_gbp">Фунт стерлингов</string>
+    <string name="unit_name_chf">Швейцарский франк</string>
+    <string name="unit_name_jpy">Японская иена</string>
+    <string name="unit_name_cad">Канадский доллар</string>
+    <string name="unit_name_aud">Австралийский доллар</string>
+    <string name="unit_name_cny">Китайский юань</string>
+    <string name="unit_name_pln">Польский злотый</string>
+    <string name="unit_name_sek">Шведская крона</string>
+    <string name="unit_name_nok">Норвежская крона</string>
+    <string name="unit_name_inr">Индийская рупия</string>
+    <string name="unit_keywords_eur">евро,eur,€,валюта</string>
+    <string name="unit_keywords_usd">доллар,usd,$,валюта</string>
+    <string name="unit_keywords_gbp">фунт,gbp,£,pound,валюта</string>
+    <string name="unit_keywords_chf">франк,швейцарский франк,chf,валюта</string>
+    <string name="unit_keywords_jpy">иена,jpy,¥,валюта</string>
+    <string name="unit_keywords_cad">канадский доллар,cad,валюта</string>
+    <string name="unit_keywords_aud">австралийский доллар,aud,валюта</string>
+    <string name="unit_keywords_cny">юань,cny,rmb,валюта</string>
+    <string name="unit_keywords_pln">злотый,pln,валюта</string>
+    <string name="unit_keywords_sek">шведская крона,sek,валюта</string>
+    <string name="unit_keywords_nok">норвежская крона,nok,валюта</string>
+    <string name="unit_keywords_inr">индийская рупия,inr,₹,валюта</string>
+
+    <!-- v1.3.8: Recent Accent Colors -->
+    <string name="accent_color_recent_label">Недавние</string>
+
+    <!-- v1.3.8: Quick Settings Tile & Widget -->
+    <string name="qs_tile_desc">Быстрый запуск GlassCalc из строки состояния</string>
+    <string name="info_qs_tile_title">Плитка быстрых настроек</string>
+    <string name="info_qs_tile_desc">Запускайте GlassCalc прямо из панели быстрых настроек Android с логотипом GC.</string>
+    <string name="info_qs_tile_btn">Добавить плитку в быстрые настройки</string>
+    <string name="qs_tile_added">Плитка добавлена в быстрые настройки</string>
+    <string name="qs_tile_already_added">Плитка уже в быстрых настройках</string>
+    <string name="qs_tile_not_added">Не удалось добавить плитку</string>
+    <string name="qs_tile_requires_android_13">На Android ниже 13 добавьте плитку через меню изменения быстрых настроек.</string>
+    <string name="settings_keywords_info_qs_tile">плитка,быстрые настройки,quick settings,tile,ярлык</string>
+    <string name="widget_quick_calc_name">Быстрый калькулятор GlassCalc</string>
+    <string name="widget_quick_calc_desc">Компактный виджет в стиле Liquid-Glass для главного экрана.</string>
+    <string name="widget_open_app_desc">Открыть GlassCalc</string>
+    <string name="info_oss_frankfurter_title">Frankfurter API</string>
+    <string name="info_frankfurter_desc">Актуальные курсы валют предоставляются через Frankfurter API</string>
+    <string name="info_oss_frankfurter_license">Лицензия: Open Source (MIT) - Free to use (курсы ЕЦБ)</string>
+    <string name="currency_api_disclaimer">Примечание: Курсы валют загружаются через внешний API Frankfurter (frankfurter.app).</string>
 </resources>

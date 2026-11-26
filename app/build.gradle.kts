@@ -18,8 +18,8 @@ android {
     applicationId = "com.limonatalp4.glasscalcproject"
     minSdk = 26
     targetSdk = 37
-    versionCode = 20
-    versionName = "1.3.7"
+    versionCode = 21
+    versionName = "1.3.8"
 
     ndk {
       abiFilters += listOf("arm64-v8a", "armeabi-v7a")
@@ -129,6 +129,12 @@ dependencies {
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.androidx.appcompat)
+  implementation(libs.retrofit)
+  implementation(libs.converter.moshi)
+  implementation(libs.okhttp)
+  implementation(libs.moshi.kotlin)
+  implementation(libs.androidx.glance.appwidget)
+  implementation(libs.androidx.glance.material3)
 
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)

@@ -40,6 +40,8 @@ class GlassCalcPreferences(private val context: Context) {
         val LANGUAGE = stringPreferencesKey("language")
         val APP_ICON = stringPreferencesKey("app_icon")
         val CUSTOM_ACCENT_COLOR = intPreferencesKey("custom_accent_color")
+        val RECENT_ACCENT_COLORS = stringPreferencesKey("recent_accent_colors")
+        val CACHED_CURRENCY_RATES = stringPreferencesKey("cached_currency_rates")
     }
 
     private val safeDataFlow: Flow<Preferences> = context.dataStore.data
@@ -134,6 +136,16 @@ class GlassCalcPreferences(private val context: Context) {
         prefs[PreferencesKeys.CUSTOM_ACCENT_COLOR]
     }
 
+    val recentAccentColorsFlow: Flow<List<Int>> = safeDataFlow.map { prefs ->
+        val raw = prefs[PreferencesKeys.RECENT_ACCENT_COLORS] ?: "[]"
+        parseRecentColorsJson(raw)
+    }
+
+    val cachedCurrencyRatesFlow: Flow<CachedCurrencyRates?> = safeDataFlow.map { prefs ->
+        val raw = prefs[PreferencesKeys.CACHED_CURRENCY_RATES] ?: return@map null
+        parseCurrencyRatesJson(raw)
+    }
+
     suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
         try {
             context.dataStore.edit { prefs ->
@@ -206,6 +218,34 @@ class GlassCalcPreferences(private val context: Context) {
                 } else {
                     prefs[PreferencesKeys.CUSTOM_ACCENT_COLOR] = colorArgb
                 }
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+        }
+    }
+
+    suspend fun addRecentAccentColor(colorArgb: Int) {
+        try {
+            context.dataStore.edit { prefs ->
+                val raw = prefs[PreferencesKeys.RECENT_ACCENT_COLORS] ?: "[]"
+                val updated = (listOf(colorArgb) + parseRecentColorsJson(raw).filter { it != colorArgb }).take(5)
+                prefs[PreferencesKeys.RECENT_ACCENT_COLORS] = serializeRecentColorsJson(updated)
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+        }
+    }
+
+    suspend fun saveCachedCurrencyRates(
+        base: String,
+        date: String,
+        rates: Map<String, Double>,
+        fetchedAtMillis: Long
+    ) {
+        try {
+            context.dataStore.edit { prefs ->
+                prefs[PreferencesKeys.CACHED_CURRENCY_RATES] =
+                    serializeCurrencyRatesJson(CachedCurrencyRates(base, date, rates, fetchedAtMillis))
             }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
@@ -331,4 +371,73 @@ class GlassCalcPreferences(private val context: Context) {
         }
         return array.toString()
     }
+
+    private fun parseRecentColorsJson(jsonStr: String): List<Int> {
+        val list = mutableListOf<Int>()
+        try {
+            val array = JSONArray(jsonStr)
+            for (i in 0 until array.length()) {
+                val value = array.optInt(i)
+                if (value != 0 && value !in list) {
+                    list.add(value)
+                }
+                if (list.size == 5) break
+            }
+        } catch (_: Exception) {
+            // Ignore malformed JSON
+        }
+        return list
+    }
+
+    private fun serializeRecentColorsJson(colors: List<Int>): String {
+        val array = JSONArray()
+        colors.take(5).forEach { array.put(it) }
+        return array.toString()
+    }
+
+    private fun parseCurrencyRatesJson(jsonStr: String): CachedCurrencyRates? {
+        return try {
+            val obj = JSONObject(jsonStr)
+            val base = obj.optString("base", "EUR")
+            val date = obj.optString("date", "")
+            val fetchedAtMillis = obj.optLong("fetchedAtMillis", 0L)
+            val ratesObj = obj.optJSONObject("rates") ?: return null
+            val rates = mutableMapOf<String, Double>()
+            val keys = ratesObj.keys()
+            while (keys.hasNext()) {
+                val code = keys.next()
+                val value = ratesObj.optDouble(code, Double.NaN)
+                if (value.isFinite() && value > 0.0) {
+                    rates[code] = value
+                }
+            }
+            if (rates.isEmpty()) return null
+            CachedCurrencyRates(
+                base = base,
+                date = date,
+                rates = rates,
+                fetchedAtMillis = fetchedAtMillis
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun serializeCurrencyRatesJson(data: CachedCurrencyRates): String {
+        val obj = JSONObject()
+        obj.put("base", data.base)
+        obj.put("date", data.date)
+        obj.put("fetchedAtMillis", data.fetchedAtMillis)
+        val ratesObj = JSONObject()
+        data.rates.forEach { (k, v) -> ratesObj.put(k, v) }
+        obj.put("rates", ratesObj)
+        return obj.toString()
+    }
 }
+
+data class CachedCurrencyRates(
+    val base: String,
+    val date: String,
+    val rates: Map<String, Double>,
+    val fetchedAtMillis: Long
+)

@@ -99,3 +99,4 @@ This app utilizes the following open-source libraries. We thank the authors for 
 *   **[Liquid Glass](https://github.com/nadeemiqbal/liquid-glass):** Licensed under the Apache License 2.0. (Used for UI blur and glass effects).
 *   **[MathParser.org-mXparser](https://mathparser.org/):** Licensed under the **mXparser Dual License (Non-Commercial)**. (Used for parsing and evaluating mathematical expressions and formulas). The non-commercial use has been confirmed within the app's source code as required by the license.
 *   **Google Play Services (OSS Licenses):** Licensed under the Apache License 2.0. (Used to automatically generate the third-party license menu within the app).
+*   **[Frankfurter API](https://www.frankfurter.app/):** Open Source (MIT License) / Free to use. (Used for fetching live currency exchange rates based on European Central Bank reference rates).

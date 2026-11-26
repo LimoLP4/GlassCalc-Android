@@ -28,3 +28,15 @@
 -keep class androidx.compose.runtime.Composer { *; }
 -keep class androidx.compose.runtime.CompositionLocal { *; }
 -keep class androidx.compose.material3.** { *; }
+
+# Jetpack Glance AppWidget ActionCallback
+-keep class * implements androidx.glance.appwidget.action.ActionCallback {
+    public <init>();
+}
+
+# Retrofit / OkHttp / Moshi (Currency Converter)
+-keep class com.limonatalp4.glasscalcproject.data.remote.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
+-dontwarn okio.**
+

@@ -560,4 +560,73 @@
     <string name="unit_keywords_bar">bar,bares,presión</string>
     <string name="unit_keywords_psi">psi,libra por pulgada cuadrada,presión</string>
     <string name="unit_keywords_atmosphere">atmósfera,atmósferas,atm,presión</string>
+
+    <!-- v1.3.8: Currency Converter (Live Rates) -->
+    <string name="cat_currency">Divisas</string>
+    <string name="converter_keywords_currency">divisas,moneda,monedas,cambio,tasa,euro,dólar,libra,yen,franco,currency</string>
+    <string name="currency_loading">Cargando tipos de cambio…</string>
+    <string name="currency_rate_info">1 %1$s = %2$s %3$s • Fecha: %4$s</string>
+    <string name="currency_cached_offline">1 %1$s = %2$s %3$s • Caché sin conexión (%4$s)</string>
+    <string name="currency_error">No se pudieron cargar los tipos de cambio. Pulsa actualizar.</string>
+    <string name="currency_refresh_desc">Actualizar tipos de cambio</string>
+    <string name="unit_eur_usd">Euro ↔ Dólar estadounidense (EUR ↔ USD)</string>
+    <string name="unit_eur_gbp">Euro ↔ Libra esterlina (EUR ↔ GBP)</string>
+    <string name="unit_eur_chf">Euro ↔ Franco suizo (EUR ↔ CHF)</string>
+    <string name="unit_eur_jpy">Euro ↔ Yen japonés (EUR ↔ JPY)</string>
+    <string name="unit_usd_gbp">Dólar estadounidense ↔ Libra esterlina (USD ↔ GBP)</string>
+    <string name="unit_usd_jpy">Dólar estadounidense ↔ Yen japonés (USD ↔ JPY)</string>
+    <string name="unit_usd_chf">Dólar estadounidense ↔ Franco suizo (USD ↔ CHF)</string>
+    <string name="unit_eur_cad">Euro ↔ Dólar canadiense (EUR ↔ CAD)</string>
+    <string name="unit_eur_aud">Euro ↔ Dólar australiano (EUR ↔ AUD)</string>
+    <string name="unit_eur_cny">Euro ↔ Yuan chino (EUR ↔ CNY)</string>
+    <string name="unit_usd_cny">Dólar estadounidense ↔ Yuan chino (USD ↔ CNY)</string>
+    <string name="unit_eur_pln">Euro ↔ Złoty polaco (EUR ↔ PLN)</string>
+    <string name="unit_eur_sek">Euro ↔ Corona sueca (EUR ↔ SEK)</string>
+    <string name="unit_eur_nok">Euro ↔ Corona noruega (EUR ↔ NOK)</string>
+    <string name="unit_eur_inr">Euro ↔ Rupia india (EUR ↔ INR)</string>
+    <string name="unit_name_eur">Euro</string>
+    <string name="unit_name_usd">Dólar estadounidense</string>
+    <string name="unit_name_gbp">Libra esterlina</string>
+    <string name="unit_name_chf">Franco suizo</string>
+    <string name="unit_name_jpy">Yen japonés</string>
+    <string name="unit_name_cad">Dólar canadiense</string>
+    <string name="unit_name_aud">Dólar australiano</string>
+    <string name="unit_name_cny">Yuan chino</string>
+    <string name="unit_name_pln">Złoty polaco</string>
+    <string name="unit_name_sek">Corona sueca</string>
+    <string name="unit_name_nok">Corona noruega</string>
+    <string name="unit_name_inr">Rupia india</string>
+    <string name="unit_keywords_eur">euro,eur,€,moneda,divisa</string>
+    <string name="unit_keywords_usd">dólar,dollar,usd,$,moneda,divisa</string>
+    <string name="unit_keywords_gbp">libra,gbp,£,pound,moneda,divisa</string>
+    <string name="unit_keywords_chf">franco,franco suizo,chf,moneda,divisa</string>
+    <string name="unit_keywords_jpy">yen,jpy,¥,moneda,divisa</string>
+    <string name="unit_keywords_cad">dólar canadiense,cad,moneda,divisa</string>
+    <string name="unit_keywords_aud">dólar australiano,aud,moneda,divisa</string>
+    <string name="unit_keywords_cny">yuan,renminbi,cny,rmb,moneda,divisa</string>
+    <string name="unit_keywords_pln">zloty,złoty,pln,moneda,divisa</string>
+    <string name="unit_keywords_sek">corona sueca,sek,moneda,divisa</string>
+    <string name="unit_keywords_nok">corona noruega,nok,moneda,divisa</string>
+    <string name="unit_keywords_inr">rupia india,inr,₹,moneda,divisa</string>
+
+    <!-- v1.3.8: Recent Accent Colors -->
+    <string name="accent_color_recent_label">Usados recientemente</string>
+
+    <!-- v1.3.8: Quick Settings Tile & Widget -->
+    <string name="qs_tile_desc">Abrir GlassCalc rápidamente desde la barra de estado</string>
+    <string name="info_qs_tile_title">Mosaico de Ajustes rápidos</string>
+    <string name="info_qs_tile_desc">Abre GlassCalc directamente desde los Ajustes rápidos de Android con el icono GC.</string>
+    <string name="info_qs_tile_btn">Añadir mosaico a Ajustes rápidos</string>
+    <string name="qs_tile_added">Mosaico añadido a Ajustes rápidos</string>
+    <string name="qs_tile_already_added">El mosaico ya está en Ajustes rápidos</string>
+    <string name="qs_tile_not_added">No se pudo añadir el mosaico</string>
+    <string name="qs_tile_requires_android_13">En versiones anteriores a Android 13, añádelo desde el menú de edición de Ajustes rápidos.</string>
+    <string name="settings_keywords_info_qs_tile">mosaico,ajustes rápidos,tile,barra de estado,acceso directo</string>
+    <string name="widget_quick_calc_name">Calculadora rápida GlassCalc</string>
+    <string name="widget_quick_calc_desc">Widget compacto con diseño Liquid-Glass para la pantalla de inicio.</string>
+    <string name="widget_open_app_desc">Abrir GlassCalc</string>
+    <string name="info_oss_frankfurter_title">Frankfurter API</string>
+    <string name="info_frankfurter_desc">Tipos de cambio en directo proporcionados por Frankfurter API</string>
+    <string name="info_oss_frankfurter_license">Licencia: Open Source (MIT) - Free to use (tipos BCE)</string>
+    <string name="currency_api_disclaimer">Aviso: Los tipos de cambio se obtienen de la API externa Frankfurter (frankfurter.app).</string>
 </resources>

@@ -25,6 +25,8 @@ import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.model.AppTheme
 import com.limonatalp4.glasscalcproject.data.model.CalculationHistoryItem
 import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
+import com.limonatalp4.glasscalcproject.data.repository.CurrencyRatesUiState
+import com.limonatalp4.glasscalcproject.data.repository.CurrencyRepository
 import com.limonatalp4.glasscalcproject.ui.util.AppIconManager
 import com.limonatalp4.glasscalcproject.ui.util.HapticUtil
 import com.limonatalp4.glasscalcproject.domain.evaluator.EvaluationResult
@@ -65,6 +67,7 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
 
     private val appContext: Context = application.applicationContext ?: application
     private val preferences = GlassCalcPreferences(application)
+    private val currencyRepository = CurrencyRepository(appContext, preferences)
     private val evaluator = ExpressionEvaluator()
 
     private val _isPowerSaveMode = MutableStateFlow(readPowerSaveMode(appContext))
@@ -307,6 +310,11 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
     private val _customAccentColor = MutableStateFlow<Int?>(null)
     val customAccentColor: StateFlow<Int?> = _customAccentColor.asStateFlow()
 
+    private val _recentAccentColors = MutableStateFlow<List<Int>>(emptyList())
+    val recentAccentColors: StateFlow<List<Int>> = _recentAccentColors.asStateFlow()
+
+    val currencyRatesState: StateFlow<CurrencyRatesUiState> = currencyRepository.ratesState
+
     private val _accentHexInput = MutableStateFlow("")
     val accentHexInput: StateFlow<String> = _accentHexInput.asStateFlow()
 
@@ -443,6 +451,16 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
                         _accentHexInput.value = formatAccentHex(savedColor)
                     }
                     _isAccentHexInvalid.value = false
+                }
+            }
+        }
+
+        // Load saved recent accent colors from DataStore without overwriting immediate updates
+        viewModelScope.launch {
+            runCatching {
+                val savedRecent = preferences.recentAccentColorsFlow.first()
+                if (_recentAccentColors.value.isEmpty() && savedRecent.isNotEmpty()) {
+                    _recentAccentColors.value = savedRecent
                 }
             }
         }
@@ -965,8 +983,14 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
             defaultDisplayHexArgb != null -> formatAccentHex(defaultDisplayHexArgb)
             else -> ""
         }
+        if (colorArgb != null) {
+            recordRecentAccentColorLocal(colorArgb)
+        }
         viewModelScope.launch(Dispatchers.IO) {
             preferences.setCustomAccentColor(colorArgb)
+            if (colorArgb != null) {
+                preferences.addRecentAccentColor(colorArgb)
+            }
         }
     }
 
@@ -978,9 +1002,21 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         if (parsedArgb != null) {
             hasLocalAccentChange = true
             _customAccentColor.value = parsedArgb
+            recordRecentAccentColorLocal(parsedArgb)
             viewModelScope.launch(Dispatchers.IO) {
                 preferences.setCustomAccentColor(parsedArgb)
+                preferences.addRecentAccentColor(parsedArgb)
             }
+        }
+    }
+
+    private fun recordRecentAccentColorLocal(colorArgb: Int) {
+        _recentAccentColors.value = (listOf(colorArgb) + _recentAccentColors.value.filter { it != colorArgb }).take(5)
+    }
+
+    fun ensureCurrencyRatesLoaded(forceRefresh: Boolean = false) {
+        viewModelScope.launch {
+            currencyRepository.loadRatesIfNeeded(forceRefresh = forceRefresh)
         }
     }
 
@@ -1036,8 +1072,10 @@ class CalculatorViewModel(application: Application) : AndroidViewModel(applicati
         HapticUtil.currentIntensityLevel = 5
         hasLocalAccentChange = true
         _customAccentColor.value = null
+        _recentAccentColors.value = emptyList()
         _accentHexInput.value = ""
         _isAccentHexInvalid.value = false
+        currencyRepository.clearInMemoryState()
         _selectedAppIconOverride.value = AppIconOption.CLASSIC
         pendingAppIconToApply = AppIconOption.CLASSIC
         updateDisplayState {

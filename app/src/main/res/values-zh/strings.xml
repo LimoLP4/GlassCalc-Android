@@ -560,4 +560,73 @@
     <string name="unit_keywords_bar">巴,bar,压力,压强,胎压</string>
     <string name="unit_keywords_psi">psi,磅每平方英寸,压力,压强,胎压</string>
     <string name="unit_keywords_atmosphere">标准大气压,大气压,atmosphere,atm,气压,压力</string>
+
+    <!-- v1.3.8: Currency Converter (Live Rates) -->
+    <string name="cat_currency">货币</string>
+    <string name="converter_keywords_currency">货币,汇率,外汇,欧元,美元,英镑,日元,法郎,人民币,currency</string>
+    <string name="currency_loading">正在加载实时汇率…</string>
+    <string name="currency_rate_info">1 %1$s = %2$s %3$s • 更新: %4$s</string>
+    <string name="currency_cached_offline">1 %1$s = %2$s %3$s • 离线缓存 (%4$s)</string>
+    <string name="currency_error">无法加载汇率。点击刷新重试。</string>
+    <string name="currency_refresh_desc">刷新汇率</string>
+    <string name="unit_eur_usd">欧元 ↔ 美元 (EUR ↔ USD)</string>
+    <string name="unit_eur_gbp">欧元 ↔ 英镑 (EUR ↔ GBP)</string>
+    <string name="unit_eur_chf">欧元 ↔ 瑞士法郎 (EUR ↔ CHF)</string>
+    <string name="unit_eur_jpy">欧元 ↔ 日元 (EUR ↔ JPY)</string>
+    <string name="unit_usd_gbp">美元 ↔ 英镑 (USD ↔ GBP)</string>
+    <string name="unit_usd_jpy">美元 ↔ 日元 (USD ↔ JPY)</string>
+    <string name="unit_usd_chf">美元 ↔ 瑞士法郎 (USD ↔ CHF)</string>
+    <string name="unit_eur_cad">欧元 ↔ 加拿大元 (EUR ↔ CAD)</string>
+    <string name="unit_eur_aud">欧元 ↔ 澳大利亚元 (EUR ↔ AUD)</string>
+    <string name="unit_eur_cny">欧元 ↔ 人民币 (EUR ↔ CNY)</string>
+    <string name="unit_usd_cny">美元 ↔ 人民币 (USD ↔ CNY)</string>
+    <string name="unit_eur_pln">欧元 ↔ 波兰兹罗提 (EUR ↔ PLN)</string>
+    <string name="unit_eur_sek">欧元 ↔ 瑞典克朗 (EUR ↔ SEK)</string>
+    <string name="unit_eur_nok">欧元 ↔ 挪威克朗 (EUR ↔ NOK)</string>
+    <string name="unit_eur_inr">欧元 ↔ 印度卢比 (EUR ↔ INR)</string>
+    <string name="unit_name_eur">欧元</string>
+    <string name="unit_name_usd">美元</string>
+    <string name="unit_name_gbp">英镑</string>
+    <string name="unit_name_chf">瑞士法郎</string>
+    <string name="unit_name_jpy">日元</string>
+    <string name="unit_name_cad">加拿大元</string>
+    <string name="unit_name_aud">澳大利亚元</string>
+    <string name="unit_name_cny">人民币</string>
+    <string name="unit_name_pln">波兰兹罗提</string>
+    <string name="unit_name_sek">瑞典克朗</string>
+    <string name="unit_name_nok">挪威克朗</string>
+    <string name="unit_name_inr">印度卢比</string>
+    <string name="unit_keywords_eur">欧元,eur,€,货币</string>
+    <string name="unit_keywords_usd">美元,美金,usd,$,货币</string>
+    <string name="unit_keywords_gbp">英镑,gbp,£,货币</string>
+    <string name="unit_keywords_chf">瑞士法郎,法郎,chf,货币</string>
+    <string name="unit_keywords_jpy">日元,jpy,¥,货币</string>
+    <string name="unit_keywords_cad">加拿大元,加元,cad,货币</string>
+    <string name="unit_keywords_aud">澳大利亚元,澳元,aud,货币</string>
+    <string name="unit_keywords_cny">人民币,元,cny,rmb,货币</string>
+    <string name="unit_keywords_pln">波兰兹罗提,pln,货币</string>
+    <string name="unit_keywords_sek">瑞典克朗,sek,货币</string>
+    <string name="unit_keywords_nok">挪威克朗,nok,货币</string>
+    <string name="unit_keywords_inr">印度卢比,卢比,inr,₹,货币</string>
+
+    <!-- v1.3.8: Recent Accent Colors -->
+    <string name="accent_color_recent_label">最近使用</string>
+
+    <!-- v1.3.8: Quick Settings Tile & Widget -->
+    <string name="qs_tile_desc">从状态栏快速启动 GlassCalc</string>
+    <string name="info_qs_tile_title">快捷设置磁贴</string>
+    <string name="info_qs_tile_desc">使用 GC 图标直接从 Android 快捷设置栏启动 GlassCalc。</string>
+    <string name="info_qs_tile_btn">添加磁贴到快捷设置</string>
+    <string name="qs_tile_added">已将磁贴添加到快捷设置</string>
+    <string name="qs_tile_already_added">磁贴已在快捷设置中</string>
+    <string name="qs_tile_not_added">无法添加快捷设置磁贴</string>
+    <string name="qs_tile_requires_android_13">在 Android 13 以下版本中，请通过快捷设置编辑菜单添加。</string>
+    <string name="settings_keywords_info_qs_tile">磁贴,快捷设置,quick settings,tile,状态栏</string>
+    <string name="widget_quick_calc_name">GlassCalc 快捷计算器</string>
+    <string name="widget_quick_calc_desc">适用于主屏幕的 Liquid-Glass 风格紧凑型计算器微件。</string>
+    <string name="widget_open_app_desc">打开 GlassCalc</string>
+    <string name="info_oss_frankfurter_title">Frankfurter API</string>
+    <string name="info_frankfurter_desc">由 Frankfurter API 提供的实时汇率</string>
+    <string name="info_oss_frankfurter_license">许可协议: Open Source (MIT) - Free to use（欧洲央行参考汇率）</string>
+    <string name="currency_api_disclaimer">提示：实时汇率通过外部 Frankfurter API (frankfurter.app) 获取。</string>
 </resources>

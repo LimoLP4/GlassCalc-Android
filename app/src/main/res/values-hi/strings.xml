@@ -560,4 +560,73 @@
     <string name="unit_keywords_bar">बार,bar,दाब,दबाव</string>
     <string name="unit_keywords_psi">psi,दाब,दबाव</string>
     <string name="unit_keywords_atmosphere">वायुमंडल,एटीएम,atmosphere,atm,दाब,दबाव</string>
+
+    <!-- v1.3.8: Currency Converter (Live Rates) -->
+    <string name="cat_currency">मुद्रा</string>
+    <string name="converter_keywords_currency">मुद्रा,विनिमय दर,पैसा,यूरो,डॉलर,पाउंड,येन,रुपया,currency</string>
+    <string name="currency_loading">लाइव विनिमय दरें लोड हो रही हैं…</string>
+    <string name="currency_rate_info">1 %1$s = %2$s %3$s • अपडेट: %4$s</string>
+    <string name="currency_cached_offline">1 %1$s = %2$s %3$s • ऑफ़लाइन कैश (%4$s)</string>
+    <string name="currency_error">विनिमय दरें लोड नहीं हो सकीं। रीफ़्रेश पर टैप करें।</string>
+    <string name="currency_refresh_desc">विनिमय दरें ताज़ा करें</string>
+    <string name="unit_eur_usd">यूरो ↔ अमेरिकी डॉलर (EUR ↔ USD)</string>
+    <string name="unit_eur_gbp">यूरो ↔ ब्रिटिश पाउंड (EUR ↔ GBP)</string>
+    <string name="unit_eur_chf">यूरो ↔ स्विस फ़्रैंक (EUR ↔ CHF)</string>
+    <string name="unit_eur_jpy">यूरो ↔ जापानी येन (EUR ↔ JPY)</string>
+    <string name="unit_usd_gbp">अमेरिकी डॉलर ↔ ब्रिटिश पाउंड (USD ↔ GBP)</string>
+    <string name="unit_usd_jpy">अमेरिकी डॉलर ↔ जापानी येन (USD ↔ JPY)</string>
+    <string name="unit_usd_chf">अमेरिकी डॉलर ↔ स्विस फ़्रैंक (USD ↔ CHF)</string>
+    <string name="unit_eur_cad">यूरो ↔ कनाडाई डॉलर (EUR ↔ CAD)</string>
+    <string name="unit_eur_aud">यूरो ↔ ऑस्ट्रेलियाई डॉलर (EUR ↔ AUD)</string>
+    <string name="unit_eur_cny">यूरो ↔ चीनी युआन (EUR ↔ CNY)</string>
+    <string name="unit_usd_cny">अमेरिकी डॉलर ↔ चीनी युआन (USD ↔ CNY)</string>
+    <string name="unit_eur_pln">यूरो ↔ पोलिश ज़्लॉटी (EUR ↔ PLN)</string>
+    <string name="unit_eur_sek">यूरो ↔ स्वीडिश क्रोना (EUR ↔ SEK)</string>
+    <string name="unit_eur_nok">यूरो ↔ नॉर्वेजियन क्रोन (EUR ↔ NOK)</string>
+    <string name="unit_eur_inr">यूरो ↔ भारतीय रुपया (EUR ↔ INR)</string>
+    <string name="unit_name_eur">यूरो</string>
+    <string name="unit_name_usd">अमेरिकी डॉलर</string>
+    <string name="unit_name_gbp">ब्रिटिश पाउंड</string>
+    <string name="unit_name_chf">स्विस फ़्रैंक</string>
+    <string name="unit_name_jpy">जापानी येन</string>
+    <string name="unit_name_cad">कनाडाई डॉलर</string>
+    <string name="unit_name_aud">ऑस्ट्रेलियाई डॉलर</string>
+    <string name="unit_name_cny">चीनी युआन</string>
+    <string name="unit_name_pln">पोलिश ज़्लॉटी</string>
+    <string name="unit_name_sek">स्वीडिश क्रोना</string>
+    <string name="unit_name_nok">नॉर्वेजियन क्रोन</string>
+    <string name="unit_name_inr">भारतीय रुपया</string>
+    <string name="unit_keywords_eur">यूरो,eur,€,मुद्रा</string>
+    <string name="unit_keywords_usd">डॉलर,अमेरिकी डॉलर,usd,$,मुद्रा</string>
+    <string name="unit_keywords_gbp">पाउंड,gbp,£,मुद्रा</string>
+    <string name="unit_keywords_chf">स्विस फ़्रैंक,chf,मुद्रा</string>
+    <string name="unit_keywords_jpy">येन,जापानी येन,jpy,¥,मुद्रा</string>
+    <string name="unit_keywords_cad">कनाडाई डॉलर,cad,मुद्रा</string>
+    <string name="unit_keywords_aud">ऑस्ट्रेलियाई डॉलर,aud,मुद्रा</string>
+    <string name="unit_keywords_cny">युआन,चीनी युआन,cny,rmb,मुद्रा</string>
+    <string name="unit_keywords_pln">ज़्लॉटी,pln,मुद्रा</string>
+    <string name="unit_keywords_sek">स्वीडिश क्रोना,sek,मुद्रा</string>
+    <string name="unit_keywords_nok">नॉर्वेजियन क्रोन,nok,मुद्रा</string>
+    <string name="unit_keywords_inr">रुपया,भारतीय रुपया,inr,₹,मुद्रा</string>
+
+    <!-- v1.3.8: Recent Accent Colors -->
+    <string name="accent_color_recent_label">हाल ही में उपयोग किए गए</string>
+
+    <!-- v1.3.8: Quick Settings Tile & Widget -->
+    <string name="qs_tile_desc">स्टेटस बार से GlassCalc तुरंत खोलें</string>
+    <string name="info_qs_tile_title">त्वरित सेटिंग टाइल</string>
+    <string name="info_qs_tile_desc">GC लोगो के साथ Android त्वरित सेटिंग्स से सीधे GlassCalc खोलें।</string>
+    <string name="info_qs_tile_btn">त्वरित सेटिंग्स में टाइल जोड़ें</string>
+    <string name="qs_tile_added">टाइल त्वरित सेटिंग्स में जोड़ी गई</string>
+    <string name="qs_tile_already_added">टाइल पहले से त्वरित सेटिंग्स में है</string>
+    <string name="qs_tile_not_added">टाइल जोड़ी नहीं जा सकी</string>
+    <string name="qs_tile_requires_android_13">Android 13 से नीचे के वर्ज़न पर, त्वरित सेटिंग्स के संपादन मेनू से जोड़ें।</string>
+    <string name="settings_keywords_info_qs_tile">टाइल,त्वरित सेटिंग,quick settings,tile</string>
+    <string name="widget_quick_calc_name">GlassCalc त्वरित कैलकुलेटर</string>
+    <string name="widget_quick_calc_desc">होम स्क्रीन के लिए Liquid-Glass डिज़ाइन वाला कॉम्पैक्ट कैलकुलेटर विजेट।</string>
+    <string name="widget_open_app_desc">GlassCalc खोलें</string>
+    <string name="info_oss_frankfurter_title">Frankfurter API</string>
+    <string name="info_frankfurter_desc">Frankfurter API द्वारा प्रदान की गई लाइव विनिमय दरें</string>
+    <string name="info_oss_frankfurter_license">लाइसेंस: Open Source (MIT) - Free to use (ECB संदर्भ दरें)</string>
+    <string name="currency_api_disclaimer">नोट: लाइव विनिमय दरें बाहरी Frankfurter API (frankfurter.app) से प्राप्त की जाती हैं।</string>
 </resources>

@@ -737,4 +737,111 @@ class AppCrashRegressionTest {
         composeTestRule.onNodeWithTag("accent_color_DEFAULT").assertIsSelected()
         composeTestRule.onNodeWithTag("input_accent_hex").performScrollTo().assertTextContains("#4FC3F7")
     }
+
+    @Test
+    @Config(qualifiers = "land-w900dp-h500dp")
+    fun testLandscapeTabletHidesScientificByDefaultAndToggles() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("calculator_display").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("btn_toggle_scientific").assertIsDisplayed()
+        // Scientific keypad must be collapsed initially in landscape/tablet layout
+        assert(composeTestRule.onAllNodesWithTag("btn_constants").fetchSemanticsNodes().isEmpty())
+
+        // Expanding scientific toggle reveals the scientific keypad
+        composeTestRule.onNodeWithTag("btn_toggle_scientific").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("btn_constants").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("btn_constants").assertIsDisplayed()
+
+        // Collapsing hides it again
+        composeTestRule.onNodeWithTag("btn_toggle_scientific").performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("btn_constants").fetchSemanticsNodes().isEmpty()
+        }
+    }
+
+    @Test
+    fun testRecentAccentColorsQuickSettingsTileAndCurrencyTabUi() {
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_settings").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_settings").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Switch to White Mode so Accent Color card is visible
+        composeTestRule.onNodeWithTag("card_theme_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("radio_theme_WHITE_MODE").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("radio_theme_WHITE_MODE").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_accent_color_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Expand Accent Color and pick TEAL then CORAL -> recent swatches appear
+        composeTestRule.onNodeWithTag("card_accent_color_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("accent_color_TEAL").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("accent_color_TEAL").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("accent_color_CORAL").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("recent_accent_color_1").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("recent_accent_color_0").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("recent_accent_color_1").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("accent_color_TEAL")
+                .fetchSemanticsNodes()
+                .firstOrNull()
+                ?.config
+                ?.getOrNull(SemanticsProperties.Selected) == true
+        }
+
+        // Switch to Developer tab -> expand System & API accordion -> Quick Settings Tile card is displayed
+        composeTestRule.onNodeWithTag("tab_settings_2").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_dev_system_api_accordion").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_dev_system_api_accordion").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_qs_tile").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_qs_tile").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("btn_add_qs_tile").performScrollTo().assertIsDisplayed().performClick()
+        composeTestRule.waitForIdle()
+
+        // Switch to Info tab -> Frankfurter API card is displayed and Quick Settings Tile is absent
+        composeTestRule.onNodeWithTag("tab_settings_3").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("card_frankfurter_api").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("card_frankfurter_api").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("frankfurter_api_icon_pill", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
+        assert(composeTestRule.onAllNodesWithTag("card_qs_tile").fetchSemanticsNodes().isEmpty())
+
+        // Close Settings and open Unit Converter -> switch to Currency tab
+        composeTestRule.onNodeWithTag("btn_close_settings").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("btn_hamburger_menu").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_item_converter").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("dialog_unit_converter").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("tab_cat_CURRENCY").performScrollTo().performClick()
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
+            composeTestRule.onAllNodesWithTag("currency_rate_status_pill").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("currency_rate_status_pill").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("btn_refresh_currency_rates").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("text_currency_api_disclaimer", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
 }

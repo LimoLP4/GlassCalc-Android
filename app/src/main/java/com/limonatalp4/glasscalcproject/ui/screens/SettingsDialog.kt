@@ -1,6 +1,9 @@
 package com.limonatalp4.glasscalcproject.ui.screens
 
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -185,6 +188,7 @@ import com.limonatalp4.glasscalcproject.ui.components.SettingsUnitCard
 import com.limonatalp4.glasscalcproject.ui.components.pressScale
 import com.limonatalp4.glasscalcproject.ui.components.rememberDialogTransitionController
 import com.limonatalp4.glasscalcproject.ui.components.rememberSettingsSearchVisibility
+import com.limonatalp4.glasscalcproject.service.GlassCalcTileService
 import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import com.limonatalp4.glasscalcproject.ui.theme.resolveAccentSwatchColor
 import com.limonatalp4.glasscalcproject.ui.util.HapticMotorType
@@ -197,6 +201,7 @@ import kotlin.math.roundToInt
 fun SettingsDialog(
     currentTheme: AppTheme,
     currentAccentColor: Int? = null,
+    recentAccentColors: List<Int> = emptyList(),
     accentHexInput: String = "",
     isAccentHexInvalid: Boolean = false,
     currentAppIcon: AppIconOption = AppIconOption.CLASSIC,
@@ -520,6 +525,7 @@ fun SettingsDialog(
                                 0 -> AppearanceSection(
                                     currentTheme = currentTheme,
                                     currentAccentColor = currentAccentColor,
+                                    recentAccentColors = recentAccentColors,
                                     accentHexInput = accentHexInput,
                                     isAccentHexInvalid = isAccentHexInvalid,
                                     currentAppIcon = selectedAppIconPreview,
@@ -667,6 +673,7 @@ fun SettingsDialog(
 private fun AppearanceSection(
     currentTheme: AppTheme,
     currentAccentColor: Int?,
+    recentAccentColors: List<Int> = emptyList(),
     accentHexInput: String,
     isAccentHexInvalid: Boolean,
     currentAppIcon: AppIconOption,
@@ -830,6 +837,49 @@ private fun AppearanceSection(
                             }
                         }
 
+                        AnimatedVisibility(
+                            visible = recentAccentColors.isNotEmpty(),
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.accent_color_recent_label),
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .padding(start = 6.dp)
+                                        .testTag("label_recent_accent_colors")
+                                )
+                                FlowRow(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    recentAccentColors.take(5).forEachIndexed { index, argb ->
+                                        RecentAccentColorMiniButton(
+                                            color = Color(argb),
+                                            hexLabel = CalculatorViewModel.formatAccentHex(argb),
+                                            isSelected = currentAccentColor == argb,
+                                            isTiefschwarz = isTiefschwarz,
+                                            glassProps = glassProps,
+                                            testTag = "recent_accent_color_$index",
+                                            onClick = {
+                                                triggerHaptic()
+                                                onSelectAccentColor(argb, null)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         AccentColorHexInput(
                             hexInput = accentHexInput,
                             isInvalid = isAccentHexInvalid,
@@ -965,6 +1015,87 @@ private fun AccentColorPillButton(
                     contentDescription = null,
                     tint = checkTint,
                     modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentAccentColorMiniButton(
+    color: Color,
+    hexLabel: String,
+    isSelected: Boolean,
+    isTiefschwarz: Boolean,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    testTag: String,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val ringColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            if (isTiefschwarz) Color.White else MaterialTheme.colorScheme.onSurface
+        } else {
+            glassProps.buttonBorderColor
+        },
+        animationSpec = tween(durationMillis = 160, easing = FastOutSlowInEasing),
+        label = "recent_accent_ring_$hexLabel"
+    )
+    val checkTint = remember(color) {
+        if (ColorUtils.calculateContrast(android.graphics.Color.WHITE, color.toArgb()) >= 3.0) {
+            Color.White
+        } else {
+            Color(0xFF0A0A0A)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .pressScale(interactionSource)
+            .clip(CircleShape)
+            .semantics {
+                selected = isSelected
+                contentDescription = hexLabel
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true),
+                role = Role.RadioButton,
+                onClick = onClick
+            )
+            .testTag(testTag),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .border(
+                    width = if (isSelected) 2.dp else 1.dp,
+                    color = ringColor,
+                    shape = CircleShape
+                )
+                .padding(if (isSelected) 2.dp else 0.dp)
+                .clip(CircleShape)
+                .background(color)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.34f),
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.14f)
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = checkTint,
+                    modifier = Modifier.size(13.dp)
                 )
             }
         }
@@ -1534,7 +1665,7 @@ private enum class SettingsDevGroup {
 }
 
 private fun SettingsDevCard.group(): SettingsDevGroup = when (this) {
-    SettingsDevCard.SCREEN, SettingsDevCard.API -> SettingsDevGroup.SYSTEM_API
+    SettingsDevCard.SCREEN, SettingsDevCard.API, SettingsDevCard.QUICK_SETTINGS_TILE -> SettingsDevGroup.SYSTEM_API
     SettingsDevCard.HAPTIC -> SettingsDevGroup.HAPTIC_FEEDBACK
     SettingsDevCard.AUTO_RESULT, SettingsDevCard.LIFECYCLE -> SettingsDevGroup.APP_BEHAVIOR
     SettingsDevCard.CLEAR_CACHE, SettingsDevCard.RESET_STORAGE -> SettingsDevGroup.STORAGE_CACHE
@@ -1850,6 +1981,124 @@ private fun DeveloperOptionsSection(
                                                     )
                                                 }
                                             }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        SettingsDevCard.QUICK_SETTINGS_TILE -> {
+                            // Card 3: Quick Settings Tile (StatusBarManager Android 13+)
+                            val qsTileBtnInteraction = remember { MutableInteractionSource() }
+                            SettingsGlassCard(
+                                glassProps = glassProps,
+                                shape = GlassDialogDefaults.NestedPanelShape,
+                                modifier = Modifier.testTag("card_qs_tile")
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.info_qs_tile_title),
+                                                fontSize = 15.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colorScheme.primary
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.info_qs_tile_desc),
+                                                fontSize = 12.sp,
+                                                lineHeight = 16.sp,
+                                                color = colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        GlassSurface(
+                                            shape = CircleShape,
+                                            customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                            borderStroke = glassProps.containerBorderStroke
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.padding(10.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_qs_tile_gc),
+                                                    contentDescription = stringResource(R.string.info_qs_tile_title),
+                                                    tint = colorScheme.primary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    GlassSurface(
+                                        shape = GlassDialogDefaults.PillShape,
+                                        customBgColor = colorScheme.primaryContainer.copy(alpha = if (isTiefschwarz) 0.55f else 0.72f),
+                                        borderStroke = glassProps.containerBorderStroke,
+                                        onClick = {
+                                            triggerHaptic()
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                val statusBarManager = context.getSystemService(StatusBarManager::class.java)
+                                                if (statusBarManager != null) {
+                                                    statusBarManager.requestAddTileService(
+                                                        ComponentName(context, GlassCalcTileService::class.java),
+                                                        context.getString(R.string.app_name),
+                                                        Icon.createWithResource(context, R.drawable.ic_qs_tile_gc),
+                                                        context.mainExecutor
+                                                    ) { resultCode ->
+                                                        val msgRes = when (resultCode) {
+                                                            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED -> R.string.qs_tile_added
+                                                            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> R.string.qs_tile_already_added
+                                                            else -> R.string.qs_tile_not_added
+                                                        }
+                                                        Toast.makeText(context, context.getString(msgRes), Toast.LENGTH_SHORT).show()
+                                                    }
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        context.getString(R.string.qs_tile_not_added),
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.qs_tile_requires_android_13),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        },
+                                        role = Role.Button,
+                                        interactionSource = qsTileBtnInteraction,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .defaultMinSize(minHeight = 48.dp)
+                                            .pressScale(qsTileBtnInteraction)
+                                            .testTag("btn_add_qs_tile")
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.info_qs_tile_btn),
+                                                fontSize = 13.5.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = colorScheme.onPrimaryContainer,
+                                                textAlign = TextAlign.Center
+                                            )
                                         }
                                     }
                                 }
@@ -2333,8 +2582,87 @@ private fun InformationSection(
             }
         }
                 }
+                SettingsInfoCard.FRANKFURTER_API -> {
+        // Frankfurter API Card (Pill-Design matching GitHub Repository)
+        val frankfurterCardInteraction = remember { MutableInteractionSource() }
+
+        SettingsGlassCard(
+            glassProps = glassProps,
+            shape = RoundedCornerShape(percent = 50),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 14.dp),
+            onClick = {
+                triggerHaptic()
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, "https://www.frankfurter.app".toUri())
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.info_oss_frankfurter_title),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+            role = Role.Button,
+            interactionSource = frankfurterCardInteraction,
+            modifier = Modifier
+                .defaultMinSize(minHeight = 56.dp)
+                .pressScale(frankfurterCardInteraction)
+                .testTag("card_frankfurter_api")
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.info_oss_frankfurter_title),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                    Text(
+                        text = stringResource(R.string.info_frankfurter_desc),
+                        fontSize = 12.sp,
+                        lineHeight = 15.sp,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.info_oss_frankfurter_license),
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                    )
+                }
+                GlassSurface(
+                    shape = CircleShape,
+                    customBgColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = glassProps.containerBorderStroke,
+                    modifier = Modifier.testTag("frankfurter_api_icon_pill")
+                ) {
+                    Box(
+                        modifier = Modifier.padding(10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.OpenInBrowser,
+                            contentDescription = stringResource(R.string.info_oss_frankfurter_title),
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+                }
                 SettingsInfoCard.OSS -> {
-        // Third-Party OSS Licenses Card (Pill-Design)
+        // Third-Party OSS Licenses Card (Compact Pill-Design)
         val ossCardInteraction = remember { MutableInteractionSource() }
 
         SettingsGlassCard(

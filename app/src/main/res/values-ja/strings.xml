@@ -560,4 +560,73 @@
     <string name="unit_keywords_bar">バール,bar,圧力</string>
     <string name="unit_keywords_psi">psi,重量ポンド毎平方インチ,圧力,空気圧</string>
     <string name="unit_keywords_atmosphere">気圧,標準気圧,atmosphere,atm,圧力</string>
+
+    <!-- v1.3.8: Currency Converter (Live Rates) -->
+    <string name="cat_currency">通貨</string>
+    <string name="converter_keywords_currency">通貨,為替,為替レート,ユーロ,ドル,ポンド,円,フラン,currency</string>
+    <string name="currency_loading">最新の為替レートを読み込み中…</string>
+    <string name="currency_rate_info">1 %1$s = %2$s %3$s • 更新: %4$s</string>
+    <string name="currency_cached_offline">1 %1$s = %2$s %3$s • オフラインキャッシュ (%4$s)</string>
+    <string name="currency_error">為替レートを読み込めませんでした。更新をタップしてください。</string>
+    <string name="currency_refresh_desc">為替レートを更新</string>
+    <string name="unit_eur_usd">ユーロ ↔ 米ドル (EUR ↔ USD)</string>
+    <string name="unit_eur_gbp">ユーロ ↔ 英ポンド (EUR ↔ GBP)</string>
+    <string name="unit_eur_chf">ユーロ ↔ スイスフラン (EUR ↔ CHF)</string>
+    <string name="unit_eur_jpy">ユーロ ↔ 日本円 (EUR ↔ JPY)</string>
+    <string name="unit_usd_gbp">米ドル ↔ 英ポンド (USD ↔ GBP)</string>
+    <string name="unit_usd_jpy">米ドル ↔ 日本円 (USD ↔ JPY)</string>
+    <string name="unit_usd_chf">米ドル ↔ スイスフラン (USD ↔ CHF)</string>
+    <string name="unit_eur_cad">ユーロ ↔ カナダドル (EUR ↔ CAD)</string>
+    <string name="unit_eur_aud">ユーロ ↔ 豪ドル (EUR ↔ AUD)</string>
+    <string name="unit_eur_cny">ユーロ ↔ 中国元 (EUR ↔ CNY)</string>
+    <string name="unit_usd_cny">米ドル ↔ 中国元 (USD ↔ CNY)</string>
+    <string name="unit_eur_pln">ユーロ ↔ ポーランドズウォティ (EUR ↔ PLN)</string>
+    <string name="unit_eur_sek">ユーロ ↔ スウェーデンクローナ (EUR ↔ SEK)</string>
+    <string name="unit_eur_nok">ユーロ ↔ ノルウェークローネ (EUR ↔ NOK)</string>
+    <string name="unit_eur_inr">ユーロ ↔ インドルピー (EUR ↔ INR)</string>
+    <string name="unit_name_eur">ユーロ</string>
+    <string name="unit_name_usd">米ドル</string>
+    <string name="unit_name_gbp">英ポンド</string>
+    <string name="unit_name_chf">スイスフラン</string>
+    <string name="unit_name_jpy">日本円</string>
+    <string name="unit_name_cad">カナダドル</string>
+    <string name="unit_name_aud">豪ドル</string>
+    <string name="unit_name_cny">中国元</string>
+    <string name="unit_name_pln">ポーランドズウォティ</string>
+    <string name="unit_name_sek">スウェーデンクローナ</string>
+    <string name="unit_name_nok">ノルウェークローネ</string>
+    <string name="unit_name_inr">インドルピー</string>
+    <string name="unit_keywords_eur">ユーロ,eur,€,通貨</string>
+    <string name="unit_keywords_usd">米ドル,ドル,usd,$,通貨</string>
+    <string name="unit_keywords_gbp">英ポンド,ポンド,gbp,£,通貨</string>
+    <string name="unit_keywords_chf">スイスフラン,フラン,chf,通貨</string>
+    <string name="unit_keywords_jpy">円,日本円,jpy,¥,通貨</string>
+    <string name="unit_keywords_cad">カナダドル,cad,通貨</string>
+    <string name="unit_keywords_aud">豪ドル,オーストラリアドル,aud,通貨</string>
+    <string name="unit_keywords_cny">元,人民元,cny,rmb,通貨</string>
+    <string name="unit_keywords_pln">ズウォティ,pln,通貨</string>
+    <string name="unit_keywords_sek">スウェーデンクローナ,sek,通貨</string>
+    <string name="unit_keywords_nok">ノルウェークローネ,nok,通貨</string>
+    <string name="unit_keywords_inr">インドルピー,ルピー,inr,₹,通貨</string>
+
+    <!-- v1.3.8: Recent Accent Colors -->
+    <string name="accent_color_recent_label">最近使用</string>
+
+    <!-- v1.3.8: Quick Settings Tile & Widget -->
+    <string name="qs_tile_desc">ステータスバーからGlassCalcを素早く起動</string>
+    <string name="info_qs_tile_title">クイック設定タイル</string>
+    <string name="info_qs_tile_desc">GCロゴを使ってAndroidのクイック設定から直接GlassCalcを開きます。</string>
+    <string name="info_qs_tile_btn">クイック設定にタイルを追加</string>
+    <string name="qs_tile_added">クイック設定にタイルを追加しました</string>
+    <string name="qs_tile_already_added">タイルはすでにクイック設定にあります</string>
+    <string name="qs_tile_not_added">タイルを追加できませんでした</string>
+    <string name="qs_tile_requires_android_13">Android 13未満では、クイック設定の編集メニューから追加してください。</string>
+    <string name="settings_keywords_info_qs_tile">タイル,クイック設定,quick settings,tile,ショートカット</string>
+    <string name="widget_quick_calc_name">GlassCalc クイック電卓</string>
+    <string name="widget_quick_calc_desc">ホーム画面向けのLiquid-Glassデザインのコンパクト電卓ウィジェット。</string>
+    <string name="widget_open_app_desc">GlassCalcを開く</string>
+    <string name="info_oss_frankfurter_title">Frankfurter API</string>
+    <string name="info_frankfurter_desc">Frankfurter API によって提供されるリアルタイム為替レート</string>
+    <string name="info_oss_frankfurter_license">ライセンス: Open Source (MIT) - Free to use (ECB基準レート)</string>
+    <string name="currency_api_disclaimer">注: 為替レートは外部の Frankfurter API (frankfurter.app) から取得されます。</string>
 </resources>

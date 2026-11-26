@@ -9,8 +9,13 @@ import com.limonatalp4.glasscalcproject.data.model.AccentColorOption
 import com.limonatalp4.glasscalcproject.data.model.AngleMode
 import com.limonatalp4.glasscalcproject.data.model.AppIconOption
 import com.limonatalp4.glasscalcproject.data.preferences.GlassCalcPreferences
+import com.limonatalp4.glasscalcproject.data.remote.FrankfurterApiService
+import com.limonatalp4.glasscalcproject.data.remote.FrankfurterRatesResponse
+import com.limonatalp4.glasscalcproject.data.repository.CurrencyRepository
+import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
 import com.limonatalp4.glasscalcproject.ui.util.AppIconManager
 import com.limonatalp4.glasscalcproject.ui.viewmodel.CalculatorViewModel
+import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -368,5 +373,124 @@ class CalculatorViewModelTest {
         // Typing preset hex automatically matches preset enum
         restoredVm.onAccentHexInput("#9333EA")
         assertEquals(AccentColorOption.PURPLE, AccentColorOption.findPresetOrNull(restoredVm.customAccentColor.value))
+    }
+
+    @Test
+    fun testRecentAccentColorsTrackCirclesAndHexCappedAtFiveAndReset() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val prefs = GlassCalcPreferences(app)
+        val vm = CalculatorViewModel(app)
+
+        assertTrue(vm.recentAccentColors.value.isEmpty())
+
+        val teal = AccentColorOption.TEAL.colorArgb!!
+        val coral = AccentColorOption.CORAL.colorArgb!!
+        val purple = AccentColorOption.PURPLE.colorArgb!!
+        val green = AccentColorOption.GREEN.colorArgb!!
+        val amber = AccentColorOption.AMBER.colorArgb!!
+        val customHex = 0xFFFF5722.toInt()
+
+        // Selecting Standard/Default (null) does not record null into recent colors
+        vm.setCustomAccentColor(null)
+        assertTrue(vm.recentAccentColors.value.isEmpty())
+
+        // Pick 5 preset colors + 1 valid hex -> MRU order, capped at 5
+        vm.setCustomAccentColor(teal)
+        vm.setCustomAccentColor(coral)
+        vm.setCustomAccentColor(purple)
+        vm.setCustomAccentColor(green)
+        vm.setCustomAccentColor(amber)
+        // Partial hex must not be added
+        vm.onAccentHexInput("#FF5")
+        assertEquals(listOf(amber, green, purple, coral, teal), vm.recentAccentColors.value)
+
+        // Complete valid hex becomes most recent, evicting oldest (teal)
+        vm.onAccentHexInput("#FF5722")
+        assertEquals(listOf(customHex, amber, green, purple, coral), vm.recentAccentColors.value)
+
+        // Selecting an existing recent color moves it to index 0 without duplication
+        vm.setCustomAccentColor(purple)
+        assertEquals(listOf(purple, customHex, amber, green, coral), vm.recentAccentColors.value)
+
+        waitUntil {
+            runBlocking {
+                prefs.recentAccentColorsFlow.first() == listOf(purple, customHex, amber, green, coral)
+            }
+        }
+
+        // Fresh ViewModel restores persisted recent colors
+        val restoredVm = CalculatorViewModel(app)
+        waitUntil {
+            restoredVm.recentAccentColors.value == listOf(purple, customHex, amber, green, coral)
+        }
+
+        // resetApp clears recent accent colors
+        restoredVm.resetApp()
+        assertTrue(restoredVm.recentAccentColors.value.isEmpty())
+        waitUntil { runBlocking { prefs.recentAccentColorsFlow.first().isEmpty() } }
+    }
+
+    @Test
+    fun testCurrencyRepositoryCachesRatesAndFallsBackOffline() = runBlocking {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val prefs = GlassCalcPreferences(app)
+
+        val onlineApi = object : FrankfurterApiService {
+            var callCount = 0
+            override suspend fun getLatestRates(base: String, symbols: String?): FrankfurterRatesResponse {
+                callCount++
+                return FrankfurterRatesResponse(
+                    amount = 1.0,
+                    base = "EUR",
+                    date = "2026-11-26",
+                    rates = mapOf("USD" to 1.10, "GBP" to 0.85, "JPY" to 165.0)
+                )
+            }
+        }
+
+        val repo = CurrencyRepository(app, prefs, apiServiceOverride = onlineApi)
+        repo.loadRatesIfNeeded(forceRefresh = false)
+
+        val state = repo.ratesState.value
+        assertFalse(state.isLoading)
+        assertFalse(state.hasError)
+        assertFalse(state.isOfflineFallback)
+        assertEquals("2026-11-26", state.date)
+        assertEquals(1.0, state.rates["EUR"] ?: 0.0, 1e-6)
+        assertEquals(1.10, state.rates["USD"] ?: 0.0, 1e-6)
+
+        // Calling again within TTL uses cached state without hitting network
+        repo.loadRatesIfNeeded(forceRefresh = false)
+        assertEquals(1, onlineApi.callCount)
+
+        // Bidirectional currency conversion
+        val eurUsdPair = UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "USD" }
+        assertEquals("110,00", UnitConverter.convertCurrency(100.0, eurUsdPair, forward = true, rates = state.rates))
+        assertEquals("100,00", UnitConverter.convertCurrency(110.0, eurUsdPair, forward = false, rates = state.rates))
+
+        // Cross-currency conversion (USD -> JPY)
+        val usdJpyPair = UnitConverter.CONVERSIONS.first { it.unitFrom == "USD" && it.unitTo == "JPY" }
+        assertEquals("1500,00", UnitConverter.convertCurrency(10.0, usdJpyPair, forward = true, rates = state.rates))
+
+        // Offline force-refresh falls back cleanly to persisted DataStore cache
+        val failingApi = object : FrankfurterApiService {
+            override suspend fun getLatestRates(base: String, symbols: String?): FrankfurterRatesResponse {
+                throw IOException("Network unavailable")
+            }
+        }
+        val offlineWithCacheRepo = CurrencyRepository(app, prefs, apiServiceOverride = failingApi)
+        offlineWithCacheRepo.loadRatesIfNeeded(forceRefresh = true)
+        val fallbackState = offlineWithCacheRepo.ratesState.value
+        assertTrue(fallbackState.hasRates)
+        assertTrue(fallbackState.isOfflineFallback)
+        assertFalse(fallbackState.hasError)
+        assertEquals("2026-11-26", fallbackState.date)
+
+        // Offline cold start without any cache reports error cleanly
+        prefs.resetAll()
+        val offlineNoCacheRepo = CurrencyRepository(app, prefs, apiServiceOverride = failingApi)
+        offlineNoCacheRepo.loadRatesIfNeeded(forceRefresh = true)
+        assertFalse(offlineNoCacheRepo.ratesState.value.hasRates)
+        assertTrue(offlineNoCacheRepo.ratesState.value.hasError)
     }
 }

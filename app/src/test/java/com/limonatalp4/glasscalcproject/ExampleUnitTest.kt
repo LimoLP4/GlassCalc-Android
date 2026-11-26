@@ -816,6 +816,7 @@ class ExampleUnitTest {
                 UnitCategory.DATA_RATE -> listOf("datenrate", "bandbreite", "internet", "bps")
                 UnitCategory.ENERGY -> listOf("energie", "joule", "kalorien", "wattstunden")
                 UnitCategory.PRESSURE -> listOf("druck", "luftdruck", "pascal", "bar", "psi", "atmosphäre")
+                UnitCategory.CURRENCY -> listOf("währung", "wechselkurs", "euro", "dollar", "pfund", "yen")
             }
             com.limonatalp4.glasscalcproject.ui.components.LocalizedConversionPair(
                 pair = pair,

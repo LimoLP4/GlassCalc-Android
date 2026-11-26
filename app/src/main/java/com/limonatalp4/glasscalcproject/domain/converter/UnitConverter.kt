@@ -24,7 +24,8 @@ enum class UnitCategory(val stringResId: Int) {
     FREQUENCY(R.string.cat_frequency),
     DATA_RATE(R.string.cat_data_rate),
     ENERGY(R.string.cat_energy),
-    PRESSURE(R.string.cat_pressure)
+    PRESSURE(R.string.cat_pressure),
+    CURRENCY(R.string.cat_currency)
 }
 
 @Immutable
@@ -760,8 +761,136 @@ object UnitConverter {
             labelResId = R.string.unit_atm_psi,
             formulaFromTo = { it * 101_325.0 / 6894.757293168361 },
             formulaToFrom = { it * 6894.757293168361 / 101_325.0 }
+        ),
+        // Currency (live conversion via CurrencyRepository / Frankfurter API)
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "USD",
+            labelResId = R.string.unit_eur_usd,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "GBP",
+            labelResId = R.string.unit_eur_gbp,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "CHF",
+            labelResId = R.string.unit_eur_chf,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "JPY",
+            labelResId = R.string.unit_eur_jpy,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "USD",
+            unitTo = "GBP",
+            labelResId = R.string.unit_usd_gbp,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "USD",
+            unitTo = "JPY",
+            labelResId = R.string.unit_usd_jpy,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "USD",
+            unitTo = "CHF",
+            labelResId = R.string.unit_usd_chf,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "CAD",
+            labelResId = R.string.unit_eur_cad,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "AUD",
+            labelResId = R.string.unit_eur_aud,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "CNY",
+            labelResId = R.string.unit_eur_cny,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "USD",
+            unitTo = "CNY",
+            labelResId = R.string.unit_usd_cny,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "PLN",
+            labelResId = R.string.unit_eur_pln,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "SEK",
+            labelResId = R.string.unit_eur_sek,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "NOK",
+            labelResId = R.string.unit_eur_nok,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
+        ),
+        ConversionPair(
+            category = UnitCategory.CURRENCY,
+            unitFrom = "EUR",
+            unitTo = "INR",
+            labelResId = R.string.unit_eur_inr,
+            formulaFromTo = { Double.NaN },
+            formulaToFrom = { Double.NaN }
         )
     )
+
+    private val CURRENCY_FORMAT = ThreadLocal.withInitial {
+        DecimalFormat("#,##0.####", DecimalFormatSymbols(Locale.GERMANY)).apply {
+            isGroupingUsed = false
+            minimumFractionDigits = 2
+        }
+    }
 
     fun convert(value: Double, pair: ConversionPair, forward: Boolean): String {
         if (!value.isFinite()) return "—"
@@ -771,5 +900,29 @@ object UnitConverter {
             return SCIENTIFIC_FORMAT.get()!!.format(res)
         }
         return FORMAT.get()!!.format(res)
+    }
+
+    fun convertCurrency(
+        value: Double,
+        pair: ConversionPair,
+        forward: Boolean,
+        rates: Map<String, Double>
+    ): String {
+        if (!value.isFinite() || rates.isEmpty()) return "—"
+        val fromCode = if (forward) pair.unitFrom else pair.unitTo
+        val toCode = if (forward) pair.unitTo else pair.unitFrom
+        val fromRate = rates[fromCode] ?: return "—"
+        val toRate = rates[toCode] ?: return "—"
+        if (!fromRate.isFinite() || !toRate.isFinite() || fromRate <= 0.0 || toRate <= 0.0) return "—"
+        val res = value * (toRate / fromRate)
+        if (!res.isFinite()) return "—"
+        if (abs(res) >= 1e12 || (abs(res) < 1e-6 && res != 0.0)) {
+            return SCIENTIFIC_FORMAT.get()!!.format(res)
+        }
+        return if (abs(res) > 0.0 && abs(res) < 0.1) {
+            FORMAT.get()!!.format(res)
+        } else {
+            CURRENCY_FORMAT.get()!!.format(res)
+        }
     }
 }

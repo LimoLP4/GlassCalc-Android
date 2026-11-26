@@ -70,9 +70,9 @@ import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 
 enum class SettingsUnitCard { DEG, RAD }
 
-enum class SettingsDevCard { SCREEN, API, HAPTIC, AUTO_RESULT, LIFECYCLE, CLEAR_CACHE, RESET_STORAGE }
+enum class SettingsDevCard { SCREEN, API, QUICK_SETTINGS_TILE, HAPTIC, AUTO_RESULT, LIFECYCLE, CLEAR_CACHE, RESET_STORAGE }
 
-enum class SettingsInfoCard { VERSION, GITHUB, OSS, APACHE }
+enum class SettingsInfoCard { VERSION, GITHUB, FRANKFURTER_API, OSS, APACHE }
 
 @Immutable
 data class SettingsSearchVisibility(
@@ -83,6 +83,7 @@ data class SettingsSearchVisibility(
     val showRadCard: Boolean,
     val showDevScreenCard: Boolean,
     val showDevApiCard: Boolean,
+    val showDevQsTileCard: Boolean = true,
     val showDevHapticCard: Boolean,
     val showDevAutoResultCard: Boolean,
     val showDevLifecycleCard: Boolean,
@@ -90,6 +91,7 @@ data class SettingsSearchVisibility(
     val showDevResetStorageCard: Boolean,
     val showInfoVersionCard: Boolean,
     val showInfoGitHubCard: Boolean,
+    val showInfoFrankfurterCard: Boolean = true,
     val showInfoOssCard: Boolean,
     val showInfoApacheCard: Boolean,
     val matchingLanguages: List<Language>,
@@ -107,6 +109,7 @@ data class SettingsSearchVisibility(
     val hasAnyDeveloperMatch: Boolean
         get() = showDevScreenCard ||
             showDevApiCard ||
+            showDevQsTileCard ||
             showDevHapticCard ||
             showDevAutoResultCard ||
             showDevLifecycleCard ||
@@ -114,7 +117,11 @@ data class SettingsSearchVisibility(
             showDevResetStorageCard
 
     val hasAnyInfoMatch: Boolean
-        get() = showInfoVersionCard || showInfoGitHubCard || showInfoOssCard || showInfoApacheCard
+        get() = showInfoVersionCard ||
+            showInfoGitHubCard ||
+            showInfoFrankfurterCard ||
+            showInfoOssCard ||
+            showInfoApacheCard
 
     val hasAnyLanguageMatch: Boolean
         get() = matchingLanguages.isNotEmpty()
@@ -174,6 +181,7 @@ fun rememberSettingsSearchVisibility(
             showRadCard = true,
             showDevScreenCard = true,
             showDevApiCard = true,
+            showDevQsTileCard = true,
             showDevHapticCard = true,
             showDevAutoResultCard = true,
             showDevLifecycleCard = true,
@@ -181,6 +189,7 @@ fun rememberSettingsSearchVisibility(
             showDevResetStorageCard = true,
             showInfoVersionCard = true,
             showInfoGitHubCard = true,
+            showInfoFrankfurterCard = true,
             showInfoOssCard = true,
             showInfoApacheCard = true,
             matchingLanguages = Language.entries,
@@ -272,13 +281,14 @@ fun rememberSettingsSearchVisibility(
     val accentColorAccordionTitle = stringResource(R.string.accent_color_accordion_title)
     val accentColorDesc = stringResource(R.string.accent_color_desc)
     val accentColorHexLabel = stringResource(R.string.accent_color_hex_label)
+    val accentColorRecentLabel = stringResource(R.string.accent_color_recent_label)
     val accentColorKeywords = stringResource(R.string.settings_keywords_accent_color)
     val accentColorNames = AccentColorOption.entries.map { stringResource(it.labelResId) }
     val accentColorScore = if (!isMaterialYouActive) {
         scoreSettingsEntry(
             tokens = tokens,
             primaryNames = listOf(accentColorAccordionTitle),
-            secondaryTexts = accentColorNames + listOf(accentColorDesc, accentColorHexLabel, appearanceTabTitle),
+            secondaryTexts = accentColorNames + listOf(accentColorDesc, accentColorHexLabel, accentColorRecentLabel, appearanceTabTitle),
             keywordStrings = listOf(accentColorKeywords, appearanceKeywords)
         )
     } else {
@@ -398,14 +408,28 @@ fun rememberSettingsSearchVisibility(
         ),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_dev_reset))
     )
+    val devQsTileScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(
+            stringResource(R.string.info_qs_tile_title),
+            stringResource(R.string.info_qs_tile_btn)
+        ),
+        secondaryTexts = listOf(
+            stringResource(R.string.info_qs_tile_desc),
+            devAccordionSystemApi,
+            devTabTitle
+        ),
+        keywordStrings = listOf(stringResource(R.string.settings_keywords_info_qs_tile))
+    )
     val scoredDevCards = listOfNotNull(
         devScreenScore?.let { Triple(SettingsDevCard.SCREEN, it, 0) },
         devApiScore?.let { Triple(SettingsDevCard.API, it, 1) },
-        devHapticScore?.let { Triple(SettingsDevCard.HAPTIC, it, 2) },
-        devAutoResultScore?.let { Triple(SettingsDevCard.AUTO_RESULT, it, 3) },
-        devLifecycleScore?.let { Triple(SettingsDevCard.LIFECYCLE, it, 4) },
-        devClearCacheScore?.let { Triple(SettingsDevCard.CLEAR_CACHE, it, 5) },
-        devResetStorageScore?.let { Triple(SettingsDevCard.RESET_STORAGE, it, 6) }
+        devQsTileScore?.let { Triple(SettingsDevCard.QUICK_SETTINGS_TILE, it, 2) },
+        devHapticScore?.let { Triple(SettingsDevCard.HAPTIC, it, 3) },
+        devAutoResultScore?.let { Triple(SettingsDevCard.AUTO_RESULT, it, 4) },
+        devLifecycleScore?.let { Triple(SettingsDevCard.LIFECYCLE, it, 5) },
+        devClearCacheScore?.let { Triple(SettingsDevCard.CLEAR_CACHE, it, 6) },
+        devResetStorageScore?.let { Triple(SettingsDevCard.RESET_STORAGE, it, 7) }
     ).sortedWith(compareBy<Triple<SettingsDevCard, Int, Int>> { it.second }.thenBy { it.third })
     val orderedDevCards = scoredDevCards.map { it.first }
     val bestDevScore = scoredDevCards.minOfOrNull { it.second }
@@ -426,6 +450,20 @@ fun rememberSettingsSearchVisibility(
         primaryNames = listOf(stringResource(R.string.info_github_repo), "GitHub"),
         secondaryTexts = listOf("LimoLP4/GlassCalc-Android", infoTabTitle),
         keywordStrings = listOf(stringResource(R.string.settings_keywords_info_github))
+    )
+    val infoFrankfurterScore = scoreSettingsEntry(
+        tokens = tokens,
+        primaryNames = listOf(stringResource(R.string.info_oss_frankfurter_title)),
+        secondaryTexts = listOf(
+            stringResource(R.string.info_frankfurter_desc),
+            stringResource(R.string.info_oss_frankfurter_license),
+            "https://www.frankfurter.app",
+            infoTabTitle
+        ),
+        keywordStrings = listOf(
+            stringResource(R.string.settings_keywords_info_license),
+            "frankfurter,api,währung,currency,ecb,ezb,mit"
+        )
     )
     val infoOssScore = scoreSettingsEntry(
         tokens = tokens,
@@ -449,8 +487,9 @@ fun rememberSettingsSearchVisibility(
     val scoredInfoCards = listOfNotNull(
         infoVersionScore?.let { Triple(SettingsInfoCard.VERSION, it, 0) },
         infoGitHubScore?.let { Triple(SettingsInfoCard.GITHUB, it, 1) },
-        infoOssScore?.let { Triple(SettingsInfoCard.OSS, it, 2) },
-        infoApacheScore?.let { Triple(SettingsInfoCard.APACHE, it, 3) }
+        infoFrankfurterScore?.let { Triple(SettingsInfoCard.FRANKFURTER_API, it, 2) },
+        infoOssScore?.let { Triple(SettingsInfoCard.OSS, it, 3) },
+        infoApacheScore?.let { Triple(SettingsInfoCard.APACHE, it, 4) }
     ).sortedWith(compareBy<Triple<SettingsInfoCard, Int, Int>> { it.second }.thenBy { it.third })
     val orderedInfoCards = scoredInfoCards.map { it.first }
     val bestInfoScore = scoredInfoCards.minOfOrNull { it.second }
@@ -500,6 +539,7 @@ fun rememberSettingsSearchVisibility(
         showRadCard = radScore != null,
         showDevScreenCard = devScreenScore != null,
         showDevApiCard = devApiScore != null,
+        showDevQsTileCard = devQsTileScore != null,
         showDevHapticCard = devHapticScore != null,
         showDevAutoResultCard = devAutoResultScore != null,
         showDevLifecycleCard = devLifecycleScore != null,
@@ -507,6 +547,7 @@ fun rememberSettingsSearchVisibility(
         showDevResetStorageCard = devResetStorageScore != null,
         showInfoVersionCard = infoVersionScore != null,
         showInfoGitHubCard = infoGitHubScore != null,
+        showInfoFrankfurterCard = infoFrankfurterScore != null,
         showInfoOssCard = infoOssScore != null,
         showInfoApacheCard = infoApacheScore != null,
         matchingLanguages = matchingLanguages,

@@ -46,6 +46,7 @@ lifecycleProcess = "2.8.7"
 mxparser = "5.2.1"
 appcompat = "1.7.1"
 playServicesOssLicenses = "17.5.3"
+glance = "1.1.1"
 
 
 [libraries]
@@ -106,6 +107,8 @@ androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-p
 mxparser = { group = "org.mariuszgromada.math", name = "MathParser.org-mXparser", version.ref = "mxparser" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 play-services-oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
+androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
 
 
 [plugins]

@@ -195,7 +195,21 @@ val ALL_UNIT_ITEMS: List<UnitItem> by lazy {
         UnitItem("pascal", "Pa", UnitCategory.PRESSURE, R.string.unit_name_pascal, UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "bar" }, R.string.unit_keywords_pascal),
         UnitItem("bar", "bar", UnitCategory.PRESSURE, R.string.unit_name_bar, UnitConverter.CONVERSIONS.first { it.unitFrom == "Pa" && it.unitTo == "bar" }, R.string.unit_keywords_bar),
         UnitItem("psi", "psi", UnitCategory.PRESSURE, R.string.unit_name_psi, UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "psi" }, R.string.unit_keywords_psi),
-        UnitItem("atmosphere", "atm", UnitCategory.PRESSURE, R.string.unit_name_atmosphere, UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "atm" }, R.string.unit_keywords_atmosphere)
+        UnitItem("atmosphere", "atm", UnitCategory.PRESSURE, R.string.unit_name_atmosphere, UnitConverter.CONVERSIONS.first { it.unitFrom == "bar" && it.unitTo == "atm" }, R.string.unit_keywords_atmosphere),
+
+        // Currency
+        UnitItem("eur", "EUR", UnitCategory.CURRENCY, R.string.unit_name_eur, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "USD" }, R.string.unit_keywords_eur),
+        UnitItem("usd", "USD", UnitCategory.CURRENCY, R.string.unit_name_usd, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "USD" }, R.string.unit_keywords_usd),
+        UnitItem("gbp", "GBP", UnitCategory.CURRENCY, R.string.unit_name_gbp, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "GBP" }, R.string.unit_keywords_gbp),
+        UnitItem("chf", "CHF", UnitCategory.CURRENCY, R.string.unit_name_chf, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "CHF" }, R.string.unit_keywords_chf),
+        UnitItem("jpy", "JPY", UnitCategory.CURRENCY, R.string.unit_name_jpy, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "JPY" }, R.string.unit_keywords_jpy),
+        UnitItem("cad", "CAD", UnitCategory.CURRENCY, R.string.unit_name_cad, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "CAD" }, R.string.unit_keywords_cad),
+        UnitItem("aud", "AUD", UnitCategory.CURRENCY, R.string.unit_name_aud, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "AUD" }, R.string.unit_keywords_aud),
+        UnitItem("cny", "CNY", UnitCategory.CURRENCY, R.string.unit_name_cny, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "CNY" }, R.string.unit_keywords_cny),
+        UnitItem("pln", "PLN", UnitCategory.CURRENCY, R.string.unit_name_pln, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "PLN" }, R.string.unit_keywords_pln),
+        UnitItem("sek", "SEK", UnitCategory.CURRENCY, R.string.unit_name_sek, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "SEK" }, R.string.unit_keywords_sek),
+        UnitItem("nok", "NOK", UnitCategory.CURRENCY, R.string.unit_name_nok, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "NOK" }, R.string.unit_keywords_nok),
+        UnitItem("inr", "INR", UnitCategory.CURRENCY, R.string.unit_name_inr, UnitConverter.CONVERSIONS.first { it.unitFrom == "EUR" && it.unitTo == "INR" }, R.string.unit_keywords_inr)
     )
 }
 
@@ -494,6 +508,7 @@ fun categoryKeywordsResId(category: UnitCategory): Int = when (category) {
     UnitCategory.DATA_RATE -> R.string.converter_keywords_data_rate
     UnitCategory.ENERGY -> R.string.converter_keywords_energy
     UnitCategory.PRESSURE -> R.string.converter_keywords_pressure
+    UnitCategory.CURRENCY -> R.string.converter_keywords_currency
 }
 
 fun filterConversionPairs(

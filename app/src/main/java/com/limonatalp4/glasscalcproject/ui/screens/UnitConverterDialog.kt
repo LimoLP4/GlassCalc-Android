@@ -67,6 +67,7 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -76,6 +77,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.SettingsInputComponent
@@ -87,6 +89,7 @@ import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -137,6 +140,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import com.limonatalp4.glasscalcproject.R
+import com.limonatalp4.glasscalcproject.data.repository.CurrencyRatesUiState
+import com.limonatalp4.glasscalcproject.data.repository.CurrencyRepository
 import com.limonatalp4.glasscalcproject.domain.converter.ConversionPair
 import com.limonatalp4.glasscalcproject.domain.converter.UnitCategory
 import com.limonatalp4.glasscalcproject.domain.converter.UnitConverter
@@ -165,7 +170,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun UnitConverterDialog(
     onImportToCalculator: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    currencyRatesState: CurrencyRatesUiState = CurrencyRatesUiState(),
+    onEnsureCurrencyRates: (Boolean) -> Unit = {}
 ) {
     val glassProps = LocalGlassProperties.current
     val colorScheme = MaterialTheme.colorScheme
@@ -242,10 +249,20 @@ fun UnitConverterDialog(
     val fromUnit = if (isForward) currentPair.unitFrom else currentPair.unitTo
     val toUnit = if (isForward) currentPair.unitTo else currentPair.unitFrom
 
-    val convertedResult = remember(inputValue, currentPair, isForward) {
+    LaunchedEffect(currentCategory) {
+        if (currentCategory == UnitCategory.CURRENCY) {
+            onEnsureCurrencyRates(false)
+        }
+    }
+
+    val convertedResult = remember(inputValue, currentPair, isForward, currencyRatesState.rates) {
         val num = inputValue.replace(",", ".").toDoubleOrNull()
         if (num != null) {
-            UnitConverter.convert(num, currentPair, isForward)
+            if (currentPair.category == UnitCategory.CURRENCY) {
+                UnitConverter.convertCurrency(num, currentPair, isForward, currencyRatesState.rates)
+            } else {
+                UnitConverter.convert(num, currentPair, isForward)
+            }
         } else {
             "—"
         }
@@ -524,7 +541,8 @@ fun UnitConverterDialog(
                     Triple(UnitCategory.FREQUENCY, Icons.Default.GraphicEq, R.string.cat_frequency),
                     Triple(UnitCategory.DATA_RATE, Icons.Default.NetworkCheck, R.string.cat_data_rate),
                     Triple(UnitCategory.ENERGY, Icons.Default.LocalFireDepartment, R.string.cat_energy),
-                    Triple(UnitCategory.PRESSURE, Icons.Default.Compress, R.string.cat_pressure)
+                    Triple(UnitCategory.PRESSURE, Icons.Default.Compress, R.string.cat_pressure),
+                    Triple(UnitCategory.CURRENCY, Icons.Default.CurrencyExchange, R.string.cat_currency)
                 )
                 val categoryPillItems = categoryTabs.map { (cat, icon, shortLabelRes) ->
                     GlassPillTabItem(
@@ -838,6 +856,23 @@ fun UnitConverterDialog(
                                 )
                             }
                         }
+
+                        if (currentPair.category == UnitCategory.CURRENCY) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            CurrencyRateStatusPill(
+                                fromUnit = fromUnit,
+                                toUnit = toUnit,
+                                currentPair = currentPair,
+                                isForward = isForward,
+                                ratesState = currencyRatesState,
+                                isPureBlack = isPureBlack,
+                                glassProps = glassProps,
+                                onRefresh = {
+                                    triggerHaptic()
+                                    onEnsureCurrencyRates(true)
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -1040,6 +1075,146 @@ private fun SupportedSystemsInfoCard(
                         onSurfaceColor.copy(alpha = 0.82f)
                     },
                     modifier = Modifier.testTag("text_converter_systems_detail")
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CurrencyRateStatusPill(
+    fromUnit: String,
+    toUnit: String,
+    currentPair: ConversionPair,
+    isForward: Boolean,
+    ratesState: CurrencyRatesUiState,
+    isPureBlack: Boolean,
+    glassProps: com.limonatalp4.glasscalcproject.ui.theme.GlassThemeProperties,
+    onRefresh: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val refreshInteraction = remember { MutableInteractionSource() }
+    val statusBg = if (isPureBlack) {
+        Color(0xFF0A0A0A)
+    } else {
+        colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    }
+    val statusTextColor = if (isPureBlack) {
+        Color.White.copy(alpha = 0.78f)
+    } else {
+        colorScheme.onSurfaceVariant
+    }
+
+    GlassSurface(
+        shape = GlassDialogDefaults.NestedPanelShape,
+        customBgColor = statusBg,
+        borderStroke = glassProps.containerBorderStroke,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("currency_rate_status_pill")
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (ratesState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .testTag("currency_loading_indicator"),
+                            strokeWidth = 2.dp,
+                            color = colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.currency_loading),
+                            fontSize = 12.sp,
+                            color = statusTextColor,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    } else if (ratesState.hasRates) {
+                        val unitRate = UnitConverter.convertCurrency(1.0, currentPair, isForward, ratesState.rates)
+                        val dateLabel = ratesState.date.ifBlank { CurrencyRepository.DEFAULT_BASE }
+                        val statusMessage = if (ratesState.isOfflineFallback) {
+                            stringResource(R.string.currency_cached_offline, fromUnit, unitRate, toUnit, dateLabel)
+                        } else {
+                            stringResource(R.string.currency_rate_info, fromUnit, unitRate, toUnit, dateLabel)
+                        }
+                        Text(
+                            text = statusMessage,
+                            fontSize = 11.5.sp,
+                            lineHeight = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = statusTextColor,
+                            modifier = Modifier.testTag("text_currency_rate_info")
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.currency_error),
+                            fontSize = 12.sp,
+                            lineHeight = 15.sp,
+                            color = colorScheme.error,
+                            modifier = Modifier.testTag("text_currency_rate_error")
+                        )
+                    }
+                }
+
+                GlassSurface(
+                    shape = CircleShape,
+                    customBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    borderStroke = glassProps.containerBorderStroke,
+                    modifier = Modifier.pressScale(refreshInteraction)
+                ) {
+                    IconButton(
+                        onClick = onRefresh,
+                        enabled = !ratesState.isLoading,
+                        interactionSource = refreshInteraction,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .testTag("btn_refresh_currency_rates")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.currency_refresh_desc),
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 14.dp, end = 14.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = colorScheme.primary.copy(alpha = 0.85f),
+                    modifier = Modifier.size(13.dp)
+                )
+                Text(
+                    text = stringResource(R.string.currency_api_disclaimer),
+                    fontSize = 10.5.sp,
+                    lineHeight = 14.sp,
+                    color = statusTextColor.copy(alpha = 0.85f),
+                    modifier = Modifier.testTag("text_currency_api_disclaimer")
                 )
             }
         }
