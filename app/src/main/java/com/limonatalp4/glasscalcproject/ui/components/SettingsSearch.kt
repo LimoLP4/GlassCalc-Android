@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -566,12 +567,11 @@ fun SettingsSearchBar(
     isTiefschwarz: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val shape = GlassDialogDefaults.PillShape
     val searchBarBgColor = GlassDialogDefaults.searchBarBackgroundColor(isTiefschwarz)
     val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
-    val textColor = colorScheme.onSurface
-    val hintColor = colorScheme.onSurfaceVariant
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val hintColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val context = LocalContext.current
     val view = LocalView.current
@@ -652,8 +652,10 @@ fun SettingsSearchBar(
                 interactionSource = textFieldInteractionSource,
                 textStyle = TextStyle(
                     color = textColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    platformStyle = PlatformTextStyle(includeFontPadding = false)
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
@@ -672,7 +674,11 @@ fun SettingsSearchBar(
                             Text(
                                 text = stringResource(R.string.settings_search_placeholder),
                                 color = hintColor,
-                                fontSize = 14.sp,
+                                fontSize = 16.sp,
+                                lineHeight = 20.sp,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )

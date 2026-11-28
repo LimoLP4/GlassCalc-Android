@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -67,7 +68,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import com.limonatalp4.glasscalcproject.ui.theme.LocalGlassProperties
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -161,16 +161,16 @@ fun DrawerFormulaSearch(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Liquid-Glass-Suchleiste (ausschließlich dynamische Theme-Variablen)
+        // Liquid-Glass-Suchleiste nahtlos integriert in die Menü-Pille
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .clip(searchBarShape)
-                .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .background(colorScheme.primaryContainer.copy(alpha = 0.26f))
                 .border(
-                    border = LocalGlassProperties.current.containerBorderStroke,
+                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.24f)),
                     shape = searchBarShape
                 )
                 .clickable(
@@ -186,18 +186,18 @@ fun DrawerFormulaSearch(
                     focusRequester.requestFocus()
                 }
                 .padding(
-                    start = 14.dp,
-                    end = if (query.isNotEmpty()) 4.dp else 14.dp
+                    start = 18.dp,
+                    end = if (query.isNotEmpty()) 4.dp else 18.dp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
+                tint = colorScheme.primary,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Box(
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterStart
@@ -209,10 +209,12 @@ fun DrawerFormulaSearch(
                     interactionSource = textFieldInteractionSource,
                     textStyle = TextStyle(
                         color = colorScheme.onSurface,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        platformStyle = PlatformTextStyle(includeFontPadding = false)
                     ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    cursorBrush = SolidColor(colorScheme.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
@@ -228,8 +230,12 @@ fun DrawerFormulaSearch(
                             if (query.isEmpty()) {
                                 Text(
                                     text = stringResource(R.string.formula_search_placeholder),
-                                    color = colorScheme.onSurfaceVariant,
-                                    fontSize = 14.sp,
+                                    color = colorScheme.primary.copy(alpha = 0.78f),
+                                    fontSize = 16.sp,
+                                    lineHeight = 20.sp,
+                                    style = TextStyle(
+                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -252,7 +258,7 @@ fun DrawerFormulaSearch(
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = stringResource(R.string.formula_search_clear),
-                        tint = colorScheme.onSurfaceVariant,
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -265,30 +271,30 @@ fun DrawerFormulaSearch(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            val suggestionBgColor = colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            val suggestionBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
+            val suggestionBgColor = colorScheme.primaryContainer.copy(alpha = 0.22f)
+            val suggestionBorder = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.22f))
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp)
+                    .padding(top = 8.dp)
                     .heightIn(max = if (isImeVisible) 160.dp else 232.dp)
                     .testTag("drawer_formula_dropdown"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(vertical = 4.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(vertical = 2.dp)
             ) {
                 if (filteredFormulas.isEmpty()) {
                     item(key = "empty") {
                         Surface(
                             shape = suggestionPillShape,
-                            color = colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                            contentColor = colorScheme.onSurfaceVariant,
+                            color = colorScheme.primaryContainer.copy(alpha = 0.18f),
+                            contentColor = colorScheme.primary,
                             border = suggestionBorder,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
                                 text = stringResource(R.string.formula_search_empty),
-                                color = colorScheme.onSurfaceVariant,
+                                color = colorScheme.primary.copy(alpha = 0.85f),
                                 fontSize = 13.sp,
                                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
                             )

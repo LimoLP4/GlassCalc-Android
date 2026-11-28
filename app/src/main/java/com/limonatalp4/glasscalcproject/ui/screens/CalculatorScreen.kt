@@ -534,32 +534,7 @@ fun CalculatorScreen(
                                 )
                             }
                             HorizontalDivider(color = onSurfaceColor.copy(alpha = 0.08f))
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            DrawerFormulaSearch(
-                                query = formulaSearchQuery,
-                                onQueryChange = { newValue ->
-                                    formulaSearchQuery = newValue
-                                },
-                                onClearClick = {
-                                    HapticUtil.performAppHaptic(
-                                        context = context,
-                                        view = view,
-                                        enabled = hapticFeedbackEnabled,
-                                        intensityLevel = hapticIntensity
-                                    )
-                                    formulaSearchQuery = ""
-                                },
-                                onFormulaSelected = { formula ->
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                    viewModel.insertFormula(formula.insertExpression)
-                                    formulaSearchQuery = ""
-                                    isDrawerOpen = false
-                                }
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             val menuItems = remember {
                                 listOf(
@@ -571,7 +546,7 @@ fun CalculatorScreen(
                                 )
                             }
 
-                            // Outer Segmented Control Container (große schwebende Pille)
+                            // Outer Segmented Control Container (große schwebende Pille inkl. Suchleiste)
                             var selectedNavTag by remember { mutableStateOf("nav_item_calculator") }
                             LaunchedEffect(
                                 isDrawerOpen,
@@ -644,101 +619,132 @@ fun CalculatorScreen(
                                     )
                                     .padding(8.dp)
                             ) {
-                                // Gleitende aktive Pille (konzentrisch zum 32.dp-Container)
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .offset { IntOffset(0, indicatorOffsetY.roundToPx()) }
-                                        .height(indicatorHeight)
-                                        .clip(innerPillShape)
-                                        .background(activePillBgColor)
-                                )
-
                                 Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(itemSpacing)
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    menuItems.forEachIndexed { index, (icon, labelRes, tag) ->
-                                        val isSelected = selectedNavTag == tag
-                                        val menuItemInteraction = remember { MutableInteractionSource() }
-                                        val iconTint by animateColorAsState(
-                                            targetValue = if (isSelected) {
-                                                MaterialTheme.colorScheme.onPrimaryContainer
-                                            } else {
-                                                MaterialTheme.colorScheme.primary
-                                            },
-                                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-                                            label = "nav_icon_tint_$tag"
-                                        )
-                                        val labelColor by animateColorAsState(
-                                            targetValue = if (isSelected) {
-                                                MaterialTheme.colorScheme.onPrimaryContainer
-                                            } else {
-                                                MaterialTheme.colorScheme.primary
-                                            },
-                                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
-                                            label = "nav_label_color_$tag"
-                                        )
+                                    DrawerFormulaSearch(
+                                        query = formulaSearchQuery,
+                                        onQueryChange = { newValue ->
+                                            formulaSearchQuery = newValue
+                                        },
+                                        onClearClick = {
+                                            HapticUtil.performAppHaptic(
+                                                context = context,
+                                                view = view,
+                                                enabled = hapticFeedbackEnabled,
+                                                intensityLevel = hapticIntensity
+                                            )
+                                            formulaSearchQuery = ""
+                                        },
+                                        onFormulaSelected = { formula ->
+                                            focusManager.clearFocus()
+                                            keyboardController?.hide()
+                                            viewModel.insertFormula(formula.insertExpression)
+                                            formulaSearchQuery = ""
+                                            isDrawerOpen = false
+                                        }
+                                    )
 
-                                        Surface(
-                                            selected = isSelected,
-                                            onClick = {
-                                                focusManager.clearFocus()
-                                                keyboardController?.hide()
-                                                HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
-                                                selectedNavTag = tag
-                                                isDrawerOpen = false
-                                                menuVisibleState.targetState = false
-                                                coroutineScope.launch {
-                                                    snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
-                                                        .first { it }
-                                                    when (tag) {
-                                                        "nav_item_history" -> isHistoryOpen = true
-                                                        "nav_item_converter" -> isUnitConverterOpen = true
-                                                        "nav_item_graph" -> isGraphOpen = true
-                                                        "nav_item_settings" -> isSettingsOpen = true
-                                                    }
-                                                }
-                                            },
-                                            shape = innerPillShape,
-                                            color = Color.Transparent,
-                                            contentColor = labelColor,
-                                            interactionSource = menuItemInteraction,
+                                    Spacer(modifier = Modifier.height(itemSpacing))
+
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        // Gleitende aktive Pille (konzentrisch zum 32.dp-Container)
+                                        Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .defaultMinSize(minHeight = defaultItemHeight)
-                                                .onSizeChanged { size ->
-                                                    itemHeights[index] = with(density) { size.height.toDp() }
-                                                }
-                                                .pressScale(menuItemInteraction)
-                                                .testTag(tag)
+                                                .offset { IntOffset(0, indicatorOffsetY.roundToPx()) }
+                                                .height(indicatorHeight)
+                                                .clip(innerPillShape)
+                                                .background(activePillBgColor)
+                                        )
+
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalArrangement = Arrangement.spacedBy(itemSpacing)
                                         ) {
-                                            Box(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                contentAlignment = Alignment.CenterStart
-                                            ) {
-                                                Row(
+                                            menuItems.forEachIndexed { index, (icon, labelRes, tag) ->
+                                                val isSelected = selectedNavTag == tag
+                                                val menuItemInteraction = remember { MutableInteractionSource() }
+                                                val iconTint by animateColorAsState(
+                                                    targetValue = if (isSelected) {
+                                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                                                    label = "nav_icon_tint_$tag"
+                                                )
+                                                val labelColor by animateColorAsState(
+                                                    targetValue = if (isSelected) {
+                                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                                                    label = "nav_label_color_$tag"
+                                                )
+
+                                                Surface(
+                                                    selected = isSelected,
+                                                    onClick = {
+                                                        focusManager.clearFocus()
+                                                        keyboardController?.hide()
+                                                        HapticUtil.performAppHaptic(context, view, hapticFeedbackEnabled, hapticIntensity)
+                                                        selectedNavTag = tag
+                                                        isDrawerOpen = false
+                                                        menuVisibleState.targetState = false
+                                                        coroutineScope.launch {
+                                                            snapshotFlow { menuVisibleState.isIdle && !menuVisibleState.currentState }
+                                                                .first { it }
+                                                            when (tag) {
+                                                                "nav_item_history" -> isHistoryOpen = true
+                                                                "nav_item_converter" -> isUnitConverterOpen = true
+                                                                "nav_item_graph" -> isGraphOpen = true
+                                                                "nav_item_settings" -> isSettingsOpen = true
+                                                            }
+                                                        }
+                                                    },
+                                                    shape = innerPillShape,
+                                                    color = Color.Transparent,
+                                                    contentColor = labelColor,
+                                                    interactionSource = menuItemInteraction,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(horizontal = 18.dp, vertical = 12.dp),
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                        .defaultMinSize(minHeight = defaultItemHeight)
+                                                        .onSizeChanged { size ->
+                                                            itemHeights[index] = with(density) { size.height.toDp() }
+                                                        }
+                                                        .pressScale(menuItemInteraction)
+                                                        .testTag(tag)
                                                 ) {
-                                                    Icon(
-                                                        imageVector = icon,
-                                                        contentDescription = null,
-                                                        tint = iconTint,
-                                                        modifier = Modifier.size(20.dp)
-                                                    )
-                                                    Text(
-                                                        text = stringResource(labelRes),
-                                                        fontSize = 15.sp,
-                                                        lineHeight = 19.sp,
-                                                        maxLines = 2,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                        color = labelColor
-                                                    )
+                                                    Box(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        contentAlignment = Alignment.CenterStart
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(horizontal = 18.dp, vertical = 12.dp),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                                        ) {
+                                                            Icon(
+                                                                imageVector = icon,
+                                                                contentDescription = null,
+                                                                tint = iconTint,
+                                                                modifier = Modifier.size(20.dp)
+                                                            )
+                                                            Text(
+                                                                text = stringResource(labelRes),
+                                                                fontSize = 15.sp,
+                                                                lineHeight = 19.sp,
+                                                                maxLines = 2,
+                                                                overflow = TextOverflow.Ellipsis,
+                                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                                color = labelColor
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }

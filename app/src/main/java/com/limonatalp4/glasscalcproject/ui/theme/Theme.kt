@@ -89,7 +89,7 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = Color(0xFFF0F4F8),
     onSurface = Color(0xFFF0F4F8),
     surfaceVariant = Color(0xFF202838),
-    onSurfaceVariant = Color(0xFFC2C7D0),
+    onSurfaceVariant = Color(0xFFA8C6E3),
     outline = Color(0xFF8C9199)
 )
 
@@ -114,7 +114,7 @@ private val TiefschwarzColorScheme = darkColorScheme(
     onBackground = Color(0xFFF0F4F8),
     onSurface = Color(0xFFF0F4F8),
     surfaceVariant = Color(0xFF141414),
-    onSurfaceVariant = Color(0xFFC2C7D0),
+    onSurfaceVariant = Color(0xFFA8C6E3),
     outline = Color(0xFF8C9199)
 )
 
@@ -134,7 +134,7 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color(0xFF0F172A),
     onSurface = Color(0xFF0F172A),
     surfaceVariant = Color(0xFFE1E7F0),
-    onSurfaceVariant = Color(0xFF42474E),
+    onSurfaceVariant = Color(0xFF334B63),
     outline = Color(0xFF73777F)
 )
 
@@ -293,6 +293,10 @@ internal fun applyCustomAccentColor(
             onTertiaryContainerArgb = android.graphics.Color.WHITE
         }
 
+        val onSurfaceVariantArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.48f).coerceIn(0.24f, 0.58f), 0.78f)
+        )
+
         return baseScheme.copy(
             primary = primaryColor,
             onPrimary = Color(onPrimaryArgb),
@@ -301,6 +305,7 @@ internal fun applyCustomAccentColor(
             tertiary = Color(tertiaryArgb),
             tertiaryContainer = Color(tertiaryContainerArgb),
             onTertiaryContainer = Color(onTertiaryContainerArgb),
+            onSurfaceVariant = Color(onSurfaceVariantArgb),
             inversePrimary = Color(inversePrimaryArgb)
         )
     } else {
@@ -350,6 +355,10 @@ internal fun applyCustomAccentColor(
             onTertiaryContainerArgb = darkFallback
         }
 
+        val onSurfaceVariantArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, (baseSat * 0.45f).coerceIn(0.20f, 0.55f), 0.34f)
+        )
+
         return baseScheme.copy(
             primary = primaryColor,
             onPrimary = onPrimaryColor,
@@ -358,6 +367,7 @@ internal fun applyCustomAccentColor(
             tertiary = Color(tertiaryArgb),
             tertiaryContainer = Color(tertiaryContainerArgb),
             onTertiaryContainer = Color(onTertiaryContainerArgb),
+            onSurfaceVariant = Color(onSurfaceVariantArgb),
             inversePrimary = Color(inversePrimaryArgb)
         )
     }

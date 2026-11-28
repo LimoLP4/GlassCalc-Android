@@ -271,8 +271,6 @@ fun UnitConverterDialog(
     val dialogBgColor = colorScheme.surfaceContainerHigh
     val onSurfaceColor = colorScheme.onSurface
     val primaryColor = colorScheme.primary
-    val primaryContainerColor = colorScheme.primaryContainer
-    val onPrimaryContainerColor = colorScheme.onPrimaryContainer
     val isTiefschwarz = glassProps.isTiefschwarz
     val isPureBlack = isTiefschwarz
 
@@ -568,9 +566,9 @@ fun UnitConverterDialog(
                     minTabHeight = 40.dp,
                     tabPadding = PaddingValues(vertical = 9.dp, horizontal = 12.dp),
                     labelFontSize = 11.5.sp,
-                    activeIndicatorColor = primaryContainerColor,
-                    activeContentColor = onPrimaryContainerColor,
-                    inactiveContentColor = colorScheme.onSurfaceVariant,
+                    activeIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     animationLabelPrefix = "cat"
                 )
 
