@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -312,27 +313,30 @@ fun UnitConverterDialog(
                     }
             )
 
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
-                    .align(if (isImeVisible) Alignment.TopCenter else Alignment.Center)
+                    .fillMaxSize()
                     .windowInsetsPadding(
                         WindowInsets.statusBars
                             .union(WindowInsets.displayCutout)
-                            .union(WindowInsets.ime)
                             .union(WindowInsets.navigationBars)
                     )
+                    .imePadding()
                     .padding(
                         start = 16.dp,
                         end = 16.dp,
                         top = dialogTopPadding,
                         bottom = dialogBottomPadding
-                    )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
+                val maxDialogHeight = maxHeight * 0.9f
                 DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
                     GlassSurface(
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .widthIn(max = 400.dp)
+                            .heightIn(max = maxDialogHeight)
                             .pointerInput(Unit) {
                                 awaitPointerEventScope {
                                     while (true) {

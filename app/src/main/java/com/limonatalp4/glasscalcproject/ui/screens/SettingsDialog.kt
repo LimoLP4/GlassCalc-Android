@@ -40,12 +40,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -344,27 +347,30 @@ fun SettingsDialog(
                     }
             )
 
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
-                    .align(if (isImeVisible) Alignment.TopCenter else Alignment.Center)
+                    .fillMaxSize()
                     .windowInsetsPadding(
                         WindowInsets.statusBars
                             .union(WindowInsets.displayCutout)
-                            .union(WindowInsets.ime)
                             .union(WindowInsets.navigationBars)
                     )
+                    .imePadding()
                     .padding(
                         start = 16.dp,
                         end = 16.dp,
                         top = dialogTopPadding,
                         bottom = dialogBottomPadding
-                    )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
+                val maxDialogHeight = maxHeight * 0.9f
                 DialogAnimatedContent(visibleState = dialogTransition.visibleState) {
                     GlassSurface(
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .widthIn(max = 400.dp)
+                            .heightIn(max = maxDialogHeight)
                             .pointerInput(Unit) {
                                 awaitPointerEventScope {
                                     while (true) {
