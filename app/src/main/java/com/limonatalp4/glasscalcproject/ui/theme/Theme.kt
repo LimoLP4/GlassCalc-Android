@@ -80,6 +80,9 @@ private val DarkColorScheme = darkColorScheme(
     onPrimaryContainer = Color(0xFFD1E4FF),
     secondary = DarkSecondaryBlue,
     tertiary = DarkTertiaryBlue,
+    onTertiary = Color(0xFF3B1D42),
+    tertiaryContainer = Color(0xFF53335A),
+    onTertiaryContainer = Color(0xFFFAD8FF),
     error = DarkErrorRed,
     background = DarkBackground,
     surface = Color(0xFF14171E),
@@ -97,6 +100,9 @@ private val TiefschwarzColorScheme = darkColorScheme(
     onPrimaryContainer = Color(0xFFD1E4FF),
     secondary = DarkSecondaryBlue,
     tertiary = DarkTertiaryBlue,
+    onTertiary = Color(0xFF3B1D42),
+    tertiaryContainer = Color(0xFF53335A),
+    onTertiaryContainer = Color(0xFFFAD8FF),
     error = DarkErrorRed,
     background = TiefschwarzBackground,
     surface = TiefschwarzBackground,
@@ -119,6 +125,9 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = Color(0xFF001D36),
     secondary = SecondaryBlue,
     tertiary = TertiaryBlue,
+    onTertiary = Color(0xFFFDF2FF),
+    tertiaryContainer = Color(0xFFF8D8FF),
+    onTertiaryContainer = Color(0xFF2B0E32),
     error = ErrorRed,
     background = Color(0xFFF3F5FA),
     surface = Color(0xFFFFFFFF),
@@ -242,7 +251,7 @@ internal fun applyCustomAccentColor(
         }
 
         val containerArgb = ColorUtils.HSLToColor(
-            floatArrayOf(hue, (baseSat * 0.75f).coerceIn(0.35f, 0.80f), 0.28f)
+            floatArrayOf(hue, (baseSat * 0.75f).coerceIn(0.35f, 0.80f), 0.24f)
         )
         val onContainerSat = (baseSat * 0.92f).coerceIn(0.55f, 0.96f)
         var onContainerLightness = 0.78f
@@ -262,11 +271,36 @@ internal fun applyCustomAccentColor(
             floatArrayOf(hue, baseSat.coerceIn(0.55f, 0.88f), 0.40f)
         )
 
+        val tertiaryHue = (hue + 32f) % 360f
+        val tertiaryArgb = ColorUtils.HSLToColor(
+            floatArrayOf(tertiaryHue, (baseSat * 0.72f).coerceIn(0.45f, 0.85f), 0.74f)
+        )
+        val tertiaryContainerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(tertiaryHue, (baseSat * 0.65f).coerceIn(0.35f, 0.75f), 0.26f)
+        )
+        var onTertiaryContainerLightness = 0.82f
+        val onTertiaryContainerSat = (baseSat * 0.82f).coerceIn(0.48f, 0.90f)
+        var onTertiaryContainerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(tertiaryHue, onTertiaryContainerSat, onTertiaryContainerLightness)
+        )
+        while (onTertiaryContainerLightness < 0.95f && ColorUtils.calculateContrast(onTertiaryContainerArgb, tertiaryContainerArgb) < 4.5) {
+            onTertiaryContainerLightness += 0.02f
+            onTertiaryContainerArgb = ColorUtils.HSLToColor(
+                floatArrayOf(tertiaryHue, onTertiaryContainerSat, onTertiaryContainerLightness.coerceAtMost(0.95f))
+            )
+        }
+        if (ColorUtils.calculateContrast(onTertiaryContainerArgb, tertiaryContainerArgb) < 4.5) {
+            onTertiaryContainerArgb = android.graphics.Color.WHITE
+        }
+
         return baseScheme.copy(
             primary = primaryColor,
             onPrimary = Color(onPrimaryArgb),
             primaryContainer = Color(containerArgb),
             onPrimaryContainer = Color(onContainerArgb),
+            tertiary = Color(tertiaryArgb),
+            tertiaryContainer = Color(tertiaryContainerArgb),
+            onTertiaryContainer = Color(onTertiaryContainerArgb),
             inversePrimary = Color(inversePrimaryArgb)
         )
     } else {
@@ -290,7 +324,7 @@ internal fun applyCustomAccentColor(
         }
 
         val containerArgb = ColorUtils.HSLToColor(
-            floatArrayOf(hue, (baseSat * 0.65f).coerceIn(0.30f, 0.85f), 0.89f)
+            floatArrayOf(hue, (baseSat * 0.65f).coerceIn(0.30f, 0.85f), 0.92f)
         )
         var onContainerArgb = ColorUtils.HSLToColor(
             floatArrayOf(hue, (baseSat * 0.85f).coerceIn(0.40f, 0.90f), 0.14f)
@@ -302,11 +336,28 @@ internal fun applyCustomAccentColor(
             floatArrayOf(hue, baseSat.coerceIn(0.55f, 0.90f), 0.74f)
         )
 
+        val tertiaryHue = (hue + 32f) % 360f
+        val tertiaryArgb = ColorUtils.HSLToColor(
+            floatArrayOf(tertiaryHue, (baseSat * 0.70f).coerceIn(0.42f, 0.85f), 0.42f)
+        )
+        val tertiaryContainerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(tertiaryHue, (baseSat * 0.60f).coerceIn(0.30f, 0.80f), 0.92f)
+        )
+        var onTertiaryContainerArgb = ColorUtils.HSLToColor(
+            floatArrayOf(tertiaryHue, (baseSat * 0.82f).coerceIn(0.40f, 0.88f), 0.15f)
+        )
+        if (ColorUtils.calculateContrast(onTertiaryContainerArgb, tertiaryContainerArgb) < 4.5) {
+            onTertiaryContainerArgb = darkFallback
+        }
+
         return baseScheme.copy(
             primary = primaryColor,
             onPrimary = onPrimaryColor,
             primaryContainer = Color(containerArgb),
             onPrimaryContainer = Color(onContainerArgb),
+            tertiary = Color(tertiaryArgb),
+            tertiaryContainer = Color(tertiaryContainerArgb),
+            onTertiaryContainer = Color(onTertiaryContainerArgb),
             inversePrimary = Color(inversePrimaryArgb)
         )
     }
@@ -545,11 +596,7 @@ fun GlassCalcTheme(
         else -> 0.65f
     }
 
-    val buttonBorderColor = if (isTiefschwarz) {
-        Color.White.copy(alpha = UNIFIED_GLASS_BORDER_ALPHA)
-    } else {
-        colorScheme.outline.copy(alpha = UNIFIED_GLASS_BORDER_ALPHA)
-    }
+    val buttonBorderColor = colorScheme.outline.copy(alpha = UNIFIED_GLASS_BORDER_ALPHA)
     val containerBorderStroke = remember(buttonBorderColor) {
         BorderStroke(width = 1.dp, color = buttonBorderColor)
     }

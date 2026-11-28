@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.indication
@@ -98,20 +99,13 @@ fun GlassCalculatorButton(
     )
 
     val colorScheme = MaterialTheme.colorScheme
-    val primaryColor = colorScheme.primary
     val primaryContainerColor = colorScheme.primaryContainer
-    val tertiaryColor = colorScheme.tertiary
     val tertiaryContainerColor = colorScheme.tertiaryContainer
     val surfaceVariantColor = colorScheme.surfaceVariant
     val onErrorColor = colorScheme.onError
 
-    val textColor = when (type) {
-        ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> MaterialTheme.colorScheme.onPrimary
-        ButtonType.OPERATOR -> MaterialTheme.colorScheme.onPrimaryContainer
-        ButtonType.FUNCTION -> MaterialTheme.colorScheme.onTertiaryContainer
-        ButtonType.NUMBER -> MaterialTheme.colorScheme.primary
-    }
-    val effectiveTextColor = if (isLongPressTriggered) onErrorColor else textColor
+    val textColor = MaterialTheme.colorScheme.primary
+    val effectiveTextColor = if (isLongPressTriggered) onErrorColor else MaterialTheme.colorScheme.primary
 
     val flashColor by animateColorAsState(
         targetValue = if (isLongPressTriggered) colorScheme.error.copy(alpha = 0.85f) else Color.Transparent,
@@ -119,53 +113,60 @@ fun GlassCalculatorButton(
         label = "flash_color"
     )
 
-    val (bgBrush, borderColor) = remember(
+    val unifiedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    val buttonBorderStroke = BorderStroke(
+        width = 1.dp,
+        color = if (isLongPressTriggered) colorScheme.error else unifiedBorderColor
+    )
+
+    val bgBrush = remember(
         type,
-        primaryColor,
         primaryContainerColor,
-        tertiaryColor,
         tertiaryContainerColor,
         surfaceVariantColor,
-        glassProps.buttonBackgroundAlpha,
-        glassProps.buttonBorderColor
+        glassProps.buttonBackgroundAlpha
     ) {
         when (type) {
-            ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> {
-                val gradient = Brush.linearGradient(
+            ButtonType.EQUALS -> {
+                Brush.verticalGradient(
                     listOf(
-                        primaryColor,
-                        primaryColor.copy(alpha = 0.8f)
+                        primaryContainerColor.copy(alpha = 0.85f),
+                        primaryContainerColor.copy(alpha = 0.65f)
                     )
                 )
-                gradient to primaryColor
+            }
+            ButtonType.ACTION_CLEAR -> {
+                Brush.verticalGradient(
+                    listOf(
+                        primaryContainerColor.copy(alpha = 0.68f),
+                        primaryContainerColor.copy(alpha = 0.48f)
+                    )
+                )
             }
             ButtonType.OPERATOR -> {
-                val brush = Brush.verticalGradient(
+                Brush.verticalGradient(
                     listOf(
-                        primaryContainerColor.copy(alpha = 0.80f),
-                        primaryContainerColor.copy(alpha = 0.60f)
+                        primaryContainerColor.copy(alpha = 0.56f),
+                        primaryContainerColor.copy(alpha = 0.36f)
                     )
                 )
-                brush to primaryColor.copy(alpha = 0.50f)
             }
             ButtonType.FUNCTION -> {
-                val brush = Brush.verticalGradient(
+                Brush.verticalGradient(
                     listOf(
-                        tertiaryContainerColor.copy(alpha = 0.80f),
-                        tertiaryContainerColor.copy(alpha = 0.60f)
+                        tertiaryContainerColor.copy(alpha = 0.52f),
+                        tertiaryContainerColor.copy(alpha = 0.34f)
                     )
                 )
-                brush to tertiaryColor.copy(alpha = 0.50f)
             }
             ButtonType.NUMBER -> {
                 val alpha = glassProps.buttonBackgroundAlpha
-                val brush = Brush.verticalGradient(
+                Brush.verticalGradient(
                     listOf(
                         surfaceVariantColor.copy(alpha = alpha + 0.10f),
                         surfaceVariantColor.copy(alpha = alpha)
                     )
                 )
-                brush to glassProps.buttonBorderColor
             }
         }
     }
@@ -324,7 +325,7 @@ fun GlassCalculatorButton(
                 }
                 .clip(CircleShape)
                 .safeLiquidGlass(
-                    state = if (type != ButtonType.EQUALS && type != ButtonType.ACTION_CLEAR) glassState else null,
+                    state = glassState,
                     shape = CircleShape,
                     supportsBlur = glassProps.supportsBlur
                 )
@@ -336,7 +337,7 @@ fun GlassCalculatorButton(
                         Modifier
                     }
                 )
-                .border(1.dp, if (isLongPressTriggered) colorScheme.error else borderColor, CircleShape)
+                .border(border = buttonBorderStroke, shape = CircleShape)
                 .indication(interactionSource, ripple(bounded = true, color = textColor)),
             contentAlignment = Alignment.Center
         ) {
@@ -346,7 +347,7 @@ fun GlassCalculatorButton(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = if (glassProps.isTiefschwarz) 0.14f else 0.10f),
+                            colorScheme.onSurface.copy(alpha = if (glassProps.isDark) 0.08f else 0.14f),
                             Color.Transparent
                         )
                     )
@@ -381,7 +382,7 @@ fun GlassCalculatorButton(
                 fontSize = calculatedFontSize,
                 lineHeight = (calculatedFontSize.value * 1.15f).sp,
                 fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR || type == ButtonType.ACTION_CLEAR) FontWeight.Bold else FontWeight.Medium,
-                color = effectiveTextColor,
+                color = if (isLongPressTriggered) onErrorColor else MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 maxLines = if (allowWrap) 2 else 1,
                 softWrap = allowWrap,
