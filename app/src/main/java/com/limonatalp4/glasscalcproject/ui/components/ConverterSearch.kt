@@ -294,6 +294,7 @@ fun UnitConverterSearchBar(
         }
     }
 
+    val iconPillShape = RoundedCornerShape(50)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -315,17 +316,33 @@ fun UnitConverterSearchBar(
                 focusRequester.requestFocus()
             }
             .padding(
-                start = 14.dp,
+                start = 6.dp,
                 end = if (query.isNotEmpty()) 0.dp else 14.dp
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = null,
-            tint = hintColor,
-            modifier = Modifier.size(18.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(iconPillShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .border(
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    ),
+                    shape = iconPillShape
+                )
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
         Spacer(modifier = Modifier.width(10.dp))
         Box(
             modifier = Modifier.weight(1f),
@@ -382,7 +399,6 @@ fun UnitConverterSearchBar(
         }
         if (query.isNotEmpty()) {
             val clearInteraction = remember { MutableInteractionSource() }
-            val clearPillShape = RoundedCornerShape(50)
             IconButton(
                 onClick = onClearClick,
                 interactionSource = clearInteraction,
@@ -394,14 +410,14 @@ fun UnitConverterSearchBar(
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(clearPillShape)
+                        .clip(iconPillShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                         .border(
                             border = BorderStroke(
                                 1.dp,
                                 MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                             ),
-                            shape = clearPillShape
+                            shape = iconPillShape
                         )
                         .padding(8.dp),
                     contentAlignment = Alignment.Center

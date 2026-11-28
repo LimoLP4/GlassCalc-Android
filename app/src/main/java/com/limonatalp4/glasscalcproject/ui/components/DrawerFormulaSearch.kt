@@ -177,6 +177,7 @@ fun DrawerFormulaSearch(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
+        val iconPillShape = RoundedCornerShape(50)
         // Liquid-Glass-Suchleiste nahtlos integriert in die Menü-Pille (neutraler Glas-Look)
         Row(
             modifier = Modifier
@@ -202,18 +203,31 @@ fun DrawerFormulaSearch(
                     focusRequester.requestFocus()
                 }
                 .padding(
-                    start = 18.dp,
+                    start = 6.dp,
                     end = if (query.isNotEmpty()) 0.dp else 18.dp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(iconPillShape)
+                    .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .border(
+                        border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                        shape = iconPillShape
+                    )
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
@@ -248,7 +262,6 @@ fun DrawerFormulaSearch(
             )
             if (query.isNotEmpty()) {
                 val clearInteraction = remember { MutableInteractionSource() }
-                val clearPillShape = RoundedCornerShape(50)
                 IconButton(
                     onClick = onClearClick,
                     interactionSource = clearInteraction,
@@ -260,11 +273,11 @@ fun DrawerFormulaSearch(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(clearPillShape)
+                            .clip(iconPillShape)
                             .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
                             .border(
                                 border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
-                                shape = clearPillShape
+                                shape = iconPillShape
                             )
                             .padding(8.dp),
                         contentAlignment = Alignment.Center
