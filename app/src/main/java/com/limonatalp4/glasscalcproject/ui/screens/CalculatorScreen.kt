@@ -482,7 +482,6 @@ fun CalculatorScreen(
                         val isPureBlack = glassProps.isTiefschwarz
                         val drawerColorScheme = MaterialTheme.colorScheme
                         val drawerBgColor = drawerColorScheme.surfaceContainerHigh
-                        val primaryTint = drawerColorScheme.primary
                         val onSurfaceColor = drawerColorScheme.onSurface
                         val view = LocalView.current
                         
@@ -530,7 +529,7 @@ fun CalculatorScreen(
                                     text = stringResource(R.string.app_version_tag, BuildConfig.VERSION_NAME),
                                     fontSize = 11.sp,
                                     fontFamily = FontFamily.Monospace,
-                                    color = primaryTint,
+                                    color = MaterialTheme.colorScheme.primary,
                                     maxLines = 1
                                 )
                             }
@@ -622,7 +621,7 @@ fun CalculatorScreen(
                                 label = "drawer_pill_height"
                             )
                             val activePillBgColor by animateColorAsState(
-                                targetValue = drawerColorScheme.primaryContainer,
+                                targetValue = MaterialTheme.colorScheme.primaryContainer,
                                 animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
                                 label = "drawer_active_pill_bg"
                             )
@@ -664,18 +663,18 @@ fun CalculatorScreen(
                                         val menuItemInteraction = remember { MutableInteractionSource() }
                                         val iconTint by animateColorAsState(
                                             targetValue = if (isSelected) {
-                                                drawerColorScheme.onPrimaryContainer
+                                                MaterialTheme.colorScheme.onPrimaryContainer
                                             } else {
-                                                onSurfaceColor.copy(alpha = 0.7f)
+                                                MaterialTheme.colorScheme.primary
                                             },
                                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                             label = "nav_icon_tint_$tag"
                                         )
                                         val labelColor by animateColorAsState(
                                             targetValue = if (isSelected) {
-                                                drawerColorScheme.onPrimaryContainer
+                                                MaterialTheme.colorScheme.onPrimaryContainer
                                             } else {
-                                                onSurfaceColor.copy(alpha = 0.85f)
+                                                MaterialTheme.colorScheme.primary
                                             },
                                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
                                             label = "nav_label_color_$tag"
