@@ -256,8 +256,8 @@ fun UnitConverterSearchBar(
     val shape = GlassDialogDefaults.PillShape
     val searchBarBgColor = GlassDialogDefaults.searchBarBackgroundColor(isTiefschwarz)
     val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val hintColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = MaterialTheme.colorScheme.primary
+    val hintColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 
     val context = LocalContext.current
     val view = LocalView.current
@@ -444,7 +444,7 @@ fun UnitSuggestionsDropdown(
     val colorScheme = MaterialTheme.colorScheme
     val density = LocalDensity.current
     val isImeVisible = WindowInsets.ime.getBottom(density) > 0
-    val textColor = colorScheme.onSurface
+    val textColor = colorScheme.primary
     val dividerColor = colorScheme.outline.copy(alpha = 0.12f)
 
     GlassSurface(
@@ -472,7 +472,7 @@ fun UnitSuggestionsDropdown(
                     ) {
                         Text(
                             text = stringResource(R.string.converter_search_empty),
-                            color = colorScheme.onSurfaceVariant,
+                            color = colorScheme.primary,
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -594,7 +594,7 @@ fun ConverterSearchEmptyState(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = colorScheme.onSurfaceVariant,
+                tint = colorScheme.primary,
                 modifier = Modifier.size(26.dp)
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -602,7 +602,7 @@ fun ConverterSearchEmptyState(
                 text = stringResource(R.string.converter_search_empty),
                 fontSize = 13.5.sp,
                 fontWeight = FontWeight.Medium,
-                color = colorScheme.onSurfaceVariant,
+                color = colorScheme.primary,
                 textAlign = TextAlign.Center
             )
         }

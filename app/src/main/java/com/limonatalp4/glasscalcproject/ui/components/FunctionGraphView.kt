@@ -1151,9 +1151,9 @@ fun FunctionGraphView(
                             },
                             shape = CircleShape,
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = colorScheme.primary,
-                                selectedLabelColor = colorScheme.onPrimary,
-                                labelColor = colorScheme.onSurface.copy(alpha = 0.7f)
+                                selectedContainerColor = colorScheme.primaryContainer,
+                                selectedLabelColor = colorScheme.primary,
+                                labelColor = colorScheme.primary
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
@@ -1189,7 +1189,7 @@ fun FunctionGraphView(
                     Icon(
                         imageVector = if (isGraphLocked) Icons.Default.Lock else Icons.Default.LockOpen,
                         contentDescription = if (isGraphLocked) stringResource(R.string.graph_gesture_unlock) else stringResource(R.string.graph_gesture_lock),
-                        tint = if (isGraphLocked) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.4f),
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -1848,7 +1848,7 @@ fun FunctionGraphView(
                             Icon(
                                 imageVector = Icons.Default.RestartAlt,
                                 contentDescription = stringResource(R.string.graph_reset),
-                                tint = colorScheme.onSurface.copy(alpha = if (isGraphLocked) 0.25f else 0.70f),
+                                tint = if (isGraphLocked) colorScheme.primary.copy(alpha = 0.3f) else colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -1934,7 +1934,7 @@ fun FunctionGraphView(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     fontFamily = FontFamily.Monospace,
-                                    color = colorScheme.onSurface
+                                    color = colorScheme.primary
                                 )
                             }
                         }
@@ -1957,7 +1957,7 @@ fun FunctionGraphView(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     fontFamily = FontFamily.Monospace,
-                                    color = colorScheme.onSurface
+                                    color = colorScheme.primary
                                 )
                             }
 
@@ -1986,7 +1986,7 @@ fun FunctionGraphView(
                             Text(
                                 text = stringResource(R.string.graph_hint_second_point),
                                 fontSize = 10.sp,
-                                color = labelColor
+                                color = colorScheme.primary
                             )
                         }
                     }
@@ -2009,12 +2009,12 @@ fun FunctionGraphView(
                     glassState = glassState,
                     shape = RoundedCornerShape(50),
                     borderStroke = if (hasActivePoint) {
-                        BorderStroke(1.dp, colorScheme.onPrimary.copy(alpha = 0.25f))
+                        BorderStroke(1.dp, colorScheme.primary)
                     } else {
                         glassProps.containerBorderStroke
                     },
                     customBgColor = if (hasActivePoint) {
-                        colorScheme.primary.copy(alpha = 0.90f)
+                        colorScheme.primaryContainer
                     } else {
                         colorScheme.surfaceVariant.copy(alpha = 0.3f)
                     },
@@ -2036,9 +2036,9 @@ fun FunctionGraphView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val contentColor = if (hasActivePoint) {
-                            colorScheme.onPrimary
+                            colorScheme.primary
                         } else {
-                            colorScheme.onSurface.copy(alpha = 0.45f)
+                            colorScheme.primary.copy(alpha = 0.3f)
                         }
                         Icon(
                             imageVector = Icons.Default.Calculate,

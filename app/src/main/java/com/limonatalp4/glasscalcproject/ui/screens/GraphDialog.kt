@@ -149,7 +149,7 @@ fun GraphDialog(
                                     text = stringResource(R.string.title_graph),
                                     fontSize = 21.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = colorScheme.onSurface
+                                    color = colorScheme.primary
                                 )
                                 val closeBtnInteraction = remember { MutableInteractionSource() }
                                 GlassSurface(

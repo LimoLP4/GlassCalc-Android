@@ -667,7 +667,7 @@ fun CalculatorScreen(
                                                 val menuItemInteraction = remember { MutableInteractionSource() }
                                                 val iconTint by animateColorAsState(
                                                     targetValue = if (isSelected) {
-                                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                                        MaterialTheme.colorScheme.primary
                                                     } else {
                                                         MaterialTheme.colorScheme.primary
                                                     },
@@ -676,7 +676,7 @@ fun CalculatorScreen(
                                                 )
                                                 val labelColor by animateColorAsState(
                                                     targetValue = if (isSelected) {
-                                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                                        MaterialTheme.colorScheme.primary
                                                     } else {
                                                         MaterialTheme.colorScheme.primary
                                                     },

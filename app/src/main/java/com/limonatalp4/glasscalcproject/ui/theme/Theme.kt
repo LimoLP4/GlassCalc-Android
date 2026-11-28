@@ -89,7 +89,7 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = Color(0xFFF0F4F8),
     onSurface = Color(0xFFF0F4F8),
     surfaceVariant = Color(0xFF202838),
-    onSurfaceVariant = Color(0xFFA8C6E3),
+    onSurfaceVariant = Color(0xFF7CA4D1),
     outline = Color(0xFF8C9199)
 )
 
@@ -114,7 +114,7 @@ private val TiefschwarzColorScheme = darkColorScheme(
     onBackground = Color(0xFFF0F4F8),
     onSurface = Color(0xFFF0F4F8),
     surfaceVariant = Color(0xFF141414),
-    onSurfaceVariant = Color(0xFFA8C6E3),
+    onSurfaceVariant = Color(0xFF7CA4D1),
     outline = Color(0xFF8C9199)
 )
 
@@ -293,9 +293,20 @@ internal fun applyCustomAccentColor(
             onTertiaryContainerArgb = android.graphics.Color.WHITE
         }
 
-        val onSurfaceVariantArgb = ColorUtils.HSLToColor(
-            floatArrayOf(hue, (baseSat * 0.48f).coerceIn(0.24f, 0.58f), 0.78f)
+        val onSurfaceVariantSat = (baseSat * 0.68f).coerceIn(0.40f, 0.78f)
+        var onSurfaceVariantLightness = 0.62f
+        var onSurfaceVariantArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, onSurfaceVariantSat, onSurfaceVariantLightness)
         )
+        val darkSurfaceRefArgb = baseScheme.surfaceVariant.toArgb()
+        while (onSurfaceVariantLightness < 0.76f &&
+            ColorUtils.calculateContrast(onSurfaceVariantArgb, darkSurfaceRefArgb) < 4.5
+        ) {
+            onSurfaceVariantLightness += 0.02f
+            onSurfaceVariantArgb = ColorUtils.HSLToColor(
+                floatArrayOf(hue, onSurfaceVariantSat, onSurfaceVariantLightness.coerceAtMost(0.76f))
+            )
+        }
 
         return baseScheme.copy(
             primary = primaryColor,
@@ -355,9 +366,20 @@ internal fun applyCustomAccentColor(
             onTertiaryContainerArgb = darkFallback
         }
 
-        val onSurfaceVariantArgb = ColorUtils.HSLToColor(
-            floatArrayOf(hue, (baseSat * 0.45f).coerceIn(0.20f, 0.55f), 0.34f)
+        val onSurfaceVariantSat = (baseSat * 0.62f).coerceIn(0.32f, 0.75f)
+        var onSurfaceVariantLightness = 0.36f
+        var onSurfaceVariantArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, onSurfaceVariantSat, onSurfaceVariantLightness)
         )
+        val lightSurfaceRefArgb = baseScheme.surfaceVariant.toArgb()
+        while (onSurfaceVariantLightness > 0.22f &&
+            ColorUtils.calculateContrast(onSurfaceVariantArgb, lightSurfaceRefArgb) < 4.5
+        ) {
+            onSurfaceVariantLightness -= 0.02f
+            onSurfaceVariantArgb = ColorUtils.HSLToColor(
+                floatArrayOf(hue, onSurfaceVariantSat, onSurfaceVariantLightness.coerceAtLeast(0.22f))
+            )
+        }
 
         return baseScheme.copy(
             primary = primaryColor,

@@ -433,14 +433,14 @@ fun HistorySheet(
                                                 Text(
                                                     text = item.expression,
                                                     fontSize = 16.sp,
-                                                    color = colorScheme.onSurface.copy(alpha = 0.85f),
+                                                    color = colorScheme.primary,
                                                     modifier = Modifier.weight(1f)
                                                 )
                                                 Text(
                                                     text = dateFormat.format(Date(item.timestamp)),
                                                     fontSize = 11.sp,
                                                     fontFamily = FontFamily.Monospace,
-                                                    color = colorScheme.onSurfaceVariant
+                                                    color = colorScheme.primary
                                                 )
                                             }
                                             Spacer(modifier = Modifier.height(6.dp))

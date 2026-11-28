@@ -233,7 +233,7 @@ fun DrawerFormulaSearch(
                 onValueChange = onQueryChange,
                 singleLine = true,
                 interactionSource = textFieldInteractionSource,
-                textStyle = searchTextStyle.copy(color = colorScheme.onSurface),
+                textStyle = searchTextStyle.copy(color = colorScheme.primary),
                 cursorBrush = SolidColor(colorScheme.primary),
                 modifier = Modifier
                     .weight(1f)
@@ -250,7 +250,7 @@ fun DrawerFormulaSearch(
                         if (query.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.formula_search_placeholder),
-                                color = colorScheme.primary.copy(alpha = 0.78f),
+                                color = colorScheme.primary.copy(alpha = 0.5f),
                                 style = searchTextStyle,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -316,13 +316,13 @@ fun DrawerFormulaSearch(
                         Surface(
                             shape = suggestionPillShape,
                             color = colorScheme.surfaceVariant.copy(alpha = 0.24f),
-                            contentColor = colorScheme.onSurfaceVariant,
+                            contentColor = colorScheme.primary,
                             border = suggestionBorder,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
                                 text = stringResource(R.string.formula_search_empty),
-                                color = colorScheme.primary.copy(alpha = 0.85f),
+                                color = colorScheme.primary,
                                 fontSize = 13.sp,
                                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
                             )
@@ -346,7 +346,7 @@ fun DrawerFormulaSearch(
                             },
                             shape = suggestionPillShape,
                             color = suggestionBgColor,
-                            contentColor = colorScheme.onSurface,
+                            contentColor = colorScheme.primary,
                             border = suggestionBorder,
                             interactionSource = itemInteractionSource,
                             modifier = Modifier
@@ -362,7 +362,7 @@ fun DrawerFormulaSearch(
                             ) {
                                 Text(
                                     text = entry.localizedName,
-                                    color = colorScheme.onSurface,
+                                    color = colorScheme.primary,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,

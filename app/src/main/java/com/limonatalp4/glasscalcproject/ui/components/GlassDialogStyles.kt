@@ -119,10 +119,13 @@ object GlassDialogDefaults {
     }
 
     @Composable
-    fun pillOptionTextColor(selected: Boolean): Color = if (selected) {
-        MaterialTheme.colorScheme.onPrimaryContainer
+    fun pillOptionTextColor(
+        selected: Boolean,
+        enabled: Boolean = true
+    ): Color = if (enabled) {
+        MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.onSurface
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
     }
 }
 
@@ -187,7 +190,7 @@ fun GlassPillOptionContainer(
     )
 
     val textColor by animateColorAsState(
-        targetValue = GlassDialogDefaults.pillOptionTextColor(selected),
+        targetValue = GlassDialogDefaults.pillOptionTextColor(selected, enabled),
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
         label = "${animationLabel}_text"
     )
@@ -196,7 +199,6 @@ fun GlassPillOptionContainer(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = minHeight)
-            .alpha(if (enabled) 1.0f else 0.45f)
             .pressScale(interactionSource, enabled = enabled),
         shape = GlassDialogDefaults.PillShape,
         borderWidth = if (selected) 1.5.dp else 1.dp,
@@ -245,8 +247,8 @@ fun GlassAutoCenterPillTabBar(
     labelFontSize: TextUnit = 12.sp,
     tabSpacing: Dp = 4.dp,
     activeIndicatorColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    activeContentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    inactiveContentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    activeContentColor: Color = MaterialTheme.colorScheme.primary,
+    inactiveContentColor: Color = MaterialTheme.colorScheme.primary,
     animationLabelPrefix: String = "pill_tab"
 ) {
     if (items.isEmpty()) return

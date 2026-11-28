@@ -640,8 +640,8 @@ fun SettingsDialog(
         AlertDialog(
             onDismissRequest = { showResetConfirmDialog = false },
             icon = { Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = colorScheme.error) },
-            title = { Text(stringResource(R.string.dialog_reset_title)) },
-            text = { Text(stringResource(R.string.dialog_reset_text)) },
+            title = { Text(stringResource(R.string.dialog_reset_title), color = colorScheme.primary) },
+            text = { Text(stringResource(R.string.dialog_reset_text), color = colorScheme.primary) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -660,7 +660,7 @@ fun SettingsDialog(
                     triggerHaptic()
                     showResetConfirmDialog = false
                 }) {
-                    Text(stringResource(R.string.dialog_reset_cancel))
+                    Text(stringResource(R.string.dialog_reset_cancel), color = colorScheme.primary)
                 }
             }
         )
@@ -778,7 +778,7 @@ private fun AppearanceSection(
                     text = stringResource(id = R.string.accent_color_desc),
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
-                    color = colorScheme.onSurfaceVariant
+                    color = colorScheme.primary
                 )
 
                 val activeAccentLabel = if (matchedPreset != null) {
@@ -850,7 +850,7 @@ private fun AppearanceSection(
                                     text = stringResource(id = R.string.accent_color_recent_label),
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = colorScheme.onSurfaceVariant,
+                                    color = colorScheme.primary,
                                     modifier = Modifier
                                         .padding(start = 6.dp)
                                         .testTag("label_recent_accent_colors")
@@ -948,7 +948,7 @@ private fun AccentColorPillButton(
     val interactionSource = remember { MutableInteractionSource() }
     val ringColor by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onSurface
+            MaterialTheme.colorScheme.primary
         } else {
             glassProps.buttonBorderColor
         },
@@ -1034,7 +1034,7 @@ private fun RecentAccentColorMiniButton(
     val interactionSource = remember { MutableInteractionSource() }
     val ringColor by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onSurface
+            MaterialTheme.colorScheme.primary
         } else {
             glassProps.buttonBorderColor
         },
@@ -1174,8 +1174,8 @@ private fun AccentColorHexInput(
     val previewColor = parsedValidArgb?.let { Color(it) }
         ?: resolveAccentSwatchColor(colorArgb = currentAccentColor, isDark = glassProps.isDark)
 
-    val textColor = colorScheme.onSurface
-    val hintColor = colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+    val textColor = colorScheme.primary
+    val hintColor = colorScheme.primary.copy(alpha = 0.5f)
     val hexLabel = stringResource(id = R.string.accent_color_hex_label)
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -1183,7 +1183,7 @@ private fun AccentColorHexInput(
             text = hexLabel,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = if (isInvalid) colorScheme.error else colorScheme.onSurfaceVariant,
+            color = if (isInvalid) colorScheme.error else colorScheme.primary,
             modifier = Modifier.padding(start = 6.dp, bottom = 6.dp)
         )
 
@@ -1484,7 +1484,13 @@ private fun AppIconPillOption(
                 onClick = null,
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colorScheme.primary,
-                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    unselectedColor = if (enabled) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    },
+                    disabledSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    disabledUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                 ),
                 enabled = enabled
             )
@@ -1518,10 +1524,10 @@ private fun AppIconPillOption(
                         text = description,
                         fontSize = 11.5.sp,
                         lineHeight = 14.sp,
-                        color = if (selected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        color = if (enabled) {
+                            MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         },
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -1803,13 +1809,13 @@ private fun DeveloperOptionsSection(
                                         text = "WindowSizeClass: $widthClassName",
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                     Text(
                                         text = stringResource(R.string.dev_resolution, screenWidthDp, screenHeightDp),
                                         fontSize = 13.sp,
                                         fontFamily = FontFamily.Monospace,
-                                        color = colorScheme.onSurfaceVariant
+                                        color = colorScheme.primary
                                     )
                                 }
                             }
@@ -1847,7 +1853,7 @@ private fun DeveloperOptionsSection(
                                                 text = stringResource(R.string.info_qs_tile_desc),
                                                 fontSize = 12.sp,
                                                 lineHeight = 16.sp,
-                                                color = colorScheme.onSurfaceVariant
+                                                color = colorScheme.primary
                                             )
                                         }
                                         GlassSurface(
@@ -1924,7 +1930,7 @@ private fun DeveloperOptionsSection(
                                                 text = stringResource(R.string.info_qs_tile_btn),
                                                 fontSize = 13.5.sp,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = colorScheme.onPrimaryContainer,
+                                                color = colorScheme.primary,
                                                 textAlign = TextAlign.Center
                                             )
                                         }
@@ -1963,7 +1969,7 @@ private fun DeveloperOptionsSection(
                                             text = stringResource(R.string.dev_simulate_api_switch),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.primary
                                         )
                                         Switch(
                                             checked = simulatedApiEnabled,
@@ -2042,7 +2048,7 @@ private fun DeveloperOptionsSection(
                                         text = stringResource(R.string.dev_api_feature_compatibility, realDeviceApi),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = colorScheme.onSurfaceVariant
+                                        color = colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -2064,7 +2070,7 @@ private fun DeveloperOptionsSection(
                                         apiFeatures.forEach { (nameResId, minApi) ->
                                             val isAvailable = effectiveApi >= minApi
                                             val pillBg = if (isAvailable) colorScheme.primaryContainer.copy(alpha = 0.85f) else colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                            val textColor = if (isAvailable) colorScheme.onPrimaryContainer else colorScheme.onSurface.copy(alpha = 0.35f)
+                                            val textColor = if (isAvailable) colorScheme.primary else colorScheme.primary.copy(alpha = 0.3f)
                                             val featureName = stringResource(nameResId)
                                             val apiSuffix = stringResource(R.string.dev_api_level_plus, minApi)
 
@@ -2082,7 +2088,7 @@ private fun DeveloperOptionsSection(
                                                     Icon(
                                                         imageVector = if (isAvailable) Icons.Default.Check else Icons.Default.Close,
                                                         contentDescription = null,
-                                                        tint = if (isAvailable) colorScheme.primary else colorScheme.onSurface.copy(alpha = 0.35f),
+                                                        tint = if (isAvailable) colorScheme.primary else colorScheme.primary.copy(alpha = 0.3f),
                                                         modifier = Modifier.size(13.dp)
                                                     )
                                                     Text(
@@ -2113,20 +2119,23 @@ private fun DeveloperOptionsSection(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .alpha(if (isHapticUsable) 1.0f else 0.5f)
+                                            modifier = Modifier.weight(1f)
                                         ) {
+                                            val hapticTextColor = if (isHapticUsable) {
+                                                colorScheme.primary
+                                            } else {
+                                                colorScheme.primary.copy(alpha = 0.3f)
+                                            }
                                             Text(
                                                 text = stringResource(R.string.dev_haptic_title),
                                                 fontSize = 15.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = colorScheme.primary
+                                                color = hapticTextColor
                                             )
                                             Text(
                                                 text = stringResource(R.string.dev_haptic_desc),
                                                 fontSize = 12.sp,
-                                                color = colorScheme.onSurfaceVariant
+                                                color = hapticTextColor
                                             )
                                         }
                                         Switch(
@@ -2171,7 +2180,11 @@ private fun DeveloperOptionsSection(
                                         text = "${stringResource(R.string.dev_haptic_detected_motor)}: $motorLabel",
                                         fontSize = 11.sp,
                                         fontFamily = FontFamily.Monospace,
-                                        color = colorScheme.primary.copy(alpha = 0.8f)
+                                        color = if (isHapticUsable) {
+                                            colorScheme.primary
+                                        } else {
+                                            colorScheme.primary.copy(alpha = 0.3f)
+                                        }
                                     )
 
                                     // Haptic Intensity Slider Pill (10 levels: 1..10, default 5)
@@ -2189,24 +2202,27 @@ private fun DeveloperOptionsSection(
                                             .padding(horizontal = 20.dp, vertical = 16.dp)
                                     ) {
                                         Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .alpha(if (isIntensitySliderEnabled) 1.0f else 0.45f),
+                                            modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
+                                            val sliderLabelColor = if (isIntensitySliderEnabled) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                            }
                                             Text(
                                                 text = stringResource(R.string.dev_haptic_intensity_label),
                                                 fontSize = 13.sp,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = sliderLabelColor
                                             )
                                             Text(
                                                 text = stringResource(R.string.dev_haptic_intensity_level, currentLevel),
                                                 fontSize = 12.sp,
                                                 fontFamily = FontFamily.Monospace,
                                                 fontWeight = FontWeight.Bold,
-                                                color = if (isIntensitySliderEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                color = sliderLabelColor,
                                                 modifier = Modifier.testTag("text_haptic_intensity_level")
                                             )
                                         }
@@ -2292,7 +2308,7 @@ private fun DeveloperOptionsSection(
                                         Text(
                                             text = stringResource(R.string.dev_auto_result_desc),
                                             fontSize = 12.sp,
-                                            color = colorScheme.onSurfaceVariant
+                                            color = colorScheme.primary
                                         )
                                     }
                                     Switch(
@@ -2384,7 +2400,7 @@ private fun DeveloperOptionsSection(
                                     Text(
                                         text = stringResource(R.string.dev_clear_cache_desc),
                                         fontSize = 12.sp,
-                                        color = colorScheme.onSurfaceVariant
+                                        color = colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Button(
@@ -2404,7 +2420,10 @@ private fun DeveloperOptionsSection(
                                             .fillMaxWidth()
                                             .testTag("btn_clear_cache"),
                                         shape = RoundedCornerShape(50),
-                                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colorScheme.primaryContainer,
+                                            contentColor = colorScheme.primary
+                                        )
                                     ) {
                                         Text(stringResource(R.string.dev_btn_clear_cache), fontWeight = FontWeight.Bold)
                                     }
@@ -2427,7 +2446,7 @@ private fun DeveloperOptionsSection(
                                     Text(
                                         text = stringResource(R.string.dev_reset_storage_desc),
                                         fontSize = 12.sp,
-                                        color = colorScheme.onSurfaceVariant
+                                        color = colorScheme.primary
                                     )
                                     Button(
                                         onClick = {
@@ -2499,13 +2518,13 @@ private fun InformationSection(
                 Text(
                     text = stringResource(R.string.app_version_subtitle),
                     fontSize = 12.sp,
-                    color = colorScheme.onSurfaceVariant,
+                    color = colorScheme.primary,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = stringResource(R.string.copyright_notice),
                     fontSize = 11.sp,
-                    color = colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = colorScheme.primary,
                     textAlign = TextAlign.Center
                 )
             }
@@ -2554,7 +2573,7 @@ private fun InformationSection(
                     Text(
                         text = "LimoLP4/GlassCalc-Android",
                         fontSize = 12.sp,
-                        color = colorScheme.onSurfaceVariant
+                        color = colorScheme.primary
                     )
                 }
                 GlassSurface(
@@ -2627,13 +2646,13 @@ private fun InformationSection(
                         text = stringResource(R.string.info_frankfurter_desc),
                         fontSize = 12.sp,
                         lineHeight = 15.sp,
-                        color = colorScheme.onSurfaceVariant
+                        color = colorScheme.primary
                     )
                     Text(
                         text = stringResource(R.string.info_oss_frankfurter_license),
                         fontSize = 11.sp,
                         lineHeight = 14.sp,
-                        color = colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                        color = colorScheme.primary
                     )
                 }
                 GlassSurface(
@@ -2701,7 +2720,7 @@ private fun InformationSection(
                     Text(
                         text = stringResource(R.string.info_oss_licenses_desc),
                         fontSize = 12.sp,
-                        color = colorScheme.onSurfaceVariant
+                        color = colorScheme.primary
                     )
                 }
                 GlassSurface(
@@ -2799,7 +2818,7 @@ private fun InformationSection(
                         text = "Copyright 2026 limonatalp4\n\nLicensed under the Apache License, Version 2.0 (the \"License\"); you may not use this file except in compliance with the License. You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software distributed under the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = colorScheme.onSurfaceVariant,
+                        color = colorScheme.primary,
                         modifier = Modifier.padding(top = 10.dp)
                     )
                 }
@@ -2897,7 +2916,13 @@ private fun SettingsPillOption(
                 onClick = null,
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colorScheme.primary,
-                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    unselectedColor = if (enabled) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    },
+                    disabledSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    disabledUnselectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                 ),
                 enabled = enabled
             )
@@ -2923,10 +2948,10 @@ private fun SettingsPillOption(
                         text = description,
                         fontSize = 11.5.sp,
                         lineHeight = 14.sp,
-                        color = if (selected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        color = if (enabled) {
+                            MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         },
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -3002,8 +3027,8 @@ private fun SettingsTabBar(
         tabPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp, horizontal = 10.dp),
         labelFontSize = 12.sp,
         activeIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
-        activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        activeContentColor = MaterialTheme.colorScheme.primary,
+        inactiveContentColor = MaterialTheme.colorScheme.primary,
         animationLabelPrefix = "settings_tab"
     )
 }

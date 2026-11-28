@@ -381,7 +381,7 @@ fun UnitConverterDialog(
                                 )
                                 val infoBtnTint by animateColorAsState(
                                     targetValue = if (showSystemsInfo) {
-                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                        MaterialTheme.colorScheme.primary
                                     } else {
                                         MaterialTheme.colorScheme.primary
                                     },
@@ -567,8 +567,8 @@ fun UnitConverterDialog(
                     tabPadding = PaddingValues(vertical = 9.dp, horizontal = 12.dp),
                     labelFontSize = 11.5.sp,
                     activeIndicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    activeContentColor = MaterialTheme.colorScheme.primary,
+                    inactiveContentColor = MaterialTheme.colorScheme.primary,
                     animationLabelPrefix = "cat"
                 )
 
@@ -656,7 +656,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.converter_input_label, fromUnit),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = onSurfaceColor.copy(alpha = 0.75f),
+                                color = colorScheme.primary,
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(end = 12.dp)
@@ -731,7 +731,7 @@ fun UnitConverterDialog(
                             label = "converter_input_border"
                         )
                         val inputBgColor = GlassDialogDefaults.searchBarBackgroundColor(isPureBlack)
-                        val inputTextColor = onSurfaceColor
+                        val inputTextColor = primaryColor
 
                         Row(
                             modifier = Modifier
@@ -790,7 +790,7 @@ fun UnitConverterDialog(
                                 text = fromUnit,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = colorScheme.onSurfaceVariant,
+                                color = colorScheme.primary,
                                 maxLines = 1,
                                 softWrap = false
                             )
@@ -802,7 +802,7 @@ fun UnitConverterDialog(
                             text = stringResource(R.string.converter_result_label, toUnit),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = onSurfaceColor.copy(alpha = 0.75f)
+                            color = colorScheme.primary
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -898,8 +898,8 @@ fun UnitConverterDialog(
                         vertical = 12.dp
                     ),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryColor,
-                        contentColor = colorScheme.onPrimary
+                        containerColor = colorScheme.primaryContainer,
+                        contentColor = primaryColor
                     ),
                     shape = GlassDialogDefaults.PillShape
                 ) {
@@ -1067,7 +1067,7 @@ private fun SupportedSystemsInfoCard(
                     text = stringResource(R.string.units_systems_detail),
                     fontSize = 13.5.sp,
                     lineHeight = 20.sp,
-                    color = onSurfaceColor.copy(alpha = 0.85f),
+                    color = primaryColor,
                     modifier = Modifier.testTag("text_converter_systems_detail")
                 )
             }
@@ -1093,7 +1093,7 @@ private fun CurrencyRateStatusPill(
     } else {
         colorScheme.surfaceVariant.copy(alpha = 0.4f)
     }
-    val statusTextColor = colorScheme.onSurfaceVariant
+    val statusTextColor = colorScheme.primary
 
     GlassSurface(
         shape = GlassDialogDefaults.NestedPanelShape,

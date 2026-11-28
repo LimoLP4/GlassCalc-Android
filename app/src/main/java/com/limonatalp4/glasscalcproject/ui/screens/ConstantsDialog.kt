@@ -124,7 +124,7 @@ fun ConstantsDialog(
                                 text = stringResource(R.string.title_constants),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = colorScheme.onSurface
+                                color = colorScheme.primary
                             )
                         }
 
@@ -160,7 +160,7 @@ fun ConstantsDialog(
                     Text(
                         text = stringResource(R.string.constants_select_heading),
                         fontSize = 13.sp,
-                        color = colorScheme.onSurfaceVariant
+                        color = colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -211,7 +211,7 @@ fun ConstantsDialog(
                                             text = constant.symbol,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = colorScheme.onPrimaryContainer,
+                                            color = colorScheme.primary,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }
@@ -221,14 +221,14 @@ fun ConstantsDialog(
                                             text = stringResource(constant.nameResId),
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = colorScheme.onSurface
+                                            color = colorScheme.primary
                                         )
                                         if (constant.unit.isNotEmpty()) {
                                             Text(
                                                 text = constant.unit,
                                                 fontSize = 11.sp,
                                                 fontFamily = FontFamily.Monospace,
-                                                color = colorScheme.onSurfaceVariant
+                                                color = colorScheme.primary
                                             )
                                         }
                                     }

@@ -570,8 +570,8 @@ fun SettingsSearchBar(
     val shape = GlassDialogDefaults.PillShape
     val searchBarBgColor = GlassDialogDefaults.searchBarBackgroundColor(isTiefschwarz)
     val searchBarBorder = LocalGlassProperties.current.containerBorderStroke
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val hintColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = MaterialTheme.colorScheme.primary
+    val hintColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 
     val context = LocalContext.current
     val view = LocalView.current
@@ -765,7 +765,7 @@ fun SettingsSearchEmptyState(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = colorScheme.onSurfaceVariant,
+                tint = colorScheme.primary,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -773,7 +773,7 @@ fun SettingsSearchEmptyState(
                 text = stringResource(R.string.settings_search_empty),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = colorScheme.onSurfaceVariant,
+                color = colorScheme.primary,
                 textAlign = TextAlign.Center
             )
         }
