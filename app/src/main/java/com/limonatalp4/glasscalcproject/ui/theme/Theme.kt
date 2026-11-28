@@ -114,7 +114,7 @@ private val TiefschwarzColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryBlue,
-    onPrimary = Color.White,
+    onPrimary = Color(0xFFE8F2FF),
     primaryContainer = Color(0xFFD1E4FF),
     onPrimaryContainer = Color(0xFF001D36),
     secondary = SecondaryBlue,
@@ -244,9 +244,17 @@ internal fun applyCustomAccentColor(
         val containerArgb = ColorUtils.HSLToColor(
             floatArrayOf(hue, (baseSat * 0.75f).coerceIn(0.35f, 0.80f), 0.28f)
         )
+        val onContainerSat = (baseSat * 0.92f).coerceIn(0.55f, 0.96f)
+        var onContainerLightness = 0.78f
         var onContainerArgb = ColorUtils.HSLToColor(
-            floatArrayOf(hue, (baseSat * 0.65f).coerceIn(0.30f, 0.85f), 0.90f)
+            floatArrayOf(hue, onContainerSat, onContainerLightness)
         )
+        while (onContainerLightness < 0.95f && ColorUtils.calculateContrast(onContainerArgb, containerArgb) < 4.5) {
+            onContainerLightness += 0.02f
+            onContainerArgb = ColorUtils.HSLToColor(
+                floatArrayOf(hue, onContainerSat, onContainerLightness.coerceAtMost(0.95f))
+            )
+        }
         if (ColorUtils.calculateContrast(onContainerArgb, containerArgb) < 4.5) {
             onContainerArgb = android.graphics.Color.WHITE
         }
@@ -264,10 +272,21 @@ internal fun applyCustomAccentColor(
     } else {
         val whiteArgb = android.graphics.Color.WHITE
         val darkFallback = 0xFF0F172A.toInt()
-        val onPrimaryColor = if (ColorUtils.calculateContrast(whiteArgb, primaryArgb) >= 4.5) {
-            Color.White
-        } else {
-            Color(darkFallback)
+        val onPrimarySat = (baseSat * 0.65f).coerceIn(0.35f, 0.80f)
+        var onPrimaryLightness = 0.91f
+        var tintedLightOnPrimaryArgb = ColorUtils.HSLToColor(
+            floatArrayOf(hue, onPrimarySat, onPrimaryLightness)
+        )
+        while (onPrimaryLightness < 0.97f && ColorUtils.calculateContrast(tintedLightOnPrimaryArgb, primaryArgb) < 4.5) {
+            onPrimaryLightness += 0.02f
+            tintedLightOnPrimaryArgb = ColorUtils.HSLToColor(
+                floatArrayOf(hue, onPrimarySat, onPrimaryLightness.coerceAtMost(0.97f))
+            )
+        }
+        val onPrimaryColor = when {
+            ColorUtils.calculateContrast(tintedLightOnPrimaryArgb, primaryArgb) >= 4.5 -> Color(tintedLightOnPrimaryArgb)
+            ColorUtils.calculateContrast(whiteArgb, primaryArgb) >= 4.5 -> Color.White
+            else -> Color(darkFallback)
         }
 
         val containerArgb = ColorUtils.HSLToColor(

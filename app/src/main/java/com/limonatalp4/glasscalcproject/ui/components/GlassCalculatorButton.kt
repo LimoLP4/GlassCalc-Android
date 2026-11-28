@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -98,14 +99,19 @@ fun GlassCalculatorButton(
 
     val colorScheme = MaterialTheme.colorScheme
     val primaryColor = colorScheme.primary
-    val onPrimaryColor = colorScheme.onPrimary
     val primaryContainerColor = colorScheme.primaryContainer
-    val onPrimaryContainerColor = colorScheme.onPrimaryContainer
     val tertiaryColor = colorScheme.tertiary
     val tertiaryContainerColor = colorScheme.tertiaryContainer
-    val onTertiaryContainerColor = colorScheme.onTertiaryContainer
     val surfaceVariantColor = colorScheme.surfaceVariant
     val onErrorColor = colorScheme.onError
+
+    val textColor = when (type) {
+        ButtonType.EQUALS, ButtonType.ACTION_CLEAR -> MaterialTheme.colorScheme.onPrimary
+        ButtonType.OPERATOR -> MaterialTheme.colorScheme.onPrimaryContainer
+        ButtonType.FUNCTION -> MaterialTheme.colorScheme.onTertiaryContainer
+        ButtonType.NUMBER -> MaterialTheme.colorScheme.primary
+    }
+    val effectiveTextColor = if (isLongPressTriggered) onErrorColor else textColor
 
     val flashColor by animateColorAsState(
         targetValue = if (isLongPressTriggered) colorScheme.error.copy(alpha = 0.85f) else Color.Transparent,
@@ -113,15 +119,12 @@ fun GlassCalculatorButton(
         label = "flash_color"
     )
 
-    val (bgBrush, textColor, borderColor) = remember(
+    val (bgBrush, borderColor) = remember(
         type,
         primaryColor,
-        onPrimaryColor,
         primaryContainerColor,
-        onPrimaryContainerColor,
         tertiaryColor,
         tertiaryContainerColor,
-        onTertiaryContainerColor,
         surfaceVariantColor,
         glassProps.buttonBackgroundAlpha,
         glassProps.buttonBorderColor
@@ -134,7 +137,7 @@ fun GlassCalculatorButton(
                         primaryColor.copy(alpha = 0.8f)
                     )
                 )
-                Triple(gradient, onPrimaryColor, primaryColor)
+                gradient to primaryColor
             }
             ButtonType.OPERATOR -> {
                 val brush = Brush.verticalGradient(
@@ -143,7 +146,7 @@ fun GlassCalculatorButton(
                         primaryContainerColor.copy(alpha = 0.60f)
                     )
                 )
-                Triple(brush, onPrimaryContainerColor, primaryColor.copy(alpha = 0.50f))
+                brush to primaryColor.copy(alpha = 0.50f)
             }
             ButtonType.FUNCTION -> {
                 val brush = Brush.verticalGradient(
@@ -152,7 +155,7 @@ fun GlassCalculatorButton(
                         tertiaryContainerColor.copy(alpha = 0.60f)
                     )
                 )
-                Triple(brush, onTertiaryContainerColor, tertiaryColor.copy(alpha = 0.50f))
+                brush to tertiaryColor.copy(alpha = 0.50f)
             }
             ButtonType.NUMBER -> {
                 val alpha = glassProps.buttonBackgroundAlpha
@@ -162,7 +165,7 @@ fun GlassCalculatorButton(
                         surfaceVariantColor.copy(alpha = alpha)
                     )
                 )
-                Triple(brush, primaryColor, glassProps.buttonBorderColor)
+                brush to glassProps.buttonBorderColor
             }
         }
     }
@@ -372,18 +375,20 @@ fun GlassCalculatorButton(
         }
         val allowWrap = hasCjk && text.length > 2
 
-        Text(
-            text = text,
-            fontSize = calculatedFontSize,
-            lineHeight = (calculatedFontSize.value * 1.15f).sp,
-            fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR || type == ButtonType.ACTION_CLEAR) FontWeight.Bold else FontWeight.Medium,
-            color = if (isLongPressTriggered) onErrorColor else textColor,
-            textAlign = TextAlign.Center,
-            maxLines = if (allowWrap) 2 else 1,
-            softWrap = allowWrap,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        )
+        CompositionLocalProvider(LocalContentColor provides effectiveTextColor) {
+            Text(
+                text = text,
+                fontSize = calculatedFontSize,
+                lineHeight = (calculatedFontSize.value * 1.15f).sp,
+                fontWeight = if (type == ButtonType.EQUALS || type == ButtonType.OPERATOR || type == ButtonType.ACTION_CLEAR) FontWeight.Bold else FontWeight.Medium,
+                color = effectiveTextColor,
+                textAlign = TextAlign.Center,
+                maxLines = if (allowWrap) 2 else 1,
+                softWrap = allowWrap,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
         }
     }
 }
