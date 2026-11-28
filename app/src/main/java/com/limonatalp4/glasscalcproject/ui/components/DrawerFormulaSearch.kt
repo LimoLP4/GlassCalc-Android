@@ -161,16 +161,16 @@ fun DrawerFormulaSearch(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Liquid-Glass-Suchleiste nahtlos integriert in die Menü-Pille
+        // Liquid-Glass-Suchleiste nahtlos integriert in die Menü-Pille (neutraler Glas-Look)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .clip(searchBarShape)
-                .background(colorScheme.primaryContainer.copy(alpha = 0.26f))
+                .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 .border(
-                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.24f)),
+                    border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
                     shape = searchBarShape
                 )
                 .clickable(
@@ -271,8 +271,8 @@ fun DrawerFormulaSearch(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            val suggestionBgColor = colorScheme.primaryContainer.copy(alpha = 0.22f)
-            val suggestionBorder = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.22f))
+            val suggestionBgColor = colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            val suggestionBorder = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f))
 
             LazyColumn(
                 modifier = Modifier
@@ -287,8 +287,8 @@ fun DrawerFormulaSearch(
                     item(key = "empty") {
                         Surface(
                             shape = suggestionPillShape,
-                            color = colorScheme.primaryContainer.copy(alpha = 0.18f),
-                            contentColor = colorScheme.primary,
+                            color = colorScheme.surfaceVariant.copy(alpha = 0.24f),
+                            contentColor = colorScheme.onSurfaceVariant,
                             border = suggestionBorder,
                             modifier = Modifier.fillMaxWidth()
                         ) {

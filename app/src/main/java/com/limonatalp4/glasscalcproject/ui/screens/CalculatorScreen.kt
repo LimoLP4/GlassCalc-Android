@@ -645,7 +645,7 @@ fun CalculatorScreen(
                                         }
                                     )
 
-                                    Spacer(modifier = Modifier.height(itemSpacing))
+                                    Spacer(modifier = Modifier.height(itemSpacing * 2))
 
                                     Box(modifier = Modifier.fillMaxWidth()) {
                                         // Gleitende aktive Pille (konzentrisch zum 32.dp-Container)
