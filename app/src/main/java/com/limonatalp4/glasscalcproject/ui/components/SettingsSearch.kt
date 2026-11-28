@@ -630,7 +630,7 @@ fun SettingsSearchBar(
             }
             .padding(
                 start = 14.dp,
-                end = if (query.isNotEmpty()) 4.dp else 14.dp
+                end = if (query.isNotEmpty()) 0.dp else 14.dp
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -690,6 +690,7 @@ fun SettingsSearchBar(
         }
         if (query.isNotEmpty()) {
             val clearInteraction = remember { MutableInteractionSource() }
+            val clearPillShape = RoundedCornerShape(50)
             IconButton(
                 onClick = onClearClick,
                 interactionSource = clearInteraction,
@@ -698,12 +699,28 @@ fun SettingsSearchBar(
                     .pressScale(clearInteraction)
                     .testTag("btn_clear_settings_search")
             ) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = stringResource(R.string.settings_search_clear),
-                    tint = hintColor,
-                    modifier = Modifier.size(18.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(clearPillShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .border(
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            ),
+                            shape = clearPillShape
+                        )
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = stringResource(R.string.settings_search_clear),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

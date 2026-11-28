@@ -49,6 +49,7 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -160,6 +161,21 @@ fun DrawerFormulaSearch(
         filterFormulas(trimmedQuery, localizedFormulas)
     }
 
+    val searchTextStyle = remember {
+        TextStyle(
+            fontFamily = FontFamily.Default,
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 0.sp,
+            platformStyle = PlatformTextStyle(includeFontPadding = false),
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.Both
+            )
+        )
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         // Liquid-Glass-Suchleiste nahtlos integriert in die Menü-Pille (neutraler Glas-Look)
         Row(
@@ -187,7 +203,7 @@ fun DrawerFormulaSearch(
                 }
                 .padding(
                     start = 18.dp,
-                    end = if (query.isNotEmpty()) 4.dp else 18.dp
+                    end = if (query.isNotEmpty()) 0.dp else 18.dp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -198,55 +214,41 @@ fun DrawerFormulaSearch(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                BasicTextField(
-                    value = query,
-                    onValueChange = onQueryChange,
-                    singleLine = true,
-                    interactionSource = textFieldInteractionSource,
-                    textStyle = TextStyle(
-                        color = colorScheme.onSurface,
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Medium,
-                        platformStyle = PlatformTextStyle(includeFontPadding = false)
-                    ),
-                    cursorBrush = SolidColor(colorScheme.primary),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focusState ->
-                            isSearchFocused = focusState.isFocused
-                        }
-                        .testTag("drawer_formula_search_input"),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            if (query.isEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.formula_search_placeholder),
-                                    color = colorScheme.primary.copy(alpha = 0.78f),
-                                    fontSize = 16.sp,
-                                    lineHeight = 20.sp,
-                                    style = TextStyle(
-                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            innerTextField()
-                        }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                singleLine = true,
+                interactionSource = textFieldInteractionSource,
+                textStyle = searchTextStyle.copy(color = colorScheme.onSurface),
+                cursorBrush = SolidColor(colorScheme.primary),
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        isSearchFocused = focusState.isFocused
                     }
-                )
-            }
+                    .testTag("drawer_formula_search_input"),
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (query.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.formula_search_placeholder),
+                                color = colorScheme.primary.copy(alpha = 0.78f),
+                                style = searchTextStyle,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
             if (query.isNotEmpty()) {
                 val clearInteraction = remember { MutableInteractionSource() }
+                val clearPillShape = RoundedCornerShape(50)
                 IconButton(
                     onClick = onClearClick,
                     interactionSource = clearInteraction,
@@ -255,12 +257,25 @@ fun DrawerFormulaSearch(
                         .pressScale(clearInteraction)
                         .testTag("btn_clear_formula_search")
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(R.string.formula_search_clear),
-                        tint = colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(clearPillShape)
+                            .background(colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .border(
+                                border = BorderStroke(1.dp, colorScheme.outline.copy(alpha = 0.3f)),
+                                shape = clearPillShape
+                            )
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.formula_search_clear),
+                            tint = colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         }
