@@ -361,7 +361,7 @@ fun UnitConverterDialog(
                                 text = stringResource(R.string.title_converter),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = onSurfaceColor,
+                                color = MaterialTheme.colorScheme.primary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier
@@ -374,18 +374,18 @@ fun UnitConverterDialog(
                             ) {
                                 val infoBtnBg by animateColorAsState(
                                     targetValue = if (showSystemsInfo) {
-                                        primaryContainerColor
+                                        MaterialTheme.colorScheme.primaryContainer
                                     } else {
-                                        colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                     },
                                     animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
                                     label = "converter_info_btn_bg"
                                 )
                                 val infoBtnTint by animateColorAsState(
                                     targetValue = if (showSystemsInfo) {
-                                        onPrimaryContainerColor
+                                        MaterialTheme.colorScheme.onPrimaryContainer
                                     } else {
-                                        onSurfaceColor
+                                        MaterialTheme.colorScheme.primary
                                     },
                                     animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
                                     label = "converter_info_btn_tint"
@@ -395,7 +395,7 @@ fun UnitConverterDialog(
                                     shape = GlassDialogDefaults.PillShape,
                                     customBgColor = infoBtnBg,
                                     borderStroke = if (showSystemsInfo) {
-                                        BorderStroke(1.5.dp, primaryColor)
+                                        BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
                                     } else {
                                         glassProps.containerBorderStroke
                                     },

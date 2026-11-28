@@ -391,7 +391,7 @@ fun SettingsDialog(
                                 text = stringResource(R.string.title_settings),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.primary
                             )
                             val closeBtnInteraction = remember { MutableInteractionSource() }
                             GlassSurface(
